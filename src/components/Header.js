@@ -28,7 +28,7 @@ class Header extends Component {
                       <span className="icon-bar"></span>
                   </button>
                   <a className="navbar-brand text-danger" href="#">
-                      <img src="/dist/assets/images/OCHA_Logo.png" style={{display: 'inline'}} width="45" height="45">
+                      <img src="/dist/assets/images/OCHA_Logo.png" style={{display: 'inline'}} width="45" height="45" />
                      <span className="brandLabel">CURRENT STATE OF LIBYA</span>
                   </a>
               </div>
