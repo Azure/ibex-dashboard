@@ -1,0 +1,13 @@
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,700,200italic,400italic,700italic);
+
+.hero-spacer {
+    margin-top: 30px;
+}
+
+.hero-feature {
+    margin-bottom: 20px;
+}
+
+body{
+      background-color: #2D3742;
+}

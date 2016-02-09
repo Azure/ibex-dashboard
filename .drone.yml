@@ -1,0 +1,13 @@
+cache:
+  mount:
+    - node_modules
+    - bower_modules
+    
+build:
+  image: felixrieseberg/orwell:4.2
+  environment:
+    NPM_CONFIG_LOGLEVEL: warn
+  commands:
+    - npm install
+    - bower install --allow-root
+    - npm test

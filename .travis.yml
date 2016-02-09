@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+- '4.1'
+env:
+  global:
+  - secure: pZdOqirQIrgDIcS3dEV3PoE0gNgGnmP50fHNZsiszOwcQ6JBY6ZzukgZFKCUWULWsKBjLa6Wx9sQRgp/iM+WeUSGJ2u5yBWhLShfVIgQPvGQwXfgq7bc4TW/kCbohMd1otnctly794os4clBfDcRTmMqM/BUSUkeOoViFmzh8qJGFyyBONOvHPo1o316akm3PtrPv5Y1zx54JmkSKyGR5rGvSL+biKaMdlrZiSQpi1OWItzcegH0wqJpEIkphES+VwxvpnneQGabcXWJBkj+AH6eqvuOSIy9FI509w64I9MxbgSaaXq94UrMeEzpmNZ6vPJ94H/fZOE0tOGnMAkzttKJz7IoZtWTzU4yIxCaAvF3MrmZ0pMYzEB+UQw1aKed2WE6w8OM1am0oFNrkvyIZPsLMHoR6w+auH4nwwVuCqT6x6BY7tXZD1e8cFTWuzxfLnXPfuq5YfP/d4Yv8NuX+9IV8C0WBfyXLISGM6z7e98udJzKvnqar2eDxq7vlfkaKK3cA+pjf0H79S7DfBnt/X1BK85yZepz1AE9B5ivmo33fAvI6iAMsLnHa9oqHnEhzCCZAdKqsqfoGPrPmJau8UoF8N4bmvl0rrTAjwpiJ3xref92vCeuJjvzDTNIzVo4sPUIF35+j7wTfdozxT3dMyTtEE3IN/lianxwE02nhE0=
+before_install:
+- openssl aes-256-cbc -k "$secret_password" -in ssh_keys.tar.enc -out ssh_keys.tar -d
+- sudo apt-get install expect
+- tar xvf ssh_keys.tar
+before_script:
+- npm run third-party-dependencies
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: bash scripts/travis_deploy.sh
+  on:
+    branch: master

@@ -1,0 +1,28 @@
+{
+  "name": "AzureWebStarterTemplateReactJS",
+  "version": "1.0.0",
+  "license": "MIT",
+  "directory": "vendor",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.5",
+    "fontawesome": "~4.4.0"
+  },
+  "overrides": {
+        "jquery": {
+            "main": ["dist/jquery.min.js", "dist/jquery.min.map"]
+        },
+        "bootstrap": {
+            "main": ["dist/css/bootstrap.css", "dist/js/bootstrap.min.js", "dist/css/bootstrap.css.map"]
+        },
+        "fontawesome": {
+            "main": ["css/font-awesome.min.css"]
+        }
+    }
+}
