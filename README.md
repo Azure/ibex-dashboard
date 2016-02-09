@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/CatalystCode/azure-web-starter-template-reactjs.svg?branch=master)](https://travis-ci.org/CatalystCode/azure-web-starter-template-reactjs)<img src="https://cloud.githubusercontent.com/assets/7635865/11383036/781f2cee-92d3-11e5-98b9-91eb7f29e540.png" width="300" height="65"/><br>
-<img src="https://cloud.githubusercontent.com/assets/7635865/11382863/6505a116-92d2-11e5-965f-33dba073d0a5.png" width="500" height="300"/>
+[![Build Status](https://travis-ci.org/CatalystCode/azure-web-starter-template-reactjs.svg?branch=master)](https://travis-ci.org/CatalystCode/azure-web-starter-template-reactjs)
 
 # OCHA Current State of Libya Monitoriung Dashboard
 A starter template for a NodeJS web application running on Microsoft Azure. This repo is a starting point for developers seeking a production ready fullstack site running on Azure. This project is intended for web applications running on the react/flux platform, and hoping to offer similar options for Angular 2, Relay / GraphQL and Ember. This is an unopinionated project, that enables developers to kickoff a web project running off any framework or CI deployment solution. 
