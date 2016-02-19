@@ -150,7 +150,7 @@ export const HeatMap = React.createClass({
     //exit the fetch if the tile response is already cached
     if (this.heatmap[tileId]) return callback();
 
-    let timespanFragment = "{0}-{1}".format(this.state.timespanType, this.state.timespan);
+    let timespanFragment = "{0}-{1}".format(this.state.timespanType, this.state.toDate);
 
     let url = '';//ENV.APP.EMOTIONMAPS_BLOB + timespanFragment + '/' + tileId;
     SERVICES.getHeatmapTiles(url)

@@ -53,17 +53,9 @@ export const SentimentBarChart = React.createClass({
       if(this.barChart && this.barChart.getBarsAtEvent(evt).length > 0){
           let activeBars = this.barChart.getBarsAtEvent(evt);
           let selectedLabel = activeBars[0].label;
+          let dataStore = this.getFlux().store("DataStore").dataStore;
           
-          this.barChart.datasets.map((ds, dsIdx) => {
-              ds.bars.map((bar, barIdx) => {
-                  if(bar.label === selectedLabel){
-                      this.barChart.datasets[dsIdx].bars[barIdx].fillColor = "#7db5d3";
-                      this.barChart.datasets[dsIdx].bars[barIdx].highlightFill = "#7db5d3";
-                  }
-              });
-          });
-          
-          this.barChart.update();
+          this.getFlux().actions.DASHBOARD.changeSearchFilter(selectedLabel, dataStore.categoryType);
       }
   },
   

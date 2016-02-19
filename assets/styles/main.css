@@ -25,3 +25,21 @@ body{
     width:100%;
     margin-bottom: 40px;
 }
+
+.breadcrumbContainer{
+    width: 100%;
+}
+
+.breadcrumb{
+    padding: 0px 15px!important;
+    padding-top: 6px!important;
+    margin-bottom: 0px!important;
+    list-style: none;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+ol.breadcrumb a {
+    color: #3e5063;
+    font-weight: 600;
+}
