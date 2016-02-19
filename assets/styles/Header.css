@@ -55,7 +55,7 @@ a:hover {
 }
 
 .navbar-trans {
-    background-color: #222931;
+    background-color: rgba(66,73,79,0.94);
     color: #61A5E4;
     border-bottom: 1px solid #61A5E4!important;
     border-width: 0;
@@ -273,4 +273,22 @@ section {
 .userLabel{
     font-size: 14px;
     color: #ccc;
+}
+
+.input-group-addon:first-child {
+   font-weight: 700;
+   font-size: 9pt;   
+}
+
+.dateFilter{
+    width: 226px;
+    padding-left:6px;
+}
+
+.dateFilterColumn{
+    display: inherit;
+}
+
+#save-button{
+    margin-left:8px;
 }

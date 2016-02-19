@@ -1,18 +1,15 @@
 import React, { PropTypes, Component } from 'react';
-import Header from '../components/Header';
+import {Header} from '../components/Header';
 import Footer from '../components/Footer';
-import App from '../components/App';
-import HomePage from '../components/HomePage';
+import {Dashboard} from '../components/Dashboard';
 
 export const EntryPage = React.createClass({
   render() {
     return (
     <div>
-	    <Header routePage="EntryPage" />
-	    <App {...this.props.params} >
-         <HomePage />
-      </App>
-      <Footer />
+	    <Header flux={this.props.flux} routePage="Dashboard" />
+        <Dashboard flux={this.props.flux} {...this.props.params} />
+        <Footer flux={this.props.flux} />
     </div>
   )}
 });

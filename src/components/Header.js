@@ -1,21 +1,33 @@
 import React, { Component } from 'react';
 import {routes} from '../routes/routes';
+import Fluxxor from 'fluxxor';
+import {TypeaheadSearch} from './TypeaheadSearch';
 
-class Header extends Component {
+const FluxMixin = Fluxxor.FluxMixin(React),
+      StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
-  constructor(props) {
-      super(props);
-      let firstName = window.userProfile ? window.userProfile.given_name : 'N/A';
-      let lastName = window.userProfile ? window.userProfile.family_name : 'N/A';
-      this.state = {given_name: firstName, family_name: lastName};
-  }
+export const Header = React.createClass({
+  mixins: [FluxMixin, StoreWatchMixin],
+  
+  getInitialState(){
+    return {given_name: 'Erik'};  
+  },
+  
+  getStateFromFlux() {
+    return this.getFlux().store("DataStore").getState().userProfile;
+  },
+
+  componentWillReceiveProps(nextProps) {
+       this.setState(this.getStateFromFlux());
+  },
 
   render() {
     var self = this;
     let routeName = this.props.routePage;
     let routeCollection = routes.props.children;
     let routeIterator = (routeCollection instanceof Array) ? routeCollection : [routeCollection];
-    let initials = this.state.given_name != 'N/A' ? this.state.given_name.substring(0, 0) + this.state.family_name.substring(0, 0) : 'NA';
+    let initials = 'N/A';
+    let defaultSearchPlaceholder = "Search Here";
 
     return (
       <nav className="navbar navbar-trans" role="navigation">
@@ -34,21 +46,10 @@ class Header extends Component {
               </div>
               <div className="navbar-collapse collapse" id="navbar-collapsible">
                   <ul className="nav navbar-nav navbar-left">
-                      {
-                        routeIterator.map(route => {
-                          let routeProps = route.props;
-                          let className = (routeName === routeProps.component.displayName) ? "active": "inactive";
-
-                          if(routeProps.href && routeProps.linkLabel)
-                            return <li className={className}>
-                                       <a href={routeProps.href}>
-                                         {routeProps.icon?<i className={routeProps.icon}></i>:undefined}
-                                         &nbsp;{routeProps.linkLabel}
-                                       </a>
-                                   </li>
-                        })
-                      }
                       <li>&nbsp;</li>
+                      <li>
+                         <TypeaheadSearch data={defaultSearchPlaceholder}/>
+                      </li>
                   </ul>
                   <ul className="nav navbar-nav navbar-right">
                       <li className="userProfile">
@@ -60,14 +61,10 @@ class Header extends Component {
                           </i>
                         </span>
                       </li>
-                      <li><img className="logoImg" src="/dist/assets/images/partner_catalyst_logo.png" width="175"/></li>
                   </ul>
               </div>
           </div>
      </nav>
-    );
+      );
   }
-
-}
-
-export default Header;
+});

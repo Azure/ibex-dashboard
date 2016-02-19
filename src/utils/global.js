@@ -15,3 +15,8 @@ window.guid = function(){
     }
     return _p8() + _p8(true) + _p8(true) + _p8();
 }
+
+Number.prototype.randomize = function(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}

@@ -12,17 +12,37 @@
   ],
   "dependencies": {
     "bootstrap": "~3.3.5",
-    "fontawesome": "~4.4.0"
+    "fontawesome": "~4.4.0",
+    "leaflet": "~0.7.7"
   },
   "overrides": {
-        "jquery": {
-            "main": ["dist/jquery.min.js", "dist/jquery.min.map"]
-        },
-        "bootstrap": {
-            "main": ["dist/css/bootstrap.css", "dist/js/bootstrap.min.js", "dist/css/bootstrap.css.map"]
-        },
-        "fontawesome": {
-            "main": ["css/font-awesome.min.css"]
-        }
+    "jquery": {
+      "main": [
+        "dist/jquery.min.js",
+        "dist/jquery.min.map"
+      ]
+    },
+    "bootstrap": {
+      "main": [
+        "dist/css/bootstrap.css",
+        "dist/js/bootstrap.min.js",
+        "dist/css/bootstrap.css.map"
+      ]
+    },
+    "fontawesome": {
+      "main": [
+        "css/font-awesome.min.css"
+      ]
+    },
+    "leaflet": {
+      "main": [
+        "dist/leaflet.css",
+        "dist/images/layers-2x.png",
+        "dist/images/layers.png",
+        "dist/images/marker-icon-2x.png",
+        "dist/images/marker-icon.png",
+        "dist/images/marker-shadow.png"
+      ]
     }
+  }
 }

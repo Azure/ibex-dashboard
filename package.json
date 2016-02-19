@@ -48,11 +48,20 @@
   },
   "dependencies": {
     "applicationinsights": "^0.15.7",
+    "chart-stackedbar-js": "^1.0.3",
+    "chart.js": "^1.0.2",
+    "dygraphs": "^1.1.1",
     "envify": "^3.2.0",
     "extend": "^3.0.0",
     "flux": "^2.1.1",
     "fluxxor": "^1.7.3",
+    "geotile": "^0.1.6",
     "history": "^1.13.0",
+    "leaflet": "^0.7.7",
+    "material-ui": "^0.14.2",
+    "moment": "^2.11.2",
+    "rainbowvis.js": "^1.0.1",
+    "react-autosuggest": "2.1.1",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3"
   },
@@ -71,6 +80,7 @@
     "third-party-dependencies": "npm install -g gulp && npm install bower gulp && bower install",
     "setup": "npm install && npm install bower gulp && bower install && gulp build",
     "server-start": "node server.js",
-    "build": "gulp build"
+    "build": "gulp build",
+    "dev": "gulp"
   }
 }

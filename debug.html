@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <title>Minerva Dashboard</title>
     <!-- Bower Components -->
-    <script type="text/javascript" src="/dist/vendor/vendor.js"></script>
-    <link rel="stylesheet" href="/dist/vendor/vendor.css">
+    <script type="text/javascript" src="/dist/vendor/vendor.min.js"></script>
+    <link rel="stylesheet" href="/dist/vendor/vendor.min.css">
     <link rel="stylesheet" href="/dist/assets/styles/main.css">
     <script src="https://secure.aadcdn.microsoftonline-p.com/lib/1.0.0/js/adal.min.js"></script>
     <link rel='shortcut icon' href='/dist/assets/images/partner_catalyst_icon.ico' type='image/x-icon' />
@@ -14,5 +14,16 @@
     <div id="app">
     </div>
   </body>
-  <script src="/dist/js/index.debug.js"></script>
+  <script language="JavaScript">
+    var applicationScript = '/dist/js/index.debug.js';
+    
+    (function(filename,cache){
+                var s=document.getElementsByTagName('script')[0];
+                var sc=document.createElement('script');
+                    sc.type='text/javascript';
+                    sc.async=true;
+                    sc.src=filename + (!cache?'?v=' + new Date().getTime():''); 
+                s.parentNode.insertBefore(sc,s);
+    })(applicationScript, true);
+  </script>
 </html>

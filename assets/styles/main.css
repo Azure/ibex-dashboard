@@ -9,5 +9,19 @@
 }
 
 body{
-      background-color: #2D3742;
+      background-color: #f5f8fa;
+}
+
+.dateRow{
+    display: inline-flex;
+}
+
+#leafletMap{
+    height: 600px;
+    margin-top: 12px;
+}
+
+#graphdiv{
+    width:100%;
+    margin-bottom: 40px;
 }

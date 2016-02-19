@@ -1,14 +1,14 @@
 .Footer {
-  background: #222931;
+  background: rgba(66,73,79,0.94);
   color: #fff;
-  height: 50px;
+  height: 38px;
   bottom: 0;
   position: fixed;
 }
 
 .Footer-container {
   margin: 0 auto;
-  padding: 20px 15px;
+  padding: 3px 15px;
   text-align: center;
 }
 
