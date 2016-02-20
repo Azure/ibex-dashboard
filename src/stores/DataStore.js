@@ -16,6 +16,7 @@ export const DataStore = Fluxxor.createStore({
           activities: [],
           trends: [],
           sentimentChartData: [],
+          sentimentTreeViewData: [],
           categoryValue: 'refugee',
           sentimentValues: Object.keys(Actions.constants.SENTIMENT_JSON_MAPPING),
           defaultResults: []
@@ -27,7 +28,8 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.GRAPHING.LOAD_SENTIMENT_BAR_CHART, this.handleLoadSentimentBarChart,
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
-            Actions.constants.GRAPHING.CHANGE_TIME_SCALE, this.handleChangeChangeTimeScale
+            Actions.constants.GRAPHING.CHANGE_TIME_SCALE, this.handleChangeChangeTimeScale,
+            Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView
       );
     },
 
@@ -65,6 +67,12 @@ export const DataStore = Fluxxor.createStore({
     handleChangeSearchTerm(selection){
         this.dataStore.categoryValue = selection.filter;
         this.dataStore.categoryType = selection.type;
+        
+        this.emit("change");
+    },
+    
+    handleLoadSentimentTreeView(treeView){
+        this.dataStore.sentimentTreeViewData = treeView.response;
         
         this.emit("change");
     }

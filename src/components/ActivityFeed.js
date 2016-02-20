@@ -11,11 +11,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
       
 export const ActivityFeed = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
-  
-  getInitialState(){
-      this.getFlux().actions.ACTIVITY.load_activity_events();
-  },
-  
+   
   getStateFromFlux: function() {
     return this.getFlux().store("DataStore").getState();
   },
@@ -30,14 +26,14 @@ export const ActivityFeed = React.createClass({
     let self = this;
     
     return (
-     <div className="col-lg-3 news-feed-column">
+     <div className="col-lg-12 news-feed-column">
         <List subheader="What's Happening Now" className="panel panel-default">
             <ul className="nav nav-tabs">
                 <li role="presentation" className="active"><a href="#" aria-controls="home"><i className="fa fa-share-alt"></i>&nbsp;All&nbsp;<span className="badge">42</span></a></li>
                 <li role="presentation"><a href="#" aria-controls="profile"><i className="fa fa-facebook-official"></i>&nbsp;Facebook&nbsp;<span className="badge">32</span></a></li>
                 <li role="presentation"><a href="#" aria-controls="messages"><i className="fa fa-twitter"></i>&nbsp;Twitter&nbsp;<span className="badge">10</span></a></li>
             </ul>
-            <div className="list-group" data-scrollable="">
+            <div className="list-group activity-list-group" data-scrollable="">
                 {
                         this.state.activities.map((activity, index) => {
                             return <div>

@@ -162,7 +162,11 @@ a.keyword-link.pull-left {
     line-height: 1.3;
     overflow: auto;
     width: auto;
-    height: 440px;
+    height: 600px;
+}
+
+.activity-list-group{
+    height: 430px!important;
 }
 
 .panel-default{
@@ -180,4 +184,13 @@ a.keyword-link.pull-left {
 
 .trend-column{
     margin-top: 11px!important;
+}
+
+.badge{
+    font-size: 14px;
+     background-color: #337ab7;
+}
+
+.modalContent{
+    height: 600px!important;
 }

@@ -3,7 +3,7 @@ import Fluxxor from 'fluxxor';
 import {DataSelector} from './DataSelector';
 import {TrendsPanel} from './TrendsPanel';
 import {HeatMap} from './HeatMap';
-import {ActivityFeed} from './ActivityFeed';
+import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -37,7 +37,7 @@ export const Dashboard = React.createClass({
                         <div id='leafletMap'></div>
                         <HeatMap />
                     </div>
-                    <ActivityFeed />
+                    <SentimentTreeview />
                 </div>
                 <div className="row">
                   <div className="col-lg-12">

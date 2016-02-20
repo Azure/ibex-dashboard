@@ -35,7 +35,8 @@ const constants = {
                RETRIEVE_HEATMAP_TILE: "HEATMAP"
            },
            ACTIVITY : {
-               LOAD_EVENTS: "LOAD:ACTIVITIES"
+               LOAD_EVENTS: "LOAD:ACTIVITIES",
+               LOAD_SENTIMENT_TREE: "LOAD:TREE-VIEW"
            },
            TRENDS : {
                LOAD_TRENDS: "LOAD:TRENDS"
@@ -63,6 +64,20 @@ const methods = {
             .subscribe(response => {
                 if(response && response.length > 0){
                     self.dispatch(constants.ACTIVITY.LOAD_EVENTS, {
+                                            response: response
+                    });
+                }
+            });
+        },
+        load_sentiment_tree_view: function(){
+            let self = this;
+            
+            let dataStore = this.flux.stores.DataStore.dataStore;
+            
+            SERVICES.getSentimentTreeData(dataStore.categoryType, dataStore.categoryValue, dataStore.fromDate, dataStore.toDate)
+            .subscribe(response => {
+                if(response && response.length > 0){
+                    self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {
                                             response: response
                     });
                 }

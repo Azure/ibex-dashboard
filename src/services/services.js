@@ -281,6 +281,107 @@ export const SERVICES = {
       return Rx.Observable.from(response);
   },
   
+  getSentimentTreeData(type, filteredValue, fromDate, toDate){
+      let testData = [[{
+          sentimentText: "Early Recovery",
+          eventCount: 3000,
+          nodes: [
+              {
+                sentimentText: "Infrastructure",
+                eventCount: 1200,
+                nodes: [
+                        {
+                            sentimentText: "damaged",
+                            eventCount: 700,
+                            nodes: [{
+                                sentimentText: "destroyed",
+                                eventCount: 500
+                            }]
+                        },
+               ]
+             },
+             {
+                sentimentText: "Markets",
+                eventCount: 800,
+                nodes: [
+                        {
+                            sentimentText: "functional",
+                            eventCount: 500,
+                            nodes: [{
+                                sentimentText: "non-functional",
+                                eventCount: 300
+                            }]
+                        },
+               ]
+             },
+             {
+                sentimentText: "Jobs",
+                eventCount: 1000,
+                nodes: [
+                        {
+                            sentimentText: "unemployment",
+                            eventCount: 500,
+                            nodes: [{
+                                sentimentText: "youth",
+                                eventCount: 300
+                            }]
+                        },
+               ]
+             }
+          ]
+      },
+      {
+          sentimentText: "Education",
+          eventCount: 500,
+          nodes: [
+              {
+                sentimentText: "Schools",
+                eventCount: 100,
+                nodes: [
+                        {
+                            sentimentText: "destroyed",
+                            eventCount: 70,
+                            nodes: [{
+                                sentimentText: "damaged",
+                                eventCount: 20
+                            }]
+                        },
+               ]
+             },
+             {
+                sentimentText: "Children",
+                eventCount: 200,
+                nodes: [
+                        {
+                            sentimentText: "classes",
+                            eventCount: 100,
+                            nodes: [{
+                                sentimentText: "teachers",
+                                eventCount: 0
+                            }]
+                        },
+               ]
+             },
+             {
+                sentimentText: "Books",
+                eventCount: 1000,
+                nodes: [
+                        {
+                            sentimentText: "materials",
+                            eventCount: 500,
+                            nodes: [{
+                                sentimentText: "training",
+                                eventCount: 100
+                            }]
+                        },
+               ]
+             }
+          ]
+      }]];
+      
+      return Rx.Observable.from(testData);
+  },
+  
   getTrendingKeywords: function(){
       let testData =[[{
         "id": 1,
