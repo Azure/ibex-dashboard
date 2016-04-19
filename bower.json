@@ -13,7 +13,8 @@
   "dependencies": {
     "bootstrap": "~3.3.5",
     "fontawesome": "~4.4.0",
-    "leaflet": "~0.7.7"
+    "leaflet": "~0.7.7",
+    "react-widgets": "~3.2.4"
   },
   "overrides": {
     "jquery": {
@@ -32,6 +33,11 @@
     "fontawesome": {
       "main": [
         "css/font-awesome.min.css"
+      ]
+    },
+   "react-widgets": {
+      "main": [
+        "dist/css/react-widgets.css"
       ]
     },
     "leaflet": {

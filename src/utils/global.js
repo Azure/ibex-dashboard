@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 String.prototype.format = function(){
    var content = this;
    for (var i=0; i < arguments.length; i++)
@@ -20,3 +22,7 @@ Number.prototype.randomize = function(min,max)
 {
     return Math.floor(Math.random()*(max-min+1)+min);
 }
+
+ window.momentToggleFormats = function(dateString, fromFormat, targetFormat){
+      return moment(dateString, fromFormat).format(targetFormat);
+ }

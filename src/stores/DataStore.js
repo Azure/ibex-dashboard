@@ -9,16 +9,14 @@ export const DataStore = Fluxxor.createStore({
       
       this.dataStore = {
           userProfile: profile,
-          timespanType: 'hour',
-          fromDate: '02/19/2015',
-          toDate: "02/19/2016",
-          categoryType: "Keyword",
+          timespanType: 'customMonth',
+          datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
+          categoryType: 'keywords',
           activities: [],
           trends: [],
           sentimentChartData: [],
           sentimentTreeViewData: [],
-          categoryValue: 'refugee',
-          sentimentValues: Object.keys(Actions.constants.SENTIMENT_JSON_MAPPING),
+          categoryValue: 'refugees',
           defaultResults: []
       }
       
@@ -28,8 +26,9 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.GRAPHING.LOAD_SENTIMENT_BAR_CHART, this.handleLoadSentimentBarChart,
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
-            Actions.constants.GRAPHING.CHANGE_TIME_SCALE, this.handleChangeChangeTimeScale,
-            Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView
+            Actions.constants.GRAPHING.CHANGE_TIME_SCALE, this.handleChangeTimeScale,
+            Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView,
+            Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate
       );
     },
 
@@ -57,9 +56,15 @@ export const DataStore = Fluxxor.createStore({
         this.emit("change");
     },
     
-    handleChangeChangeTimeScale(selection){
-        this.dataStore.fromDate = selection.from;
-        this.dataStore.toDate = selection.to;
+    handleChangeTimeScale(selection){
+        //this.dataStore.datetimeSelection = selection.datetimeSelection;
+        
+        this.emit("change");
+    },
+    
+    handleChangeDate(selection){
+        this.dataStore.datetimeSelection = selection.newDateStr;
+        this.dataStore.timespanType = selection.dateType;
         
         this.emit("change");
     },

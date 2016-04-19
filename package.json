@@ -62,6 +62,7 @@
     "moment": "^2.11.2",
     "rainbowvis.js": "^1.0.1",
     "react-autosuggest": "2.1.1",
+    "react-widgets": "^3.2.4",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3"
   },

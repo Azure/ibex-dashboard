@@ -18,7 +18,7 @@ const assetPaths = {
     htmls: ['./*.html'],
     jsSrc: ['./src/**/*'],
     jsLib: ['./dist/**/*'],
-    style: ['./assets/styles/**/*.css', './node_modules/rc-slider/assets/index.css'],
+    style: ['./assets/styles/**/*.css'],
     asset: ['./assets/**/*', '!./assets/**/*.css'],
     fonts: ['bower_components/fontawesome/fonts/*',
             'bower_components/bootstrap/dist/fonts/*',
@@ -86,7 +86,7 @@ gulp.task('clean-copy', (cb) => {
 })
 
 gulp.task('config-env', (cb) => {
-    var AZURE_CONFIG_PROPS = ['APPINSIGHTS_INSTRUMENTATIONKEY', 'AAD_AUTH_CLIENTID', 'SERVICE_URL'];
+    var AZURE_CONFIG_PROPS = ['APPINSIGHTS_INSTRUMENTATIONKEY', 'AAD_AUTH_CLIENTID', 'SERVICE_URL', 'EMOTIONMAPS_BLOB'];
     var configFile = './config.json';
     var configurationEnv = {};
     

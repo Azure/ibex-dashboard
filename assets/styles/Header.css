@@ -37,6 +37,11 @@ a:hover {
     color:#f44d3c;
 }
 
+#cancel-button{
+    margin-top: 10px;
+    margin-left: 4px;
+}
+
 .btn-huge {
     padding:17px 22px;
     font-size:22px;
@@ -282,7 +287,10 @@ section {
 
 .dateFilter{
     width: 226px;
-    padding-left:6px;
+}
+
+.rw-datetimepicker.rw-widget {
+    margin-top:7px;
 }
 
 .dateFilterColumn{
@@ -291,4 +299,5 @@ section {
 
 #save-button{
     margin-left:8px;
+    margin-top: 8px;
 }
