@@ -3,24 +3,29 @@ import {SERVICES} from '../services/services';
 
 const constants = {
            SENTIMENT_JSON_MAPPING : {
-                "positive": "a",
-                "neutral": "n",
-                "negative": "h"
+                "0": -5,
+                "-1": -15,
+                "1": 5
            },
            TIMESPAN_TYPES : {
-                'hour': {
-                    newFormat: "YYYY-MM-DD HH:00"
+                'hours': {
+                    format: "MM/DD/YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00"
                 },
-                'day': {
-                    newFormat: "YYYY-MM-DD"
+                'days': {
+                    format: "MM/DD/YYYY", blobFormat: "[day]-YYYY-MM-DD"
                 },
-                'month': {
-                    newFormat: "YYYY-MM"
+                'months': {
+                    format: "YYYY-MM", blobFormat: "[month]-YYYY-MM"
                 },
-                'year': {
-                    newFormat: "YYYY"
+                'customDate': {
+                    format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD"
                 },
-                'alltime': {}
+                'customDateTime': {
+                    format: "MM/DD/YY HH:00", reactWidgetFormat: "MMM Do YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00"
+                },
+                'customMonth': {
+                    format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM"
+                }
            },
            SENTIMENT_COLOR_MAPPING : {
                "negative": "#800026",
@@ -48,7 +53,8 @@ const constants = {
            },
            DASHBOARD : {
                LOAD: "LOAD:DASHBOARD",
-               CHANGE_SEARCH: "SEARCH:CHANGE"
+               CHANGE_SEARCH: "SEARCH:CHANGE",
+               CHANGE_DATE: "DATE:CHANGE"
            }
 };
 
@@ -60,7 +66,7 @@ const methods = {
             let dataStore = this.flux.stores.DataStore.dataStore;
             let currentKeyword = dataStore.categoryValue;
             
-            SERVICES.getActivityEvents(currentKeyword, dataStore.categoryType, dataStore.fromDate, dataStore.toDate)
+            SERVICES.getActivityEvents(currentKeyword, dataStore.categoryType, dataStore.datetimeSelection, dataStore.timespanType)
             .subscribe(response => {
                 if(response && response.length > 0){
                     self.dispatch(constants.ACTIVITY.LOAD_EVENTS, {
@@ -74,7 +80,7 @@ const methods = {
             
             let dataStore = this.flux.stores.DataStore.dataStore;
             
-            SERVICES.getSentimentTreeData(dataStore.categoryType, dataStore.categoryValue, dataStore.fromDate, dataStore.toDate)
+            SERVICES.getSentimentTreeData(dataStore.categoryType, dataStore.categoryValue, dataStore.timespanType, dataStore.datetimeSelection)
             .subscribe(response => {
                 if(response && response.length > 0){
                     self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {
@@ -113,12 +119,15 @@ const methods = {
         },
         changeSearchFilter(newFilter, searchType){
            this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {filter: newFilter, type: searchType});
+        },
+        changeDate(datetimeString, timespanType){
+           this.dispatch(constants.DASHBOARD.CHANGE_DATE, {newDateStr: datetimeString, dateType: timespanType});
         }
     },
     GRAPHING : {
-        edit_time_scale(newFromDate, newToDate){
-            this.dispatch(constants.GRAPHING.CHANGE_TIME_SCALE, {from: newFromDate, 
-                                                                 to: newToDate});
+        edit_time_scale(fromDate, toDate){
+            this.dispatch(constants.GRAPHING.CHANGE_TIME_SCALE, {fromDate: fromDate, 
+                                                                 toDate: toDate});
         },
         load_graph: function(){
             let self = this;
@@ -136,7 +145,7 @@ const methods = {
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
             
-            SERVICES.getSentimentDisperityDataSet(dataStore.fromDate, dataStore.toDate, dataStore.categoryType)
+            SERVICES.getSentimentDisperityDataSet(dataStore.timespanType, dataStore.dateSelection, dataStore.categoryType)
             .subscribe(response => {
                 if(response && response.length > 0){
                     self.dispatch(constants.GRAPHING.LOAD_SENTIMENT_BAR_CHART, {

@@ -57,7 +57,7 @@ export const TimeSeriesGraph = React.createClass({
                       self.initializeGraph(response); 
                    }
                  }, error => {
-                     console.log('Something went terribly wrong with loading the initial ghraph dataset');
+                     console.log('Something went terribly wrong with loading the initial graph dataset');
                  });
   },
   

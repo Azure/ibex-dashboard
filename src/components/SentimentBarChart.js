@@ -80,8 +80,8 @@ export const SentimentBarChart = React.createClass({
 	    }
         
         this.state.sentimentChartData.map(item => {
-            let positiveSentiment = item[Actions.constants.SENTIMENT_JSON_MAPPING["positive"]];
-            let negativeSentiment = item[Actions.constants.SENTIMENT_JSON_MAPPING["negative"]];
+            let positiveSentiment = "a";
+            let negativeSentiment = "h";
             let occurences = item["occurences"];
             let positivePercentage = (positiveSentiment / (positiveSentiment + negativeSentiment));
             let positiveSentimentVal = (positivePercentage * occurences).toFixed(0);
