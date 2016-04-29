@@ -1,0 +1,421 @@
+# Author @patriciogv - 2015
+
+sources:
+    osm:
+        type: TopoJSON
+        url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-JUsa0Gc
+cameras:
+    perspective:
+        type: perspective
+        vanishing_point: [0, -1000]
+lights:
+    directional1:
+        type: directional
+        direction: [0.293,-0.861,-0.415]
+        ambient: .5
+        diffuse: .9
+        specular: 1.
+    point1:
+        type: point
+        position: [0, -100, 0px]
+        origin: ground
+        ambient: .2
+        diffuse: .2
+        specular: .5
+scene:
+    background:
+        color: [0.114, 0.114, 0.114]
+styles:
+    geometry-tilt:
+        animated: true
+        shaders:
+            defines:
+                PI: 3.1415926535897932384626433832795
+                HALF_PI: 1.5707963267948966192313216916398
+            blocks:
+                global: |
+                    mat3 rotateX3D(float phi){
+                        return mat3(
+                            vec3(1.,0.,0.),
+                            vec3(0.,cos(phi),-sin(phi)),
+                            vec3(0.,sin(phi),cos(phi)));
+                    }
+                    mat3 rotateZ3D(float psi){
+                        return mat3(
+                            vec3(cos(psi),-sin(psi),0.),
+                            vec3(sin(psi),cos(psi),0.),
+                            vec3(0.,0.,1.));
+                    }
+                position: |
+                    float t = u_time*0.1; 
+                    float z = smoothstep(0.7,1.,max((u_map_position.z)/20.,0.)*0.9);
+                    position.xyz = rotateX3D(z*HALF_PI) * rotateZ3D(sin(t)*PI*z) * position.xyz;
+    geometry-normal:
+        shaders:
+            blocks:
+                global: |
+                    // Ask to the geometry normals if this surface is a Wall
+                    bool isWall() {
+                        return dot(v_normal,vec3(0.,0.,1.)) == 0.0;
+                    }
+                    //
+                    // Ask to the geometry normals if this surface is a roof
+                    bool isRoof() {
+                        return dot(v_normal,vec3(0.,0.,1.)) == 0.0;
+                    }
+    generative-random:
+        shaders:
+            blocks:
+                global: |
+                    // 1D Random for 1 and 2 dimentions
+                    // ================================
+                    float random (float x) {
+                        return fract(sin(x)*1e4);
+                    }
+                    float random (vec2 xy) {
+                        return fract(sin(dot(xy.xy, vec2(12.9898,78.233)))* 43758.5453123);
+                    }
+                    //
+                    // 2D Random for 2 dimentions
+                    // ================================
+                    vec2 random2 (vec2 xy) {
+                        return fract(sin(vec2(dot(xy,vec2(127.1,311.7)),dot(xy,vec2(269.5,183.3))))*43758.5453);
+                    }
+                    //
+                    // 3D Random for 2 dimentions
+                    // ================================
+                    vec3 random3 (vec2 xy) { 
+                        return fract(sin(vec3( dot(xy,vec2(127.1,311.7)), dot(xy,vec2(269.5,183.3)), dot(xy,vec2(419.2,371.9)) ))*43758.5453); 
+                    }
+                    vec3 random3 (vec3 c) {
+                        float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));
+                        vec3 r;
+                        r.z = fract(512.0*j);
+                        j *= .125;
+                        r.x = fract(512.0*j);
+                        j *= .125;
+                        r.y = fract(512.0*j);
+                        return r-0.5;
+                    }
+    generative-noise:
+        mix: generative-random
+        shaders:
+            blocks:
+                global: |
+                    // 1D Value Noise for 1, 2 and 3 dimentions
+                    // ================================
+                    float noise (in float x) {
+                        float i = floor(x);
+                        float f = fract(x);
+                        float u = f * f * (3.0 - 2.0 * f);
+                        return mix(random(i), random(i + 1.0), u);
+                    }
+                    float noise (vec2 xy) {
+                        vec2 i = floor(xy);
+                        vec2 f = fract(xy);
+                        float a = random(i);
+                        float b = random(i + vec2(1.0, 0.0));
+                        float c = random(i + vec2(0.0, 1.0));
+                        float d = random(i + vec2(1.0, 1.0));
+                        vec2 u = f * f * (3.0 - 2.0 * f);
+                        return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+                    }
+                    float noise (vec3 xyz) {
+                        const vec3 step = vec3(110.0, 241.0, 171.0);
+                        vec3 i = floor(xyz);
+                        vec3 f = fract(xyz);
+                        float n = dot(i, step);
+                        vec3 u = f * f * (3.0 - 2.0 * f);
+                        return mix( mix(mix(random(n + dot(step, vec3(0,0,0))),
+                                            random(n + dot(step, vec3(1,0,0))),
+                                            u.x),
+                                        mix(random(n + dot(step, vec3(0,1,0))),
+                                            random(n + dot(step, vec3(1,1,0))),
+                                            u.x),
+                                        u.y),
+                                    mix(mix(random(n + dot(step, vec3(0,0,1))),
+                                        random(n + dot(step, vec3(1,0,1))),
+                                        u.x),
+                                        mix(random(n + dot(step, vec3(0,1,1))),
+                                            random(n + dot(step, vec3(1,1,1))),
+                                            u.x),
+                                    u.y),
+                                u.z);
+                    }
+                    //
+                    // Simplex Noise
+                    const float F3 =  0.3333333;
+                    const float G3 =  0.1666667;
+                    float snoise (vec3 p) {
+                        vec3 s = floor(p + dot(p, vec3(F3)));
+                        vec3 x = p - s + dot(s, vec3(G3));
+                        vec3 e = step(vec3(0.0), x - x.yzx);
+                        vec3 i1 = e*(1.0 - e.zxy);
+                        vec3 i2 = 1.0 - e.zxy*(1.0 - e);
+                        vec3 x1 = x - i1 + G3;
+                        vec3 x2 = x - i2 + 2.0*G3;
+                        vec3 x3 = x - 1.0 + 3.0*G3;
+                        vec4 w, d;
+                        w.x = dot(x, x);
+                        w.y = dot(x1, x1);
+                        w.z = dot(x2, x2);
+                        w.w = dot(x3, x3);
+                        w = max(0.6 - w, 0.0);
+                        d.x = dot(random3(s), x);
+                        d.y = dot(random3(s + i1), x1);
+                        d.z = dot(random3(s + i2), x2);
+                        d.w = dot(random3(s + 1.0), x3);
+                        w *= w;
+                        w *= w;
+                        d *= w;
+                        return dot(d, vec4(52.0));
+                    }
+    generative-fbm:
+        mix: generative-noise
+        shaders:
+            defines:
+                NUM_OCTAVES: 5
+            blocks:
+                global: |
+                    // Fractional Brownian motion for 1 and 2 dimensions
+                    float fbm (float x) {
+                        float v = 0.0;
+                        float a = 0.5;
+                        float shift = float(100.0);
+                        for (int i = 0; i < int(NUM_OCTAVES); ++i) {
+                            v += a * noise(x);
+                            x = x * 2.0 + shift;
+                            a *= 0.5;
+                        }
+                        return v;
+                    }
+                    float fbm (vec2 xy) {
+                        float v = 0.0;
+                        float a = 0.5;
+                        vec2 shift = vec2(100.0);
+                        mat2 rot = mat2(cos(0.5), sin(0.5), 
+                                        -sin(0.5), cos(0.50));
+                        for (int i = 0; i < int(NUM_OCTAVES); ++i) {
+                            v += a * noise(xy);
+                            xy = rot * xy * 2.0 + shift;
+                            a *= 0.5;
+                        }
+                        return v;
+                    }
+    filter-grain:
+        mix: generative-fbm
+        shaders:
+            defines:
+                GRAIN_AMOUNT: .5
+                NUM_OCTAVES: 2
+            blocks:
+                global: |
+                    // Grain fractor on screen space with less concetration in the center
+                    // ================================
+                    float grain(){
+                        #ifdef TANGRAM_FRAGMENT_SHADER
+                        vec2 pos = gl_FragCoord.xy;
+                        vec2 st = pos/u_resolution.xy-vec2(.5);
+                        return dot(st,st)+(fbm(pos*0.6)*0.1);
+                        #else
+                        return 0.0;
+                        #endif
+                    }
+                filter: |
+                    // Apply the grain in the amount defined on GRAIN_AMOUNT
+                    color.rgb -= grain()*GRAIN_AMOUNT;
+    buildings:
+        texcoords: true
+        base: polygons
+        mix: [functions-map, geometry-tilt, geometry-normal, filter-grain]
+        material:
+            shininess: 2.
+            specular: 1.0
+            ambient: [0.000, 0.000, 0.000]
+            emission: 0.0
+        shaders:
+            blocks:
+                filter: |
+                    color.rgb += vec3(1.0)* min( 1.-(worldPosition().z*.001 + .7) , 0.5 );
+    apartments:
+        base: polygons
+        mix: buildings
+        shaders:
+            blocks:
+                color: |
+                    if (isWall()){
+                        vec2 st = vec2(v_texcoord.x*10.,worldPosition().z*0.2);
+                        vec2 ipos = floor(st);
+                        vec2 fpos = fract(st);
+                        float p = step(0.6,fpos.x)*step(0.4,fpos.y);
+                        
+                        if ( p > 0.0 ){
+                            material.specular = vec4(1.) * max( 1.-(worldPosition().z*.001 + .5), 0. );
+                            material.emission = vec4(0.988,0.983,0.880,1.)  * step(.5,random(ipos+floor(v_normal.xy*10.0)));
+                            fpos = vec2(.8,.7)-fpos;
+                            material.emission -= clamp(dot(fpos,fpos),0.,1.);
+                        }
+                    }
+        
+    offices:
+        base: polygons
+        mix: buildings
+        shaders:
+            blocks:
+                color: |
+                    if (isWall()){
+                        vec2 st = vec2(v_texcoord.x*10.,worldPosition().z*0.2);
+                        vec2 ipos = floor(st);
+                        vec2 fpos = fract(st);
+                        if ( step(0.01,fpos.x)*step(0.1,fpos.y) > 0.0 ){
+                            material.specular = vec4(1.) * max( 1.-(worldPosition().z*.001 + .5), 0. );
+                            material.emission = vec4(0.957,0.988,0.976,1.0);
+                            material.emission *= step(.5, random(ipos)*random(ipos*vec2(0.0000001,0.01)+floor(v_normal.xy*10.0)));
+                        }
+                    }
+    modern-buildings:
+        base: polygons
+        mix: buildings
+        shaders:
+            blocks:
+                global: |
+                    vec3 voronoi (vec2 st) {
+                        vec2 ipos = floor(st);
+                        vec2 fpos = fract(st);
+                        vec3 m = vec3( 8.0 );
+                        for( int j=-1; j<=1; j++ ){
+                            for( int i=-1; i<=1; i++ ){
+                                vec2  g = vec2( float(i), float(j) );
+                                vec2  o = random2( ipos + g );
+                                vec2  r = g - fpos + o;
+                                float d = dot( r, r );
+                                if( d<m.x )
+                                    m = vec3( d, o );
+                            }
+                        }
+                        return m;
+                    }
+                color: |
+                    if (isWall()){
+                        vec2 st = vec2(v_texcoord.x*10.,worldPosition().z*0.2);
+                        float scale = 0.8;
+                        
+                        vec3 c = voronoi(st*scale);
+                        vec3 col = 0.6 + cos( c.y*0.6 + vec3(1.5) );
+                        vec2 e = vec2( 2.0, 0.0 )/vec2(50.);
+                        vec3 ca = voronoi( scale*(st + e.xy) );
+                        vec3 cb = voronoi( scale*(st + e.yx) );
+                        col *= 1.0 - clamp( abs(2.0*c.z-ca.z-cb.z)*1000.0,0.0,1.0);
+                        
+                        material.specular = vec4(0.957,0.988,0.976,1.0) * step(0.1,col.r);
+                        material.emission = vec4(0.857,0.888,0.980,1.0) * smoothstep(0.9,1.,col.r * 2.);
+                    }
+    roads:
+        texcoords: true
+        base: lines
+        mix: [geometry-tilt, filter-grain]
+        material:
+            diffuse: .9
+            emission: 0.0
+        shaders:
+            blocks:
+                global: |
+                    float car(vec2 st){
+                        return (0.7-dot(st-.5,st-vec2(.5,.9))*3.);
+                    }
+                color: |
+                    vec2 st = v_texcoord.xy;
+                    float dir = -0.1;
+                    if ( v_color.r < 0.5) {
+                       if (st.x < 0.5) {
+                         st.y = 1.-st.y;
+                       }
+                       st.x = fract(st.x*2.0);
+                    }
+                    float v = u_time*dir;
+                    st *= vec2(4.,1.);
+                    st += vec2(1.);
+                    vec2 ipos = floor(st);
+                    vec2 fpos = fract(st);
+                    fpos = fpos+vec2(.0,v*random(ipos.x));
+                    ipos = floor(fpos*vec2(10.));
+                    fpos = fract(fpos*vec2(1.,10.));
+                    
+                    st = worldPosition().xy*0.04;
+                    float n = noise(st);
+                    
+                    material.emission = vec4(0.957,0.988,0.976,1.0) * max(0.0,car(fpos) * step(0.5,random(ipos.y)));
+                    
+                    float lineWidth = 0.2;
+                    float borders = 1.0-(step(lineWidth,v_texcoord.x)-step(1.0-lineWidth,v_texcoord.x));
+                    material.emission *= 1.-borders;
+                    
+                    color.rgb = vec3(0.4)*borders+n;
+    earth:
+        base: polygons
+        mix: [geometry-tilt, filter-grain]
+    water:
+        base: polygons
+        mix: [geometry-tilt, filter-grain]
+        animated: true
+        material:
+            ambient: 0.8
+    
+layers:
+    earth:
+        data: { source: osm }
+        draw:
+            earth:
+                order: 0
+                color: '#555'
+    landuse:
+        data: { source: osm }
+        draw:
+            earth:
+                order: 1
+                color: '#666'
+    water:
+        data: { source: osm }
+        draw:
+            water:
+                order: 2
+                color: '#555'
+    roads:
+        data: { source: osm }
+        filter: { not: { kind: [rail, ferry] } }
+        properties: { width: 3 }
+        draw:
+            roads:
+                order: 3
+                color: black
+                width: 15
+        oneway:
+            filter: { oneway: yes }
+            draw: { roads: { color: red } }
+    buildings:
+        data: { source: osm }
+        filter: { $zoom: { min: 10 } }
+        offices:
+            filter: function(){ return feature.height > 100; }
+            draw:
+                polygons:
+                    style: offices
+                    extrude: true
+                    order: 4
+                    color: '#999'
+        apartments:
+            filter: function(){ return feature.height < 100; }
+            draw:
+                polygons:
+                    style: apartments
+                    extrude: true
+                    order: 4
+                    color: '#999'
+        modern:
+            filter: { kind: museum, $zoom: { min: 10 } }
+            draw:
+                polygons:
+                    style: modern-buildings
+                    extrude: true
+                    order: 4
+                    color: '#999'
