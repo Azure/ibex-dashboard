@@ -1,0 +1,257 @@
+# Author @patriciogv - 2015
+
+cameras:
+    camera1:
+        type: perspective
+styles:
+    space-tile:
+        shaders:
+            blocks:
+                global: |
+                    // Variant to be add to both vertex and fragments shaders
+                    varying vec3 v_pos;
+                    //
+                    // Get the coordinates in tile space
+                    // ================================
+                    vec2 getTileCoords() {
+                        return fract(v_pos.xy);
+                    }
+
+                position: |
+                    // Normalize the attribute position of a vertex
+                    v_pos = modelPosition().xyz;
+    tools:
+        lighting: false
+        mix: space-tile
+        shaders:
+            blocks:
+                global: |
+                    // Grids
+                    //=============================
+                    bool gridLine(vec2 st, float res, float press){
+                        vec2 grid = fract(st*res);
+                        return grid.x < res*press || grid.y < res*press;
+                    }
+                    float TileGrid(float res){
+                        vec2 st = getTileCoords()*100.*res;
+                        float pct = 0.0;
+                        float press = 0.4+(1.0-fract(u_map_position.z))*0.1;
+                        if (gridLine(st,0.01,press)) pct += 0.5;
+                        if (gridLine(st,0.1,press)) pct += 0.1;
+                        return pct;
+                    }
+                    float TileGrid(){ return mix(TileGrid(1.),TileGrid(2.),fract(u_map_position.z)); }
+                    float grid (in vec2 _pos, in float _zoom, in float _lineWidth){
+                        _pos = fract(_pos*_zoom);
+                        vec2 g = smoothstep(vec2(0.5-_lineWidth),vec2(0.5),_pos) -
+                                 smoothstep(vec2(0.5),vec2(0.5+_lineWidth),_pos);
+                        return clamp(g.x+g.y,0.0,1.0);
+                    }
+                    //  Crosses
+                    //=============================
+                    float box(in vec2 _st, in vec2 _size){
+                        _size = vec2(0.5) - _size*0.5;
+                        vec2 uv = smoothstep(_size,
+                                            _size+vec2(0.001),
+                                            _st);
+                        uv *= smoothstep(_size,
+                                        _size+vec2(0.001),
+                                        vec2(1.0)-_st);
+                        return uv.x*uv.y;
+                    }
+                    float cross(in vec2 _st, float _size){
+                        return  box(_st, vec2(_size*0.5,_size*0.125)) +
+                                box(_st, vec2(_size*0.125,_size*0.5));
+                    }
+                    float cross(in vec2 _st, vec2 _size){
+                        return  box(_st, vec2(_size.x*0.5,_size.y*0.125)) +
+                                box(_st, vec2(_size.y*0.125,_size.x*0.5));
+                    }
+    grid:
+        base: polygons
+        mix : tools
+        shaders:
+            blocks:
+                color: |
+                    vec2 pos = getTileCoords()*4.;
+                    color.rgb = v_color.rgb*grid(pos,10.,0.05);
+    tiledCross:
+        base: polygons
+        mix: tools
+        shaders:
+            blocks:
+                color: |
+                    vec2 pos = getTileCoords()*3.;
+                    float pct = clamp(cross(fract(pos),0.2),0.0,1.0);
+                    color.rgb = mix(vec3(0.051,0.071,0.278),vec3(0.654,0.897,1.000),pct);
+    roads:
+        base: lines
+        animated: true
+        texcoords: true
+        lighting: false
+        shaders:
+            blocks:
+                global: |
+                    float getHatch(in vec2 _pos, float _angle, float _brigtness){
+                        _pos *= 20.;
+                        _pos = _pos.yx;
+                        return 1.0-smoothstep(-1.+_brigtness*2.0,1.,abs(sin(_pos.x*3.1415)));
+                    }
+                color: |
+                    vec2 st = v_texcoord.xy;
+                    float dir = -0.1;
+                    if ( v_color.r < 0.5) {
+                        if (st.x < 0.5) {
+                          dir *= -1.;
+                        }
+                        st.x = fract(st.x*2.0);
+                    }
+                    float pattern = getHatch( u_time*dir+st.xy*0.5, 3.1415*0.5, 0.5);
+                    color.rgb = vec3(1.000,0.865,0.387)* pattern*sin(smoothstep(0.0,1.,st.x)*3.1415);
+    walls:
+        base: polygons
+        mix: tools
+        texcoords: true
+        blend: add
+        shaders:
+            blocks:
+                position: |
+                    position.z *= max(1.0,0.5+(1.0-(u_map_position.z/20.0))*5.0);
+                color: |
+                    float pct = grid(v_texcoord,10.,0.1)*0.5;
+                    color.rgb = mix(vec3(0.051,0.071,0.278)*0.8,vec3(0.239,0.431,0.718)*0.6,pct)*0.5;
+    walls-outline:
+        base: lines
+        lighting: false
+        shaders:
+            blocks:
+                width: |
+                    width *= 0.2+min(pow(position.z*0.006,2.),.6);
+                position: |
+                    position.z *= max(1.0,0.5+(1.0-(u_map_position.z/20.0))*5.0);
+sources:
+    osm:
+        type: TopoJSON
+        url:  //vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson?api_key=vector-tiles-JUsa0Gc
+layers:
+    earth:
+        data: { source: osm }  
+        draw:
+            grid:
+                order: 0
+                color: [0.101,0.203,0.203]
+    landuse:
+        data: { source: osm }
+        draw:
+            grid:
+                order: 1
+                color: '#ff00ff'
+    water:
+        data: { source: osm }
+        draw:
+            tiledCross:
+                order: 2
+                color: [0,0,0]
+            outline:
+                order: 3
+                style: lines
+                color: [0.654,0.897,1.000]
+                width: 1px
+                tile_edges: false
+    roads:
+        data: { source: osm }
+        filter: { not: { kind: [rail, ferry] } }
+        draw:
+            roads:
+                order: 4
+                color: [0, 0, 0]
+                width: 8
+        oneway:
+            filter: { oneway: yes }
+            draw: { roads: { color: red } }
+
+        highway:
+            filter:
+                kind: highway
+            draw:
+                roads:
+                    order: 5
+                    width: 12
+                outline:
+                    style: lines
+                    order: 4
+                    color: [0.654,0.897,1.000]
+                    width: 13
+        tunnel:
+            filter:
+                is_tunnel: yes
+            rail:
+                filter:
+                    kind: rail
+                visible: false
+        minor_road:
+            filter:
+                kind: minor_road
+            draw:
+                roads:
+                    width: 5
+        path:
+            filter:
+                kind: path
+            draw:
+                roads:
+                    width: 3
+        rail:
+            filter:
+                kind: rail
+                is_tunnel: no
+            draw:
+                roads:
+                    width: 3
+    buildings:
+        data: { source: osm }
+        draw:
+            walls:
+                order: 6
+                color: [0, 0, 0]
+            baseline:
+                style: lines
+                order: 5
+                width: [[12, .1px], [18, 0.5m]]
+                color: [0.654,0.897,1.000]
+            walls-outline:
+                order: 7
+                color: [0.654,0.897,1.000]
+                width: 1px
+        extruded:
+            filter: { $zoom: { min: 13 } }
+            draw:
+                walls:
+                    extrude: true
+                walls-outline:
+                    order: 7
+                    width: [[12, .1px], [14, 0.1px], [15, 0.5px], [17, 1.0px], [18, 1px]]
+                    extrude: true
+                    color: [0.654,0.897,1.000]
+    road_labels:
+        data: { source: osm, layer: roads }
+        filter: { name: true, $zoom: { min: 14 }, not: { kind: [ferry] } }
+        draw:
+            text:
+                font:
+                    family: Helvetica
+                    size: 12px
+                    style: italic
+                    fill: [.9,.9,1.]
+                    stroke: { color: black , width: 3 }
+    places:
+        data: { source: osm }
+        filter: { name: true }
+        draw:
+            text:
+                font:
+                    family: Helvetica
+                    size: 18px
+                    weight: bold
+                    fill: black
+                    stroke: { color: white , width: 5 }

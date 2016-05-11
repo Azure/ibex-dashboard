@@ -31,9 +31,6 @@ export const HeatMap = React.createClass({
   
   addInfoBoxControl(){
       let info = Leaflet.control();
-      let categoryType = this.state.categoryType;
-      let categoryValue = this.state.categoryValue;
-      let infoHeaderText = "<h4>{0} Geo-Location Tile Details</h4>".format(categoryType);
       let self = this;
       
       if(this.map){
@@ -48,7 +45,10 @@ export const HeatMap = React.createClass({
           },
 
 		  info.update = props => {
-            var infoBoxInnerHtml = 'Hover over a tile to see more details<br><br>';
+            let categoryType = self.state.categoryType;
+            let categoryValue = self.state.categoryValue;
+            let infoHeaderText = "<h4>{0} Sentiment Details</h4>".format(categoryType);
+            let infoBoxInnerHtml = 'Hover over a tile to see more details<br><br>';
             
             if(props && props.count){
                 infoBoxInnerHtml = "<b>{0}</b><br /><ul><li><u>Mentions</u>:{1}</li><li><u>Intensity Level</u>:{2}</li><li><u>Weighting</u>:{3}</li></ul>".format(categoryValue, props.count, props.magnitude, props.weighted);
@@ -190,7 +190,7 @@ export const HeatMap = React.createClass({
         Object.keys(heatmapTileElement).forEach(heatmapElementTileId => {
            Object.keys(heatmapTileElement[heatmapElementTileId]).forEach(eventWordText => {
                //Skip the element if the selected keyword doesnt match the event word
-               if(self.state.categoryValue && eventWordText.toLowerCase() != self.state.categoryValue.toLowerCase()){
+               if(self.state.categoryValue && eventWordText.toLowerCase() != self.state.categoryValue.toLowerCase().trim()){
                    return false;
                }
                
