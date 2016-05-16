@@ -83,7 +83,7 @@ export const TypeaheadSearch = React.createClass({
                         onSuggestionSelected={this.typeaheadItemSelected}
                         showWhen={input => input.trim().length >= 0}
                         suggestionValue={this.suggestionValue}
-                        scrollBar = {true} />        
+                        scrollBar = {true} />
         </div>
     );
   }
