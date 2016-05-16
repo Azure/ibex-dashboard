@@ -37,6 +37,12 @@ const constants = {
                "twitter": "fa fa-twitter",
                "facebook": "fa fa-facebook-official"
            },
+           CATEGORY_KEY_MAPPING: {
+             'kw': 'keyword',
+             'g': 'group',
+             'sec': 'sector',
+             'st': 'status'
+           },
            HEATMAP : {
                RETRIEVE_HEATMAP_TILE: "HEATMAP"
            },

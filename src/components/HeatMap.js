@@ -47,12 +47,12 @@ export const HeatMap = React.createClass({
 		  info.update = props => {
             let categoryType = self.state.categoryType;
             let categoryValue = self.state.categoryValue;
-            let infoHeaderText = "<h4>{0} Sentiment Details</h4>".format(categoryType);
+            let infoHeaderText = "<h4>{0} Sentiment Details</h4>".format(categoryType.charAt(0).toUpperCase() + '' + categoryType.substring(1, categoryType.length));
             let infoBoxInnerHtml = 'Hover over a tile to see more details<br><br>';
             
             if(props && props.cnt){
                 let sentimentListItem = "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span>".format(self.getColor((props.mag_n || 0) * rainbowColorCeiling), self.getSentimentCategory((props.mag_n || 0) * 100));
-                infoBoxInnerHtml = "<b>{0}</b><br /><ul><li><b>Mentions</b>:{1}</li><li><b>Sentiment:</b>{2}</li><li><b>Intensity Level</b>:{3}</li></ul>".format(categoryValue, props.cnt, sentimentListItem, Number(((props.mag_n || 0) * 100).toFixed(0)));
+                infoBoxInnerHtml = "<b>Term:</b>&nbsp;<u>{0}</u><br /><ul><li><b>Mentions</b>:{1}</li><li><b>Sentiment:</b>{2}&nbsp;</li><li><b>Intensity Level</b>:{3}</li></ul>".format(categoryValue, props.cnt, sentimentListItem, Number(((props.mag_n || 0) * 100).toFixed(0)));
             }else{
                 Object.keys(Actions.constants.SENTIMENT_COLOR_MAPPING).forEach(element => {
                     infoBoxInnerHtml += "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span><br>".format(Actions.constants.SENTIMENT_COLOR_MAPPING[element], element);

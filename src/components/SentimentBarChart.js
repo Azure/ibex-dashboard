@@ -29,16 +29,23 @@ export const SentimentBarChart = React.createClass({
       if(this.barChart && this.barChart.getBarsAtEvent(evt).length > 0){
           let activeBars = this.barChart.getBarsAtEvent(evt);
           let selectedLabel = activeBars[0].label;
+          let labelSplitArr = selectedLabel.split('-');
           let dataStore = this.getFlux().store("DataStore").dataStore;
           
-          this.getFlux().actions.DASHBOARD.changeSearchFilter(selectedLabel, dataStore.categoryType);
+          if(labelSplitArr.length > 1){
+              let label = labelSplitArr[1];
+              let category = Actions.constants.CATEGORY_KEY_MAPPING[labelSplitArr[0]];
+              if(category){
+                  this.getFlux().actions.DASHBOARD.changeSearchFilter(label, category);
+              }
+          }          
       }
   },
   
   renderBarChart(){
     if(this.state.sentimentChartData.length > 0){
         let labels = [];
-        let maxLabelCharacters = 13;
+        let maxLabelCharacters = 14;
         let positiveData = {
 				label: "Postive",
                 fillColor : "#07d159",
