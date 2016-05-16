@@ -3,6 +3,7 @@ import moment from 'moment';
 import React, { PropTypes, Component } from 'react';
 import {Actions as Actions} from '../actions/Actions';
 import env_properties from '../../config.json';
+import bs from 'binarysearch';
 
 export const DataStore = Fluxxor.createStore({
     initialize(profile) {
@@ -13,7 +14,10 @@ export const DataStore = Fluxxor.createStore({
           datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: 'keywords',
           activities: [],
+          action: '',
           trends: [],
+          timeSeriesGraphData: [],
+          indexedTimeSeriesMap: new Map(),
           sentimentChartData: [],
           sentimentTreeViewData: [],
           categoryValue: 'refugees',
@@ -23,10 +27,10 @@ export const DataStore = Fluxxor.createStore({
       this.bindActions(
             Actions.constants.ACTIVITY.LOAD_EVENTS, this.handleLoadActivites,
             Actions.constants.TRENDS.LOAD_TRENDS, this.handleLoadTrendingActivity,
-            Actions.constants.GRAPHING.LOAD_SENTIMENT_BAR_CHART, this.handleLoadSentimentBarChart,
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.GRAPHING.CHANGE_TIME_SCALE, this.handleChangeTimeScale,
+            Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
             Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate
       );
@@ -41,13 +45,63 @@ export const DataStore = Fluxxor.createStore({
         this.emit("change");
     },
     
-    handleLoadTrendingActivity(trends){
-        this.dataStore.trends = trends.response;
+    handleLoadGraphData(timeSeries){
+        this.refreshGraphData(timeSeries.response);
         this.emit("change");
     },
     
-    handleLoadSentimentBarChart(chartData){
-        this.dataStore.sentimentChartData = chartData.response;
+    indexTimeSeriesResponse(timeSeries){
+        let self = this;
+        this.sortedTimeSeriesDates = [];
+        this.dataStore.indexedTimeSeriesMap.clear();
+        
+        if(timeSeries && timeSeries.graphData){
+            //hash the time series data by the epoch time as we'll use this to render 
+            //the aggregates in the bar chart based on the selected graph zoom area. 
+            timeSeries.graphData.map(timeEntry => {
+                self.dataStore.indexedTimeSeriesMap.set(timeEntry[0], timeEntry);
+                self.sortedTimeSeriesDates.push(timeEntry[0]);
+            });
+        }
+    },
+    
+    //a log(N) algorithm to aggregate the occurences and magnitude of the time series data.
+    aggregateTimeSeriesData(fromDatetime, toDatetime){
+        this.dataStore.sentimentChartData = [];
+        let self = this;
+        
+        //If there's no provided from and todate then this is the initial data load for the bar chart
+        //default both to the upper and lower bounds of the sortedTimeSeriesDates.
+        if(!fromDatetime && !toDatetime && this.sortedTimeSeriesDates.length > 0){
+            fromDatetime = this.sortedTimeSeriesDates[0];
+            toDatetime = this.sortedTimeSeriesDates[this.sortedTimeSeriesDates.length - 1];
+        }
+        
+        //Make sure to and from date is provided and there are both labels and time series data.
+        if(fromDatetime && toDatetime && this.sortedTimeSeriesDates.length > 0 && this.dataStore.timeSeriesGraphData.labels.length > 0){
+            //default the initial dataset with all the labels we're rendering. This has a max length of 6 labels. 
+            for(let i = 1; i < this.dataStore.timeSeriesGraphData.labels.length; i++){
+                this.dataStore.sentimentChartData.push({label: this.dataStore.timeSeriesGraphData.labels[i], occurences: 0, mag_n: Math.random()})
+            }
+            
+            //extract the indexed time slices based on the from and to date range.
+            let timeSlices = bs.rangeValue(this.sortedTimeSeriesDates, Math.abs(fromDatetime), Math.abs(toDatetime));
+            //enumerate through all the time slices.
+            timeSlices.map(datetime => {
+                //pull the time slice details which contain the occurences and normalized magnitude sentiment.
+                let datetimeData = self.dataStore.indexedTimeSeriesMap.get(datetime);
+                if(datetimeData){
+                    //we'll need to aggregate the occurences for each label across the date range.
+                    self.dataStore.sentimentChartData.map((labelEntry, index) => {
+                        self.dataStore.sentimentChartData[index].occurences += datetimeData[index + 1];
+                    });
+                }
+            });
+        }
+    },
+    
+    handleLoadTrendingActivity(trends){
+        this.dataStore.trends = trends.response;
         this.emit("change");
     },
     
@@ -56,22 +110,33 @@ export const DataStore = Fluxxor.createStore({
         this.emit("change");
     },
     
-    handleChangeTimeScale(selection){
-        //this.dataStore.datetimeSelection = selection.datetimeSelection;
+    handleChangeTimeScale(dateRange){
+        this.aggregateTimeSeriesData(dateRange.fromDate, dateRange.toDate);
+        this.dataStore.action = 'editingTimeScale';
         
         this.emit("change");
     },
     
-    handleChangeDate(selection){
-        this.dataStore.datetimeSelection = selection.newDateStr;
-        this.dataStore.timespanType = selection.dateType;
+    refreshGraphData(timeSeriesData){
+        this.dataStore.timeSeriesGraphData = timeSeriesData;
+        this.indexTimeSeriesResponse(timeSeriesData);
+        this.aggregateTimeSeriesData(false, false);        
+    },
+    
+    handleChangeDate(changedData){
+        this.dataStore.datetimeSelection = changedData.datetimeSelection;
+        this.dataStore.timespanType = changedData.timespanType;
+        this.refreshGraphData(changedData.timeSeriesResponse);
+        this.dataStore.action = 'changedSearchTerms';
         
         this.emit("change");
     },
     
-    handleChangeSearchTerm(selection){
-        this.dataStore.categoryValue = selection.filter;
-        this.dataStore.categoryType = selection.type;
+    handleChangeSearchTerm(changedData){
+        this.dataStore.categoryValue = changedData.newFilter;
+        this.dataStore.categoryType = changedData.searchType;
+        this.refreshGraphData(changedData.timeSeriesResponse);
+        this.dataStore.action = 'changedSearchTerms';
         
         this.emit("change");
     },

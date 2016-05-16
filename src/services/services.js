@@ -2,6 +2,12 @@ import env_properties from '../../config.json';
 import Rx from 'rx';
 import RxDom from 'rx-dom';
 import {TestGraphData} from './testGraphData';
+import azure from 'azure-storage';
+import {Actions} from '../actions/Actions';
+
+const accountName = "ochahackfest";
+const searchTermsTable = "dmaksearchterms";
+const tableService = azure.createTableService(env_properties.OCHA_TERMS_TBL_CONN || '');
 
 export const SERVICES = {
   host: "https://myservice-host.net/",
@@ -57,229 +63,33 @@ export const SERVICES = {
     }
   },
   
-  getInitialGraphDataSet(timespanType, dateSelection, dataType){
-      let response = [TestGraphData];
+  getInitialGraphDataSet(datetimeSelection, timespanType){
+     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
 
-      return Rx.Observable.from(response);
+     let url = "{0}/{1}/{2}.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
+                                         env_properties.TIMESERIES_BLOB,
+                                         momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
+      
+      return Rx.DOM.getJSON(url);
   },
   
-  getDefaultSuggestionList(){
-      let testData = [[
-            {value: 'Hunger', type: 'Keywords'},
-            {value: 'Asylum seekers', type: 'Statuses'},
-            {value: 'IDPs', type: 'Statuses'},
-            {value: 'Host community', type: 'Statuses'},
-            {value: 'Libyan', type: 'Statuses'},
-            {value: 'Women', type: 'Group'},
-            {value: 'Children', type: 'Group'},
-            {value: 'Youth', type: 'Group'},
-            {value: 'Elderly', type: 'Group'},
-            {value: 'Disabled', type: 'Group'},
-            {value: 'Babies', type: 'Group'},
-            {value: 'People', type: 'Group'},
-            {value: 'Men', type: 'Group'},
-            {value: 'Infant', type: 'Group'},
-            {value: 'General National Congress', type: 'Keywords'},
-            {value: 'GNC', type: 'Keywords'},
-            {value: 'humanitarian', type: 'Keywords'},
-            {value: 'food', type: 'Keywords'},
-            {value: 'shelter', type: 'Keywords'},
-            {value: 'water shortage', type: 'Keywords'},
-            {value: 'attack', type: 'Keywords'},
-            {value: 'protection', type: 'Keywords'},
-            {value: 'education', type: 'Keywords'},
-            {value: 'health', type: 'Keywords'},
-            {value: 'malnutrition', type: 'Keywords'},
-            {value: 'starving', type: 'Keywords'},
-            {value: 'people affected', type: 'Keywords'},
-            {value: 'livelihoods', type: 'Keywords'},
-            {value: 'shortage', type: 'Keywords'},
-            {value: 'internally displaced', type: 'Keywords'},
-            {value: 'asylum-seekers', type: 'Keywords'},
-            {value: 'migrants', type: 'Keywords'},
-            {value: 'People in need', type: 'Keywords'},
-            {value: 'vulnerable', type: 'Keywords'},
-            {value: 'minorities', type: 'Keywords'},
-            {value: 'healthcare', type: 'Keywords'},
-            {value: 'IDPs', type: 'Keywords'},
-            {value: 'drinking water', type: 'Keywords'},
-            {value: 'suffering', type: 'Keywords'},
-            {value: 'discrimination', type: 'Keywords'},
-            {value: 'displacement', type: 'Keywords'},
-            {value: 'Europe', type: 'Keywords'},
-            {value: 'traffickers', type: 'Keywords'},
-            {value: 'death toll', type: 'Keywords'},
-            {value: 'marginalization', type: 'Keywords'},
-            {value: 'human rights violations', type: 'Keywords'},
-            {value: 'human rights ', type: 'Keywords'},
-            {value: 'borders', type: 'Keywords'},
-            {value: 'Islamists', type: 'Keywords'},
-            {value: 'paramilitaries', type: 'Keywords'},
-            {value: 'air strikes', type: 'Keywords'},
-            {value: 'outbreak', type: 'Keywords'},
-            {value: 'heavy weaponry', type: 'Keywords'},
-            {value: 'Weapon', type: 'Keywords'},
-            {value: 'casualties', type: 'Keywords'},
-            {value: 'inaccessible', type: 'Keywords'},
-            {value: 'humanitarian action', type: 'Keywords'},
-            {value: 'Extremist', type: 'Keywords'},
-            {value: 'shortages', type: 'Keywords'},
-            {value: 'humanitarian organisations', type: 'Keywords'},
-            {value: 'medical supplies', type: 'Keywords'},
-            {value: 'Gaddafi ', type: 'Keywords'},
-            {value: 'protests ', type: 'Keywords'},
-            {value: 'disease ', type: 'Keywords'},
-            {value: 'Islamic state', type: 'Keywords'},
-            {value: 'war crimes', type: 'Keywords'},
-            {value: 'electricity cuts', type: 'Keywords'},
-            {value: 'militants ', type: 'Keywords'},
-            {value: 'terrorists ', type: 'Keywords'},
-            {value: 'bomb', type: 'Keywords'},
-            {value: 'militia ', type: 'Keywords'},
-            {value: 'Cameron ', type: 'Keywords'},
-            {value: 'ISIS ', type: 'Keywords'},
-            {value: 'United Nations ', type: 'Keywords'},
-            {value: 'migrants crisis', type: 'Keywords'},
-            {value: 'imperialist ', type: 'Keywords'},
-            {value: 'oil ', type: 'Keywords'},
-            {value: 'negotiations ', type: 'Keywords'},
-            {value: 'tribal ', type: 'Keywords'},
-            {value: 'anti terror ', type: 'Keywords'},
-            {value: 'United States', type: 'Keywords'},
-            {value: 'Egypt', type: 'Keywords'},
-            {value: 'UK ', type: 'Keywords'},
-            {value: 'Tunisia ', type: 'Keywords'},
-            {value: 'western intervention ', type: 'Keywords'},
-            {value: 'uprisings ', type: 'Keywords'},
-            {value: 'envoy ', type: 'Keywords'},
-            {value: 'Clinton ', type: 'Keywords'},
-            {value: 'European Union ', type: 'Keywords'},
-            {value: 'security threat ', type: 'Keywords'},
-            {value: 'chaos ', type: 'Keywords'},
-            {value: 'violence ', type: 'Keywords'},
-            {value: 'executes ', type: 'Keywords'},
-            {value: 'Christians ', type: 'Keywords'},
-            {value: 'Arab spring ', type: 'Keywords'},
-            {value: 'reconstruction ', type: 'Keywords'},
-            {value: 'ceasefire ', type: 'Keywords'},
-            {value: 'constitution ', type: 'Keywords'},
-            {value: 'NATO ', type: 'Keywords'},
-            {value: 'rescue operation ', type: 'Keywords'},
-            {value: 'Benghazi ', type: 'Keywords'},
-            {value: 'ISIL', type: 'Keywords'},
-            {value: 'Tripoli parliament', type: 'Keywords'},
-            {value: 'government ', type: 'Keywords'},
-            {value: 'Together we build Libya', type: 'Keywords'},
-            {value: 'Washington ', type: 'Keywords'},
-            {value: 'Masrata', type: 'Keywords'},
-            {value: 'Muslim Brotherhood ', type: 'Keywords'},
-            {value: 'Libya Shield ', type: 'Keywords'},
-            {value: 'Entity / intrest', type: 'Keywords'},
-            {value: 'Interim government ', type: 'Keywords'},
-            {value: 'Military personnels ', type: 'Keywords'},
-            {value: 'Ibrahim El Dabashi ', type: 'Keywords'},
-            {value: 'Clashes', type: 'Keywords'},
-            {value: 'international organizations ', type: 'Keywords'},
-            {value: 'Human rights organizations ', type: 'Keywords'},
-            {value: 'Renaissance', type: 'Keywords'},
-            {value: 'Armed', type: 'Keywords'},
-            {value: 'Soldiers ', type: 'Keywords'},
-            {value: 'Arrest ', type: 'Keywords'},
-            {value: 'journalists ', type: 'Keywords'},
-            {value: 'peace talks ', type: 'Keywords'},
-            {value: 'International Criminal Court ', type: 'Keywords'},
-            {value: 'Amnesty ', type: 'Keywords'},
-            {value: 'Bernardino Leon', type: 'Keywords'},
-            {value: 'war planes', type: 'Keywords'},
-            {value: 'civil war ', type: 'Keywords'},
-            {value: 'jihadists ', type: 'Keywords'},
-            {value: 'civilians ', type: 'Keywords'},
-            {value: 'Allies ', type: 'Keywords'},
-            {value: 'proxy war ', type: 'Keywords'},
-            {value: 'suicide ', type: 'Keywords'},
-            {value: 'suicide bombing ', type: 'Keywords'},
-            {value: 'resolution ', type: 'Keywords'},
-            {value: 'rebels ', type: 'Keywords'},
-            {value: 'geneva ', type: 'Keywords'},
-            {value: 'troops ', type: 'Keywords'},
-            {value: 'humanitarian crisis ', type: 'Keywords'},
-            {value: 'foreign policy ', type: 'Keywords'},
-            {value: 'terror ', type: 'Keywords'},
-            {value: 'terrorism ', type: 'Keywords'},
-            {value: 'forces ', type: 'Keywords'},
-            {value: 'instability ', type: 'Keywords'},
-            {value: 'Invade', type: 'Keywords'},
-            {value: 'Middle East ', type: 'Keywords'},
-            {value: 'Political Dialogue', type: 'Keywords'},
-            {value: 'Public uprising', type: 'Keywords'},
-            {value: 'Arab League ', type: 'Keywords'},
-            {value: 'Economic downfall ', type: 'Keywords'},
-            {value: 'Suicide Attack ', type: 'Keywords'},
-            {value: 'illegal detention ', type: 'Keywords'},
-            {value: 'hostages', type: 'Keywords'},
-            {value: 'dialogue ', type: 'Keywords'},
-            {value: 'Third World War', type: 'Keywords'},
-            {value: 'opponent ', type: 'Keywords'},
-            {value: 'emergency ', type: 'Keywords'},
-            {value: 'death sentence ', type: 'Keywords'},
-            {value: 'press conference ', type: 'Keywords'},
-            {value: 'neo-colonial ', type: 'Keywords'},
-            {value: 'show trials ', type: 'Keywords'},
-            {value: 'shipwreck ', type: 'Keywords'},
-            {value: 'non-food items', type: 'Keywords'},
-            {value: 'vector control', type: 'Keywords'},
-            {value: 'Water Sanitation', type: 'Keywords'},
-            {value: 'expatriate', type: 'Keywords'},
-            {value: 'coordinator', type: 'Keywords'},
-            {value: 'jerrycan', type: 'Keywords'},
-            {value: 'patrol', type: 'Keywords'},
-            {value: 'intervention', type: 'Keywords'},
-            {value: 'Water, Sanitation and Hygiene', type: 'Keywords'},
-            {value: 'empowerment', type: 'Keywords'},
-            {value: 'gender', type: 'Keywords'},
-            {value: 'emergency response', type: 'Keywords'},
-            {value: 'peacekeeping', type: 'Keywords'},
-            {value: 'awareness', type: 'Keywords'},
-            {value: 'mission', type: 'Keywords'},
-            {value: 'call sign', type: 'Keywords'},
-            {value: 'camp', type: 'Keywords'},
-            {value: 'mesh tank', type: 'Keywords'},
-            {value: 'logistics', type: 'Keywords'},
-            {value: 'evacuation', type: 'Keywords'},
-            {value: 'demilitarized zone', type: 'Keywords'},
-            {value: 'camouflage netting', type: 'Keywords'},
-            {value: 'bladder tank', type: 'Keywords'},
-            {value: 'charter', type: 'Keywords'},
-            {value: 'survey mission', type: 'Keywords'},
-            {value: 'logistics base', type: 'Keywords'},
-            {value: 'radio operator', type: 'Keywords'},
-            {value: 'Non-Governmental Organization', type: 'Keywords'},
-            {value: 'main supply route', type: 'Keywords'},
-            {value: 'Missing people ', type: 'Keywords'},
-            {value: 'Detention', type: 'Keywords'},
-            {value: 'Refugees', type: 'Keywords'},
-            {value: 'Displaced populations', type: 'Keywords'},
-            {value: 'NGOs', type: 'Keywords'},
-            {value: 'United Nations ', type: 'Keywords'},
-            {value: 'Human Rights ', type: 'Keywords'},
-            {value: 'Women', type: 'Keywords'},
-            {value: 'Legal violations ', type: 'Keywords'},
-            {value: 'International Law', type: 'Keywords'},
-            {value: 'Colonization ', type: 'Keywords'},
-            {value: 'Collective Security', type: 'Keywords'},
-            {value: 'Children', type: 'Keywords'}]];
+  getDefaultSuggestionList(cb){
+      let query = new azure.TableQuery();
+      
+      tableService.queryEntities(searchTermsTable, query, null, (error, result, response) => {
+        if(!error) {
+            let processedResults = result.entries.map(item => {
+                let searchTerm = item.RowKey._.toLowerCase();
+                let category = item.PartitionKey._.toLowerCase();
+                
+                return {category, searchTerm};
+            });
             
-          return Rx.Observable.from(testData);
-  },
-  
-  getSentimentDisperityDataSet(timespanType, dateSelection, dataType){
-      let response = [[{dataType: 'Keyword', dataValue: '#refugees', a: 6, h: 2, occurences: 450},
-                       {dataType: 'Keyword', dataValue: '#women', a: 3, h: 7, occurences: 150},
-                       {dataType: 'Keyword', dataValue: '#ISIS', a: 1, h: 3, occurences: 1250},
-                       {dataType: 'Keyword', dataValue: '#famine', a: 2, h: 7, occurences: 4350},
-                       {dataType: 'Keyword', dataValue: '#benghazi', a: 4, h: 8, occurences: 2150},]]
-
-      return Rx.Observable.from(response);
+            cb(processedResults);
+        }else{
+            console.error('An error occured trying to query the search terms: ' + error);
+        }
+      });
   },
   
   getSentimentTreeData(type, filteredValue, timespanType, dateSelection){
@@ -835,9 +645,16 @@ export const SERVICES = {
       return Rx.Observable.from(testData);
   },
   
-  getHeatmapTiles: function(url){
-    /*var testData = [[{"11_688_1103":{"a":0,"c":0,"d":0,"f":0,"h":7,"sp":6,"n":7,"s":0, "timestamp": "10/11/2015 12:32", occurences: 50}},{"10_345_546":{"a":0, "timestamp": "10/11/2015 10:32", occurences: 6,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":0,"s":7}},{"11_685_1102":{"a":7,"c":0,"d":1,"f":8,"h":6,"sp":3,"n":5,"s":3, "timestamp": "10/11/2015 09:32", occurences: 500}},{"10_351_546":{"a":0, "timestamp": "10/11/2015 12:12", occurences: 12,"c":0,"d":0,"f":1,"h":0,"sp":6,"n":0,"s":5}},{"11_680_1093":{"a":1, "timestamp": "10/11/2015 12:22", occurences: 35,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":9,"s":0}},{"10_345_551":{"a":0, "timestamp": "10/11/2015 12:32", occurences: 50,"c":0,"d":0,"f":0,"h":2,"sp":6,"n":0,"s":0}},{"10_338_547":{"a":0, "timestamp": "10/11/2015 12:30", occurences: 1000,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":3,"s":0}},{"10_351_544":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 23,"c":0,"d":5,"f":0,"h":0,"sp":0,"n":0,"s":0}},{"11_679_1103":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 7,"c":0,"d":0,"f":0,"h":1,"sp":1,"n":0,"s":5}},{"11_673_1100":{"a":7,"timestamp": "10/11/2015 10:32", occurences: 9,"c":0,"d":3,"f":0,"h":6,"sp":4,"n":2,"s":3}},{"11_684_1090":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 23,"c":0,"d":0,"f":0,"h":5,"sp":0,"n":0,"s":0}},{"10_342_551":{"a":5,"timestamp": "10/11/2015 10:32", occurences: 12,"c":0,"d":1,"f":0,"h":3,"sp":7,"n":4,"s":2}},{"10_342_552":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 8,"c":0,"d":0,"f":0,"h":1,"sp":0,"n":2,"s":0}},{"11_672_1098":{"a":4,"timestamp": "10/11/2015 10:32", occurences: 13,"c":0,"d":4,"f":4,"h":5,"sp":4,"n":4,"s":4}},{"11_683_1094":{"a":9,"timestamp": "10/11/2015 10:32", occurences: 15,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":0,"s":0}},{"11_672_1099":{"a":6,"timestamp": "10/11/2015 10:32", occurences: 14,"c":0,"d":4,"f":4,"h":5,"sp":5,"n":3,"s":8}},{"10_341_547":{"a":3,"timestamp": "10/11/2015 10:32", occurences: 16,"c":0,"d":4,"f":0,"h":4,"sp":0,"n":3,"s":0}},{"10_336_549":{"a":4,"timestamp": "10/11/2015 10:32", occurences: 54,"c":0,"d":5,"f":4,"h":5,"sp":5,"n":4,"s":4}},{"11_702_1088":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 12,"c":0,"d":5,"f":0,"h":0,"sp":0,"n":0,"s":0}},{"10_340_545":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 43,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":0,"s":0}},{"11_682_1095":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 65,"c":0,"d":0,"f":0,"h":6,"sp":0,"n":0,"s":0}},{"11_682_1094":{"a":8,"timestamp": "10/11/2015 10:32", occurences: 65,"c":0,"d":1,"f":0,"h":6,"sp":0,"n":5,"s":0}},{"10_340_546":{"a":1,"timestamp": "10/11/2015 10:32", occurences: 23,"c":0,"d":1,"f":0,"h":0,"sp":0,"n":4,"s":0}},{"11_691_1102":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 52,"c":0,"d":0,"f":0,"h":4,"sp":5,"n":0,"s":0}},{"11_681_1092":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 25,"c":0,"d":5,"f":0,"h":0,"sp":0,"n":0,"s":0}},{"10_336_550":{"a":6,"timestamp": "10/11/2015 10:32", occurences: 15,"c":0,"d":3,"f":5,"h":4,"sp":5,"n":4,"s":5}},{"11_681_1091":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 45,"c":0,"d":0,"f":0,"h":0,"sp":6,"n":0,"s":0}},{"10_342_545":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 75,"c":0,"d":0,"f":0,"h":5,"sp":0,"n":0,"s":0}},{"10_344_551":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 21,"c":0,"d":0,"f":0,"h":8,"sp":1,"n":6,"s":0}},{"11_690_1093":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 11,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":0,"s":0}},{"10_339_551":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 12,"c":0,"d":0,"f":0,"h":4,"sp":4,"n":0,"s":5}},{"11_677_1094":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 15,"c":0,"d":0,"f":0,"h":0,"sp":0,"n":8,"s":0}},{"11_672_1100":{"a":2,"timestamp": "10/11/2015 10:32", occurences: 25,"c":0,"d":6,"f":7,"h":4,"sp":7,"n":4,"s":5}},{"11_672_1101":{"a":5,"timestamp": "10/11/2015 10:32", occurences: 9,"c":0,"d":6,"f":3,"h":6,"sp":5,"n":5,"s":5}},{"11_684_1105":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 3,"c":0,"d":0,"f":0,"h":2,"sp":0,"n":8,"s":0}},{"11_703_1092":{"a":0,"timestamp": "10/11/2015 10:32", occurences: 10,"c":0,"d":0,"f":5,"h":0,"sp":4,"n":0,"s":8}}]];*/
+  getHeatmapTiles: function(categoryType, timespanType, categoryValue, datetimeSelection, tileId){
+    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
     
+    let url = "{0}/{1}/{2}/{3}/{4}/{5}.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
+                                       env_properties.EMOTIONMAPS_BLOB,
+                                       categoryType.toLowerCase(),
+                                       categoryValue,
+                                       momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat),
+                                       tileId);
+                                            
     return Rx.DOM.getJSON(url);
   },
 }

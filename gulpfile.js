@@ -86,7 +86,7 @@ gulp.task('clean-copy', (cb) => {
 })
 
 gulp.task('config-env', (cb) => {
-    var AZURE_CONFIG_PROPS = ['APPINSIGHTS_INSTRUMENTATIONKEY', 'AAD_AUTH_CLIENTID', 'SERVICE_URL', 'EMOTIONMAPS_BLOB'];
+    var AZURE_CONFIG_PROPS = ['APPINSIGHTS_INSTRUMENTATIONKEY', 'OCHA_BLOB_HOSTNAME', 'TIMESERIES_BLOB', 'AAD_AUTH_CLIENTID', 'SERVICE_URL', 'EMOTIONMAPS_BLOB', 'OCHA_TERMS_TBL_CONN'];
     var configFile = './config.json';
     var configurationEnv = {};
     

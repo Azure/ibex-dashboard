@@ -1,5 +1,6 @@
 import global from '../utils/global';
 import {SERVICES} from '../services/services';
+import env_properties from '../../config.json';
 
 const constants = {
            SENTIMENT_JSON_MAPPING : {
@@ -47,8 +48,7 @@ const constants = {
                LOAD_TRENDS: "LOAD:TRENDS"
            },
            GRAPHING : {
-               LOAD_GRAPH: "LOAD:GRAPH",
-               LOAD_SENTIMENT_BAR_CHART: "LOAD:CHART",
+               LOAD_GRAPH_DATA: "LOAD:GRAPH_DATA",
                CHANGE_TIME_SCALE: "EDIT:TIME_SCALE"
            },
            DASHBOARD : {
@@ -107,21 +107,42 @@ const methods = {
     DASHBOARD: {
         initialize(){
           let self = this;
-
-          SERVICES.getDefaultSuggestionList()
-            .subscribe(response => {
-                if(response && response.length > 0){
+          
+          let azureStorageCB = results => {
+                if(results && results.length > 0){
                     self.dispatch(constants.DASHBOARD.LOAD, {
-                                            response: response
+                                            response: results
                     });
                 }
-            });
+          };
+          
+          SERVICES.getDefaultSuggestionList(azureStorageCB);
         },
         changeSearchFilter(newFilter, searchType){
-           this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {filter: newFilter, type: searchType});
+           let self = this;
+           let dataStore = this.flux.stores.DataStore.dataStore;
+           
+           SERVICES.getInitialGraphDataSet(dataStore.datetimeSelection, dataStore.timespanType, newFilter, searchType)
+                      .subscribe(timeSeriesResponse => {
+                             if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
+                                 self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse, newFilter, searchType});
+                             }
+                      }, error => {
+                        console.log('Something went terribly wrong with loading the initial graph dataset');
+           });
         },
-        changeDate(datetimeString, timespanType){
-           this.dispatch(constants.DASHBOARD.CHANGE_DATE, {newDateStr: datetimeString, dateType: timespanType});
+        changeDate(datetimeSelection, timespanType){
+           let self = this;
+           let dataStore = this.flux.stores.DataStore.dataStore;
+                       
+           SERVICES.getInitialGraphDataSet(datetimeSelection, timespanType)
+                      .subscribe(timeSeriesResponse => {
+                             if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
+                                 self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
+                             }
+                      }, error => {
+                        console.log('Something went terribly wrong with loading the initial graph dataset');
+           });            
         }
     },
     GRAPHING : {
@@ -129,30 +150,18 @@ const methods = {
             this.dispatch(constants.GRAPHING.CHANGE_TIME_SCALE, {fromDate: fromDate, 
                                                                  toDate: toDate});
         },
-        load_graph: function(){
-            let self = this;
-            
-            SERVICES.getInitialGraphDataSet()
-            .subscribe(response => {
-                if(response && response.length > 0){
-                    self.dispatch(constants.GRAPHING.LOAD_GRAPH, {
-                                            response: response
-                    });
-                }
-            });
-        },
-        load_sentiment_bar_chart: function(){
+        load_timeseries_data: function(){
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
-            
-            SERVICES.getSentimentDisperityDataSet(dataStore.timespanType, dataStore.dateSelection, dataStore.categoryType)
-            .subscribe(response => {
-                if(response && response.length > 0){
-                    self.dispatch(constants.GRAPHING.LOAD_SENTIMENT_BAR_CHART, {
-                                            response: response
-                    });
-                }
-            });
+        
+            SERVICES.getInitialGraphDataSet(dataStore.datetimeSelection, dataStore.timespanType)
+                            .subscribe(response => {
+                                if(response && response.graphData && response.graphData.length > 0){
+                                    self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response: response});
+                                }
+                            }, error => {
+                                console.log('Something went terribly wrong with loading the initial graph dataset');
+                            });
         }
     }
 };

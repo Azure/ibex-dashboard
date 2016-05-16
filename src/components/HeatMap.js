@@ -7,13 +7,13 @@ import Rx from 'rx';
 import {SERVICES} from '../services/services';
 import env_properties from '../../config.json';
 import global from '../utils/global';
+import Rainbow from 'rainbowvis.js';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 const defaultLat = 20.1463919;
 const defaultLong = 2.2705778;
-const SENTIMENT_SCALE_INCREMENTS = 15;
-const MAGNITUDE_MAX_VALUE = 10;
+const rainbowColorCeiling = 1000;
 
 export const HeatMap = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
@@ -50,8 +50,9 @@ export const HeatMap = React.createClass({
             let infoHeaderText = "<h4>{0} Sentiment Details</h4>".format(categoryType);
             let infoBoxInnerHtml = 'Hover over a tile to see more details<br><br>';
             
-            if(props && props.count){
-                infoBoxInnerHtml = "<b>{0}</b><br /><ul><li><u>Mentions</u>:{1}</li><li><u>Intensity Level</u>:{2}</li><li><u>Weighting</u>:{3}</li></ul>".format(categoryValue, props.count, props.magnitude, props.weighted);
+            if(props && props.cnt){
+                let sentimentListItem = "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span>".format(self.getColor((props.mag_n || 0) * rainbowColorCeiling), self.getSentimentCategory((props.mag_n || 0) * 100));
+                infoBoxInnerHtml = "<b>{0}</b><br /><ul><li><b>Mentions</b>:{1}</li><li><b>Sentiment:</b>{2}</li><li><b>Intensity Level</b>:{3}</li></ul>".format(categoryValue, props.cnt, sentimentListItem, Number(((props.mag_n || 0) * 100).toFixed(0)));
             }else{
                 Object.keys(Actions.constants.SENTIMENT_COLOR_MAPPING).forEach(element => {
                     infoBoxInnerHtml += "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span><br>".format(Actions.constants.SENTIMENT_COLOR_MAPPING[element], element);
@@ -70,16 +71,34 @@ export const HeatMap = React.createClass({
       return Actions.constants.SENTIMENT_COLOR_MAPPING[sentiment];
   },
   
+  getSentimentCategory(level){
+      if(level >= 0 && level <= 15){
+          return "Very Positive";
+      }else if(level > 15 && level <= 25){
+          return "Positive";
+      }else if(level > 25 && level <= 40){
+          return "Slightly Positive";
+      }else if(level > 40 && level <= 55){
+          return "Neutral";
+      }else if(level > 55 && level <= 70){
+          return "Slightly Negative";
+      }else if(level > 70 && level <= 85){
+          return "Negative";
+      }else if(level > 85){
+          return "Very Negative";
+      }
+  },
+  
   componentDidMount(){
     let latitude = this.state.latitude;
     let longitude = this.state.longitude;
     this.heatmapLayers = {};
     this.heatmap = {};
-    let defaultZoom = 10;
+    let defaultZoom = 5;
     
-    //this.gradient = new Rainbow();
-    //this.gradient.setSpectrum('red', 'yellow', 'green');
-    //this.gradient.setNumberRange(SENTIMENT_SCALE_INCREMENTS * -1, SENTIMENT_SCALE_INCREMENTS);
+    this.gradient = new Rainbow();
+    this.gradient.setSpectrum('green', 'yellow', 'red');
+    this.gradient.setNumberRange(0, rainbowColorCeiling);
     
     this.map = Leaflet.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
     Leaflet.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -159,19 +178,12 @@ export const HeatMap = React.createClass({
     let self = this;
     //exit the fetch if the tile response is already cached
     if (this.heatmap[tileId]) return callback();
-    let formatter = Actions.constants.TIMESPAN_TYPES[this.state.timespanType];
-    
-    let url = "{0}{1}/{2}/{3}".format(env_properties.EMOTIONMAPS_BLOB,
-                                       this.state.categoryType.toLowerCase(), 
-                                       momentToggleFormats(this.state.datetimeSelection, formatter.format, formatter.blobFormat),
-                                       tileId);
 
-    SERVICES.getHeatmapTiles(url)
+    SERVICES.getHeatmapTiles(this.state.categoryType, this.state.timespanType, this.state.categoryValue, this.state.datetimeSelection, tileId)
             .subscribe(response => {
                 self.heatmap[tileId] = response;
                 callback(response);
-            }, error => {                
-                callback(null);
+            }, error => {
             });
   },
   
@@ -187,23 +199,9 @@ export const HeatMap = React.createClass({
             
       //Iterate through all the elemens in the cache for tileId
       self.heatmap[tileId].forEach(heatmapTileElement => {
-        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => {
-           Object.keys(heatmapTileElement[heatmapElementTileId]).forEach(eventWordText => {
-               //Skip the element if the selected keyword doesnt match the event word
-               if(self.state.categoryValue && eventWordText.toLowerCase() != self.state.categoryValue.toLowerCase().trim()){
-                   return false;
-               }
-               
-               let leafletElement = heatmapTileElement[heatmapElementTileId][eventWordText];
-               let heatmapTile = Tile.tileFromTileId(heatmapElementTileId);
-               let sentiment = leafletElement['sentiment'];
-               
-               //I dont like this but currently there's no scale coming back from the aggregation services, so 
-               //need to cap the ceiling at 10. This is a hack and need to change it soon.
-               //let tileMagnitudeScale = leafletElement['magnitude'] <= MAGNITUDE_MAX_VALUE ? leafletElement['magnitude'] : MAGNITUDE_MAX_VALUE;
-               //let colorValueStart = Actions.constants.SENTIMENT_JSON_MAPPING[sentiment];
-               //let colorValue = colorValueStart + tileMagnitudeScale;
-               //let color =  '#' + self.gradient.colourAt(colorValue);
+        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => {               
+               let leafletElement = heatmapTileElement[heatmapElementTileId];
+               let heatmapTile = Tile.tileFromTileId(heatmapElementTileId); 
                
                let rectangle = Leaflet.rectangle([
                     [ heatmapTile.latitudeNorth, heatmapTile.longitudeWest ],
@@ -217,8 +215,7 @@ export const HeatMap = React.createClass({
                }else{
                    self.heatmapLayers[layerId] = Leaflet.geoJson(geoJson,
                         {style: self.style, onEachFeature : self.onEachFeature});
-               }               
-            });
+               }
         });
       });
       
@@ -232,25 +229,17 @@ export const HeatMap = React.createClass({
   
   style(feature) {
 			return {
-				weight: 2,
+			    weight: 0,
 				opacity: 1,
-				color: 'white',
-				dashArray: '3',
+				//color: 'white',
+				//dashArray: '3',
 				fillOpacity: 0.7,
-				fillColor: this.getColor(feature.properties.magnitude)
+				fillColor: this.getColor((feature.properties.mag_n || 0) * rainbowColorCeiling)
 			};
  },
  
- // get color depending on population density value
  getColor(d) {
-			return d > 1000 ? '#800026' :
-			       d > 500  ? '#BD0026' :
-			       d > 200  ? '#E31A1C' :
-			       d > 100  ? '#FC4E2A' :
-			       d > 50   ? '#FD8D3C' :
-			       d > 20   ? '#FEB24C' :
-			       d > 10   ? '#FED976' :
-			                  '#FFEDA0';
+			return "#{0}".format(this.gradient.colourAt(d));
  },
   
  convertTileToGeoJSON(geoJson, properties, layerId){
@@ -302,9 +291,13 @@ export const HeatMap = React.createClass({
         this.heatmap = {};
         this.heatmapLayers = {};
    },
+   
+   renderMap(){
+     return this.map && this.state.action != 'editingTimeScale';
+   },
 
-  render() {
-    if(this.map){
+   render() {
+    if(this.renderMap()){
         this.clearMap();
         this.updateHeatmap();
     }
