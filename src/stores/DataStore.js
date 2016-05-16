@@ -19,6 +19,8 @@ export const DataStore = Fluxxor.createStore({
           timeSeriesGraphData: [],
           indexedTimeSeriesMap: new Map(),
           sentimentChartData: [],
+          timeseriesFromDate: false,
+          timeseriesToDate: false,
           sentimentTreeViewData: [],
           categoryValue: 'refugees',
           defaultResults: []
@@ -111,6 +113,13 @@ export const DataStore = Fluxxor.createStore({
     },
     
     handleChangeTimeScale(dateRange){
+        if(!dateRange.fromDate || !dateRange.fromDate){
+            console.error('handleChangeTimeScale was called without providing both a from/to datetime.');
+            return;
+        }
+        
+        this.dataStore.timeseriesFromDate = moment(dateRange.fromDate).format(Actions.constants.MOMENT_FORMATS.timeScaleDate);
+        this.dataStore.timeseriesToDate = moment(dateRange.toDate).format(Actions.constants.MOMENT_FORMATS.timeScaleDate);
         this.aggregateTimeSeriesData(dateRange.fromDate, dateRange.toDate);
         this.dataStore.action = 'editingTimeScale';
         
@@ -120,7 +129,9 @@ export const DataStore = Fluxxor.createStore({
     refreshGraphData(timeSeriesData){
         this.dataStore.timeSeriesGraphData = timeSeriesData;
         this.indexTimeSeriesResponse(timeSeriesData);
-        this.aggregateTimeSeriesData(false, false);        
+        this.aggregateTimeSeriesData(false, false);
+        this.dataStore.timeseriesFromDate = false;
+        this.dataStore.timeseriesToDate = false;
     },
     
     handleChangeDate(changedData){
