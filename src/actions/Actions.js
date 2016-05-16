@@ -134,7 +134,11 @@ const methods = {
                                  self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse, newFilter, searchType});
                              }
                       }, error => {
-                        console.log('Something went terribly wrong with loading the initial graph dataset');
+                        let emptyTimeSeries = {graphData: [], labels: []};
+                        
+                        //If we reached here then the datetime blob is not available. We should continue
+                        //to dispatch the flux operation to the front-end so the search terms / date is reflected.
+                        self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: emptyTimeSeries, newFilter: newFilter, searchType: searchType});
            });
         },
         changeDate(datetimeSelection, timespanType){
@@ -147,7 +151,11 @@ const methods = {
                                  self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
                              }
                       }, error => {
-                        console.log('Something went terribly wrong with loading the initial graph dataset');
+                        let emptyTimeSeries = {graphData: [], labels: []};
+                        
+                        //If we reached here then the datetime blob is not available. We should continue
+                        //to dispatch the flux operation to the front-end so the search terms / date is reflected.
+                        self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: emptyTimeSeries, datetimeSelection: datetimeSelection, timespanType: timespanType});
            });            
         }
     },

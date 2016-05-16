@@ -89,6 +89,8 @@ export const SentimentBarChart = React.createClass({
             
         this.barChart.generateLegend();
         this.barChart.chart.canvas.onclick = this.onClickHandler;
+    }else if(this.barChart){
+        this.barChart.destroy();
     }
   },
   

@@ -60,6 +60,8 @@ export const TimeSeriesGraph = React.createClass({
                });
                                 
               self.initializeGraph({'labels': dygraphData.labels, 'graphData': formattedGrapData });
+        }else if(this.graph && dygraphData.graphData.length == 0){
+            this.graph.destroy();
         }
   },
   
