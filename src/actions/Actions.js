@@ -28,6 +28,9 @@ const constants = {
                     format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM"
                 }
            },
+           MOMENT_FORMATS: {
+               "timeScaleDate": "MM/DD/YY HH:00"
+           },
            SENTIMENT_COLOR_MAPPING : {
                "negative": "#800026",
                "positive": "#FED976",
@@ -61,7 +64,7 @@ const constants = {
                LOAD: "LOAD:DASHBOARD",
                CHANGE_SEARCH: "SEARCH:CHANGE",
                CHANGE_DATE: "DATE:CHANGE"
-           }
+           },
 };
 
 const methods = {
