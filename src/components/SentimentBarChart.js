@@ -5,6 +5,7 @@ import Fluxxor from 'fluxxor';
 import React, { PropTypes, Component } from 'react';
 import {Actions} from '../actions/Actions';
 
+/*Uses Chart.js stacked bar chart extension https://github.com/Regaddi/Chart.StackedBar.js/blob/master/docs/Stacked-Bar-Chart.md*/
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
@@ -20,33 +21,8 @@ const chartOptions = {
 export const SentimentBarChart = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
-  getInitialState(){
-      this.getFlux().actions.GRAPHING.load_sentiment_bar_chart();
-  },
-  
   getStateFromFlux: function() {
     return this.getFlux().store("DataStore").getState();
-  },
-  
-  componentDidMount(){
-      
-      this.bindChartDataToState();
-  },
-  
-  /*Only doing for test demo purpose until we get some real data*/ 
-  randomize(){
-      let maxNumber = 5000;
-      let minNumber = 50;
-      
-      if(this.barChart){
-          this.barChart.datasets.map(ds => {
-              ds.bars.map(bar => {
-                  bar.value = parseInt(bar.value).randomize(minNumber, maxNumber);
-              });
-          });
-          
-          this.barChart.update();
-      }
   },
   
   onClickHandler(evt){
@@ -59,9 +35,10 @@ export const SentimentBarChart = React.createClass({
       }
   },
   
-  bindChartDataToState(){
-    if(this.state.sentimentChartData){
+  renderBarChart(){
+    if(this.state.sentimentChartData.length > 0){
         let labels = [];
+        let maxLabelCharacters = 13;
         let positiveData = {
 				label: "Postive",
                 fillColor : "#07d159",
@@ -80,37 +57,37 @@ export const SentimentBarChart = React.createClass({
 	    }
         
         this.state.sentimentChartData.map(item => {
-            let positiveSentiment = "a";
-            let negativeSentiment = "h";
-            let occurences = item["occurences"];
-            let positivePercentage = (positiveSentiment / (positiveSentiment + negativeSentiment));
-            let positiveSentimentVal = (positivePercentage * occurences).toFixed(0);
-            let negativeSentimentVal = occurences - positiveSentimentVal;
-            labels.push(item.dataValue);
+            let occurences = item.occurences;
+            let negativeSentimentVal = Number((item.mag_n * occurences).toFixed(0));
+            let positiveSentimentVal = occurences - negativeSentimentVal;
+            labels.push(item.label.length > maxLabelCharacters ? item.label.substring(0, maxLabelCharacters) : item.label);
             positiveData.data.push(positiveSentimentVal);
             negativeData.data.push(negativeSentimentVal);
         });
         
-        var ctx = document.getElementById("BarChart").getContext("2d");
-	    this.barChart = new Chart(ctx).StackedBar({
-            labels: labels,
-            datasets : [positiveData, negativeData],
-        },
-        {
-			responsive : true,
-            scaleShowHorizontalLines: true,
-            //String - A legend template
-            legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
-		});
+        if(this.barChart){
+            this.barChart.destroy();
+        }
         
+        var ctx = document.getElementById("BarChart").getContext("2d");
+        this.barChart = new Chart(ctx).StackedBar({
+                labels: labels,
+                datasets : [positiveData, negativeData],
+        },{
+                responsive : true,
+                scaleShowHorizontalLines: true,
+                //String - A legend template
+                legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].lineColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>",
+        });
+            
         this.barChart.generateLegend();
         this.barChart.chart.canvas.onclick = this.onClickHandler;
-    }  
+    }
   },
   
   render() {
-   if(this.barChart){
-       this.randomize();
+   if(this.state.sentimentChartData){
+       this.renderBarChart();
    }
    
     return (

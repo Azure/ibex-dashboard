@@ -10,10 +10,10 @@ export const TypeaheadSearch = React.createClass({
   
   typeaheadItemSelected(suggestion, event){
     let oldValue =  this.props.data || '';
-    let newValue =  suggestion.value || '';
-    let newType =  suggestion.type || '';
+    let newValue =  suggestion.searchTerm.trim();
+    let newType =  suggestion.category.trim();
     
-    if(oldValue.trim() === newValue.trim()){
+    if(oldValue === newValue){
         return;
     }
     
@@ -30,7 +30,7 @@ export const TypeaheadSearch = React.createClass({
       let filteredResults = [];
       this.getFlux().store("DataStore").dataStore.defaultResults
            .forEach((element, key, map) => {
-               if(element.value.toLowerCase().indexOf(input) > -1){
+               if(element.searchTerm.indexOf(input) > -1){
                    filteredResults.push(element);
                }
            });
@@ -46,15 +46,10 @@ export const TypeaheadSearch = React.createClass({
       this.filterResults(input, callback);
     }
   },
-    
-  handleBlur(value){
-      let newValue = value.target.value.trim();
-      let oldValue = this.props.data || '';      
-  },
   
   renderSuggestion(element, input) { // In this example, 'suggestion' is a string
-     let suggestion = element.value; 
-     let valueType = element.type;
+     let suggestion = element.searchTerm; 
+     let valueType = element.category;
      
      let beginNormalFont = '', highlightedSequence = '', endNormalFont = '';
      let matchingPosition = suggestion.toLowerCase().indexOf(input.toLowerCase());
@@ -70,15 +65,14 @@ export const TypeaheadSearch = React.createClass({
     );
   },
   
-  suggestionValue(suggestion){
-      return suggestion.type + ' - ' + suggestion.value;
+  suggestionValue(suggestion){  
+      return suggestion.category.trim() + ' - ' + suggestion.searchTerm.trim();
   },
   
   render: function(){
     let inputAttributes = {
           className: 'twitter-input',
-          placeholder: this.props.data || '',
-          onBlur: this.handleBlur
+          placeholder: this.props.data || ''
     };
 
     return (

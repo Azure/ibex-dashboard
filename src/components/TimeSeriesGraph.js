@@ -12,6 +12,10 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 export const TimeSeriesGraph = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
+  getInitialState: function() {
+    this.getFlux().actions.GRAPHING.load_timeseries_data();
+  },
+      
   getStateFromFlux: function() {
     return this.getFlux().store("DataStore").getState();
   },
@@ -25,43 +29,45 @@ export const TimeSeriesGraph = React.createClass({
             labelsSeparateLines: true,
             labelsDivWidth: 150,
             strokeWidth: 2,
+            title: 'Event Pipeline Time Series',
+            ylabel: 'Occurences',
             zoomCallback: this.timeRangeFiltered,
-            dateWindow: [ Date.parse("2015/12/31 12:00:00"),
-                          Date.parse("2016/02/18 12:00:00") ],
             colors: [
                 '#015086',
                 '#665385',
                 '#6a8ea1',
                 '#81a595',
                 '#cab2d2'
-            ]//,
-            //showRangeSelector: true
+            ]
         }
     );
   },
   
-  timeRangeFiltered(minDate, maxDate, yRanges){
-      let targetFormat = "MM/DD/YY HH"
-      let newFromDate = moment(minDate).format(targetFormat);
-      let newToDate = moment(maxDate).format(targetFormat);
-      
-      this.getFlux().actions.GRAPHING.edit_time_scale(newFromDate, newToDate);
+  timeRangeFiltered(minDate, maxDate, yRanges){      
+      this.getFlux().actions.GRAPHING.edit_time_scale(minDate, maxDate);
   },
   
-  componentDidMount(){
-   let self = this;
-   
-   SERVICES.getInitialGraphDataSet()
-                 .subscribe(response => {
-                   if(response && response.graphData && response.graphData.length > 0){
-                      self.initializeGraph(response); 
-                   }
-                 }, error => {
-                     console.log('Something went terribly wrong with loading the initial graph dataset');
-                 });
+  fetchTimeSeriesData(){
+        let self = this;
+        let dygraphData = this.state.timeSeriesGraphData;
+        
+        if(dygraphData.graphData && dygraphData.graphData.length > 0){
+               let formattedGrapData = dygraphData.graphData.map(timeEntry =>{
+                    //Unfortunate requirement that Dygraph expects native Javascript Dates for the mapping data.
+                    timeEntry[0] = new Date(timeEntry[0]);
+                                    
+                    return timeEntry;
+               });
+                                
+              self.initializeGraph({'labels': dygraphData.labels, 'graphData': formattedGrapData });
+        }
   },
   
   render() {
+    if(this.state.timeSeriesGraphData && this.state.action != 'editingTimeScale'){
+        this.fetchTimeSeriesData();
+    }
+    
     return (
         <div className="col-lg-12">
         </div>
