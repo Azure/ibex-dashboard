@@ -32,9 +32,9 @@ const constants = {
                "timeScaleDate": "MM/DD/YY HH:00"
            },
            SENTIMENT_COLOR_MAPPING : {
-               "negative": "#800026",
-               "positive": "#FED976",
-               "neutral": "#FD8D3C"
+               "negative": "red",
+               "neutral": "yellow",
+               "positive": "green"
            },
            EVENT_SOURCE_ICON_MAP : {
                "twitter": "fa fa-twitter",

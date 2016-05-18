@@ -41,7 +41,7 @@ export const Header = React.createClass({
                   </button>
                   <a className="navbar-brand text-danger" href="#">
                       <img src="/dist/assets/images/OCHA_Logo.png" style={{display: 'inline'}} width="45" height="45" />
-                     <span className="brandLabel">CURRENT STATE OF LIBYA</span>
+                     <span className="brandLabel">BETTER HUMANITARIAN RESPONSE THROUGH MACHINE LEARNING</span>
                   </a>
               </div>
               <div className="navbar-collapse collapse" id="navbar-collapsible">
