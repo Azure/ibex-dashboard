@@ -105,7 +105,7 @@ const methods = {
             
             SERVICES.getTrendingKeywords()
             .subscribe(response => {
-                if(response && response.length > 0){
+                if(response && Object.keys(response).length > 0){
                     self.dispatch(constants.TRENDS.LOAD_TRENDS, {
                                             response: response
                     });
