@@ -30,10 +30,35 @@ export const TrendsPanel = React.createClass({
      
      return icon ? icon : 'N/A';
   },
+
+  volumeFormatter(count){
+    let formatedNumber = count;
+    let denominator = 1;
+    let type = '';
+
+    if(formatedNumber >= 1000 && formatedNumber < 1000000){
+      denominator = 1000;
+      type = 'k';
+    }else if(formatedNumber >= 1000000 && formatedNumber < 1000000000){
+      denominator = 1000000;
+      type = 'm';
+    }else if(formatedNumber >= 1000000000){
+      denominator = 1000000000;
+      type = 'b';
+    }
+
+    return ((formatedNumber / denominator).toFixed(denominator > 1 ? 2 : 0)) + type;
+  },
+
+  handleClick(term, type){
+    if(term && type){
+         this.getFlux().actions.DASHBOARD.changeSearchFilter(term, type);
+    }
+  },
   
   render() {
     let self = this;
-    
+
     return (
      <div className="col-lg-3 trend-column">
        <div className="row">
@@ -41,16 +66,18 @@ export const TrendsPanel = React.createClass({
                 <div className="list-group list-group-trends" data-scrollable="">
                   {
                         this.state.trends.map((trend, index) => {
+                            var bindedClickHandler = self.handleClick.bind(this, trend.trendingValue, trend.trendingType);
+
                             return <div>
                                     <ListItem primaryText={
                                                 <div className="media-body media-body-trends">
-                                                    <strong>{trend.trendingType}</strong> -- <a href="#">{trend.trendingValue}</a> on <i className={self.lookupEventSourceIcon(trend.source)}></i>
-                                                    <div className="pull-right news-feed-content-date">Trending {trend.trendingTimespan}</div>
+                                                    <strong>{trend.trendingType}</strong> -- <a href="#" onClick={bindedClickHandler}>{trend.trendingValue}</a> on <i className={self.lookupEventSourceIcon(trend.source)}></i>
+                                                    <div className="pull-right news-feed-content-date">Trending since {trend.trendingTimespan}</div>
                                                 </div>
                                             } 
                                             secondaryText={
                                                 <p className="media-body">
-                                                   {trend.trendingVolume && trend.trendingVolume > 0 ? <span>{trend.trendingVolume}k {trend.source === 'twitter' ? "tweets" : "activities"}</span> : undefined}
+                                                   {trend.trendingVolume && trend.trendingVolume > 0 ? <span>{self.volumeFormatter(trend.trendingVolume)} {trend.source === 'twitter' ? "tweets" : "activities"}</span> : undefined}
                                                 </p>
                                             }
                                             secondaryTextLines={2}

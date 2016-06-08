@@ -12,7 +12,7 @@ export const DataStore = Fluxxor.createStore({
           userProfile: profile,
           timespanType: 'customMonth',
           datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
-          categoryType: 'keywords',
+          categoryType: '',
           activities: [],
           action: '',
           trends: [],
@@ -22,7 +22,7 @@ export const DataStore = Fluxxor.createStore({
           timeseriesFromDate: false,
           timeseriesToDate: false,
           sentimentTreeViewData: [],
-          categoryValue: 'refugees',
+          categoryValue: '',
           defaultResults: []
       }
       
@@ -103,8 +103,39 @@ export const DataStore = Fluxxor.createStore({
     },
     
     handleLoadTrendingActivity(trends){
-        this.dataStore.trends = trends.response;
+        this.dataStore.trends = this.trendingDataReducer(trends.response, 'trending');
+        if(this.dataStore.trends.length > 0){
+            this.dataStore.categoryValue = this.dataStore.trends[0].trendingValue;
+            this.dataStore.categoryType = this.dataStore.trends[0].trendingType;
+        }
+        
         this.emit("change");
+    },
+
+    trendingDataReducer(response, fileredKey){
+        let componentStateData = [];
+
+        if(response != undefined){
+            Object.keys(response).forEach(windowKey => {
+                let timeWindow = response[windowKey];
+
+                if((timeWindow.hasOwnProperty('cutoff_time') || timeWindow.hasOwnProperty('previous_cutoff_time')) && timeWindow.hasOwnProperty(fileredKey)){
+                    let timeWindowDisplay = moment(timeWindow.cutoff_time || timeWindow.hasOwnProperty('previous_cutoff_time')).fromNow();
+                    
+                    timeWindow[fileredKey].map(dataItem => {
+                         componentStateData.push({
+                               'trendingVolume': dataItem.count,
+                               'source': dataItem.source,
+                               'trendingTimespan': timeWindowDisplay,
+                               'trendingType': dataItem.type.toLowerCase().substring(0, dataItem.type.length - 1),
+                               'trendingValue': dataItem.term
+                         });
+                    });
+                }
+            })
+        }
+
+        return componentStateData;
     },
     
     handleLoadDefaultSearchResults(searchResults){

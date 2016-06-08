@@ -138,7 +138,7 @@ export const HeatMap = React.createClass({
     let self = this;
     
     if(!this.dataStoreValidated()){
-        throw new Error("Either date or category type is not set");
+        return false;
     }
     
     let dataStore = this.getFlux().store("DataStore").dataStore;
