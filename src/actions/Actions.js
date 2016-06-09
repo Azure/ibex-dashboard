@@ -148,7 +148,7 @@ const methods = {
            let self = this;
            let dataStore = this.flux.stores.DataStore.dataStore;
                        
-           SERVICES.getInitialGraphDataSet(datetimeSelection, timespanType)
+           SERVICES.getInitialGraphDataSet(datetimeSelection, timespanType, dataStore.categoryValue, dataStore.categoryType)
                       .subscribe(timeSeriesResponse => {
                              if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
                                  self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
@@ -170,8 +170,9 @@ const methods = {
         load_timeseries_data: function(){
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
-        
-            SERVICES.getInitialGraphDataSet(dataStore.datetimeSelection, dataStore.timespanType)
+
+            if(dataStore.categoryValue && dataStore.categoryType){
+                SERVICES.getInitialGraphDataSet(dataStore.datetimeSelection, dataStore.timespanType, dataStore.categoryValue, dataStore.categoryType)
                             .subscribe(response => {
                                 if(response && response.graphData && response.graphData.length > 0){
                                     self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response: response});
@@ -179,6 +180,7 @@ const methods = {
                             }, error => {
                                 console.log('Something went terribly wrong with loading the initial graph dataset');
                             });
+            }
         }
     }
 };

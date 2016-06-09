@@ -5,6 +5,7 @@ import {TrendsPanel} from './TrendsPanel';
 import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
+import {SentimentBarChart} from './SentimentBarChart';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -39,11 +40,16 @@ export const Dashboard = React.createClass({
                     </div>
                     <SentimentTreeview />
                 </div>
-                <div className="row">
-                  <div className="col-lg-12">
-                    <div id="graphdiv" style={{width: '100%'}}></div>
-                    <TimeSeriesGraph />
-                  </div>
+                <div className="row graphContainer">
+                    <div className="col-lg-3">
+                      <div className="aggregatedBarChartTitle">Aggregated Sentiment Breakdown</div>
+                      <canvas id="BarChart" style={{width: '100%', height: '300px'}}></canvas>
+                    </div>
+                    <SentimentBarChart />                
+                    <div className="col-lg-9">
+                        <div id="graphdiv" style={{width: '100%'}}></div>
+                         <TimeSeriesGraph />
+                    </div>                
                 </div>
             </div>
           </div>

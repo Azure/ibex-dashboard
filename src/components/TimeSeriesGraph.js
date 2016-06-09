@@ -28,8 +28,15 @@ export const TimeSeriesGraph = React.createClass({
             labels: graphDataset.labels,
             labelsSeparateLines: true,
             labelsDivWidth: 150,
-            strokeWidth: 2,
-            title: 'Event Pipeline Time Series',
+            strokeWidth: 1,
+            title: 'Event Pipeline Histogram',
+            highlightCircleSize: 2,
+            stackedGraph: true,
+            highlightSeriesOpts: {
+                strokeWidth: 3,
+                strokeBorderWidth: 1,
+                highlightCircleSize: 5
+            },
             ylabel: 'Occurences',
             zoomCallback: this.timeRangeFiltered,
             colors: [
@@ -51,8 +58,8 @@ export const TimeSeriesGraph = React.createClass({
         let self = this;
         let dygraphData = this.state.timeSeriesGraphData;
         
-        if(dygraphData.graphData && dygraphData.graphData.length > 0){
-               let formattedGrapData = dygraphData.graphData.map(timeEntry =>{
+        if(dygraphData.aggregatedCounts && dygraphData.aggregatedCounts.length > 0){
+               let formattedGrapData = dygraphData.aggregatedCounts.map(timeEntry =>{
                     //Unfortunate requirement that Dygraph expects native Javascript Dates for the mapping data.
                     timeEntry[0] = new Date(timeEntry[0]);
                                     
@@ -71,7 +78,7 @@ export const TimeSeriesGraph = React.createClass({
     }
     
     return (
-        <div className="col-lg-12">
+        <div>
         </div>
      );
    }

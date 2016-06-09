@@ -38,7 +38,7 @@ export const SentimentBarChart = React.createClass({
               if(category){
                   this.getFlux().actions.DASHBOARD.changeSearchFilter(label, category);
               }
-          }          
+          }
       }
   },
   
@@ -65,7 +65,7 @@ export const SentimentBarChart = React.createClass({
         
         this.state.sentimentChartData.map(item => {
             let occurences = item.occurences;
-            let negativeSentimentVal = Number((item.mag_n * occurences).toFixed(0));
+            let negativeSentimentVal = item.mag_n;
             let positiveSentimentVal = occurences - negativeSentimentVal;
             labels.push(item.label.length > maxLabelCharacters ? item.label.substring(0, maxLabelCharacters) : item.label);
             positiveData.data.push(positiveSentimentVal);

@@ -15,8 +15,9 @@ export const DataStore = Fluxxor.createStore({
           categoryType: '',
           activities: [],
           action: '',
+          popularTerms: [],
           trends: [],
-          timeSeriesGraphData: [],
+          timeSeriesGraphData: {},
           indexedTimeSeriesMap: new Map(),
           sentimentChartData: [],
           timeseriesFromDate: false,
@@ -52,19 +53,37 @@ export const DataStore = Fluxxor.createStore({
         this.emit("change");
     },
     
-    indexTimeSeriesResponse(timeSeries){
+    indexTimeSeriesResponse(){
         let self = this;
         this.sortedTimeSeriesDates = [];
         this.dataStore.indexedTimeSeriesMap.clear();
+        this.dataStore.timeSeriesGraphData['aggregatedCounts'] = [];
         
-        if(timeSeries && timeSeries.graphData){
+        if(this.dataStore.timeSeriesGraphData && this.dataStore.timeSeriesGraphData.graphData){
             //hash the time series data by the epoch time as we'll use this to render 
             //the aggregates in the bar chart based on the selected graph zoom area. 
-            timeSeries.graphData.map(timeEntry => {
+            this.dataStore.timeSeriesGraphData.graphData.map(timeEntry => {
                 self.dataStore.indexedTimeSeriesMap.set(timeEntry[0], timeEntry);
+                //Aggregate the normalized positive and negative sentiment breakdown as we need the total count for the Dygraph.
+                self.dataStore.timeSeriesGraphData.aggregatedCounts.push([].concat(timeEntry[0], self.aggregateSentimentLevelCounts(timeEntry)));
                 self.sortedTimeSeriesDates.push(timeEntry[0]);
             });
         }
+    },
+
+    //Based on aggregating off the follwoing sample dataset i.e. [1459605600000, 0, 0, 112, 65, 123, 94, 30, 10, 36, 25, 16, 16], [1459616400000, 0, 0, 142, 75, 83, 41, 44, 10, 60, 48, 13, 10]
+    aggregateSentimentLevelCounts(graphDatetimeEntry){
+        let aggregatedCounts = [];
+        //Need to ask Mike why entries[1] & entries[2] are representative of, as they're always 0.  
+        let i = 2;
+
+        if(graphDatetimeEntry && graphDatetimeEntry.length > 0){
+            while(i < graphDatetimeEntry.length - 1){
+                aggregatedCounts.push(graphDatetimeEntry[++i] + graphDatetimeEntry[++i]);
+            }
+        }
+
+        return aggregatedCounts;
     },
     
     //a log(N) algorithm to aggregate the occurences and magnitude of the time series data.
@@ -83,7 +102,7 @@ export const DataStore = Fluxxor.createStore({
         if(fromDatetime && toDatetime && this.sortedTimeSeriesDates.length > 0 && this.dataStore.timeSeriesGraphData.labels.length > 0){
             //default the initial dataset with all the labels we're rendering. This has a max length of 6 labels. 
             for(let i = 1; i < this.dataStore.timeSeriesGraphData.labels.length; i++){
-                this.dataStore.sentimentChartData.push({label: this.dataStore.timeSeriesGraphData.labels[i], occurences: 0, mag_n: Math.random()})
+                this.dataStore.sentimentChartData.push({label: this.dataStore.timeSeriesGraphData.labels[i], occurences: 0, mag_n: 0})
             }
             
             //extract the indexed time slices based on the from and to date range.
@@ -93,9 +112,11 @@ export const DataStore = Fluxxor.createStore({
                 //pull the time slice details which contain the occurences and normalized magnitude sentiment.
                 let datetimeData = self.dataStore.indexedTimeSeriesMap.get(datetime);
                 if(datetimeData){
+                    let i = 2;
                     //we'll need to aggregate the occurences for each label across the date range.
                     self.dataStore.sentimentChartData.map((labelEntry, index) => {
-                        self.dataStore.sentimentChartData[index].occurences += datetimeData[index + 1];
+                        self.dataStore.sentimentChartData[index].mag_n += datetimeData[i + 1];
+                        self.dataStore.sentimentChartData[index].occurences += datetimeData[++i] + datetimeData[++i];
                     });
                 }
             });
@@ -104,11 +125,8 @@ export const DataStore = Fluxxor.createStore({
     
     handleLoadTrendingActivity(trends){
         this.dataStore.trends = this.trendingDataReducer(trends.response, 'trending');
-        if(this.dataStore.trends.length > 0){
-            this.dataStore.categoryValue = this.dataStore.trends[0].trendingValue;
-            this.dataStore.categoryType = this.dataStore.trends[0].trendingType;
-        }
-        
+        this.dataStore.popularTerms = this.trendingDataReducer(trends.response, 'popular');
+
         this.emit("change");
     },
 
@@ -120,7 +138,12 @@ export const DataStore = Fluxxor.createStore({
                 let timeWindow = response[windowKey];
 
                 if((timeWindow.hasOwnProperty('cutoff_time') || timeWindow.hasOwnProperty('previous_cutoff_time')) && timeWindow.hasOwnProperty(fileredKey)){
-                    let timeWindowDisplay = moment(timeWindow.cutoff_time || timeWindow.hasOwnProperty('previous_cutoff_time')).fromNow();
+                    let timeWindowDisplay = '';
+                    if(fileredKey == 'trending'){
+                        timeWindowDisplay = moment(timeWindow.cutoff_time || timeWindow.hasOwnProperty('previous_cutoff_time')).fromNow();
+                    }else{
+                        timeWindowDisplay = "{0} and {1}".format(moment(timeWindow.previous_cutoff_time).format("MM/DD/YY HH:mm"), moment(timeWindow.cutoff_time).format("MM/DD/YY HH:mm"));
+                    }
                     
                     timeWindow[fileredKey].map(dataItem => {
                          componentStateData.push({
@@ -158,8 +181,12 @@ export const DataStore = Fluxxor.createStore({
     },
     
     refreshGraphData(timeSeriesData){
-        this.dataStore.timeSeriesGraphData = timeSeriesData;
-        this.indexTimeSeriesResponse(timeSeriesData);
+        this.dataStore.timeSeriesGraphData = {
+            'labels': timeSeriesData.labels,
+            'graphData': timeSeriesData.graphData.sort((a, b) => a[0]>b[0] ? 1 : a[0]<b[0] ? -1 : 0 )
+        };
+
+        this.indexTimeSeriesResponse();
         this.aggregateTimeSeriesData(false, false);
         this.dataStore.timeseriesFromDate = false;
         this.dataStore.timeseriesToDate = false;

@@ -26,6 +26,17 @@ body{
     margin-bottom: 40px;
 }
 
+.graphContainer{
+     background-color: #ffffff;
+}
+
+.aggregatedBarChartTitle{
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    height: 28px;
+}
+
 .breadcrumbContainer{
     width: 100%;
 }
