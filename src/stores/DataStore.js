@@ -190,6 +190,7 @@ export const DataStore = Fluxxor.createStore({
         this.aggregateTimeSeriesData(false, false);
         this.dataStore.timeseriesFromDate = false;
         this.dataStore.timeseriesToDate = false;
+        this.dataStore.action = 'loadedGraphData';
     },
     
     handleChangeDate(changedData){

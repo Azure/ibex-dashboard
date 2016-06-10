@@ -5,7 +5,7 @@ import {TrendsPanel} from './TrendsPanel';
 import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
-import {SentimentBarChart} from './SentimentBarChart';
+import {SentimentSummaryChart} from './SentimentSummaryChart';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -42,10 +42,10 @@ export const Dashboard = React.createClass({
                 </div>
                 <div className="row graphContainer">
                     <div className="col-lg-3">
-                      <div className="aggregatedBarChartTitle">Aggregated Sentiment Breakdown</div>
-                      <canvas id="BarChart" style={{width: '100%', height: '300px'}}></canvas>
+                      <div className="radar-chart-description">{this.state.timeseriesFromDate ? "Data aggregated between {0} and {1}".format(this.state.timeseriesFromDate, this.state.timeseriesToDate) : "Driven off Event Pipeline Histogram Time Window Selection"}</div>                    
+                      <canvas id="BarChart" height="370"></canvas>
                     </div>
-                    <SentimentBarChart />                
+                    <SentimentSummaryChart />                
                     <div className="col-lg-9">
                         <div id="graphdiv" style={{width: '100%'}}></div>
                          <TimeSeriesGraph />

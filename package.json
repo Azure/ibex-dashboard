@@ -52,7 +52,7 @@
     "binarysearch": "^1.0.0",
     "browserify-fs": "^1.0.0",
     "chart-stackedbar-js": "^1.0.3",
-    "chart.js": "^1.0.2",
+    "chart.js": "^2.1.4",
     "dygraphs": "^1.1.1",
     "envify": "^3.2.0",
     "extend": "^3.0.0",
