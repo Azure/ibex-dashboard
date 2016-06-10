@@ -27,25 +27,27 @@ export const TimeSeriesGraph = React.createClass({
         {
             labels: graphDataset.labels,
             labelsSeparateLines: true,
-            labelsDivWidth: 150,
+            legend: 'always',
             strokeWidth: 1,
             title: 'Event Pipeline Histogram',
             highlightCircleSize: 2,
-            stackedGraph: true,
+            labelsDivStyles: { 'textAlign': 'right' },
+            stackedGraph: false,
             highlightSeriesOpts: {
                 strokeWidth: 3,
                 strokeBorderWidth: 1,
                 highlightCircleSize: 5
             },
-            ylabel: 'Occurences',
-            zoomCallback: this.timeRangeFiltered,
+            ylabel: '<b>Number of Occurences</b>',
+            xlabel: '<b>Event Occurence Date</b>(Click and hold to zoom-in horizontally or vertically. Double-click to restore view, Alt+click to pan scroll across the timeline.)',
+            zoomCallback: this.timeRangeFiltered/*,
             colors: [
                 '#015086',
                 '#665385',
                 '#6a8ea1',
                 '#81a595',
                 '#cab2d2'
-            ]
+            ]*/
         }
     );
   },
