@@ -6,15 +6,14 @@ import Fluxxor from 'fluxxor';
 import React, { PropTypes, Component } from 'react';
 import {Actions} from '../actions/Actions';
 import Checkbox from 'material-ui/lib/checkbox';
-import Dialog from 'material-ui/lib/dialog';
-import FlatButton from 'material-ui/lib/flat-button';
-import {ActivityFeed} from './ActivityFeed';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
-const options = {
-        
+const styles = {
+  subHeader: {
+    fontColor:'#a3a3b3'
+  }
 };
 
 export const SentimentTreeview = React.createClass({
@@ -22,7 +21,6 @@ export const SentimentTreeview = React.createClass({
   
   getInitialState(){
       this.getFlux().actions.ACTIVITY.load_sentiment_tree_view();
-      this.getFlux().actions.ACTIVITY.load_activity_events();
       
       return {
           openModal: false,
@@ -43,8 +41,7 @@ export const SentimentTreeview = React.createClass({
   },
   
   recurseTree(dataTree){
-      let rootItem = <ListItem primaryText="Sector Breakdown / Activity Feed Browser"
-                               initiallyOpen = {true}
+      let rootItem = <ListItem initiallyOpen = {true}
                                primaryTogglesNestedList={true}
                                nestedItems = {[]} />;
       let self = this;
@@ -54,9 +51,7 @@ export const SentimentTreeview = React.createClass({
               return;
           }
           
-          data.map(node => {
-              let modalTitle = "Activity Viewer for {0}".format(node.sentimentText);
-              
+          data.map(node => {              
               let treeItem = <ListItem 
                               primaryText={
                                   <div>
@@ -82,39 +77,22 @@ export const SentimentTreeview = React.createClass({
   
   render(){
      let treeData = [];
-     let contentClassName = "modalContent";
      
      if(this.state && this.state.sentimentTreeViewData){
          treeData = this.recurseTree(this.state.sentimentTreeViewData, );
      }
      
-     const modalActions = [
-      <FlatButton
-        label="Ok"
-        primary={true}
-        keyboardFocused={true}
-        onTouchTap={this.handleClose}
-      />,
-    ];
-     
      return (
-        <div className="col-lg-3 news-feed-column">
+        <div>
          <List subheader="" className="panel panel-default">
-          <div className="list-group" data-scrollable="">
-            {
-                this.state && this.state.sentimentTreeViewData ?                   
-                    treeData : undefined
-            }
-          </div>
+            <Subheader style={styles.subHeader}>Associated Terms Selector</Subheader>
+            <div className="list-group" data-scrollable="">
+                {
+                    this.state && this.state.sentimentTreeViewData ?                   
+                        treeData : undefined
+                }
+            </div>
          </List>
-         <Dialog
-          actions={modalActions}
-          modal={false}
-          contentClassName={contentClassName}
-          open={this.state.openModal}
-          onRequestClose={this.handleClose} >
-                <ActivityFeed />
-        </Dialog>
         </div>
      );
   }

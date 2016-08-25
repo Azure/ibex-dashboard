@@ -18,6 +18,7 @@ const assetPaths = {
     htmls: ['./*.html'],
     jsSrc: ['./src/**/*'],
     jsLib: ['./dist/**/*'],
+    minifiedJS: ['bower_components/amcharts3/amcharts/amcharts.js', 'bower_components/amcharts3/amcharts/serial.js'],
     style: ['./assets/styles/**/*.css'],
     asset: ['./assets/**/*', '!./assets/**/*.css'],
     fonts: ['bower_components/fontawesome/fonts/*',
@@ -88,7 +89,7 @@ gulp.task('clean-copy', (cb) => {
 gulp.task('config-env', (cb) => {
     var AZURE_CONFIG_PROPS = ['APPINSIGHTS_INSTRUMENTATIONKEY', 'OCHA_BLOB_HOSTNAME', 'TIMESERIES_BLOB', 
                               'AAD_AUTH_CLIENTID', 'SERVICE_URL', 'EMOTIONMAPS_BLOB', 'OCHA_TERMS_TBL_CONN',
-                              'TRENDING_BLOB'];
+                              'TRENDING_BLOB', 'POPULAR_TERMS_TIME_SERIES'];
     var configFile = './config.json';
     var configurationEnv = {};
     

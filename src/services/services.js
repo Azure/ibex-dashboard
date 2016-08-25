@@ -63,24 +63,12 @@ export const SERVICES = {
     }
   },
   
-  getInitialGraphDataSet(datetimeSelection, timespanType, searchTerm, categoryType){
+  getPopularTermsTimeSeries(datetimeSelection, timespanType){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-     let getCategoryTypeKey = category => {
-         let catKey = undefined;
 
-         for (var key in Actions.constants.CATEGORY_KEY_MAPPING) {
-            if(Actions.constants.CATEGORY_KEY_MAPPING[key] == category){
-                catKey = key;
-            }
-         }
-
-         return catKey;
-     };
-
-     let url = "{0}/{1}/{2}/{3}-{4}.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
-                                         env_properties.TIMESERIES_BLOB,
-                                         momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat),
-                                         getCategoryTypeKey(categoryType), searchTerm);
+     let url = "{0}/{1}/{2}/popular-terms.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
+                                         env_properties.POPULAR_TERMS_TIME_SERIES,
+                                         momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
       
       return Rx.DOM.getJSON(url);
   },
