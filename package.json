@@ -59,10 +59,11 @@
     "history": "^1.13.0",
     "leaflet": "^0.7.7",
     "leaflet.markercluster": "^0.5.0",
-    "material-ui": "^0.14.2",
+    "material-ui": "^0.14.4",
     "moment": "^2.11.2",
     "numeral": "^1.5.3",
     "react-autosuggest": "2.1.1",
+    "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3"

@@ -83,20 +83,6 @@ const methods = {
                     });
                 }
             });
-        },
-        load_sentiment_tree_view: function(){
-            let self = this;
-            
-            let dataStore = this.flux.stores.DataStore.dataStore;
-            
-            SERVICES.getSentimentTreeData(dataStore.categoryType, dataStore.categoryValue, dataStore.timespanType, dataStore.datetimeSelection)
-            .subscribe(response => {
-                if(response && response.length > 0){
-                    self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {
-                                            response: response
-                    });
-                }
-            });
         }
     },
     TRENDS : {
@@ -126,6 +112,17 @@ const methods = {
           };
           
           SERVICES.getDefaultSuggestionList(azureStorageCB);
+        },
+        load_sentiment_tree_view: function(){
+            let self = this;
+          
+            let azureStorageCB = folderTree => {
+                    if(folderTree && folderTree.size > 0){
+                        self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {folderTree});
+                    }
+            };
+
+            SERVICES.getSentimentTreeData(azureStorageCB);
         },
         changeSearchFilter(newFilter, searchType){
            let dataStore = this.flux.stores.DataStore.dataStore;

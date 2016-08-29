@@ -171,6 +171,8 @@ a.keyword-link.pull-left {
 
 .panel-default{
       padding-bottom: 0px!important;
+      background-color: #191919!important;
+      border: 0px;
 }
 
 .media-body-trends a {
@@ -187,8 +189,17 @@ a.keyword-link.pull-left {
 }
 
 .badge{
-    font-size: 14px;
-     background-color: #337ab7;
+    font-size: 12px;
+    background-color: #337ab7;
+    padding: 3px 4px;
+    margin-left: 5px;
+}
+
+.badge-disabled{
+    color: #a3a3b3;
+    background-color: #333;
+    padding: 3px 4px;
+    margin-left: 5px;
 }
 
 .modalContent{

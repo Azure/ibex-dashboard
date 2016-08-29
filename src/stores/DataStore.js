@@ -18,7 +18,6 @@ export const DataStore = Fluxxor.createStore({
           popularTerms: [],
           trends: [],
           timeSeriesGraphData: {},
-          indexedTimeSeriesMap: new Map(),
           sentimentChartData: [],
           timeseriesFromDate: false,
           timeseriesToDate: false,
@@ -29,7 +28,6 @@ export const DataStore = Fluxxor.createStore({
       
       this.bindActions(
             Actions.constants.ACTIVITY.LOAD_EVENTS, this.handleLoadActivites,
-            Actions.constants.TRENDS.LOAD_TRENDS, this.handleLoadTrendingActivity,
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
@@ -96,44 +94,6 @@ export const DataStore = Fluxxor.createStore({
         return graphEntry;
     },
     
-    handleLoadTrendingActivity(trends){
-        this.dataStore.trends = this.trendingDataReducer(trends.response, 'trending');
-        this.dataStore.popularTerms = this.trendingDataReducer(trends.response, 'popular');
-
-        this.emit("change");
-    },
-
-    trendingDataReducer(response, fileredKey){
-        let componentStateData = [];
-
-        if(response != undefined){
-            Object.keys(response).forEach(windowKey => {
-                let timeWindow = response[windowKey];
-
-                if((timeWindow.hasOwnProperty('cutoff_time') || timeWindow.hasOwnProperty('previous_cutoff_time')) && timeWindow.hasOwnProperty(fileredKey)){
-                    let timeWindowDisplay = '';
-                    if(fileredKey == 'trending'){
-                        timeWindowDisplay = moment(timeWindow.cutoff_time || timeWindow.hasOwnProperty('previous_cutoff_time')).fromNow();
-                    }else{
-                        timeWindowDisplay = "{0} and {1}".format(moment(timeWindow.previous_cutoff_time).format("MM/DD/YY HH:mm"), moment(timeWindow.cutoff_time).format("MM/DD/YY HH:mm"));
-                    }
-                    
-                    timeWindow[fileredKey].map(dataItem => {
-                         componentStateData.push({
-                               'trendingVolume': dataItem.count,
-                               'source': dataItem.source,
-                               'trendingTimespan': timeWindowDisplay,
-                               'trendingType': dataItem.type.toLowerCase().substring(0, dataItem.type.length - 1),
-                               'trendingValue': dataItem.term
-                         });
-                    });
-                }
-            })
-        }
-
-        return componentStateData;
-    },
-    
     handleLoadDefaultSearchResults(searchResults){
         this.dataStore.defaultResults = searchResults.response;
         this.emit("change");
@@ -180,8 +140,46 @@ export const DataStore = Fluxxor.createStore({
     },
     
     handleLoadSentimentTreeView(treeView){
-        this.dataStore.sentimentTreeViewData = treeView.response;
-        
+        this.dataStore.sentimentTreeViewData = this.recurseTree(treeView.folderTree);
+        this.dataStore.treeData = this.dataStore.sentimentTreeViewData;
+
         this.emit("change");
-    }
+    },
+
+    recurseTree(dataTree){
+      let rootItem = {
+          name: 'Associations',
+          toggled: true,
+          children: []
+      };
+
+      let self = this;
+      let recurseChildren = (parentDataFolder, parentListItem, levels) => {
+          if(!parentDataFolder){
+              return;
+          }
+          
+          for (let [folderKey, subFolder] of parentDataFolder.entries()) {            
+              let newEntry = {
+                  name: subFolder.folderName,
+                  folderKey: folderKey,
+                  checked: false,
+                  parent: parentListItem,
+                  eventCount: Math.floor((Math.random() * 50) + 1)
+              };
+              
+              parentListItem.children.push(newEntry);
+              
+              if(subFolder.subFolders.size > 0){
+                  newEntry.children = [];
+                  newEntry.eventCount = 0;
+                  recurseChildren(subFolder.subFolders, newEntry, levels + 1);
+              }
+          }
+      };
+      
+      recurseChildren(dataTree, rootItem, 1);
+      
+      return rootItem;
+  },
 });

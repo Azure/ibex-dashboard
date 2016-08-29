@@ -7,6 +7,9 @@ import {Actions} from '../actions/Actions';
 
 const accountName = "ochahackfest";
 const searchTermsTable = "dmaksearchterms";
+const categoryMappingTable = "supercategorymappings";
+const maxMappingLevels = 4;
+
 const tableService = azure.createTableService(env_properties.OCHA_TERMS_TBL_CONN || '');
 
 export const SERVICES = {
@@ -91,106 +94,43 @@ export const SERVICES = {
         }
       });
   },
+
+  processFolderItem(parentFolder, mappingItem, level){
+       if(level <= maxMappingLevels){
+           let folderKey = mappingItem["level" + level + "Key"]._ || "";
+           if(folderKey && !parentFolder.has(folderKey)){
+                let newFolder = {folderName: mappingItem["level" + level + "Display"]._, subFolders: new Map(), eventCount: 0};
+                parentFolder.set(folderKey, newFolder);
+
+                this.processFolderItem(newFolder.subFolders, mappingItem, level + 1);
+           }else if(folderKey){
+                this.processFolderItem(parentFolder.get(folderKey).subFolders, mappingItem, level + 1);
+           }
+       }
+  },
   
-  getSentimentTreeData(type, filteredValue, timespanType, dateSelection){
-      let testData = [[{
-          sentimentText: "Early Recovery",
-          eventCount: 3000,
-          nodes: [
-              {
-                sentimentText: "Infrastructure",
-                eventCount: 1200,
-                nodes: [
-                        {
-                            sentimentText: "damaged",
-                            eventCount: 700,
-                            nodes: [{
-                                sentimentText: "destroyed",
-                                eventCount: 500
-                            }]
-                        },
-               ]
-             },
-             {
-                sentimentText: "Markets",
-                eventCount: 800,
-                nodes: [
-                        {
-                            sentimentText: "functional",
-                            eventCount: 500,
-                            nodes: [{
-                                sentimentText: "non-functional",
-                                eventCount: 300
-                            }]
-                        },
-               ]
-             },
-             {
-                sentimentText: "Jobs",
-                eventCount: 1000,
-                nodes: [
-                        {
-                            sentimentText: "unemployment",
-                            eventCount: 500,
-                            nodes: [{
-                                sentimentText: "youth",
-                                eventCount: 300
-                            }]
-                        },
-               ]
-             }
-          ]
-      },
-      {
-          sentimentText: "Education",
-          eventCount: 500,
-          nodes: [
-              {
-                sentimentText: "Schools",
-                eventCount: 100,
-                nodes: [
-                        {
-                            sentimentText: "destroyed",
-                            eventCount: 70,
-                            nodes: [{
-                                sentimentText: "damaged",
-                                eventCount: 20
-                            }]
-                        },
-               ]
-             },
-             {
-                sentimentText: "Children",
-                eventCount: 200,
-                nodes: [
-                        {
-                            sentimentText: "classes",
-                            eventCount: 100,
-                            nodes: [{
-                                sentimentText: "teachers",
-                                eventCount: 0
-                            }]
-                        },
-               ]
-             },
-             {
-                sentimentText: "Books",
-                eventCount: 1000,
-                nodes: [
-                        {
-                            sentimentText: "materials",
-                            eventCount: 500,
-                            nodes: [{
-                                sentimentText: "training",
-                                eventCount: 100
-                            }]
-                        },
-               ]
-             }
-          ]
-      }]];
+  getSentimentTreeData(cb){
+      let query = new azure.TableQuery();
       
-      return Rx.Observable.from(testData);
+      tableService.queryEntities(categoryMappingTable, query, null, (error, result, response) => {
+        if(!error) {
+            let folderTree = new Map();
+
+            result.entries.map(item => {
+                let parentFolder = folderTree.get(item.PartitionKey._);
+                if(!parentFolder){
+                    parentFolder = {folderName: item.PartitionKey._, subFolders: new Map(), eventCount: 0};
+                    folderTree.set(item.PartitionKey._, parentFolder);
+                }
+                
+                this.processFolderItem(parentFolder.subFolders, item, 1);
+            });
+            
+            cb(folderTree);
+        }else{
+            console.error('An error occured trying to query the category mappings table: ' + error);
+        }
+      });
   },
   
   getTrendingKeywords: function(){
