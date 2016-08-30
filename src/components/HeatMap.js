@@ -212,8 +212,7 @@ export const HeatMap = React.createClass({
     }
     
     this.mapMarkerFlushCheck();
-    let dataStore = this.getFlux().store("DataStore").dataStore;
-    
+
     let bounds = self.map.getBounds();
     let zoom = this.map.getZoom();
     let northWest = bounds.getNorthWest();
@@ -226,10 +225,6 @@ export const HeatMap = React.createClass({
                                                       east: southEast.lng
                                                     }, zoom);
 
-    let layerIds = spanningTileIds.map(tileId => {
-       return self.buildLayerId(tileId, dataStore);
-    });
-
     let callback = () => console.log('Finished processing tile(s)');
     
     Rx.Observable.from(spanningTileIds)
@@ -237,7 +232,21 @@ export const HeatMap = React.createClass({
                      self.createLayer(tile, callback);
                  }, error => {
                      console.error('An error occured');
-                 });
+                 }, () => updateDataStore());
+  },
+
+  updateDataStore(){
+      let aggregateAssociatedTermCnt = {};
+
+      for (let [tileTerms] of this.associatedTerms.values()) {
+          Object.keys(tileTerms).forEach(term => {
+              let currentAggregatedSize = aggregateAssociatedTermCnt[term] || 0;
+              let currentSize = tileTerms[term];
+              aggregateAssociatedTermCnt[term] = currentSize + currentAggregatedSize;
+          });
+      }
+
+      this.getFlux().actions.DASHBOARD.updateAssociatedTerms(aggregateAssociatedTermCnt);
   },
   
   fetchHeatmap(tileId, callback) {
@@ -261,19 +270,18 @@ export const HeatMap = React.createClass({
 
     this.fetchHeatmap(tileId, response => {
       if (!self.heatmap[tileId]) return callback();
-            
+
       //Iterate through all the elemens in the cache for tileId
       self.heatmap[tileId].forEach(heatmapTileElement => {
         Object.keys(heatmapTileElement).forEach(heatmapElementTileId => {               
-               let leafletElement = heatmapTileElement[heatmapElementTileId];0
+               let leafletElement = heatmapTileElement[heatmapElementTileId];
                let heatmapTile = Tile.tileFromTileId(heatmapElementTileId);
                let geoJson = self.convertTileToGeoJSON(heatmapTile, leafletElement, layerId);
                
-               let heatMapLayer = L.geoJson(geoJson,
-                        {
-                            onEachFeature : self.onEachFeature
-                        });
-               
+               let heatMapLayer = L.geoJson(geoJson, {});
+                        
+               self.trackAssociatedTerms(geoJson, tileId);
+
                if(!self.tilemap[heatmapElementTileId]){
                    self.markers.addLayer(heatMapLayer);
                    self.tilemap[heatmapElementTileId] = true;
@@ -285,6 +293,27 @@ export const HeatMap = React.createClass({
     });
   },
 
+  /*Place the associated term count in a data structure indexed by layerId*/
+  trackAssociatedTerms(geoJsonTile, tileId){
+      let self = this;
+      let layerAssociations = associatedTerms.get(tileId) || {};
+
+      if(geoJsonTile.properties.associatedTerms){
+               geoJsonTile.properties.associatedTerms.map(item => {
+                   let term = item.term.toLowerCase();
+                   let size = item.cnt;
+
+                   if(layerAssociations[term]){
+                       layerAssociations[term] += size;
+                   }else{
+                       layerAssociations[term] = size;
+                   }
+               });
+      }
+
+      associatedTerms.set(tileId, layerAssociations);
+  },
+
  convertTileToGeoJSON(tile, properties, layerId){
       let tileCentroid = new L.latLngBounds(L.latLng(tile.latitudeSouth, tile.longitudeWest), 
                                                   L.latLng(tile.latitudeNorth, tile.longitudeEast)).getCenter();
@@ -294,15 +323,13 @@ export const HeatMap = React.createClass({
       
       return geoJson;
  },
-
-  onEachFeature(feature, layer) {
-  },
    
   clearMap(){
        if(this.markers){
          this.markers.clearLayers();
        }
 
+        this.associatedTerms = new Map();
         this.tilemap = {};
         this.heatmap = {};
   },

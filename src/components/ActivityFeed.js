@@ -8,6 +8,12 @@ import Avatar from 'material-ui/lib/avatar';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
+
+const styles = {
+    panel: {
+        backgroundColor: '#fff'
+    }
+};
       
 export const ActivityFeed = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
@@ -27,7 +33,7 @@ export const ActivityFeed = React.createClass({
     
     return (
      <div className="col-lg-12 news-feed-column">
-        <List subheader="What's Happening Now" className="panel panel-default">
+        <List subheader="What's Happening Now" className="panel" style={styles.panel}>
             <ul className="nav nav-tabs">
                 <li role="presentation" className="active"><a href="#" aria-controls="home"><i className="fa fa-share-alt"></i>&nbsp;All&nbsp;<span className="badge">42</span></a></li>
                 <li role="presentation"><a href="#" aria-controls="profile"><i className="fa fa-facebook-official"></i>&nbsp;Facebook&nbsp;<span className="badge">32</span></a></li>

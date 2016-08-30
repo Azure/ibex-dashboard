@@ -108,6 +108,11 @@ a:hover {
     letter-spacing:1px;
 }
 
+.form-control{
+    font-size: 12px;
+    height: 27px;
+}
+
 .navbar-trans .form-control:focus {
 	border-color: #eee;
 	outline: 0;

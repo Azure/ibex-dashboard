@@ -63,7 +63,8 @@ const constants = {
            DASHBOARD : {
                LOAD: "LOAD:DASHBOARD",
                CHANGE_SEARCH: "SEARCH:CHANGE",
-               CHANGE_DATE: "DATE:CHANGE"
+               CHANGE_DATE: "DATE:CHANGE",
+               ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS"
            },
 };
 
@@ -127,6 +128,9 @@ const methods = {
         changeSearchFilter(newFilter, searchType){
            let dataStore = this.flux.stores.DataStore.dataStore;
            this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
+        },
+        updateAssociatedTerms(associatedKeywords){
+            this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords});
         },
         changeDate(datetimeSelection, timespanType){
            let self = this;

@@ -49,7 +49,6 @@
   "dependencies": {
     "applicationinsights": "^0.15.7",
     "azure-storage": "^0.10.0",
-    "binarysearch": "^1.0.0",
     "browserify-fs": "^1.0.0",
     "envify": "^3.2.0",
     "extend": "^3.0.0",

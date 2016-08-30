@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { PropTypes, Component } from 'react';
 import {Actions as Actions} from '../actions/Actions';
 import env_properties from '../../config.json';
-import bs from 'binarysearch';
+import * as filters from './TreeFilter';
 
 export const DataStore = Fluxxor.createStore({
     initialize(profile) {
@@ -20,6 +20,7 @@ export const DataStore = Fluxxor.createStore({
           timeSeriesGraphData: {},
           sentimentChartData: [],
           timeseriesFromDate: false,
+          associatedKeywords: {},
           timeseriesToDate: false,
           sentimentTreeViewData: [],
           categoryValue: '',
@@ -32,7 +33,8 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
             Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView,
-            Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate
+            Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
+            Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.handleAssociatedTerms
       );
     },
 
@@ -146,6 +148,18 @@ export const DataStore = Fluxxor.createStore({
         this.emit("change");
     },
 
+    handleAssociatedTerms(associatedKeywords){
+        this.dataStore.associatedKeywords = associatedKeywords;
+
+        if(this.dataStore.treeData.children){
+            this.dataStore.treeData = filters.filterTree(this.dataStore.treeData, associatedKeywords, {
+                
+            });
+        }
+
+        this.emit("change");
+    },
+
     recurseTree(dataTree){
       let rootItem = {
           name: 'Associations',
@@ -159,7 +173,7 @@ export const DataStore = Fluxxor.createStore({
               return;
           }
           
-          for (let [folderKey, subFolder] of parentDataFolder.entries()) {            
+          for (let [folderKey, subFolder] of parentDataFolder.entries()) {
               let newEntry = {
                   name: subFolder.folderName,
                   folderKey: folderKey,

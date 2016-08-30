@@ -25,6 +25,20 @@ const styles = {
  }
 };
 
+const treeDataStyle = {
+    tree: {
+            base: {
+                listStyle: 'none',
+                backgroundColor: '#21252B',
+                margin: 0,
+                padding: 0,
+                color: '#9DA5AB',
+                fontFamily: 'lucida grande ,tahoma,verdana,arial,sans-serif',
+                fontSize: '12px'
+            }
+    }
+};
+
 export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
@@ -32,7 +46,7 @@ export const SentimentTreeview = React.createClass({
       this.getFlux().actions.DASHBOARD.load_sentiment_tree_view();
 
       return {
-          associatedKeywords: {}
+          associatedKeywordsChecked: {}
       }
   },
   
@@ -76,7 +90,7 @@ export const SentimentTreeview = React.createClass({
   onChange(node){
       let folderName = node.folderKey;
       let self = this;
-      let associatedKeywords = this.state.associatedKeywords;
+      let associatedKeywords = this.state.associatedKeywordsChecked;
       let checkboxValue = !associatedKeywords[folderName];
       let treeData = this.state.treeData;
       //if a folder is selected, grab the hashtag for all child items.
@@ -85,7 +99,7 @@ export const SentimentTreeview = React.createClass({
       this.changeCheckedStateForChildren(treeData, child => child.checked = associatedKeywords[child.folderKey] || false);
       this.directoryEventCount(treeData);
 
-      this.setState({associatedKeywords: this.state.associatedKeywords,
+      this.setState({associatedKeywordsChecked: associatedKeywords,
                      treeData: treeData});
   },
 
@@ -149,11 +163,12 @@ export const SentimentTreeview = React.createClass({
             </div>
             <div className="list-group" data-scrollable="">
                 {
-                    this.state && this.state.sentimentTreeViewData && this.state.sentimentTreeViewData.children ? 
+                    this.state && this.state.treeData && this.state.treeData.children ? 
                       <div style={styles.component}>  
                         <Treebeard
                             onToggle={this.onToggle}
                             animations={false}
+                            style={treeDataStyle}
                             data={this.state.treeData}
                             decorators={Object.assign({}, decorators, {Header: self.Header})} />
                         </div> : undefined
