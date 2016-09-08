@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { PropTypes, Component } from 'react';
 import {Actions as Actions} from '../actions/Actions';
 import env_properties from '../../config.json';
-import * as filters from './TreeFilter';
+import * as treeFilters from '../components/TreeFilter';
 
 export const DataStore = Fluxxor.createStore({
     initialize(profile) {
@@ -12,17 +12,21 @@ export const DataStore = Fluxxor.createStore({
           userProfile: profile,
           timespanType: 'customMonth',
           datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
-          categoryType: '',
+          categoryType: 'keyword',
           activities: [],
           action: '',
           popularTerms: [],
           trends: [],
           timeSeriesGraphData: {},
           sentimentChartData: [],
+          originalTermsTree: [],
+          renderMap: true,
           timeseriesFromDate: false,
-          associatedKeywords: {},
+          filteredTerms: {},
+          treeViewStructure: {},
+          treeData: {},
           timeseriesToDate: false,
-          sentimentTreeViewData: [],
+          associatedKeywords: {},
           categoryValue: '',
           defaultResults: []
       }
@@ -34,7 +38,8 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
             Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
-            Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.handleAssociatedTerms
+            Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
+            Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters
       );
     },
 
@@ -49,6 +54,12 @@ export const DataStore = Fluxxor.createStore({
     
     handleLoadGraphData(timeSeries){
         this.refreshGraphData(timeSeries.response);
+        this.emit("change");
+    },
+
+    handleChangeTermFilters(newFilters){
+        this.dataStore.filteredTerms = Object.assign({}, this.filteredTerms, newFilters);
+        this.dataStore.renderMap = true;
         this.emit("change");
     },
     
@@ -128,6 +139,7 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.datetimeSelection = changedData.datetimeSelection;
         this.dataStore.timespanType = changedData.timespanType;
         this.refreshGraphData(changedData.timeSeriesResponse);
+        this.dataStore.filteredTerms = {};
         this.dataStore.action = 'changedSearchTerms';
         
         this.emit("change");
@@ -137,32 +149,69 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.categoryValue = changedData.newFilter;
         this.dataStore.categoryType = changedData.searchType;
         this.dataStore.action = 'changedSearchTerms';
+        this.dataStore.filteredTerms = {};
         
         this.emit("change");
     },
     
     handleLoadSentimentTreeView(treeView){
-        this.dataStore.sentimentTreeViewData = this.recurseTree(treeView.folderTree);
-        this.dataStore.treeData = this.dataStore.sentimentTreeViewData;
+        this.dataStore.treeViewStructure = this.recurseTree(treeView.folderTree);
+        this.dataStore.originalTermsTree = this.dataStore.treeViewStructure;
+        this.dataStore.treeData = this.dataStore.treeViewStructure;
+        this.updateMapAndFilters()
 
         this.emit("change");
     },
 
-    handleAssociatedTerms(associatedKeywords){
+    mapDataUpdate(associatedKeywords){
         this.dataStore.associatedKeywords = associatedKeywords;
+        this.dataStore.renderMap = false;
+        this.updateMapAndFilters();
+    },
 
-        if(this.dataStore.treeData.children){
-            this.dataStore.treeData = filters.filterTree(this.dataStore.treeData, associatedKeywords, {
-                
-            });
+    updateMapAndFilters(){
+        let self = this;
+        let termSuperSet = Object.keys(this.dataStore.associatedKeywords);
+
+        if(Object.keys(this.dataStore.filteredTerms).length == 0){
+            this.dataStore.filteredTerms = termSuperSet.map(term=>{let o = {}; o[term] = true; return o;});
         }
 
-        this.emit("change");
+        if(this.dataStore.treeViewStructure.children && this.dataStore.treeViewStructure.children.length > 0){
+            let filtered = treeFilters.filterTreeByMatcher(this.dataStore.treeViewStructure, node => {
+                        return termSuperSet.indexOf((node.folderKey || "").toLowerCase()) > -1;
+                    }, 
+                    node => Object.assign({}, node, {eventCount: this.dataStore.associatedKeywords[node.folderKey.toLowerCase()], 
+                                                     checked: self.dataStore.filteredTerms[node.folderKey.toLowerCase()]}));
+            
+            this.updateTreeEventCount(filtered);
+            this.dataStore.originalTermsTree = filtered;
+            this.dataStore.treeData = filtered;
+            this.emit("change");
+        }
     },
 
-    recurseTree(dataTree){
+    updateTreeEventCount(node){
+      let eventCount = 0;
+      let self = this;
+
+      if(node.children && node.children.length > 0){
+        for(let i in node.children){
+            eventCount += this.updateTreeEventCount(node.children[i]);
+        }
+
+        node.eventCount = eventCount;
+      }else{
+        eventCount += node.checked ? node.eventCount : 0;
+      }
+
+      return eventCount;
+  },
+
+  recurseTree(dataTree){
       let rootItem = {
           name: 'Associations',
+          folderKey: 'associatedKeywords',
           toggled: true,
           children: []
       };
@@ -179,7 +228,7 @@ export const DataStore = Fluxxor.createStore({
                   folderKey: folderKey,
                   checked: false,
                   parent: parentListItem,
-                  eventCount: Math.floor((Math.random() * 50) + 1)
+                  eventCount: 0
               };
               
               parentListItem.children.push(newEntry);

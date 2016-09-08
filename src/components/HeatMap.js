@@ -2,7 +2,7 @@ import Fluxxor from 'fluxxor';
 import React, { PropTypes, Component } from 'react';
 import {Actions} from '../actions/Actions';
 import Tile from 'geotile';
-import Rx from 'rx';
+import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
 import Dialog from 'material-ui/lib/dialog';
 import env_properties from '../../config.json';
@@ -16,6 +16,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 const defaultLat = 20.1463919;
 const defaultLong = 2.2705778;
 const rainbowColorCeiling = 1000;
+const maxRequestLimit = 400;
 const sentimentFieldName = 'mag_n';
 const mentionCountFieldName = 'cnt';
 const defaultClusterSize = 40;
@@ -99,8 +100,10 @@ export const HeatMap = React.createClass({
   componentDidMount(){
     let latitude = this.state.latitude;
     let longitude = this.state.longitude;
-    this.heatmap = {};
-    this.tilemap = {};
+    this.loadedTileBuckets = new Map();
+    this.visibleClusters = new Set();
+    this.associatedTerms = new Map();
+    this.tilemap = new Map();
     let defaultZoom = 5;
     L.Icon.Default.imagePath = "/dist/assets/images";
     this.map = L.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
@@ -114,14 +117,13 @@ export const HeatMap = React.createClass({
     this.map.addControl(L.control.zoom({position: 'topright'}));
     this.map.selectedTerm = this.state.categoryValue;
     this.map.datetimeSelection = this.state.datetimeSelection;
-    var self = this;
+
     this.map.on('moveend',() => {
-      self.viewportChanged();
+      this.viewportChanged();
     });
 
     this.map.on('zoomend',() => {
       this.clearMap();
-      self.viewportChanged();
     });
 
     this.addClusterGroup();
@@ -192,11 +194,11 @@ export const HeatMap = React.createClass({
   dataStoreValidated(){
       return this.state && this.state.datetimeSelection
                         && this.state.timespanType
-                        && this.state.categoryType
+                        && this.state.categoryValue
    },
 
   mapMarkerFlushCheck(){
-      if(this.map.selectedTerm != this.state.categoryValue || this.map.datetimeSelection != this.state.datetimeSelection){
+      if(this.map.selectedTerm != this.state.categoryValue || this.map.datetimeSelection != this.state.datetimeSelection || this.state.renderMap){
           this.map.datetimeSelection =  this.state.datetimeSelection;
           this.map.selectedTerm = this.state.categoryValue;
 
@@ -204,16 +206,14 @@ export const HeatMap = React.createClass({
       }
   },
   
-  updateHeatmap() {
-    let self = this;
-    
+  updateHeatmap() {    
     if(!this.dataStoreValidated()){
         return false;
     }
     
     this.mapMarkerFlushCheck();
 
-    let bounds = self.map.getBounds();
+    let bounds = this.map.getBounds();
     let zoom = this.map.getZoom();
     let northWest = bounds.getNorthWest();
     let southEast = bounds.getSouthEast();
@@ -225,25 +225,14 @@ export const HeatMap = React.createClass({
                                                       east: southEast.lng
                                                     }, zoom);
 
-    let callback = () => console.log('Finished processing tile(s)');
-    
-    Rx.Observable.from(spanningTileIds)
-                 .subscribe(tile => {
-                     self.createLayer(tile, callback);
-                 }, error => {
-                     console.error('An error occured');
-                 }, () => updateDataStore());
+    eachLimit(spanningTileIds, maxRequestLimit, this.createLayer, this.updateDataStore);
   },
 
   updateDataStore(){
       let aggregateAssociatedTermCnt = {};
 
-      for (let [tileTerms] of this.associatedTerms.values()) {
-          Object.keys(tileTerms).forEach(term => {
-              let currentAggregatedSize = aggregateAssociatedTermCnt[term] || 0;
-              let currentSize = tileTerms[term];
-              aggregateAssociatedTermCnt[term] = currentSize + currentAggregatedSize;
-          });
+      for (let tileTerms of this.associatedTerms.values()) {
+          Object.keys(tileTerms).forEach(term => aggregateAssociatedTermCnt[term] = aggregateAssociatedTermCnt[term] || 0 + tileTerms[term]);
       }
 
       this.getFlux().actions.DASHBOARD.updateAssociatedTerms(aggregateAssociatedTermCnt);
@@ -251,67 +240,90 @@ export const HeatMap = React.createClass({
   
   fetchHeatmap(tileId, callback) {
     let self = this;
-    //exit the fetch if the tile response is already cached
-    if (this.heatmap[tileId]) return false;
+    let cachedTileBucket = this.loadedTileBuckets.get(tileId);
+
+    if (cachedTileBucket) return callback(this.shouldFilterCachedTile(cachedTileBucket, tileId));
 
     SERVICES.getHeatmapTiles(this.state.categoryType, this.state.timespanType, this.state.categoryValue, this.state.datetimeSelection, tileId)
             .subscribe(response => {
-                self.heatmap[tileId] = response;
                 callback(response);
             }, error => {
+                callback([]);
             });
+  },
+
+  shouldFilterCachedTile(parentTileChildren, parentTileId){
+      let self = this;
+
+      if(Array.isArray(parentTileChildren)){
+          parentTileChildren.forEach(childTileId => self.processMapCluster(parentTileId, childTileId, {}, {}));
+      }
+
+      return [];
   },
   
   createLayer(tileId, callback) {
     let self = this;
     let dataStore = this.getFlux().store("DataStore").dataStore;
-    
     let layerId = this.buildLayerId(tileId, dataStore);
 
     this.fetchHeatmap(tileId, response => {
-      if (!self.heatmap[tileId]) return callback();
-
-      //Iterate through all the elemens in the cache for tileId
-      self.heatmap[tileId].forEach(heatmapTileElement => {
-        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => {               
-               let leafletElement = heatmapTileElement[heatmapElementTileId];
-               let heatmapTile = Tile.tileFromTileId(heatmapElementTileId);
-               let geoJson = self.convertTileToGeoJSON(heatmapTile, leafletElement, layerId);
-               
-               let heatMapLayer = L.geoJson(geoJson, {});
-                        
-               self.trackAssociatedTerms(geoJson, tileId);
-
-               if(!self.tilemap[heatmapElementTileId]){
-                   self.markers.addLayer(heatMapLayer);
-                   self.tilemap[heatmapElementTileId] = true;
-               }
-        });
+      response.forEach(heatmapTileElement => {
+        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => self.processMapCluster(tileId, heatmapElementTileId, heatmapTileElement[heatmapElementTileId], layerId));
       });
       
       return callback();
     });
   },
 
+  processMapCluster(bucketTileId, tileId, tilePayload, layerId){
+       let tileGeoJson = this.tilemap.get(tileId);
+
+       if(!tileGeoJson && tilePayload){
+           tileGeoJson = this.addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId);
+       }
+
+       let filterCluster = this.filterMapCluster(tileGeoJson, tileId);
+
+       if(!this.visibleClusters.has(tileId) && !filterCluster){
+           this.visibleClusters.add(tileId);
+           this.markers.addLayer(tileGeoJson);
+       }else if(filterCluster){
+           this.visibleClusters.delete(tileId);
+           this.markers.removeLayer(tileGeoJson);
+       }
+  },
+
+  addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId){
+       try{
+            let heatmapTile = Tile.tileFromTileId(tileId);
+            let tileBucketCache = this.loadedTileBuckets.get(bucketTileId) || [];
+            tileBucketCache.push(tileId);
+
+            this.loadedTileBuckets.set(bucketTileId, tileBucketCache);
+            let geoJson = this.convertTileToGeoJSON(heatmapTile, tilePayload, layerId);
+            let heatMapLayer = L.geoJson(geoJson, {});
+            this.tilemap.set(tileId, heatMapLayer);
+            this.trackAssociatedTerms(geoJson, tileId);
+
+        return heatMapLayer;
+       }catch(e){
+           console.error("An error occured trying to grab the tile details.");
+       }
+  },
+
   /*Place the associated term count in a data structure indexed by layerId*/
   trackAssociatedTerms(geoJsonTile, tileId){
-      let self = this;
-      let layerAssociations = associatedTerms.get(tileId) || {};
+      let layerAssociations = this.associatedTerms.get(tileId) || {};
 
       if(geoJsonTile.properties.associatedTerms){
-               geoJsonTile.properties.associatedTerms.map(item => {
-                   let term = item.term.toLowerCase();
-                   let size = item.cnt;
-
-                   if(layerAssociations[term]){
-                       layerAssociations[term] += size;
-                   }else{
-                       layerAssociations[term] = size;
-                   }
+               geoJsonTile.properties.associatedTerms.forEach(termMentions =>  {
+                   let term = Object.keys(termMentions)[0];
+                   layerAssociations[term] = layerAssociations[term] || 0 + termMentions[term];
                });
-      }
 
-      associatedTerms.set(tileId, layerAssociations);
+               this.associatedTerms.set(tileId, layerAssociations);
+      }
   },
 
  convertTileToGeoJSON(tile, properties, layerId){
@@ -323,19 +335,33 @@ export const HeatMap = React.createClass({
       
       return geoJson;
  },
+
+ filterMapCluster(geoJsonTile, tileId) {
+    let termFilters = this.state.filteredTerms;
+    let layerAssociations = this.associatedTerms.get(tileId);
+
+    if(Object.keys(termFilters).length == 0){
+        return false;
+    }
+
+    return Object.keys(layerAssociations || {})
+                 .filter(key => termFilters[key])
+                 .length > 0;
+ },
    
   clearMap(){
        if(this.markers){
          this.markers.clearLayers();
        }
 
-        this.associatedTerms = new Map();
-        this.tilemap = {};
-        this.heatmap = {};
+        this.associatedTerms.clear();
+        this.tilemap.clear();
+        this.visibleClusters.clear();
+        this.loadedTileBuckets.clear();
   },
    
    renderMap(){
-     return this.map && this.state.action != 'editingTimeScale';
+     return this.map && this.state.renderMap;
    },
 
    render() {

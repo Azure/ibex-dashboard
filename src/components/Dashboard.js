@@ -48,8 +48,13 @@ export const Dashboard = React.createClass({
                         <SentimentTreeview />
                     </div>
                     <div className="col-lg-10 heatmapContainer">
-                        <div id='leafletMap'></div>
-                        <HeatMap />
+                      <div className="row" className="tagFilterRow">
+                         
+                      </div>
+                      <div className="row">
+                          <div id='leafletMap'></div>
+                          <HeatMap />
+                      </div>
                     </div>
                 </div>
             </div>

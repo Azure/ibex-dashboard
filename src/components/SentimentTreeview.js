@@ -26,8 +26,8 @@ const styles = {
 };
 
 const treeDataStyle = {
-    tree: {
-            base: {
+     tree: {
+        base: {
                 listStyle: 'none',
                 backgroundColor: '#21252B',
                 margin: 0,
@@ -35,7 +35,71 @@ const treeDataStyle = {
                 color: '#9DA5AB',
                 fontFamily: 'lucida grande ,tahoma,verdana,arial,sans-serif',
                 fontSize: '12px'
+        },
+        node: {
+            base: {
+                position: 'relative'
+            },
+            link: {
+                cursor: 'pointer',
+                position: 'relative',
+                padding: '0px 5px',
+                display: 'block'
+            },
+            activeLink: {
+                background: '#31363F'
+            },
+            toggle: {
+                base: {
+                    position: 'relative',
+                    display: 'inline-block',
+                    verticalAlign: 'top',
+                    marginLeft: '-5px',
+                    height: '24px',
+                    width: '24px'
+                },
+                wrapper: {
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    margin: '-7px 0 0 -7px',
+                    height: '14px'
+                },
+                height: 14,
+                width: 14,
+                arrow: {
+                    fill: '#9DA5AB',
+                    strokeWidth: 0
+                }
+            },
+            header: {
+                base: {
+                    display: 'inline-block',
+                    verticalAlign: 'top',
+                    color: '#9DA5AB'
+                },
+                connector: {
+                    width: '2px',
+                    height: '12px',
+                    borderLeft: 'solid 2px black',
+                    borderBottom: 'solid 2px black',
+                    position: 'absolute',
+                    top: '0px',
+                    left: '-21px'
+                },
+                title: {
+                    lineHeight: '24px',
+                    verticalAlign: 'middle'
+                }
+            },
+            subtree: {
+                listStyle: 'none',
+                paddingLeft: '19px'
+            },
+            loading: {
+                color: '#E2C089'
             }
+        }
     }
 };
 
@@ -45,9 +109,7 @@ export const SentimentTreeview = React.createClass({
   getInitialState(){
       this.getFlux().actions.DASHBOARD.load_sentiment_tree_view();
 
-      return {
-          associatedKeywordsChecked: {}
-      }
+      return {}
   },
   
   onToggle(node, toggled){
@@ -70,42 +132,17 @@ export const SentimentTreeview = React.createClass({
       }
   },
 
-  directoryEventCount(node){
-      let eventCount = 0;
-      let self = this;
-
-      if(node.children){
-        for(let i in node.children){
-            eventCount += self.directoryEventCount(node.children[i]);
-        }
-
-        node.eventCount = eventCount;
-      }else{
-        eventCount += node.checked ? node.eventCount : 0;
-      }
-
-      return eventCount;
-  },
-
   onChange(node){
       let folderName = node.folderKey;
-      let self = this;
-      let associatedKeywords = this.state.associatedKeywordsChecked;
-      let checkboxValue = !associatedKeywords[folderName];
+      let filters = this.state.filteredTerms;
       let treeData = this.state.treeData;
-      //if a folder is selected, grab the hashtag for all child items.
-      this.changeCheckedStateForChildren(node, child => associatedKeywords[child.folderKey] = checkboxValue);
-      //traverse from the root down and change the checked state based on associatedKeywords.
-      this.changeCheckedStateForChildren(treeData, child => child.checked = associatedKeywords[child.folderKey] || false);
-      this.directoryEventCount(treeData);
-
-      this.setState({associatedKeywordsChecked: associatedKeywords,
-                     treeData: treeData});
+      this.changeCheckedStateForChildren(treeData, child => filters[child.folderKey] = !filters[child.folderKey]);
+      this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
   },
 
   onFilterMouseUp(e){
         const filter = e.target.value.trim();
-        let fullDataset = this.state.sentimentTreeViewData;
+        let fullDataset = this.state.originalTermsTree;
 
         if(!filter){ return this.setState({treeData:fullDataset}); }
         var filtered = filters.filterTree(fullDataset, filter);
@@ -117,8 +154,10 @@ export const SentimentTreeview = React.createClass({
         const style = props.style;
         let self = this;
         const iconStyle = { color: '#337ab7' };
+        const termStyle = { fontWeight: '600', color: '#fff'};
         const folderIconStyle = { color: 'rgb(232, 214, 133)' };
         const badgeClass = props.node.checked || (props.node.children && props.node.eventCount > 0) ? "badge" : "badge badge-disabled";
+        let folderType = props.node.children && props.node.children.length > 0;
 
         return (
             <div style={style.base}>
@@ -128,11 +167,10 @@ export const SentimentTreeview = React.createClass({
                         onChange={self.onChange.bind(this, props.node)}/>
                         &nbsp;
                         {
-                        !props.node.children ? <i className="fa fa-slack fa-1" style={iconStyle}></i> : <i className="fa fa-folder fa-1" style={folderIconStyle}></i>
+                         folderType ? <i className="fa fa-folder fa-1" style={folderIconStyle}></i> : <i className="fa fa-slack fa-1" style={iconStyle}></i> 
                         }
 
-                        <span style={{paddingLeft: '3px'}}>{props.node.name}</span>
-                        
+                        <span style={Object.assign({paddingLeft: '3px'}, !folderType ? termStyle : {})}>{props.node.name}</span>
                         {
                             props.node.eventCount && props.node.eventCount > 0 ? 
                                 <span className={badgeClass}>{props.node.eventCount}</span> 
@@ -168,8 +206,8 @@ export const SentimentTreeview = React.createClass({
                         <Treebeard
                             onToggle={this.onToggle}
                             animations={false}
-                            style={treeDataStyle}
                             data={this.state.treeData}
+                            style={treeDataStyle}
                             decorators={Object.assign({}, decorators, {Header: self.Header})} />
                         </div> : undefined
                 }

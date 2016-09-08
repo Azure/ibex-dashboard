@@ -1,5 +1,7 @@
 'use strict';
 
+const DefaultEnabledTermOption = {toggled: true, checked: true};
+
 // Helper functions for filtering
 export const defaultMatcher = (filterText, node) => {
     return node.name.toLowerCase().indexOf(filterText.toLowerCase()) !== -1;
@@ -7,7 +9,7 @@ export const defaultMatcher = (filterText, node) => {
 
 export const findNode = (node, filter, matcher) => {
     return matcher(filter, node) || // i match
-        (node.children && // or i have decendents and one of them match
+        (node.children != undefined && // or i have decendents and one of them match
         node.children.length &&
         !!node.children.find(child => findNode(child, filter, matcher)));
 };
@@ -19,6 +21,18 @@ export const filterTree = (node, filter, matcher = defaultMatcher) => {
     const filtered = node.children
       .filter(child => findNode(child, filter, matcher))
       .map(child => filterTree(child, filter, matcher));
+    return Object.assign({}, node, { children: filtered });
+};
+
+export const filterTransformTree = (node, matcher = defaultMatcher, newList, cb) => {
+    // If im an exact match then all my children get to stay
+
+    if(node.children){
+        node.children.forEach(child => filterTransformTree(child, matcher, newList));
+    }else if(matcher(node)){
+        newList.children.push(node);
+    }
+
     return Object.assign({}, node, { children: filtered });
 };
 
@@ -39,4 +53,52 @@ export const expandFilteredNodes = (node, filter, matcher = defaultMatcher) => {
       children: children,
       toggled: shouldExpand
     });
+};
+
+export const addFilteredNodeToRoot = (rootNode, child, filteredNode) => {
+    child.children ? child.children.forEach(node => {
+        if(node.folderKey === filteredNode.folderKey){
+            filteredNode.added = true;
+            addFilteredNodeToRoot(rootNode, node, filteredNode.children[0]);
+        }
+    }) : {};
+
+    if(!filteredNode.added){
+        child.children.push(filteredNode);
+
+        return rootNode;
+    }
+}
+
+export const postOrderTreeTraversal = (child, rootNode, newNode) => {
+    if(!child.parent){
+        return;
+    }
+
+    let displayNode = Object.assign({}, child, {children: []}, DefaultEnabledTermOption);
+    if(newNode.children){
+        displayNode.children.push(newNode);
+    }
+
+    if (child.parent.folderKey === rootNode.folderKey){
+        return addFilteredNodeToRoot(rootNode, rootNode, displayNode);
+    }
+    
+    postOrderTreeTraversal(child.parent, rootNode, displayNode);
+};
+
+export const treeFilterIterator = (node, matcher, filteredTree, nodeCB) => {
+        node.children ? node.children.forEach(child => {
+             treeFilterIterator(child, matcher, filteredTree, nodeCB);
+
+             if(matcher(child)){
+                 postOrderTreeTraversal(nodeCB(child), filteredTree, {});
+             }
+		}) : {};
+
+        return filteredTree;
+}
+
+export const filterTreeByMatcher = (rootNode, matcher, nodeCB) => {
+    return treeFilterIterator(rootNode, matcher, Object.assign({}, rootNode, {children: []}), nodeCB);
 };
