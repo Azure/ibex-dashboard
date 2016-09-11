@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {routes} from '../routes/routes';
 import Fluxxor from 'fluxxor';
-import {TypeaheadSearch} from './TypeaheadSearch';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -14,7 +13,7 @@ export const Header = React.createClass({
   },
   
   getStateFromFlux() {
-    return this.getFlux().store("DataStore").getState().userProfile;
+    return this.getFlux().store("DataStore").getState();
   },
 
   componentWillReceiveProps(nextProps) {
@@ -27,7 +26,6 @@ export const Header = React.createClass({
     let routeCollection = routes.props.children;
     let routeIterator = (routeCollection instanceof Array) ? routeCollection : [routeCollection];
     let initials = 'N/A';
-    let defaultSearchPlaceholder = "Search Here";
 
     return (
       <nav className="navbar navbar-trans" role="navigation">
@@ -47,9 +45,6 @@ export const Header = React.createClass({
               <div className="navbar-collapse collapse" id="navbar-collapsible">
                   <ul className="nav navbar-nav navbar-left">
                       <li>&nbsp;</li>
-                      <li>
-                         <TypeaheadSearch data={defaultSearchPlaceholder}/>
-                      </li>
                   </ul>
                   <ul className="nav navbar-nav navbar-right">
                       <li className="userProfile">

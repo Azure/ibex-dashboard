@@ -3,7 +3,7 @@ import moment from 'moment';
 import React, { PropTypes, Component } from 'react';
 import {Actions as Actions} from '../actions/Actions';
 import env_properties from '../../config.json';
-import bs from 'binarysearch';
+import * as treeFilters from '../components/TreeFilter';
 
 export const DataStore = Fluxxor.createStore({
     initialize(profile) {
@@ -12,30 +12,34 @@ export const DataStore = Fluxxor.createStore({
           userProfile: profile,
           timespanType: 'customMonth',
           datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
-          categoryType: '',
+          categoryType: 'keyword',
           activities: [],
           action: '',
           popularTerms: [],
           trends: [],
           timeSeriesGraphData: {},
-          indexedTimeSeriesMap: new Map(),
           sentimentChartData: [],
+          originalTermsTree: [],
+          renderMap: true,
           timeseriesFromDate: false,
+          filteredTerms: {},
+          treeViewStructure: {},
+          treeData: {},
           timeseriesToDate: false,
-          sentimentTreeViewData: [],
+          associatedKeywords: {},
           categoryValue: '',
           defaultResults: []
       }
       
       this.bindActions(
             Actions.constants.ACTIVITY.LOAD_EVENTS, this.handleLoadActivites,
-            Actions.constants.TRENDS.LOAD_TRENDS, this.handleLoadTrendingActivity,
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
-            Actions.constants.GRAPHING.CHANGE_TIME_SCALE, this.handleChangeTimeScale,
             Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
             Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView,
-            Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate
+            Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
+            Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
+            Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters
       );
     },
 
@@ -52,132 +56,74 @@ export const DataStore = Fluxxor.createStore({
         this.refreshGraphData(timeSeries.response);
         this.emit("change");
     },
+
+    handleChangeTermFilters(newFilters){
+        this.dataStore.filteredTerms = Object.assign({}, this.dataStore.filteredTerms, newFilters);
+        this.dataStore.renderMap = true;
+        this.emit("change");
+    },
     
     indexTimeSeriesResponse(){
         let self = this;
-        this.sortedTimeSeriesDates = [];
-        this.dataStore.indexedTimeSeriesMap.clear();
         this.dataStore.timeSeriesGraphData['aggregatedCounts'] = [];
+        let termSummaryMap = new Map();
+        let termColorMap = new Map();
+        let maxMentionCount = 0;
+        let barColors = ['#fdd400', '#84b761', '#b6d2ff', '#CD0D74', '#2f4074'];
         
         if(this.dataStore.timeSeriesGraphData && this.dataStore.timeSeriesGraphData.graphData){
             //hash the time series data by the epoch time as we'll use this to render 
             //the aggregates in the bar chart based on the selected graph zoom area. 
             this.dataStore.timeSeriesGraphData.graphData.map(timeEntry => {
-                self.dataStore.indexedTimeSeriesMap.set(timeEntry[0], timeEntry);
-                //Aggregate the normalized positive and negative sentiment breakdown as we need the total count for the Dygraph.
-                self.dataStore.timeSeriesGraphData.aggregatedCounts.push([].concat(timeEntry[0], self.aggregateSentimentLevelCounts(timeEntry)));
-                self.sortedTimeSeriesDates.push(timeEntry[0]);
+                //Aggregate the normalized positive and negative sentiment breakdown as we need the total count for the Histogram.
+                let graphEntry = self.aggregateSentimentLevelCounts(timeEntry, termSummaryMap);
+                self.dataStore.timeSeriesGraphData.aggregatedCounts.push(graphEntry);
             });
+
+            for (let [term, mentions] of termSummaryMap.entries()) {
+                termColorMap.set(term, barColors.pop());
+
+                if(mentions > maxMentionCount){
+                    maxMentionCount = mentions;
+                    
+                    this.dataStore.timeSeriesGraphData['mostPopularTerm'] = term;
+                }
+            }
+
+            self.dataStore.timeSeriesGraphData.termColorMap = termColorMap;
+            self.dataStore.timeSeriesGraphData.termSummaryMap = termSummaryMap;
         }
     },
 
     //Based on aggregating off the follwoing sample dataset i.e. [1459605600000, 0, 0, 112, 65, 123, 94, 30, 10, 36, 25, 16, 16], [1459616400000, 0, 0, 142, 75, 83, 41, 44, 10, 60, 48, 13, 10]
-    aggregateSentimentLevelCounts(graphDatetimeEntry){
-        let aggregatedCounts = [];
-        //Need to ask Mike why entries[1] & entries[2] are representative of, as they're always 0.  
-        let i = 2;
+    aggregateSentimentLevelCounts(graphDatetimeEntry, termSummaryMap){
+        let i = 2, labelIndex = 1;
+        let labels = this.dataStore.timeSeriesGraphData.labels;
+        let graphEntry = {"date": new Date(graphDatetimeEntry[0])};
 
         if(graphDatetimeEntry && graphDatetimeEntry.length > 0){
             while(i < graphDatetimeEntry.length - 1){
-                aggregatedCounts.push(graphDatetimeEntry[++i] + graphDatetimeEntry[++i]);
+                let label = labels[labelIndex++];
+                graphEntry[label] = graphDatetimeEntry[++i] + graphDatetimeEntry[++i];
+                let totalTermMentions = termSummaryMap.get(label);
+                termSummaryMap.set(label, (totalTermMentions || 0) + graphEntry[label]);
             }
         }
 
-        return aggregatedCounts;
-    },
-    
-    //a log(N) algorithm to aggregate the occurences and magnitude of the time series data.
-    aggregateTimeSeriesData(fromDatetime, toDatetime){
-        this.dataStore.sentimentChartData = [];
-        let self = this;
-        
-        //If there's no provided from and todate then this is the initial data load for the bar chart
-        //default both to the upper and lower bounds of the sortedTimeSeriesDates.
-        if(!fromDatetime && !toDatetime && this.sortedTimeSeriesDates.length > 0){
-            fromDatetime = this.sortedTimeSeriesDates[0];
-            toDatetime = this.sortedTimeSeriesDates[this.sortedTimeSeriesDates.length - 1];
-        }
-        
-        //Make sure to and from date is provided and there are both labels and time series data.
-        if(fromDatetime && toDatetime && this.sortedTimeSeriesDates.length > 0 && this.dataStore.timeSeriesGraphData.labels.length > 0){
-            //default the initial dataset with all the labels we're rendering. This has a max length of 6 labels. 
-            for(let i = 1; i < this.dataStore.timeSeriesGraphData.labels.length; i++){
-                this.dataStore.sentimentChartData.push({label: this.dataStore.timeSeriesGraphData.labels[i], occurences: 0, mag_n: 0})
-            }
-            
-            //extract the indexed time slices based on the from and to date range.
-            let timeSlices = bs.rangeValue(this.sortedTimeSeriesDates, Math.abs(fromDatetime), Math.abs(toDatetime));
-            //enumerate through all the time slices.
-            timeSlices.map(datetime => {
-                //pull the time slice details which contain the occurences and normalized magnitude sentiment.
-                let datetimeData = self.dataStore.indexedTimeSeriesMap.get(datetime);
-                if(datetimeData){
-                    let i = 2;
-                    //we'll need to aggregate the occurences for each label across the date range.
-                    self.dataStore.sentimentChartData.map((labelEntry, index) => {
-                        self.dataStore.sentimentChartData[index].mag_n += datetimeData[i + 1];
-                        self.dataStore.sentimentChartData[index].occurences += datetimeData[++i] + datetimeData[++i];
-                    });
-                }
-            });
-        }
-    },
-    
-    handleLoadTrendingActivity(trends){
-        this.dataStore.trends = this.trendingDataReducer(trends.response, 'trending');
-        this.dataStore.popularTerms = this.trendingDataReducer(trends.response, 'popular');
-
-        this.emit("change");
-    },
-
-    trendingDataReducer(response, fileredKey){
-        let componentStateData = [];
-
-        if(response != undefined){
-            Object.keys(response).forEach(windowKey => {
-                let timeWindow = response[windowKey];
-
-                if((timeWindow.hasOwnProperty('cutoff_time') || timeWindow.hasOwnProperty('previous_cutoff_time')) && timeWindow.hasOwnProperty(fileredKey)){
-                    let timeWindowDisplay = '';
-                    if(fileredKey == 'trending'){
-                        timeWindowDisplay = moment(timeWindow.cutoff_time || timeWindow.hasOwnProperty('previous_cutoff_time')).fromNow();
-                    }else{
-                        timeWindowDisplay = "{0} and {1}".format(moment(timeWindow.previous_cutoff_time).format("MM/DD/YY HH:mm"), moment(timeWindow.cutoff_time).format("MM/DD/YY HH:mm"));
-                    }
-                    
-                    timeWindow[fileredKey].map(dataItem => {
-                         componentStateData.push({
-                               'trendingVolume': dataItem.count,
-                               'source': dataItem.source,
-                               'trendingTimespan': timeWindowDisplay,
-                               'trendingType': dataItem.type.toLowerCase().substring(0, dataItem.type.length - 1),
-                               'trendingValue': dataItem.term
-                         });
-                    });
-                }
-            })
-        }
-
-        return componentStateData;
+        return graphEntry;
     },
     
     handleLoadDefaultSearchResults(searchResults){
         this.dataStore.defaultResults = searchResults.response;
         this.emit("change");
     },
-    
-    handleChangeTimeScale(dateRange){
-        if(!dateRange.fromDate || !dateRange.fromDate){
-            console.error('handleChangeTimeScale was called without providing both a from/to datetime.');
-            return;
+
+    defaultSearchTermToMostMentioned(mostPopularTerm){
+        let termSplit = mostPopularTerm.split('-');
+        if(termSplit != null && termSplit.length == 2){
+                this.dataStore.categoryValue = termSplit[1];
+                this.dataStore.categoryType = Actions.constants.CATEGORY_KEY_MAPPING[termSplit[0]];
         }
-        
-        this.dataStore.timeseriesFromDate = moment(dateRange.fromDate).format(Actions.constants.MOMENT_FORMATS.timeScaleDate);
-        this.dataStore.timeseriesToDate = moment(dateRange.toDate).format(Actions.constants.MOMENT_FORMATS.timeScaleDate);
-        this.aggregateTimeSeriesData(dateRange.fromDate, dateRange.toDate);
-        this.dataStore.action = 'editingTimeScale';
-        
-        this.emit("change");
     },
     
     refreshGraphData(timeSeriesData){
@@ -187,9 +133,11 @@ export const DataStore = Fluxxor.createStore({
         };
 
         this.indexTimeSeriesResponse();
-        this.aggregateTimeSeriesData(false, false);
-        this.dataStore.timeseriesFromDate = false;
-        this.dataStore.timeseriesToDate = false;
+
+        if(this.dataStore.categoryValue == "" && this.dataStore.timeSeriesGraphData.aggregatedCounts && this.dataStore.timeSeriesGraphData.aggregatedCounts.length > 0){
+           this.defaultSearchTermToMostMentioned(this.dataStore.timeSeriesGraphData.mostPopularTerm);
+        }
+
         this.dataStore.action = 'loadedGraphData';
     },
     
@@ -197,6 +145,8 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.datetimeSelection = changedData.datetimeSelection;
         this.dataStore.timespanType = changedData.timespanType;
         this.refreshGraphData(changedData.timeSeriesResponse);
+        this.dataStore.filteredTerms = {};
+        this.dataStore.renderMap = true;
         this.dataStore.action = 'changedSearchTerms';
         
         this.emit("change");
@@ -205,15 +155,105 @@ export const DataStore = Fluxxor.createStore({
     handleChangeSearchTerm(changedData){
         this.dataStore.categoryValue = changedData.newFilter;
         this.dataStore.categoryType = changedData.searchType;
-        this.refreshGraphData(changedData.timeSeriesResponse);
         this.dataStore.action = 'changedSearchTerms';
+        this.dataStore.renderMap = true;
+        this.dataStore.filteredTerms = {};
         
         this.emit("change");
     },
     
     handleLoadSentimentTreeView(treeView){
-        this.dataStore.sentimentTreeViewData = treeView.response;
-        
+        this.dataStore.treeViewStructure = this.recurseTree(treeView.folderTree);
+        this.dataStore.originalTermsTree = this.dataStore.treeViewStructure;
+        this.dataStore.treeData = this.dataStore.treeViewStructure;
+        this.updateMapAndFilters()
+
         this.emit("change");
-    }
+    },
+
+    mapDataUpdate(associatedKeywords){
+        this.dataStore.associatedKeywords = associatedKeywords;
+        this.dataStore.renderMap = false;
+        this.updateMapAndFilters();
+    },
+
+    updateMapAndFilters(){
+        let self = this;
+        let termSuperSet = Object.keys(this.dataStore.associatedKeywords);
+
+        if(termSuperSet.length > 0 && Object.keys(this.dataStore.filteredTerms).length == 0){
+            termSuperSet.forEach(term=>this.dataStore.filteredTerms[term] = true);
+        }else if(termSuperSet.length == 0){
+            this.dataStore.filteredTerms = {};
+        }
+
+        if(this.dataStore.treeViewStructure.children && this.dataStore.treeViewStructure.children.length > 0){
+            let filtered = treeFilters.filterTreeByMatcher(this.dataStore.treeViewStructure, node => {
+                        return termSuperSet.indexOf((node.folderKey || "").toLowerCase()) > -1;
+                    }, 
+                    node => Object.assign({}, node, {eventCount: this.dataStore.associatedKeywords[node.folderKey.toLowerCase()], 
+                                                     checked: self.dataStore.filteredTerms[node.folderKey.toLowerCase()]}),
+                    self.dataStore.filteredTerms);
+            
+            this.updateTreeEventCount(filtered);
+            this.dataStore.originalTermsTree = filtered;
+            this.dataStore.treeData = filtered;
+            this.emit("change");
+        }
+    },
+
+    updateTreeEventCount(node){
+      let eventCount = 0;
+      let self = this;
+
+      if(node.children && node.children.length > 0){
+        for(let i in node.children){
+            eventCount += this.updateTreeEventCount(node.children[i]);
+        }
+
+        node.eventCount = eventCount;
+      }else{
+        eventCount += node.checked ? node.eventCount : 0;
+      }
+
+      return eventCount;
+  },
+
+  recurseTree(dataTree){
+      let rootItem = {
+          name: 'Associations',
+          folderKey: 'associatedKeywords',
+          toggled: true,
+          children: []
+      };
+
+      let self = this;
+      let recurseChildren = (parentDataFolder, parentListItem, levels) => {
+          if(!parentDataFolder){
+              return;
+          }
+          
+          for (let [folderKey, subFolder] of parentDataFolder.entries()) {
+              let newEntry = {
+                  name: subFolder.folderName,
+                  folderKey: folderKey,
+                  checked: false,
+                  parent: parentListItem,
+                  eventCount: 0
+              };
+              
+              parentListItem.children.push(newEntry);
+              
+              if(subFolder.subFolders.size > 0){
+                  newEntry.children = [];
+                  newEntry.eventCount = 0;
+                  recurseChildren(subFolder.subFolders, newEntry, levels + 1);
+              }
+          }
+      };
+      
+      recurseChildren(dataTree, rootItem, 1);
+      
+      return rootItem;
+  },
 });

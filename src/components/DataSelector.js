@@ -137,26 +137,6 @@ export const DataSelector = React.createClass({
                  </button>
             }
             </div>
-            <div className="breadcrumbContainer">
-                <ol className="breadcrumb"><li><a href="#" style={{color: '#3e5063'}}>SELECTION</a></li>                
-                    {
-                        this.state && this.state.datetimeSelection ? 
-                         <li><a href="#">{this.state.datetimeSelection}</a></li> : undefined
-                    }
-                    {
-                        this.state && this.state.timeseriesFromDate && this.state && this.state.timeseriesToDate? 
-                         <li><a href="#">{this.state.timeseriesFromDate} - {this.state.timeseriesToDate}</a></li> : undefined
-                    }
-                    {
-                        this.state && this.state.categoryType ? 
-                         <li><a href="#">{this.state.categoryType}</a></li> : undefined
-                    }
-                    {
-                        this.state && this.state.categoryValue ? 
-                         <li><a href="#">{this.state.categoryValue}</a></li> : undefined
-                    }
-                </ol>
-            </div>
          </div>
      </div>
      );

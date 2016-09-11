@@ -16,6 +16,10 @@ body{
     display: flex;
 }
 
+.app-container{
+    background:#30303d;
+}
+
 #leafletMap{
     height: 600px;
     margin-top: 12px;
@@ -27,7 +31,8 @@ body{
 }
 
 .graphContainer{
-     background-color: #ffffff;
+     background-color: #30303d; 
+     color: #fff;
 }
 
 .aggregatedBarChartTitle{
@@ -52,11 +57,10 @@ body{
     padding-top: 6px!important;
     margin-bottom: 0px!important;
     list-style: none;
-    background-color: #eceeef;
+    background-color: #3f3f4f;
     margin-top: 12px!important;
     margin-left: 5px;
-    border: 1px solid #d3d5d3!important;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     border-radius: 4px;
 }
@@ -64,4 +68,27 @@ body{
 ol.breadcrumb a {
     color: #337ab7;
     font-weight: 600;
+    font-size: 13px;
+    color: rgb(46, 189, 89);
+}
+
+.timeSeriesContainer{
+    padding-left: 0px;
+}
+
+.summaryPieContainer{
+    padding-right: 0px;
+}
+
+.termBrowserContainer{
+    padding-right: 0px;
+    margin-right: 0px;
+}
+
+.heatmapContainer{
+    padding-left: 0px;
+}
+
+.tagFilterRow{
+    padding: 0px 20px 10px 20px;
 }

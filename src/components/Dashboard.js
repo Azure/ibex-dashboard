@@ -6,6 +6,7 @@ import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {SentimentSummaryChart} from './SentimentSummaryChart';
+import {PopularTermsChart} from './PopularTermsChart';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -32,24 +33,26 @@ export const Dashboard = React.createClass({
             <div className="app-container">
               <div className="container-fluid">
                 <DataSelector />
-                <div className="row">
-                    <TrendsPanel />
-                    <div className="col-lg-6">
-                        <div id='leafletMap'></div>
-                        <HeatMap />
-                    </div>
-                    <SentimentTreeview />
-                </div>
                 <div className="row graphContainer">
-                    <div className="col-lg-3">
-                      <div className="radar-chart-description">{this.state.timeseriesFromDate ? "Data aggregated between {0} and {1}".format(this.state.timeseriesFromDate, this.state.timeseriesToDate) : "Driven off Event Pipeline Histogram Time Window Selection"}</div>                    
-                      <canvas id="BarChart" height="370"></canvas>
+                    <div className="col-lg-3 summaryPieContainer">
+                       <div id="popularTermsPieDiv" style={{width: '100%', height: '250px'}}></div>
+                       <PopularTermsChart />
                     </div>
-                    <SentimentSummaryChart />                
-                    <div className="col-lg-9">
-                        <div id="graphdiv" style={{width: '100%'}}></div>
-                         <TimeSeriesGraph />
-                    </div>                
+                    <div className="col-lg-9 timeSeriesContainer">
+                       <div id="graphdiv" style={{width: '100%', height: '250px', marginBottom: '0px', paddingBottom: '0px'}}></div>
+                       <TimeSeriesGraph />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-lg-2 termBrowserContainer">
+                        <SentimentTreeview />
+                    </div>
+                    <div className="col-lg-10 heatmapContainer">
+                      <div className="row">
+                          <div id='leafletMap'></div>
+                          <HeatMap />
+                      </div>
+                    </div>
                 </div>
             </div>
           </div>

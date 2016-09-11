@@ -63,7 +63,9 @@ const constants = {
            DASHBOARD : {
                LOAD: "LOAD:DASHBOARD",
                CHANGE_SEARCH: "SEARCH:CHANGE",
-               CHANGE_DATE: "DATE:CHANGE"
+               CHANGE_DATE: "DATE:CHANGE",
+               ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
+               CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS"
            },
 };
 
@@ -79,20 +81,6 @@ const methods = {
             .subscribe(response => {
                 if(response && response.length > 0){
                     self.dispatch(constants.ACTIVITY.LOAD_EVENTS, {
-                                            response: response
-                    });
-                }
-            });
-        },
-        load_sentiment_tree_view: function(){
-            let self = this;
-            
-            let dataStore = this.flux.stores.DataStore.dataStore;
-            
-            SERVICES.getSentimentTreeData(dataStore.categoryType, dataStore.categoryValue, dataStore.timespanType, dataStore.datetimeSelection)
-            .subscribe(response => {
-                if(response && response.length > 0){
-                    self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {
                                             response: response
                     });
                 }
@@ -127,28 +115,31 @@ const methods = {
           
           SERVICES.getDefaultSuggestionList(azureStorageCB);
         },
+        load_sentiment_tree_view: function(){
+            let self = this;
+          
+            let azureStorageCB = folderTree => {
+                    if(folderTree && folderTree.size > 0){
+                        self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {folderTree});
+                    }
+            };
+
+            SERVICES.getSentimentTreeData(azureStorageCB);
+        },
         changeSearchFilter(newFilter, searchType){
-           let self = this;
            let dataStore = this.flux.stores.DataStore.dataStore;
-           
-           SERVICES.getInitialGraphDataSet(dataStore.datetimeSelection, dataStore.timespanType, newFilter, searchType)
-                      .subscribe(timeSeriesResponse => {
-                             if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
-                                 self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse, newFilter, searchType});
-                             }
-                      }, error => {
-                        let emptyTimeSeries = {graphData: [], labels: []};
-                        
-                        //If we reached here then the datetime blob is not available. We should continue
-                        //to dispatch the flux operation to the front-end so the search terms / date is reflected.
-                        self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: emptyTimeSeries, newFilter: newFilter, searchType: searchType});
-           });
+           this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
+        },
+        changeTermsFilter(newFilters){
+           this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
+        },
+        updateAssociatedTerms(associatedKeywords){
+            this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, associatedKeywords);
         },
         changeDate(datetimeSelection, timespanType){
            let self = this;
-           let dataStore = this.flux.stores.DataStore.dataStore;
                        
-           SERVICES.getInitialGraphDataSet(datetimeSelection, timespanType, dataStore.categoryValue, dataStore.categoryType)
+           SERVICES.getPopularTermsTimeSeries(datetimeSelection, timespanType)
                       .subscribe(timeSeriesResponse => {
                              if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
                                  self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
@@ -159,7 +150,7 @@ const methods = {
                         //If we reached here then the datetime blob is not available. We should continue
                         //to dispatch the flux operation to the front-end so the search terms / date is reflected.
                         self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: emptyTimeSeries, datetimeSelection: datetimeSelection, timespanType: timespanType});
-           });            
+           });
         }
     },
     GRAPHING : {
@@ -171,8 +162,8 @@ const methods = {
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
 
-            if(dataStore.categoryValue && dataStore.categoryType){
-                SERVICES.getInitialGraphDataSet(dataStore.datetimeSelection, dataStore.timespanType, dataStore.categoryValue, dataStore.categoryType)
+            if(dataStore.datetimeSelection && dataStore.timespanType){
+                SERVICES.getPopularTermsTimeSeries(dataStore.datetimeSelection, dataStore.timespanType)
                             .subscribe(response => {
                                 if(response && response.graphData && response.graphData.length > 0){
                                     self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response: response});

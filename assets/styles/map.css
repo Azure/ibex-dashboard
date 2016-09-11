@@ -1,15 +1,15 @@
 .info {
   padding: 6px 8px;
-	font: 14px/16px Arial, Helvetica, sans-serif;
+	font: 10px/16px Arial, Helvetica, sans-serif;
 	background: rgba(66,73,79,.94);
   color: #fff;
 	box-shadow: 0 0 15px rgba(0,0,0,0.2);
 	border-radius: 5px;
 }
 
-.info h4 {
-    margin: 0 0 5px;
-    font-size: 11pt;
+.info h5 {
+    margin-top: 0px;
+    font-size: 12px;
     font-weight: 700;
     color: #fff;
 }
@@ -24,4 +24,66 @@
 }
 .legend-label {
   line-height: 18px;
+}
+
+.cluster-size-medium{
+  border-radius: 30px;
+  width: 50px;
+  height: 50px;
+}
+
+.cluster-size-medium div{
+  border-radius: 30px;
+  width: 40px;
+  height: 40px;
+}
+
+.cluster-size-medium span{
+  line-height: 40px;
+}
+
+.cluster-size-large{
+  border-radius: 40px;
+  width: 60px;
+  height: 60px;
+}
+
+.cluster-size-large div{
+  border-radius: 40px;
+  width: 50px;
+  height: 50px;
+}
+
+.cluster-size-large span{
+  line-height: 50px;
+}
+
+.cluster-size-xl{
+  border-radius: 50px;
+  width: 70px;
+  height: 70px;
+}
+
+.cluster-size-xl div{
+  border-radius: 50px;
+  width: 60px;
+  height: 60px;
+}
+
+.cluster-size-xl span{
+  line-height: 60px;
+}
+
+.marker-cluster-xl{
+  background-color: #b74e4f;
+}
+
+.marker-cluster-xl div{
+  background-color: #a43834;
+  color:#fff;
+}
+
+#leafletMap{
+  margin-top: 0px;
+  background-color: #333;
 }

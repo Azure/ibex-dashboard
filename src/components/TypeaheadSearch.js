@@ -66,24 +66,27 @@ export const TypeaheadSearch = React.createClass({
   },
   
   suggestionValue(suggestion){  
-      return suggestion.category.trim() + ' - ' + suggestion.searchTerm.trim();
+      return suggestion.searchTerm.trim();
   },
   
   render: function(){
     let inputAttributes = {
-          className: 'twitter-input',
+          className: 'form-control form-control-search',
           placeholder: this.props.data || ''
     };
 
     return (
-        <div>
-           <Autosuggest suggestions={this.getSuggestions}
-                        inputAttributes={inputAttributes}
-                        suggestionRenderer={this.renderSuggestion}
-                        onSuggestionSelected={this.typeaheadItemSelected}
-                        showWhen={input => input.trim().length >= 0}
-                        suggestionValue={this.suggestionValue}
-                        scrollBar = {true} />
+        <div className="input-group">
+                  <span className="input-group-addon">
+                      <i className="fa fa-search"></i>
+                  </span>
+                  <Autosuggest suggestions={this.getSuggestions}
+                               inputAttributes={inputAttributes}
+                               suggestionRenderer={this.renderSuggestion}
+                               onSuggestionSelected={this.typeaheadItemSelected}
+                               suggestionValue={this.suggestionValue}
+                               scrollBar = {true}
+                               value={this.props.data} />
         </div>
     );
   }

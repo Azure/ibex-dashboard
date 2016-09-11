@@ -60,7 +60,7 @@ a:hover {
 }
 
 .navbar-trans {
-    background-color: rgba(66,73,79,0.94);
+    background: #3f3f4f;
     color: #61A5E4;
     border-bottom: 1px solid #61A5E4!important;
     border-width: 0;
@@ -75,7 +75,7 @@ a:hover {
 .brandLabel{
   padding: 14px;
   font-size: 14px;
-  color: #fff!important;
+  color: #a3a3b3!important;
   font-weight: bold!important;
 }
 
@@ -106,6 +106,14 @@ a:hover {
 .navbar-trans a{
     color:#cdcdcd;
     letter-spacing:1px;
+}
+
+.form-control-search{
+    font-size: 14px!important;
+    height: 27px;
+    color: rgb(46, 189, 89)!important;
+    font-weight: 600!important;
+    background-color: #3f3f4f!important;
 }
 
 .navbar-trans .form-control:focus {

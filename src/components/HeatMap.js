@@ -1,28 +1,47 @@
 import Fluxxor from 'fluxxor';
 import React, { PropTypes, Component } from 'react';
 import {Actions} from '../actions/Actions';
-import Leaflet from 'leaflet';
 import Tile from 'geotile';
-import Rx from 'rx';
+import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
+import Dialog from 'material-ui/lib/dialog';
 import env_properties from '../../config.json';
 import global from '../utils/global';
-import Rainbow from 'rainbowvis.js';
+import numeral from 'numeral';
+import FlatButton from 'material-ui/lib/flat-button';
+import {ActivityFeed} from './ActivityFeed';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 const defaultLat = 20.1463919;
 const defaultLong = 2.2705778;
 const rainbowColorCeiling = 1000;
+const maxRequestLimit = 400;
+const sentimentFieldName = 'mag_n';
+const mentionCountFieldName = 'cnt';
+const defaultClusterSize = 40;
 
 export const HeatMap = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
+      this.getFlux().actions.ACTIVITY.load_activity_events();
+      
       return{
           latitude: defaultLat,
-          longitude: defaultLong
+          longitude: defaultLong,
+          openModal: false,
+          selectedTileId: false,
+          modalTitle: ''
       };
+  },
+
+  handleOpen(layerId){
+    this.setState({openModal: true, selectedTileId: layerId});
+  },
+
+  handleClose(){
+    this.setState({openModal: false});
   },
   
   getStateFromFlux: function() {
@@ -30,12 +49,12 @@ export const HeatMap = React.createClass({
   },
   
   addInfoBoxControl(){
-      let info = Leaflet.control();
+      let info = L.control();
       let self = this;
       
       if(this.map){
           info.onAdd = map => {
-			this._div = Leaflet.DomUtil.create('div', 'info');
+			this._div = L.DomUtil.create('div', 'info');
 			info.update();
 			return this._div;
 		  };
@@ -47,17 +66,12 @@ export const HeatMap = React.createClass({
 		  info.update = props => {
             let categoryType = self.state.categoryType;
             let categoryValue = self.state.categoryValue;
-            let infoHeaderText = "<h4>{0} Sentiment Details</h4>".format(categoryType.charAt(0).toUpperCase() + '' + categoryType.substring(1, categoryType.length));
-            let infoBoxInnerHtml = 'Hover over a tile to see more details<br><br>';
+            let infoHeaderText = "<h5>{0} Mentions / Sentiment</h5>".format(categoryValue);
+            let infoBoxInnerHtml = 'Click a marker to view event details<br>';
             
-            if(props && props.cnt){
-                let sentimentListItem = "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span>".format(self.getColor((props.mag_n || 0) * rainbowColorCeiling), self.getSentimentCategory((props.mag_n || 0) * 100));
-                infoBoxInnerHtml = "<b>Term:</b>&nbsp;<u>{0}</u><br /><ul><li><b>Mentions</b>:&nbsp;{1}</li><li><b>Sentiment:</b>&nbsp;{2}&nbsp;</li><li><b>Intensity Level</b>:&nbsp;{3}</li></ul>".format(categoryValue, props.cnt, sentimentListItem, Number(((props.mag_n || 0) * 100).toFixed(0)));
-            }else{
-                Object.keys(Actions.constants.SENTIMENT_COLOR_MAPPING).forEach(element => {
+            Object.keys(Actions.constants.SENTIMENT_COLOR_MAPPING).forEach(element => {
                     infoBoxInnerHtml += "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span><br>".format(Actions.constants.SENTIMENT_COLOR_MAPPING[element], element);
-                });
-            }
+            });
             
 			this._div.innerHTML = infoHeaderText + infoBoxInnerHtml;
 		  };
@@ -72,51 +86,101 @@ export const HeatMap = React.createClass({
   },
   
   getSentimentCategory(level){
-      if(level >= 0 && level <= 15){
-          return "Very Positive";
-      }else if(level > 15 && level <= 25){
-          return "Positive";
-      }else if(level > 25 && level <= 40){
-          return "Slightly Positive";
-      }else if(level > 40 && level <= 55){
-          return "Neutral";
-      }else if(level > 55 && level <= 70){
-          return "Slightly Negative";
-      }else if(level > 70 && level <= 85){
-          return "Negative";
-      }else if(level > 85){
-          return "Very Negative";
+      if(level >= 0 && level < 30){
+          return "small";
+      }else if(level >= 30 && level < 55){
+          return "medium";
+      }else if(level >= 55 && level < 80){
+          return "large";
+      }else{
+          return "xl";
       }
   },
   
   componentDidMount(){
     let latitude = this.state.latitude;
     let longitude = this.state.longitude;
-    this.heatmapLayers = {};
-    this.heatmap = {};
+    this.loadedTileBuckets = new Map();
+    this.visibleClusters = new Set();
+    this.associatedTerms = new Map();
+    this.tilemap = new Map();
     let defaultZoom = 5;
-    
-    this.gradient = new Rainbow();
-    this.gradient.setSpectrum('green', 'yellow', 'red');
-    this.gradient.setNumberRange(0, rainbowColorCeiling);
-    
-    this.map = Leaflet.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
-    Leaflet.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+    L.Icon.Default.imagePath = "/dist/assets/images";
+    this.map = L.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
+    L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
-        id: 'mapbox.outdoors',
+        id: 'dark-v9',
         accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
     }).addTo(this.map);
     
-    this.map.addControl(Leaflet.control.zoom({position: 'topright'}));
-    
-    var self = this;
+    this.map.addControl(L.control.zoom({position: 'topright'}));
+    this.map.selectedTerm = this.state.categoryValue;
+    this.map.datetimeSelection = this.state.datetimeSelection;
+
     this.map.on('moveend',() => {
-      self.viewportChanged();
+      this.viewportChanged();
     });
-        
-    this.viewportChanged();
+
+    this.map.on('zoomend',() => {
+      this.clearMap();
+    });
+
+    this.addClusterGroup();
     this.addInfoBoxControl();
+  },
+
+  addClusterGroup(){
+      let self = this;
+
+      if(this.map){
+          this.markers = L.markerClusterGroup({
+                            maxClusterRadius: 120,
+                            iconCreateFunction: cluster => {
+                                let mentions = 0, maxSentimentLevel = 0;
+
+                                cluster.getAllChildMarkers().forEach(child => {
+                                    if(child.feature.properties[mentionCountFieldName]){
+                                        mentions += child.feature.properties[mentionCountFieldName];
+                                        maxSentimentLevel = Math.max(maxSentimentLevel, child.feature.properties[sentimentFieldName]);
+                                    }
+                                });
+
+                                let cssClass = "marker-cluster marker-cluster-{0}".format(self.getSentimentCategory((maxSentimentLevel || 0) * 100));
+
+                                return self.customClusterIcon(mentions, cssClass);
+                            },
+                            singleMarkerMode: true
+                        });
+
+            this.markers.on('click', a => {
+                //if we're at the leaf level then show the dialog
+                if(a.layer.feature.properties.layerId){
+                    self.handleOpen(a.layer.feature.properties.layerId);
+                }
+		    });
+
+            this.map.addLayer(this.markers);
+      }
+  },
+
+  customClusterIcon(mentions, cssClass){
+      let clusterSize = defaultClusterSize;
+
+      if(mentions > 1000 && mentions < 10000){
+          clusterSize = 50;
+          cssClass += " cluster-size-medium";
+      }else if(mentions > 10000 && mentions < 50000){
+          clusterSize = 60;
+          cssClass += " cluster-size-large";
+      }else if(mentions > 50000){
+          clusterSize = 70;
+          cssClass += " cluster-size-xl";
+      }
+
+      return L.divIcon({ html: "<div><span>{0}</span></div>".format(numeral(mentions).format(mentions > 1000 ? '+0.0a' : '0a')), 
+                                                         className: cssClass,
+                                                         iconSize: L.point(clusterSize, clusterSize) });
   },
   
   viewportChanged() {
@@ -130,180 +194,202 @@ export const HeatMap = React.createClass({
   dataStoreValidated(){
       return this.state && this.state.datetimeSelection
                         && this.state.timespanType
-                        && this.state.categoryType
+                        && this.state.categoryValue
    },
 
-  /*Thank You Tim Park*/
-  updateHeatmap() {
-    let self = this;
-    
+  mapMarkerFlushCheck(){
+      if(this.map.selectedTerm != this.state.categoryValue || this.map.datetimeSelection != this.state.datetimeSelection || this.state.renderMap){
+          this.map.datetimeSelection =  this.state.datetimeSelection;
+          this.map.selectedTerm = this.state.categoryValue;
+
+          this.clearMap();
+      }
+  },
+  
+  updateHeatmap() {    
     if(!this.dataStoreValidated()){
         return false;
     }
     
-    let dataStore = this.getFlux().store("DataStore").dataStore;
-    
-    let bounds = self.map.getBounds();
+    this.mapMarkerFlushCheck();
+
+    let bounds = this.map.getBounds();
     let zoom = this.map.getZoom();
     let northWest = bounds.getNorthWest();
     let southEast = bounds.getSouthEast();
 
-    let spanningTileIds = Tile.tileIdsForBoundingBox(northWest.lat, northWest.lng, southEast.lat, southEast.lng, zoom);
+    let spanningTileIds = Tile.tileIdsForBoundingBox({
+                                                      north: northWest.lat, 
+                                                      west: northWest.lng, 
+                                                      south: southEast.lat, 
+                                                      east: southEast.lng
+                                                    }, zoom);
 
-    let layerIds = spanningTileIds.map(tileId => {
-       return self.buildLayerId(tileId, dataStore);
-    });
+    eachLimit(spanningTileIds, maxRequestLimit, this.createLayer, this.updateDataStore);
+  },
 
-    let deleteList = [];
-    let callback = () => console.log('Finished processing tile(s)');
+  updateDataStore(){
+      let aggregateAssociatedTermCnt = {};
 
-    for (let layerId in this.heatmapLayers) {
-      if (layerIds.indexOf(layerId) === -1) {
-        deleteList.push(layerId);
-        this.map.removeLayer(this.heatmapLayers[layerId]);
+      for (let tileTerms of this.associatedTerms.values()) {
+          Object.keys(tileTerms).forEach(term => aggregateAssociatedTermCnt[term] = aggregateAssociatedTermCnt[term] || 0 + tileTerms[term]);
       }
-    }
-    
-    Rx.Observable.from(spanningTileIds)
-                 .subscribe(tile => {
-                     self.createLayer(tile, callback);
-                 }, error => {
-                     deleteList.forEach(layerId => {
-                        delete self.heatmapLayers[layerId];
-                     });
-                 });
+
+      this.getFlux().actions.DASHBOARD.updateAssociatedTerms(aggregateAssociatedTermCnt);
   },
   
   fetchHeatmap(tileId, callback) {
     let self = this;
-    //exit the fetch if the tile response is already cached
-    if (this.heatmap[tileId]) return callback();
+    let cachedTileBucket = this.loadedTileBuckets.get(tileId);
+
+    if (cachedTileBucket) return callback(this.shouldFilterCachedTile(cachedTileBucket, tileId));
 
     SERVICES.getHeatmapTiles(this.state.categoryType, this.state.timespanType, this.state.categoryValue, this.state.datetimeSelection, tileId)
             .subscribe(response => {
-                self.heatmap[tileId] = response;
                 callback(response);
             }, error => {
+                callback([]);
             });
+  },
+
+  shouldFilterCachedTile(parentTileChildren, parentTileId){
+      let self = this;
+
+      if(Array.isArray(parentTileChildren)){
+          parentTileChildren.forEach(childTileId => self.processMapCluster(parentTileId, childTileId, {}, {}));
+      }
+
+      return [];
   },
   
   createLayer(tileId, callback) {
     let self = this;
     let dataStore = this.getFlux().store("DataStore").dataStore;
-    
     let layerId = this.buildLayerId(tileId, dataStore);
 
     this.fetchHeatmap(tileId, response => {
-      if (!self.heatmap[tileId]) return callback();
-      if (self.heatmapLayers[layerId]) self.map.removeLayer(self.heatmapLayers[layerId]);
-            
-      //Iterate through all the elemens in the cache for tileId
-      self.heatmap[tileId].forEach(heatmapTileElement => {
-        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => {               
-               let leafletElement = heatmapTileElement[heatmapElementTileId];
-               let heatmapTile = Tile.tileFromTileId(heatmapElementTileId); 
-               
-               let rectangle = Leaflet.rectangle([
-                    [ heatmapTile.latitudeNorth, heatmapTile.longitudeWest ],
-                    [ heatmapTile.latitudeSouth, heatmapTile.longitudeEast ]
-               ]);
-               
-               let geoJson = self.convertTileToGeoJSON(rectangle.toGeoJSON(), leafletElement, layerId);
-               
-               if(self.heatmapLayers[layerId]){
-                   self.heatmapLayers[layerId].addData(geoJson);
-               }else{
-                   self.heatmapLayers[layerId] = Leaflet.geoJson(geoJson,
-                        {style: self.style, onEachFeature : self.onEachFeature});
-               }
-        });
+      response.forEach(heatmapTileElement => {
+        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => self.processMapCluster(tileId, heatmapElementTileId, heatmapTileElement[heatmapElementTileId], layerId));
       });
-      
-      if(self.heatmapLayers[layerId]){
-         self.heatmapLayers[layerId].addTo(self.map); 
-      }
       
       return callback();
     });
   },
-  
-  style(feature) {
-			return {
-			    weight: 0,
-				opacity: 1,
-				//color: 'white',
-				//dashArray: '3',
-				fillOpacity: 0.7,
-				fillColor: this.getColor((feature.properties.mag_n || 0) * rainbowColorCeiling)
-			};
- },
- 
- getColor(d) {
-			return "#{0}".format(this.gradient.colourAt(d));
- },
-  
- convertTileToGeoJSON(geoJson, properties, layerId){
+
+  processMapCluster(bucketTileId, tileId, tilePayload, layerId){
+       let tileGeoJson = this.tilemap.get(tileId);
+
+       if(!tileGeoJson && tilePayload){
+           tileGeoJson = this.addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId);
+       }
+
+       let filterCluster = this.filterMapCluster(tileGeoJson, tileId);
+
+       if(!this.visibleClusters.has(tileId) && !filterCluster){
+           this.visibleClusters.add(tileId);
+           this.markers.addLayer(tileGeoJson);
+       }else if(filterCluster){
+           this.visibleClusters.delete(tileId);
+           this.markers.removeLayer(tileGeoJson);
+       }
+  },
+
+  addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId){
+       try{
+            let heatmapTile = Tile.tileFromTileId(tileId);
+            let tileBucketCache = this.loadedTileBuckets.get(bucketTileId) || [];
+            tileBucketCache.push(tileId);
+
+            this.loadedTileBuckets.set(bucketTileId, tileBucketCache);
+            let geoJson = this.convertTileToGeoJSON(heatmapTile, tilePayload, layerId);
+            let heatMapLayer = L.geoJson(geoJson, {});
+            this.tilemap.set(tileId, heatMapLayer);
+            this.trackAssociatedTerms(geoJson, tileId);
+
+        return heatMapLayer;
+       }catch(e){
+           console.error("An error occured trying to grab the tile details.");
+       }
+  },
+
+  /*Place the associated term count in a data structure indexed by layerId*/
+  trackAssociatedTerms(geoJsonTile, tileId){
+      let layerAssociations = this.associatedTerms.get(tileId) || {};
+
+      if(geoJsonTile.properties.associatedTerms){
+               geoJsonTile.properties.associatedTerms.forEach(termMentions =>  {
+                   let term = Object.keys(termMentions)[0];
+                   layerAssociations[term] = layerAssociations[term] || 0 + termMentions[term];
+               });
+
+               this.associatedTerms.set(tileId, layerAssociations);
+      }
+  },
+
+ convertTileToGeoJSON(tile, properties, layerId){
+      let tileCentroid = new L.latLngBounds(L.latLng(tile.latitudeSouth, tile.longitudeWest), 
+                                                  L.latLng(tile.latitudeNorth, tile.longitudeEast)).getCenter();
+      
+      let geoJson = new L.Marker(tileCentroid).toGeoJSON();
       geoJson.properties = Object.assign(geoJson.properties, properties, {layerId});
       
       return geoJson;
  },
 
-  onEachFeature(feature, layer) {
-			layer.on({
-                mouseover: this.highlightFeature,
-				mouseout: this.resetHighlight,
-				click: this.zoomToFeature
-			});
-  },
-  
-  resetHighlight(e) {
-			let rectangle = e.target;
-            let geoJson = this.heatmapLayers[rectangle.feature.properties.layerId];
-            
-            if(geoJson){
-                geoJson.resetStyle(rectangle);
-            }
-            
-			this.infoControl.update();
-  },
-  
-  highlightFeature(e){
-			var layer = e.target;
+ filterMapCluster(geoJsonTile, tileId) {
+    let termFilters = this.state.filteredTerms;
+    let layerAssociations = this.associatedTerms.get(tileId);
 
-			layer.setStyle({
-				weight: 5,
-				color: '#666',
-				dashArray: '',
-				fillOpacity: 0.7
-			});
+    if(Object.keys(termFilters).length == 0){
+        return false;
+    }
 
-			this.infoControl.update(layer.feature.properties);
-   },
+    return Object.keys(layerAssociations || {})
+                 .filter(key => termFilters[key])
+                 .length > 0;
+ },
    
-   zoomToFeature(e) {
-			this.map.fitBounds(e.target.getBounds());
-   },
-   
-   clearMap(){
-       for (var layerId in this.heatmapLayers) {
-                this.map.removeLayer(this.heatmapLayers[layerId]);
-        }
-        this.heatmap = {};
-        this.heatmapLayers = {};
-   },
+  clearMap(){
+       if(this.markers){
+         this.markers.clearLayers();
+       }
+
+        this.associatedTerms.clear();
+        this.tilemap.clear();
+        this.visibleClusters.clear();
+        this.loadedTileBuckets.clear();
+  },
    
    renderMap(){
-     return this.map && this.state.action != 'editingTimeScale';
+     return this.map && this.state.renderMap;
    },
 
    render() {
+    let contentClassName = "modalContent";
+
+    const modalActions = [
+      <FlatButton
+        label="Ok"
+        primary={true}
+        keyboardFocused={true}
+        onTouchTap={this.handleClose}
+      />,
+    ];
+
     if(this.renderMap()){
-        this.clearMap();
         this.updateHeatmap();
     }
 
     return (
         <div>
+          <Dialog
+            actions={modalActions}
+            modal={false}
+            contentClassName={contentClassName}
+            open={this.state.openModal}
+            onRequestClose={this.handleClose} >
+                <ActivityFeed />
+          </Dialog>
         </div>
      );
   }
