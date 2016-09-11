@@ -1,6 +1,6 @@
 'use strict';
 
-const DefaultEnabledTermOption = {toggled: true, checked: true};
+const DefaultEnabledTermOption = {toggled: true};
 
 // Helper functions for filtering
 export const defaultMatcher = (filterText, node) => {
@@ -70,12 +70,12 @@ export const addFilteredNodeToRoot = (rootNode, child, filteredNode) => {
     }
 }
 
-export const postOrderTreeTraversal = (child, rootNode, newNode) => {
+export const postOrderTreeTraversal = (child, rootNode, newNode, filters) => {
     if(!child.parent){
         return;
     }
 
-    let displayNode = Object.assign({}, child, {children: []}, DefaultEnabledTermOption);
+    let displayNode = Object.assign({}, child, {children: []}, DefaultEnabledTermOption, {checked: filters.hasOwnProperty(child.folderKey) ? filters[child.folderKey] : true});
     if(newNode.children){
         displayNode.children.push(newNode);
     }
@@ -84,21 +84,21 @@ export const postOrderTreeTraversal = (child, rootNode, newNode) => {
         return addFilteredNodeToRoot(rootNode, rootNode, displayNode);
     }
     
-    postOrderTreeTraversal(child.parent, rootNode, displayNode);
+    postOrderTreeTraversal(child.parent, rootNode, displayNode, filters);
 };
 
-export const treeFilterIterator = (node, matcher, filteredTree, nodeCB) => {
+export const treeFilterIterator = (node, matcher, filteredTree, nodeCB, filters) => {
         node.children ? node.children.forEach(child => {
-             treeFilterIterator(child, matcher, filteredTree, nodeCB);
+             treeFilterIterator(child, matcher, filteredTree, nodeCB, filters);
 
              if(matcher(child)){
-                 postOrderTreeTraversal(nodeCB(child), filteredTree, {});
+                 postOrderTreeTraversal(nodeCB(child), filteredTree, {}, filters);
              }
 		}) : {};
 
         return filteredTree;
 }
 
-export const filterTreeByMatcher = (rootNode, matcher, nodeCB) => {
-    return treeFilterIterator(rootNode, matcher, Object.assign({}, rootNode, {children: []}), nodeCB);
+export const filterTreeByMatcher = (rootNode, matcher, nodeCB, filters) => {
+    return treeFilterIterator(rootNode, matcher, Object.assign({}, rootNode, {children: []}), nodeCB, filters);
 };

@@ -6,7 +6,7 @@ import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {SentimentSummaryChart} from './SentimentSummaryChart';
-import {PopularTermsPie} from './PopularTermsPie';
+import {PopularTermsChart} from './PopularTermsChart';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -34,12 +34,12 @@ export const Dashboard = React.createClass({
               <div className="container-fluid">
                 <DataSelector />
                 <div className="row graphContainer">
-                    <div className="col-lg-2 summaryPieContainer">
-                       <div id="popularTermsPieDiv" style={{width: '100%', height: '300px'}}></div>
-                       <PopularTermsPie />
+                    <div className="col-lg-3 summaryPieContainer">
+                       <div id="popularTermsPieDiv" style={{width: '100%', height: '250px'}}></div>
+                       <PopularTermsChart />
                     </div>
-                    <div className="col-lg-10 timeSeriesContainer">
-                       <div id="graphdiv" style={{width: '100%', height: '300px', marginBottom: '0px', paddingBottom: '0px'}}></div>
+                    <div className="col-lg-9 timeSeriesContainer">
+                       <div id="graphdiv" style={{width: '100%', height: '250px', marginBottom: '0px', paddingBottom: '0px'}}></div>
                        <TimeSeriesGraph />
                     </div>
                 </div>
@@ -48,9 +48,6 @@ export const Dashboard = React.createClass({
                         <SentimentTreeview />
                     </div>
                     <div className="col-lg-10 heatmapContainer">
-                      <div className="row" className="tagFilterRow">
-                         
-                      </div>
                       <div className="row">
                           <div id='leafletMap'></div>
                           <HeatMap />

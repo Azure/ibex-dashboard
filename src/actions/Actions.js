@@ -131,7 +131,7 @@ const methods = {
            this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
         },
         changeTermsFilter(newFilters){
-           this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, {newFilters});
+           this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
         },
         updateAssociatedTerms(associatedKeywords){
             this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, associatedKeywords);

@@ -88,3 +88,7 @@ ol.breadcrumb a {
 .heatmapContainer{
     padding-left: 0px;
 }
+
+.tagFilterRow{
+    padding: 0px 20px 10px 20px;
+}

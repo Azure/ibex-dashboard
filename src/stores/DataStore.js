@@ -58,7 +58,7 @@ export const DataStore = Fluxxor.createStore({
     },
 
     handleChangeTermFilters(newFilters){
-        this.dataStore.filteredTerms = Object.assign({}, this.filteredTerms, newFilters);
+        this.dataStore.filteredTerms = Object.assign({}, this.dataStore.filteredTerms, newFilters);
         this.dataStore.renderMap = true;
         this.emit("change");
     },
@@ -67,7 +67,9 @@ export const DataStore = Fluxxor.createStore({
         let self = this;
         this.dataStore.timeSeriesGraphData['aggregatedCounts'] = [];
         let termSummaryMap = new Map();
+        let termColorMap = new Map();
         let maxMentionCount = 0;
+        let barColors = ['#fdd400', '#84b761', '#b6d2ff', '#CD0D74', '#2f4074'];
         
         if(this.dataStore.timeSeriesGraphData && this.dataStore.timeSeriesGraphData.graphData){
             //hash the time series data by the epoch time as we'll use this to render 
@@ -79,12 +81,16 @@ export const DataStore = Fluxxor.createStore({
             });
 
             for (let [term, mentions] of termSummaryMap.entries()) {
+                termColorMap.set(term, barColors.pop());
+
                 if(mentions > maxMentionCount){
                     maxMentionCount = mentions;
+                    
                     this.dataStore.timeSeriesGraphData['mostPopularTerm'] = term;
                 }
             }
 
+            self.dataStore.timeSeriesGraphData.termColorMap = termColorMap;
             self.dataStore.timeSeriesGraphData.termSummaryMap = termSummaryMap;
         }
     },
@@ -140,6 +146,7 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.timespanType = changedData.timespanType;
         this.refreshGraphData(changedData.timeSeriesResponse);
         this.dataStore.filteredTerms = {};
+        this.dataStore.renderMap = true;
         this.dataStore.action = 'changedSearchTerms';
         
         this.emit("change");
@@ -149,6 +156,7 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.categoryValue = changedData.newFilter;
         this.dataStore.categoryType = changedData.searchType;
         this.dataStore.action = 'changedSearchTerms';
+        this.dataStore.renderMap = true;
         this.dataStore.filteredTerms = {};
         
         this.emit("change");
@@ -173,8 +181,10 @@ export const DataStore = Fluxxor.createStore({
         let self = this;
         let termSuperSet = Object.keys(this.dataStore.associatedKeywords);
 
-        if(Object.keys(this.dataStore.filteredTerms).length == 0){
-            this.dataStore.filteredTerms = termSuperSet.map(term=>{let o = {}; o[term] = true; return o;});
+        if(termSuperSet.length > 0 && Object.keys(this.dataStore.filteredTerms).length == 0){
+            termSuperSet.forEach(term=>this.dataStore.filteredTerms[term] = true);
+        }else if(termSuperSet.length == 0){
+            this.dataStore.filteredTerms = {};
         }
 
         if(this.dataStore.treeViewStructure.children && this.dataStore.treeViewStructure.children.length > 0){
@@ -182,7 +192,8 @@ export const DataStore = Fluxxor.createStore({
                         return termSuperSet.indexOf((node.folderKey || "").toLowerCase()) > -1;
                     }, 
                     node => Object.assign({}, node, {eventCount: this.dataStore.associatedKeywords[node.folderKey.toLowerCase()], 
-                                                     checked: self.dataStore.filteredTerms[node.folderKey.toLowerCase()]}));
+                                                     checked: self.dataStore.filteredTerms[node.folderKey.toLowerCase()]}),
+                    self.dataStore.filteredTerms);
             
             this.updateTreeEventCount(filtered);
             this.dataStore.originalTermsTree = filtered;

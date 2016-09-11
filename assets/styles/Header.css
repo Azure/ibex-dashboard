@@ -108,9 +108,12 @@ a:hover {
     letter-spacing:1px;
 }
 
-.form-control{
-    font-size: 12px;
+.form-control-search{
+    font-size: 14px!important;
     height: 27px;
+    color: rgb(46, 189, 89)!important;
+    font-weight: 600!important;
+    background-color: #3f3f4f!important;
 }
 
 .navbar-trans .form-control:focus {

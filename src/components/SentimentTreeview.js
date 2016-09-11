@@ -1,10 +1,12 @@
 import {SERVICES} from '../services/services';
 import Fluxxor from 'fluxxor';
 import Subheader from './Subheader';
+import {TermFilter} from './TermFilter';
 import React, { PropTypes, Component } from 'react';
 import {Actions} from '../actions/Actions';
 import {Treebeard, decorators} from 'react-treebeard';
 import * as filters from './TreeFilter';
+import {TypeaheadSearch} from './TypeaheadSearch';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -21,7 +23,7 @@ const styles = {
      width: '400px'
  },
  searchBox: {
-        padding: '20px 20px 10px 20px'
+        padding: '0px 20px 10px 20px'
  }
 };
 
@@ -103,6 +105,29 @@ const treeDataStyle = {
     }
 };
 
+decorators.Toggle = (props) => {
+      let isNodeTypeCategory = props.node && props.node.children && props.node.children.length > 0;
+      let iconComponent = <div/>;
+      let iconStyle = {color: '#fff'};
+      const style = props.style;
+
+      if(isNodeTypeCategory){
+          iconComponent = props.node.toggled ? <i className="fa fa-plus fa-1" style={iconStyle}></i> : <i className="fa fa-minus fa-1" style={iconStyle}></i>;
+      }
+
+      return (
+        <div style={style.base}>
+            <div style={style.wrapper}>
+                {iconComponent}
+            </div>
+        </div>
+      );
+};
+
+decorators.Toggle.propTypes = {
+    style: React.PropTypes.object
+};
+
 export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
@@ -133,10 +158,8 @@ export const SentimentTreeview = React.createClass({
   },
 
   onChange(node){
-      let folderName = node.folderKey;
       let filters = this.state.filteredTerms;
-      let treeData = this.state.treeData;
-      this.changeCheckedStateForChildren(treeData, child => filters[child.folderKey] = !filters[child.folderKey]);
+      this.changeCheckedStateForChildren(node, child => filters[child.folderKey] = !filters[child.folderKey]);
       this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
   },
 
@@ -154,10 +177,11 @@ export const SentimentTreeview = React.createClass({
         const style = props.style;
         let self = this;
         const iconStyle = { color: '#337ab7' };
-        const termStyle = { fontWeight: '600', color: '#fff'};
+        const termStyle = { paddingLeft: '3px', fontWeight: 800, color: '#337ab7' };
+        const categorytyle = { paddingLeft: '3px', fontSize: '13px', color: '#fff', fontWeight: 600};
         const folderIconStyle = { color: 'rgb(232, 214, 133)' };
-        const badgeClass = props.node.checked || (props.node.children && props.node.eventCount > 0) ? "badge" : "badge badge-disabled";
-        let folderType = props.node.children && props.node.children.length > 0;
+        const badgeClass = props.node.checked && props.node.children && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
+        let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
 
         return (
             <div style={style.base}>
@@ -165,12 +189,7 @@ export const SentimentTreeview = React.createClass({
                     <input type="checkbox"
                         checked={props.node.checked}
                         onChange={self.onChange.bind(this, props.node)}/>
-                        &nbsp;
-                        {
-                         folderType ? <i className="fa fa-folder fa-1" style={folderIconStyle}></i> : <i className="fa fa-slack fa-1" style={iconStyle}></i> 
-                        }
-
-                        <span style={Object.assign({paddingLeft: '3px'}, !folderType ? termStyle : {})}>{props.node.name}</span>
+                        <span style={ !isNodeTypeCategory ? termStyle : categorytyle }>{(!isNodeTypeCategory ? "#" : "") + props.node.name}</span>
                         {
                             props.node.eventCount && props.node.eventCount > 0 ? 
                                 <span className={badgeClass}>{props.node.eventCount}</span> 
@@ -180,23 +199,48 @@ export const SentimentTreeview = React.createClass({
             </div>
         );   
   },
+
+  Toggle(props){
+      let isNodeTypeCategory = props.node && props.node.children && props.node.children.length > 0;
+      let iconComponent = {};
+      let iconStyle = {color: '#fff'};
+      const style = props.style;
+
+      if(isNodeTypeCategory){
+          iconStyle = props.node.toggled ? <i className="fa fa-plus fa-1" style={iconStyle}></i> : <i className="fa fa-minus fa-1" style={iconStyle}></i>;
+      }
+
+      return (
+        <div style={style.base}>
+            <div style={style.wrapper}>
+                {iconComponent}
+            </div>
+        </div>
+      );
+ },
   
-  render(){
+ render(){
      let self = this;
-     
+     let defaultSearchPlaceholder = "#" + this.state.categoryValue;
+
      return (
          <div className="panel panel-default">
-            <Subheader style={styles.subHeader}>Associated Terms Selector</Subheader>
+            <Subheader style={styles.subHeader}>Heatmap Terms</Subheader>
+            <div className="row" className="tagFilterRow">
+                <TypeaheadSearch data={defaultSearchPlaceholder}/>
+            </div>
+            <div className="row" className="tagFilterRow">
+                <TermFilter data={this.state.associatedKeywords ? Object.keys(this.state.associatedKeywords) : [] } />
+            </div>
             <div style={styles.searchBox}>
                     <div className="input-group">
                         <span className="input-group-addon">
-                          <i className="fa fa-search"></i>
+                          <i className="fa fa-filter"></i>
                         </span>
                         <input type="text"
                             className="form-control"
                             placeholder="Search the association list..."
-                            onKeyUp={self.onFilterMouseUp}
-                        />
+                            onKeyUp={self.onFilterMouseUp} />
                     </div>
             </div>
             <div className="list-group" data-scrollable="">
@@ -216,4 +260,3 @@ export const SentimentTreeview = React.createClass({
      );
   }
 });
-  

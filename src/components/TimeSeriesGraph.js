@@ -14,7 +14,7 @@ export const TimeSeriesGraph = React.createClass({
   getInitialState: function() {
     this.getFlux().actions.GRAPHING.load_timeseries_data();
   },
-      
+
   getStateFromFlux: function() {
     return this.getFlux().store("DataStore").getState();
   },
@@ -22,12 +22,9 @@ export const TimeSeriesGraph = React.createClass({
   initializeGraph(){
     this.trendingTimeSeries = AmCharts.makeChart(graphDivId, {
         "type": "serial",
+        "mouseWheelZoomEnabled":true,
         "theme": "dark",
-        "legend": {
-            "useGraphSettings": true
-        },
         "dataProvider": [],
-        "titles":[{"text":"5 Most Mentioned Terms"}],
         "marginLeft":"0",
         "marginRight":"0",
         "synchronizeGrid":true,
@@ -40,19 +37,21 @@ export const TimeSeriesGraph = React.createClass({
         }],
         "categoryField": "date",
         "chartScrollbar": {
-            "gridAlpha":0,
-            "color":"#888888",
-            "scrollbarHeight":40,
-            "backgroundAlpha":0,
-            "selectedBackgroundAlpha":0.1,
-            "selectedBackgroundColor":"#888888",
-            "graphFillAlpha":0,
+            "graph": this.state.timeSeriesGraphData.mostPopularTerm,
+            "scrollbarHeight": 40,
+            "backgroundAlpha": 0,
+            "selectedBackgroundAlpha": 0.1,
+            "selectedBackgroundColor": "#888888",
+            "graphFillAlpha": 0,
+            "graphLineAlpha": 0.5,
+            "selectedGraphFillAlpha": 0,
+            "selectedGraphLineAlpha": 1,
             "autoGridCount":true,
-            "selectedGraphFillAlpha":0,
-            "graphLineAlpha":0.2,
-            "graphLineColor":"#c2c2c2",
-            "selectedGraphLineColor":"#888888",
-            "selectedGraphLineAlpha":1
+            "color":"#AAAAAA"
+        },
+        "valueScrollbar":{
+            "oppositeAxis":false,
+            "scrollbarHeight":10
         },
         "chartCursor": {
             "categoryBalloonDateFormat": "MMM D HH:00",
@@ -71,44 +70,19 @@ export const TimeSeriesGraph = React.createClass({
     });
   },
 
-  refreshTrendingGraph(graphDataset){
-    let graphLabelList = [
-                {
-                    lineColor: "#FF6600",
-                    bullet: "round"
-                },
-                {
-                    lineColor: "#FCD202",
-                    bullet: "square"
-                },
-                {
-                    lineColor: "#B0DE09",
-                    bullet: "triangleUp"
-                },
-                {
-                    lineColor: "#015086",
-                    bullet: "triangleDown"
-                },
-                {
-                    bullet: "bubble"
-                }
-            ];
-
+  refreshTrendingGraph(graphDataset, termColorMap){
     let graphDefaults = {
         "valueAxis": "v1",
-        "bulletBorderThickness": 1,
-        "type": "smoothedLine",
         "balloonText": "<b>[[title]]</b><br><span style='font-size:8px;'>[[value]] mentions</span>",
         "lineThickness": 2,
-        "hideBulletsCount": 30,
-		"fillAlphas": 0
+        "hideBulletsCount": 30
     };
 
     let graphList = [];
 
     for(let i = 1; i < graphDataset.labels.length; i++){
         let label = graphDataset.labels[i];
-        graphList.push(Object.assign(graphLabelList[i - 1], {valueField: label}, {title: label}, graphDefaults));
+        graphList.push(Object.assign({id: label, lineColor: termColorMap.get(label)}, {valueField: label}, {title: label}, graphDefaults));
     }
 
     this.trendingTimeSeries.graphs = graphList;
@@ -117,7 +91,7 @@ export const TimeSeriesGraph = React.createClass({
     this.trendingTimeSeries.validateData();
   },
   
-  updateTimeSeriesData(graphDataset){
+  updateTimeSeriesData(graphDataset, termColorMap){
     if(!this.trendingTimeSeries){
         this.initializeGraph();
     }
@@ -125,13 +99,13 @@ export const TimeSeriesGraph = React.createClass({
     let graphDateScope = this.trendingTimeSeries.datetimeSelection || '';
 
     if(graphDateScope != this.state.datetimeSelection){
-        this.refreshTrendingGraph(graphDataset);
+        this.refreshTrendingGraph(graphDataset, termColorMap);
     }
   },
   
   render() {
     if(this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts && this.state.timeSeriesGraphData.aggregatedCounts.length > 0){
-        this.updateTimeSeriesData(this.state.timeSeriesGraphData);
+        this.updateTimeSeriesData(this.state.timeSeriesGraphData, this.state.timeSeriesGraphData.termColorMap);
     }
 
     return (
