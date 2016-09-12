@@ -5,7 +5,6 @@ import {TrendsPanel} from './TrendsPanel';
 import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
-import {SentimentSummaryChart} from './SentimentSummaryChart';
 import {PopularTermsChart} from './PopularTermsChart';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
