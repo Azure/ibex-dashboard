@@ -106,6 +106,9 @@ touch server.js
 selectNodeVersion
 
 if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
+  echo Installing RIMRAF
+  eval $NPM_CMD install rimraf -g --silent
+  echo Removing node_modules folder
   echo Installing NPM Packages
   eval $NPM_CMD install
   exitWithMessageOnError "npm failed"
@@ -114,6 +117,7 @@ fi
 
 if [ -e "$DEPLOYMENT_SOURCE/bower.json" ]; then
   echo Installing Bower Packages
+  rimraf bower_components
   eval $NPM_CMD install bower
   exitWithMessageOnError "installing bower failed"
   ./node_modules/.bin/bower install
