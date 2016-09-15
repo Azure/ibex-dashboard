@@ -134,7 +134,7 @@ export const DataStore = Fluxxor.createStore({
 
         this.indexTimeSeriesResponse();
 
-        if(this.dataStore.categoryValue == "" && this.dataStore.timeSeriesGraphData.aggregatedCounts && this.dataStore.timeSeriesGraphData.aggregatedCounts.length > 0){
+        if(this.dataStore.timeSeriesGraphData.aggregatedCounts && this.dataStore.timeSeriesGraphData.aggregatedCounts.length > 0){
            this.defaultSearchTermToMostMentioned(this.dataStore.timeSeriesGraphData.mostPopularTerm);
         }
 
@@ -190,7 +190,7 @@ export const DataStore = Fluxxor.createStore({
         if(this.dataStore.treeViewStructure.children && this.dataStore.treeViewStructure.children.length > 0){
             let filtered = treeFilters.filterTreeByMatcher(this.dataStore.treeViewStructure, node => {
                         return termSuperSet.indexOf((node.folderKey || "").toLowerCase()) > -1;
-                    }, 
+                    },
                     node => Object.assign({}, node, {eventCount: this.dataStore.associatedKeywords[node.folderKey.toLowerCase()], 
                                                      checked: self.dataStore.filteredTerms[node.folderKey.toLowerCase()]}),
                     self.dataStore.filteredTerms);

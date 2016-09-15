@@ -69,10 +69,10 @@ export const SERVICES = {
   getPopularTermsTimeSeries(datetimeSelection, timespanType){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
 
-     let url = "{0}/{1}/{2}/popular-terms.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
-                                         env_properties.POPULAR_TERMS_TIME_SERIES,
+     let url = "{0}/{1}/{2}/top5.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
+                                         env_properties.TIMESERIES_BLOB,
                                          momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
-      
+
       return Rx.DOM.getJSON(url);
   },
   
