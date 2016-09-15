@@ -26,7 +26,8 @@ export const TimeSeriesGraph = React.createClass({
         "theme": "dark",
         "dataProvider": [],
         "marginLeft":"0",
-        "marginRight":"0",
+        "marginRight": 40,
+        "autoMarginOffset": 20,
         "synchronizeGrid":true,
         "valueAxes": [{
             "id":"v1",
@@ -37,17 +38,9 @@ export const TimeSeriesGraph = React.createClass({
         }],
         "categoryField": "date",
         "chartScrollbar": {
-            "graph": this.state.timeSeriesGraphData.mostPopularTerm,
+            "graph": "vMax",
             "scrollbarHeight": 40,
-            "backgroundAlpha": 0,
-            "selectedBackgroundAlpha": 0.1,
-            "selectedBackgroundColor": "#888888",
-            "graphFillAlpha": 0,
-            "graphLineAlpha": 0.5,
-            "selectedGraphFillAlpha": 0,
-            "selectedGraphLineAlpha": 1,
-            "autoGridCount":true,
-            "color":"#AAAAAA"
+            "autoGridCount":true
         },
         "valueScrollbar":{
             "oppositeAxis":false,
@@ -66,6 +59,9 @@ export const TimeSeriesGraph = React.createClass({
             "equalSpacing": true,
             "axisColor": "#DADADA",
             "minorGridEnabled": true
+        },
+        "export": {
+            "enabled": true
         }
     });
   },
@@ -82,9 +78,9 @@ export const TimeSeriesGraph = React.createClass({
 
     for(let i = 1; i < graphDataset.labels.length; i++){
         let label = graphDataset.labels[i];
-        graphList.push(Object.assign({id: label, lineColor: termColorMap.get(label)}, {valueField: label}, {title: label}, graphDefaults));
+        graphList.push(Object.assign({id: "v{0}".format(label == this.state.timeSeriesGraphData.mostPopularTerm ? "Max" : i), lineColor: termColorMap.get(label)}, {valueField: label}, {title: label}, graphDefaults));
     }
-
+    
     this.trendingTimeSeries.graphs = graphList;
     this.trendingTimeSeries.dataProvider = graphDataset.aggregatedCounts;
     this.trendingTimeSeries.datetimeSelection = this.state.datetimeSelection;
