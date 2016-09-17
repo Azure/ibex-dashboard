@@ -1,6 +1,5 @@
 import global from '../utils/global';
 import {SERVICES} from '../services/services';
-import env_properties from '../../config.json';
 
 const constants = {
            SENTIMENT_JSON_MAPPING : {
@@ -53,9 +52,6 @@ const constants = {
                LOAD_EVENTS: "LOAD:ACTIVITIES",
                LOAD_SENTIMENT_TREE: "LOAD:TREE-VIEW"
            },
-           TRENDS : {
-               LOAD_TRENDS: "LOAD:TRENDS"
-           },
            GRAPHING : {
                LOAD_GRAPH_DATA: "LOAD:GRAPH_DATA",
                CHANGE_TIME_SCALE: "EDIT:TIME_SCALE"
@@ -71,13 +67,13 @@ const constants = {
 
 const methods = {
     ACTIVITY: {
-        load_activity_events: function(){
+        load_activity_events: function(siteKey){
             let self = this;
             
             let dataStore = this.flux.stores.DataStore.dataStore;
             let currentKeyword = dataStore.categoryValue;
             
-            SERVICES.getActivityEvents(currentKeyword, dataStore.categoryType, dataStore.datetimeSelection, dataStore.timespanType)
+            SERVICES.getActivityEvents(siteKey, currentKeyword, dataStore.categoryType, dataStore.datetimeSelection, dataStore.timespanType)
             .subscribe(response => {
                 if(response && response.length > 0){
                     self.dispatch(constants.ACTIVITY.LOAD_EVENTS, {
@@ -87,44 +83,31 @@ const methods = {
             });
         }
     },
-    TRENDS : {
-        load_trends: function(){
-            let self = this;
-            
-            SERVICES.getTrendingKeywords()
-            .subscribe(response => {
-                if(response && Object.keys(response).length > 0){
-                    self.dispatch(constants.TRENDS.LOAD_TRENDS, {
-                                            response: response
-                    });
-                }
-            });
-        }
-    },
     DASHBOARD: {
-        initialize(){
+        initialize(siteKey){
           let self = this;
           
           let azureStorageCB = results => {
                 if(results && results.length > 0){
                     self.dispatch(constants.DASHBOARD.LOAD, {
-                                            response: results
+                                            response: results,
+                                            siteKey: siteKey
                     });
                 }
           };
           
-          SERVICES.getDefaultSuggestionList(azureStorageCB);
+          SERVICES.getDefaultSuggestionList(siteKey, azureStorageCB);
         },
-        load_sentiment_tree_view: function(){
+        load_sentiment_tree_view: function(siteKey){
             let self = this;
-          
+
             let azureStorageCB = folderTree => {
                     if(folderTree && folderTree.size > 0){
                         self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {folderTree});
                     }
             };
 
-            SERVICES.getSentimentTreeData(azureStorageCB);
+            SERVICES.getSentimentTreeData(siteKey, azureStorageCB);
         },
         changeSearchFilter(newFilter, searchType){
            let dataStore = this.flux.stores.DataStore.dataStore;
@@ -136,10 +119,10 @@ const methods = {
         updateAssociatedTerms(associatedKeywords){
             this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, associatedKeywords);
         },
-        changeDate(datetimeSelection, timespanType){
+        changeDate(siteKey, datetimeSelection, timespanType){
            let self = this;
-                       
-           SERVICES.getPopularTermsTimeSeries(datetimeSelection, timespanType)
+
+           SERVICES.getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType)
                       .subscribe(timeSeriesResponse => {
                              if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
                                  self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
@@ -158,12 +141,12 @@ const methods = {
             this.dispatch(constants.GRAPHING.CHANGE_TIME_SCALE, {fromDate: fromDate, 
                                                                  toDate: toDate});
         },
-        load_timeseries_data: function(){
+        load_timeseries_data: function(siteKey){
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
 
             if(dataStore.datetimeSelection && dataStore.timespanType){
-                SERVICES.getPopularTermsTimeSeries(dataStore.datetimeSelection, dataStore.timespanType)
+                SERVICES.getPopularTermsTimeSeries(siteKey, dataStore.datetimeSelection, dataStore.timespanType)
                             .subscribe(response => {
                                 if(response && response.graphData && response.graphData.length > 0){
                                     self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response: response});

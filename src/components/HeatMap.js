@@ -13,9 +13,6 @@ import {ActivityFeed} from './ActivityFeed';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
-const defaultLat = 20.1463919;
-const defaultLong = 2.2705778;
-const rainbowColorCeiling = 1000;
 const maxRequestLimit = 400;
 const sentimentFieldName = 'mag_n';
 const mentionCountFieldName = 'cnt';
@@ -25,11 +22,14 @@ export const HeatMap = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
+      let siteKey = this.props.siteKey;
       this.getFlux().actions.ACTIVITY.load_activity_events();
+      let defaultLatitude = getEnvPropValue(siteKey, "MAP_LAT");
+      let defaultLongitude = getEnvPropValue(siteKey, "MAP_LONG");
       
       return{
-          latitude: defaultLat,
-          longitude: defaultLong,
+          latitude: defaultLatitude,
+          longitude: defaultLongitude,
           openModal: false,
           selectedTileId: false,
           modalTitle: ''
@@ -98,13 +98,14 @@ export const HeatMap = React.createClass({
   },
   
   componentDidMount(){
+    let siteKey = this.props.siteKey;
     let latitude = this.state.latitude;
     let longitude = this.state.longitude;
     this.loadedTileBuckets = new Map();
     this.visibleClusters = new Set();
     this.associatedTerms = new Map();
     this.tilemap = new Map();
-    let defaultZoom = 5;
+    let defaultZoom = getEnvPropValue(siteKey, "MAP_ZOOM");
     L.Icon.Default.imagePath = "/dist/assets/images";
     this.map = L.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
     L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
@@ -240,11 +241,12 @@ export const HeatMap = React.createClass({
   
   fetchHeatmap(tileId, callback) {
     let self = this;
+    let siteKey = this.props.siteKey;
     let cachedTileBucket = this.loadedTileBuckets.get(tileId);
 
     if (cachedTileBucket) return callback(this.shouldFilterCachedTile(cachedTileBucket, tileId));
 
-    SERVICES.getHeatmapTiles(this.state.categoryType, this.state.timespanType, this.state.categoryValue, this.state.datetimeSelection, tileId)
+    SERVICES.getHeatmapTiles(siteKey, this.state.categoryType, this.state.timespanType, this.state.categoryValue, this.state.datetimeSelection, tileId)
             .subscribe(response => {
                 callback(response);
             }, error => {

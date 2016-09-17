@@ -1,20 +1,13 @@
 import env_properties from '../../config.json';
 import Rx from 'rx';
 import RxDom from 'rx-dom';
-import {TestGraphData} from './testGraphData';
 import azure from 'azure-storage';
 import {Actions} from '../actions/Actions';
 
-const accountName = "ochahackfest";
-const searchTermsTable = "dmaksearchterms";
-const categoryMappingTable = "supercategorymappings";
 const maxMappingLevels = 4;
+const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 
-const tableService = azure.createTableService(env_properties.OCHA_TERMS_TBL_CONN || '');
-
-export const SERVICES = {
-  host: "https://myservice-host.net/",
-  
+export const SERVICES = {  
   getUserAuthenticationInfo(){
    ///Make sure the AAD client id is setup in the config
    let userProfile = window.userProfile;
@@ -66,24 +59,27 @@ export const SERVICES = {
     }
   },
   
-  getPopularTermsTimeSeries(datetimeSelection, timespanType){
+  getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+     let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, "STORAGE_ACCT_NAME"));
+     let blobContainer = getEnvPropValue(siteKey, "BLOB_TIMESERIES");
 
-     let url = "{0}/{1}/{2}/top5.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
-                                         env_properties.TIMESERIES_BLOB,
-                                         momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
+     let url = "{0}/{1}/{2}/top5.json".format(hostname, blobContainer, momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
 
       return Rx.DOM.getJSON(url);
   },
   
-  getDefaultSuggestionList(cb){
+  getDefaultSuggestionList(siteKey, cb){
       let query = new azure.TableQuery();
-      
+      let storageConnection = getEnvPropValue(siteKey, "STORAGE_CONN");
+      let searchTermsTable = getEnvPropValue(siteKey, "TBL_KEYWORDS");
+      let tableService = azure.createTableService(storageConnection);
+
       tableService.queryEntities(searchTermsTable, query, null, (error, result, response) => {
         if(!error) {
             let processedResults = result.entries.map(item => {
-                let searchTerm = item.RowKey._.toLowerCase();
-                let category = item.PartitionKey._.toLowerCase();
+                let searchTerm = item.en_term._.toLowerCase();
+                let category = item.super_category._.toLowerCase();
                 
                 return {category, searchTerm};
             });
@@ -109,10 +105,13 @@ export const SERVICES = {
        }
   },
   
-  getSentimentTreeData(cb){
+  getSentimentTreeData(siteKey, cb){
       let query = new azure.TableQuery();
+      let storageConnection = getEnvPropValue(siteKey, "STORAGE_CONN");
+      let superCategoryTable = getEnvPropValue(siteKey, "TBL_CLASSIFICATION");
+      let tableService = azure.createTableService(storageConnection);
       
-      tableService.queryEntities(categoryMappingTable, query, null, (error, result, response) => {
+      tableService.queryEntities(superCategoryTable, query, null, (error, result, response) => {
         if(!error) {
             let folderTree = new Map();
 
@@ -132,14 +131,7 @@ export const SERVICES = {
         }
       });
   },
-  
-  getTrendingKeywords: function(){
-      let url = "{0}/{1}/trending.json".format(env_properties.OCHA_BLOB_HOSTNAME, env_properties.TRENDING_BLOB);
-      
-      return Rx.DOM.getJSON(url);
-  },
-  
-  getActivityEvents: function(categoryValue, categoryType, timespanType, dateSelection){
+  getActivityEvents: function(siteKey, categoryValue, categoryType, timespanType, dateSelection){
       let testData =[[{
         "id": 1,
         "name": "Kathy Wood",
@@ -445,15 +437,14 @@ export const SERVICES = {
       return Rx.Observable.from(testData);
   },
   
-  getHeatmapTiles: function(categoryType, timespanType, categoryValue, datetimeSelection, tileId){
+  getHeatmapTiles: function(siteKey, categoryType, timespanType, categoryValue, datetimeSelection, tileId){
     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+    let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, "STORAGE_ACCT_NAME"));
+    let blobContainer = getEnvPropValue(siteKey, "BLOB_TILES");
     
-    let url = "{0}/{1}/{2}/{3}/{4}/{5}.json".format(env_properties.OCHA_BLOB_HOSTNAME, 
-                                       env_properties.EMOTIONMAPS_BLOB,
-                                       categoryType.toLowerCase(),
-                                       categoryValue,
-                                       momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat),
-                                       tileId);
+    let url = "{0}/{1}/{2}/{3}/{4}/{5}.json".format(hostname, blobContainer,
+                                       categoryType.toLowerCase(), categoryValue.replace(" ", ""),
+                                       momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat), tileId);
                                             
     return Rx.DOM.getJSON(url);
   },

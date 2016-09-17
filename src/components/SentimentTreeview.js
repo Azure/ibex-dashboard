@@ -132,7 +132,9 @@ export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
-      this.getFlux().actions.DASHBOARD.load_sentiment_tree_view();
+      let siteKey = this.props.siteKey;
+
+      this.getFlux().actions.DASHBOARD.load_sentiment_tree_view(siteKey);
 
       return {}
   },

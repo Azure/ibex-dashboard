@@ -13,10 +13,10 @@ export const DataStore = Fluxxor.createStore({
           timespanType: 'customMonth',
           datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: 'keyword',
+          siteKey: '',
           activities: [],
           action: '',
           popularTerms: [],
-          trends: [],
           timeSeriesGraphData: {},
           sentimentChartData: [],
           originalTermsTree: [],
@@ -115,6 +115,7 @@ export const DataStore = Fluxxor.createStore({
     
     handleLoadDefaultSearchResults(searchResults){
         this.dataStore.defaultResults = searchResults.response;
+        this.dataStore.siteKey = searchResults.siteKey;
         this.emit("change");
     },
 
