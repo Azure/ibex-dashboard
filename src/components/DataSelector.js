@@ -49,18 +49,20 @@ export const DataSelector = React.createClass({
   handleChange(event, index, value){
       let timeSelectionIndex = this.customDateEntered()? index : index + 1;
       var selectionOption = TimeSelectionOptions[timeSelectionIndex];
+      let siteKey = this.props.siteKey;
       
       if(selectionOption.timeType.startsWith("custom")){
           this.setState({timeType: value});
       }else{
-          this.getFlux().actions.DASHBOARD.changeDate(value, selectionOption.timeType);
+          this.getFlux().actions.DASHBOARD.changeDate(siteKey, value, selectionOption.timeType);
       }
   },
   
   handleDatePickerChange(dateObject, dateStr){
       let formatter = Actions.constants.TIMESPAN_TYPES[this.state.timeType];
+      let siteKey = this.props.siteKey;
       
-      this.getFlux().actions.DASHBOARD.changeDate(momentToggleFormats(dateStr, formatter.reactWidgetFormat, formatter.format), this.state.timeType);
+      this.getFlux().actions.DASHBOARD.changeDate(siteKey, momentToggleFormats(dateStr, formatter.reactWidgetFormat, formatter.format), this.state.timeType);
       this.setState({timeType: ''});
   },
   

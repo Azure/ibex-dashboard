@@ -1,7 +1,6 @@
 import React, { PropTypes, Component } from 'react';
 import Fluxxor from 'fluxxor';
 import {DataSelector} from './DataSelector';
-import {TrendsPanel} from './TrendsPanel';
 import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
@@ -14,7 +13,9 @@ export const Dashboard = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState: function() {
-      this.getFlux().actions.DASHBOARD.initialize();
+      let siteKey = this.props.siteKey;
+
+      this.getFlux().actions.DASHBOARD.initialize(siteKey);
   },
 
   getStateFromFlux: function() {
@@ -25,31 +26,31 @@ export const Dashboard = React.createClass({
        this.setState(this.getStateFromFlux());
   },
   
-   render() {
+  render() {
     return (
         <div>
           <form>
             <div className="app-container">
               <div className="container-fluid">
-                <DataSelector />
+                <DataSelector {...this.props} />
                 <div className="row graphContainer">
                     <div className="col-lg-3 summaryPieContainer">
                        <div id="popularTermsPieDiv" style={{width: '100%', height: '250px'}}></div>
-                       <PopularTermsChart />
+                       <PopularTermsChart {...this.props}/>
                     </div>
                     <div className="col-lg-9 timeSeriesContainer">
                        <div id="graphdiv" style={{width: '100%', height: '250px', marginBottom: '0px', paddingBottom: '0px'}}></div>
-                       <TimeSeriesGraph />
+                       <TimeSeriesGraph {...this.props}/>
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-lg-2 termBrowserContainer">
-                        <SentimentTreeview />
+                        <SentimentTreeview {...this.props} />
                     </div>
                     <div className="col-lg-10 heatmapContainer">
                       <div className="row">
                           <div id='leafletMap'></div>
-                          <HeatMap />
+                          <HeatMap {...this.props} />
                       </div>
                     </div>
                 </div>

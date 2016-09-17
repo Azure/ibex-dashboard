@@ -29,7 +29,7 @@ export const TypeaheadSearch = React.createClass({
   filterResults(input, callback){
       let filteredResults = [];
       this.getFlux().store("DataStore").dataStore.defaultResults
-           .forEach((element, key, map) => {
+           .forEach(element => {
                if(element.searchTerm.indexOf(input) > -1){
                    filteredResults.push(element);
                }

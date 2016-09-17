@@ -12,7 +12,7 @@ export const TimeSeriesGraph = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState: function() {
-    this.getFlux().actions.GRAPHING.load_timeseries_data();
+    this.getFlux().actions.GRAPHING.load_timeseries_data(this.props.siteKey);
   },
 
   getStateFromFlux: function() {

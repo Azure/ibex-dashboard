@@ -23,7 +23,10 @@ export const Header = React.createClass({
   render() {
     var self = this;
     let routeName = this.props.routePage;
+    let siteKey = this.props.siteKey;
     let routeCollection = routes.props.children;
+    let title = getEnvPropValue(siteKey, "SITE_TITLE");
+    let logo = getEnvPropValue(siteKey, "SITE_LOGO");
     let routeIterator = (routeCollection instanceof Array) ? routeCollection : [routeCollection];
     let initials = 'N/A';
 
@@ -38,8 +41,8 @@ export const Header = React.createClass({
                       <span className="icon-bar"></span>
                   </button>
                   <a className="navbar-brand text-danger" href="#">
-                      <img src="/dist/assets/images/OCHA_Logo.png" style={{display: 'inline'}} width="45" height="45" />
-                     <span className="brandLabel">BETTER HUMANITARIAN RESPONSE THROUGH MACHINE LEARNING</span>
+                      <img src={logo} style={{display: 'inline'}} width="45" height="45" />
+                     <span className="brandLabel">{title}</span>
                   </a>
               </div>
               <div className="navbar-collapse collapse" id="navbar-collapsible">

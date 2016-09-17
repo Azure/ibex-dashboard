@@ -86,20 +86,11 @@ gulp.task('clean-copy', (cb) => {
     sequence('clean', 'copy-assets', 'bower-concat', 'css-concat', cb);
 })
 
-gulp.task('config-env', (cb) => {
-    var AZURE_CONFIG_PROPS = ['APPINSIGHTS_INSTRUMENTATIONKEY', 'OCHA_BLOB_HOSTNAME', 'TIMESERIES_BLOB', 
-                              'AAD_AUTH_CLIENTID', 'SERVICE_URL', 'EMOTIONMAPS_BLOB', 'OCHA_TERMS_TBL_CONN',
-                              'TRENDING_BLOB', 'POPULAR_TERMS_TIME_SERIES'];
+gulp.task('config-env',cb => {
     var configFile = './config.json';
-    var configurationEnv = {};
-    
-    AZURE_CONFIG_PROPS.forEach((item) => {
-              if (process.env[item])
-                  configurationEnv[item] = process.env[item];
-    });
-        
+
     try{
-        fs.writeFile(configFile, JSON.stringify(configurationEnv), cb);
+        fs.writeFile(configFile, JSON.stringify(process.env), cb);
     }catch(e){
         fs.end();
     }

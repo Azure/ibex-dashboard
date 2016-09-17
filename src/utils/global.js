@@ -1,4 +1,10 @@
 import moment from 'moment';
+import env_properties from '../../config.json';
+
+function InvalidPropException(propName) {
+   this.propName = propName;
+   this.name = "InvalidPropException";
+}
 
 String.prototype.format = function(){
    var content = this;
@@ -25,4 +31,34 @@ Number.prototype.randomize = function(min,max)
 
  window.momentToggleFormats = function(dateString, fromFormat, targetFormat){
       return moment(dateString, fromFormat).format(targetFormat);
+ }
+
+ window.getEnvPropValue = function(siteKey, propName){
+     let propNamePrefix;
+
+     if(env_properties.SITES){
+         let sitePrefixes = env_properties.SITES.split(',');
+
+         if(sitePrefixes.length > 0){
+             let site = sitePrefixes.find(site=>site.startsWith(siteKey+":"));
+             let siteSplit = site.split(':');
+             
+             if(siteSplit.length == 2){
+                 propNamePrefix = siteSplit[1];
+             }
+         }
+     }
+     
+     if(!propNamePrefix){
+         throw new InvalidPropException(siteKey);
+     }
+
+     let envVarName = "{0}{1}".format(propNamePrefix, propName);
+     let propValue = env_properties[envVarName];
+
+     if(!propValue){
+         throw new InvalidPropException(envVarName);
+     }
+
+     return propValue;
  }
