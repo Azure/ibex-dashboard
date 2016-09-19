@@ -1,8 +1,5 @@
 import Fluxxor from 'fluxxor';
-import moment from 'moment';
-import React, { PropTypes, Component } from 'react';
-import {Actions as Actions} from '../actions/Actions';
-import env_properties from '../../config.json';
+import {Actions} from '../actions/Actions';
 import * as treeFilters from '../components/TreeFilter';
 
 export const DataStore = Fluxxor.createStore({
@@ -74,7 +71,7 @@ export const DataStore = Fluxxor.createStore({
         if(this.dataStore.timeSeriesGraphData && this.dataStore.timeSeriesGraphData.graphData){
             //hash the time series data by the epoch time as we'll use this to render 
             //the aggregates in the bar chart based on the selected graph zoom area. 
-            this.dataStore.timeSeriesGraphData.graphData.map(timeEntry => {
+            this.dataStore.timeSeriesGraphData.graphData.forEach(timeEntry => {
                 //Aggregate the normalized positive and negative sentiment breakdown as we need the total count for the Histogram.
                 let graphEntry = self.aggregateSentimentLevelCounts(timeEntry, termSummaryMap);
                 self.dataStore.timeSeriesGraphData.aggregatedCounts.push(graphEntry);
@@ -93,6 +90,8 @@ export const DataStore = Fluxxor.createStore({
             self.dataStore.timeSeriesGraphData.termColorMap = termColorMap;
             self.dataStore.timeSeriesGraphData.termSummaryMap = termSummaryMap;
         }
+
+        return;
     },
 
     //Based on aggregating off the follwoing sample dataset i.e. [1459605600000, 0, 0, 112, 65, 123, 94, 30, 10, 36, 25, 16, 16], [1459616400000, 0, 0, 142, 75, 83, 41, 44, 10, 60, 48, 13, 10]
@@ -121,7 +120,7 @@ export const DataStore = Fluxxor.createStore({
 
     defaultSearchTermToMostMentioned(mostPopularTerm){
         let termSplit = mostPopularTerm.split('-');
-        if(termSplit != null && termSplit.length == 2){
+        if(termSplit != null && termSplit.length === 2){
                 this.dataStore.categoryValue = termSplit[1];
                 this.dataStore.categoryType = Actions.constants.CATEGORY_KEY_MAPPING[termSplit[0]];
         }
@@ -140,6 +139,8 @@ export const DataStore = Fluxxor.createStore({
         }
 
         this.dataStore.action = 'loadedGraphData';
+
+        return;
     },
     
     handleChangeDate(changedData){
@@ -182,9 +183,9 @@ export const DataStore = Fluxxor.createStore({
         let self = this;
         let termSuperSet = Object.keys(this.dataStore.associatedKeywords);
 
-        if(termSuperSet.length > 0 && Object.keys(this.dataStore.filteredTerms).length == 0){
+        if(termSuperSet.length > 0 && Object.keys(this.dataStore.filteredTerms).length === 0){
             termSuperSet.forEach(term=>this.dataStore.filteredTerms[term] = true);
-        }else if(termSuperSet.length == 0){
+        }else if(termSuperSet.length === 0){
             this.dataStore.filteredTerms = {};
         }
 
@@ -205,11 +206,11 @@ export const DataStore = Fluxxor.createStore({
 
     updateTreeEventCount(node){
       let eventCount = 0;
-      let self = this;
-
       if(node.children && node.children.length > 0){
         for(let i in node.children){
-            eventCount += this.updateTreeEventCount(node.children[i]);
+            if(node.children[i]){
+                eventCount += this.updateTreeEventCount(node.children[i]);
+            }
         }
 
         node.eventCount = eventCount;
@@ -228,7 +229,6 @@ export const DataStore = Fluxxor.createStore({
           children: []
       };
 
-      let self = this;
       let recurseChildren = (parentDataFolder, parentListItem, levels) => {
           if(!parentDataFolder){
               return;

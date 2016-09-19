@@ -1,4 +1,3 @@
-import global from '../utils/global';
 import {SERVICES} from '../services/services';
 
 const constants = {
@@ -110,7 +109,6 @@ const methods = {
             SERVICES.getSentimentTreeData(siteKey, azureStorageCB);
         },
         changeSearchFilter(newFilter, searchType){
-           let dataStore = this.flux.stores.DataStore.dataStore;
            this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
         },
         changeTermsFilter(newFilters){

@@ -1,10 +1,11 @@
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import {Actions} from '../actions/Actions';
 import List from 'material-ui/lib/lists/list';
 import ListItem from 'material-ui/lib/lists/list-item';
 import Divider from 'material-ui/lib/divider';
 import Avatar from 'material-ui/lib/avatar';
+import '../styles/ActivityFeed.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");

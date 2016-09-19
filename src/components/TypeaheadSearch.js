@@ -1,6 +1,7 @@
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import Autosuggest from 'react-autosuggest';
+import '../styles/TypeaheadSearch.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React);
 const maxDefaultResult = 12;
@@ -17,7 +18,7 @@ export const TypeaheadSearch = React.createClass({
         return;
     }
     
-    if(oldValue != newValue){
+    if(oldValue !== newValue){
         this.getFlux().actions.DASHBOARD.changeSearchFilter(newValue, newType);
     }
   },
@@ -53,9 +54,9 @@ export const TypeaheadSearch = React.createClass({
      
      let beginNormalFont = '', highlightedSequence = '', endNormalFont = '';
      let matchingPosition = suggestion.toLowerCase().indexOf(input.toLowerCase());
-         beginNormalFont = suggestion.substring(0, (matchingPosition != -1) ? matchingPosition : input.length);
+         beginNormalFont = suggestion.substring(0, (matchingPosition !== -1) ? matchingPosition : input.length);
 
-     if(matchingPosition != -1){
+     if(matchingPosition !== -1){
        highlightedSequence = suggestion.substring(matchingPosition, matchingPosition + input.length);
        endNormalFont = suggestion.substring(matchingPosition + input.length, suggestion.length);
      }
@@ -85,7 +86,7 @@ export const TypeaheadSearch = React.createClass({
                                suggestionRenderer={this.renderSuggestion}
                                onSuggestionSelected={this.typeaheadItemSelected}
                                suggestionValue={this.suggestionValue}
-                               scrollBar = {true}
+                               scrollBar={true}
                                value={this.props.data} />
         </div>
     );

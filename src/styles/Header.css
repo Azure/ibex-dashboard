@@ -37,6 +37,11 @@ a:hover {
     color:#f44d3c;
 }
 
+#cancel-button{
+    margin-top: 10px;
+    margin-left: 4px;
+}
+
 .btn-huge {
     padding:17px 22px;
     font-size:22px;
@@ -101,14 +106,6 @@ a:hover {
 .navbar-trans a{
     color:#cdcdcd;
     letter-spacing:1px;
-}
-
-.form-control-search{
-    font-size: 14px!important;
-    height: 27px;
-    color: rgb(46, 189, 89)!important;
-    font-weight: 600!important;
-    background-color: #3f3f4f!important;
 }
 
 .navbar-trans .form-control:focus {
@@ -289,6 +286,19 @@ section {
    font-size: 9pt;   
 }
 
+.dateFilter{
+    width: 226px;
+}
+
 .rw-datetimepicker.rw-widget {
     margin-top:7px;
+}
+
+.dateFilterColumn{
+    display: inherit;
+}
+
+#save-button{
+    margin-left:8px;
+    margin-top: 8px;
 }

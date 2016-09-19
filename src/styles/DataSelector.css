@@ -1,0 +1,21 @@
+.dateRow{
+    display: flex;
+}
+
+.dateFilterColumn{
+    display: inherit;
+}
+
+.dateFilter{
+    width: 226px;
+}
+
+#save-button{
+    margin-left:8px;
+    margin-top: 8px;
+}
+
+#cancel-button{
+    margin-top: 10px;
+    margin-left: 4px;
+}

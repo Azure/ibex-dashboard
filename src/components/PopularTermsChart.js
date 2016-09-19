@@ -1,7 +1,11 @@
-import {SERVICES} from '../services/services';
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import {Actions} from '../actions/Actions';
+import 'amcharts3';
+import 'amcharts3/amcharts/serial.js';
+import 'amcharts3/amcharts/plugins/export/export.js';
+import 'amcharts3/amcharts/themes/dark.js';
+import 'amcharts3/amcharts/plugins/export/export.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -18,7 +22,7 @@ export const PopularTermsChart = React.createClass({
     let self = this;
     let datetimeSelection = this.state.datetimeSelection;
 
-    this.popularTermsChart = AmCharts.makeChart(chartDivReference, {
+    this.popularTermsChart = window.AmCharts.makeChart(chartDivReference, {
         "theme": "dark",
         "type": "serial",
         "startDuration": 1,
@@ -61,7 +65,6 @@ export const PopularTermsChart = React.createClass({
  },
 
  refreshChart(summaryMap, termColorMap){
-    let self = this;
     let maxAxesDisplayLabelChars = 16;
     let dataProvider = [];
 
@@ -92,7 +95,7 @@ export const PopularTermsChart = React.createClass({
 
      let graphDateScope = this.popularTermsChart.datetimeSelection || '';
 
-     if(graphDateScope != this.state.datetimeSelection){
+     if(graphDateScope !== this.state.datetimeSelection){
         this.refreshChart(summaryMap, termColorMap);
      }
   },

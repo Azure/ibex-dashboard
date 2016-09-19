@@ -1,12 +1,12 @@
-import {SERVICES} from '../services/services';
 import Fluxxor from 'fluxxor';
 import Subheader from './Subheader';
 import {TermFilter} from './TermFilter';
-import React, { PropTypes, Component } from 'react';
-import {Actions} from '../actions/Actions';
+import React from 'react';
 import {Treebeard, decorators} from 'react-treebeard';
 import * as filters from './TreeFilter';
 import {TypeaheadSearch} from './TypeaheadSearch';
+import '../styles/SentimentTreeView.css';
+import '../styles/Header.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -178,10 +178,8 @@ export const SentimentTreeview = React.createClass({
   Header(props) {
         const style = props.style;
         let self = this;
-        const iconStyle = { color: '#337ab7' };
         const termStyle = { paddingLeft: '3px', fontWeight: 800, color: '#337ab7' };
         const categorytyle = { paddingLeft: '3px', fontSize: '13px', color: '#fff', fontWeight: 600};
-        const folderIconStyle = { color: 'rgb(232, 214, 133)' };
         const badgeClass = props.node.checked && props.node.children && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
         let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
 
@@ -228,10 +226,10 @@ export const SentimentTreeview = React.createClass({
      return (
          <div className="panel panel-default">
             <Subheader style={styles.subHeader}>Heatmap Terms</Subheader>
-            <div className="row" className="tagFilterRow">
+            <div className="row tagFilterRow">
                 <TypeaheadSearch data={defaultSearchPlaceholder}/>
             </div>
-            <div className="row" className="tagFilterRow">
+            <div className="row tagFilterRow">
                 <TermFilter data={this.state.associatedKeywords ? Object.keys(this.state.associatedKeywords) : [] } />
             </div>
             <div style={styles.searchBox}>

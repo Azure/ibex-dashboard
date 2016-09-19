@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
-import {routes} from '../routes/routes';
+import React from 'react';
 import Fluxxor from 'fluxxor';
+import '../styles/Header.css';
+import {getEnvPropValue} from '../utils/Utils.js';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -22,12 +23,9 @@ export const Header = React.createClass({
 
   render() {
     var self = this;
-    let routeName = this.props.routePage;
     let siteKey = this.props.siteKey;
-    let routeCollection = routes.props.children;
-    let title = getEnvPropValue(siteKey, "SITE_TITLE");
-    let logo = getEnvPropValue(siteKey, "SITE_LOGO");
-    let routeIterator = (routeCollection instanceof Array) ? routeCollection : [routeCollection];
+    let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
+    let logoURL = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_LOGO);
     let initials = 'N/A';
 
     return (
@@ -41,7 +39,7 @@ export const Header = React.createClass({
                       <span className="icon-bar"></span>
                   </button>
                   <a className="navbar-brand text-danger" href="#">
-                      <img src={logo} style={{display: 'inline'}} width="45" height="45" />
+                      <img role="presentation" src={logoURL} style={{display: 'inline'}} width="45" height="45" />
                      <span className="brandLabel">{title}</span>
                   </a>
               </div>

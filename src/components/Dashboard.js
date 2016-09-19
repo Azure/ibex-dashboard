@@ -1,10 +1,11 @@
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import Fluxxor from 'fluxxor';
 import {DataSelector} from './DataSelector';
 import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {PopularTermsChart} from './PopularTermsChart';
+import '../styles/Dashboard.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
