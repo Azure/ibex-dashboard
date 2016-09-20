@@ -1,11 +1,15 @@
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import {Actions} from '../actions/Actions';
 import DateTimePicker from 'react-widgets/lib/DateTimePicker';
 import momentLocalizer from 'react-widgets/lib/localizers/moment';
 import SelectField from 'material-ui/lib/select-field';
 import MenuItem from 'material-ui/lib/menus/menu-item';
 import moment from 'moment';
+import {momentToggleFormats} from '../utils/Utils.js';
+import '../styles/DataSelector.css';
+import 'react-widgets/dist/css/react-widgets.css';
+import '../styles/Header.css';
 
 const TimeSelectionOptions = [
     {label: '', timeType: 'customDatePlaceholder'},
@@ -67,21 +71,21 @@ export const DataSelector = React.createClass({
   },
   
   customDateEntered(){
-      return this.state.timespanType && (this.state.timespanType == 'customDate' || this.state.timespanType == 'customDateTime' || this.state.timespanType == 'customMonth');
+      return this.state.timespanType && (this.state.timespanType === 'customDate' || this.state.timespanType === 'customDateTime' || this.state.timespanType === 'customMonth');
   },
   
   predefinedDateOptions(){
       let menuItems = [];
       
-      TimeSelectionOptions.map(timeOption => {
+      TimeSelectionOptions.forEach(timeOption => {
                               let timeValue;
                               let label = timeOption.label;
                               
                               //if there is no custom date entered then skip adding the customDatePlaceholder option
-                              if(!this.customDateEntered() && timeOption.timeType == 'customDatePlaceholder'){
+                              if(!this.customDateEntered() && timeOption.timeType === 'customDatePlaceholder'){
                                   return false;
                               //if there is a custom date entered then display it in the list
-                              }else if(timeOption.timeType == 'customDatePlaceholder'){
+                              }else if(timeOption.timeType === 'customDatePlaceholder'){
                                   timeValue = this.state.datetimeSelection;
                                   label = timeValue;
                               //format the pre defined date option
@@ -103,9 +107,9 @@ export const DataSelector = React.createClass({
   
   render() {
     let self = this;
-    let showDatePicker = this.state.timeType && this.state.timeType == 'customDate' ? true : false;
-    let showTimePicker = this.state.timeType && this.state.timeType == 'customDateTime' ? true : false;
-    let showMonthSelector = this.state.timeType && this.state.timeType == 'customMonth' ? true : false;
+    let showDatePicker = this.state.timeType && this.state.timeType === 'customDate' ? true : false;
+    let showTimePicker = this.state.timeType && this.state.timeType === 'customDateTime' ? true : false;
+    let showMonthSelector = this.state.timeType && this.state.timeType === 'customMonth' ? true : false;
     let monthSelectorProps = showMonthSelector ? {initialView: "year", finalView: "year"}: {};
     
     return (

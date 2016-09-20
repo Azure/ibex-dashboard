@@ -1,0 +1,108 @@
+
+.search-form{
+  display: inline-table;
+}
+
+.react-autosuggest {
+  position: relative;
+}
+
+.react-autosuggest input {
+  width: 100%;
+  height: 30px;
+  border: 1px solid #aaaaaa;
+  border-radius: 0px 4px 4px 0px!important;
+}
+.react-autosuggest input[aria-expanded="true"] {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.react-autosuggest input:focus {
+  outline: none;
+}
+
+.react-autosuggest__highlighted_search_text{
+    font-weight: 800;
+    color:#8283FF;
+}
+
+.react-autosuggest__suggestions-container{
+  margin-top: 20px;
+}
+
+.react-autosuggest__suggestions {
+  position: absolute;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  border: 1px solid #aaaaaa;
+  background-color: #fff;
+  font-size: 12px!important;
+  margin-top: 25px;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  z-index: 100;
+  opacity: .95;
+}
+.react-autosuggest__suggestions-section:first-child .react-autosuggest__suggestions-section-name {
+  border-top: 0;
+}
+.react-autosuggest__suggestions-section-name {
+  padding: 10px 0 0 10px;
+  font-size: 14px;
+  text-transform: uppercase;
+  color: #777;
+  border-top: 1px dashed #ccc;
+}
+.react-autosuggest__suggestions-section-suggestions {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+.react-autosuggest__suggestion {
+  cursor: pointer;
+  padding: 10px 20px;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  max-height: 70px!important;
+  border-width: 1px;
+  border-style: solid;
+  color: #444;
+  background-color: #ebebeb;
+  border-color: #e5e5e5;
+}
+.react-autosuggest__suggestion--focused {
+  -webkit-box-shadow: 0 0 3px #333;
+  -moz-box-shadow: 0 0 3px #333;
+  box-shadow: 0 0 3px #333;
+  color: white;
+  border: 0 solid transparent;
+  background: #4A4A4A;
+  background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0,#4A4A4A),color-stop(100%,black));
+  background-image: -webkit-linear-gradient(top,#4A4A4A 0,black 100%);
+  background-image: -moz-linear-gradient(top,#4A4A4A 0,black 100%);
+  background-image: -ms-linear-gradient(top,#4A4A4A 0,black 100%);
+  background-image: -o-linear-gradient(top,#4A4A4A 0,black 100%);
+  background-color: #4A4A4A;
+  background-color: rgba(0,0,0,0);
+  border-color: #303030;
+  filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr=#4a4a4a,EndColorStr=#000000);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr=#4a4a4a,EndColorStr=#000000);";
+}
+
+.form-control-search{
+    font-size: 14px!important;
+    height: 27px;
+    color: rgb(46, 189, 89)!important;
+    font-weight: 600!important;
+    background-color: #3f3f4f!important;
+}

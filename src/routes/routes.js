@@ -1,7 +1,6 @@
-import { Router, Route, IndexRoute, Link } from 'react-router'
+import { Route} from 'react-router'
 import {EntryPage} from './EntryPage';
-import React, { PropTypes, Component } from 'react';
-const DefaultRoute = Router.DefaultRoute;
+import React from 'react';
 
 export const routes = (
     <Route>

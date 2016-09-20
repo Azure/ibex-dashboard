@@ -1,5 +1,3 @@
-'use strict';
-
 const DefaultEnabledTermOption = {toggled: true};
 
 // Helper functions for filtering
@@ -9,7 +7,7 @@ export const defaultMatcher = (filterText, node) => {
 
 export const findNode = (node, filter, matcher) => {
     return matcher(filter, node) || // i match
-        (node.children != undefined && // or i have decendents and one of them match
+        (node.children !== undefined && // or i have decendents and one of them match
         node.children.length &&
         !!node.children.find(child => findNode(child, filter, matcher)));
 };
@@ -21,18 +19,6 @@ export const filterTree = (node, filter, matcher = defaultMatcher) => {
     const filtered = node.children
       .filter(child => findNode(child, filter, matcher))
       .map(child => filterTree(child, filter, matcher));
-    return Object.assign({}, node, { children: filtered });
-};
-
-export const filterTransformTree = (node, matcher = defaultMatcher, newList, cb) => {
-    // If im an exact match then all my children get to stay
-
-    if(node.children){
-        node.children.forEach(child => filterTransformTree(child, matcher, newList));
-    }else if(matcher(node)){
-        newList.children.push(node);
-    }
-
     return Object.assign({}, node, { children: filtered });
 };
 
@@ -56,6 +42,7 @@ export const expandFilteredNodes = (node, filter, matcher = defaultMatcher) => {
 };
 
 export const addFilteredNodeToRoot = (rootNode, child, filteredNode) => {
+    // eslint-disable-next-line    
     child.children ? child.children.forEach(node => {
         if(node.folderKey === filteredNode.folderKey){
             filteredNode.added = true;
@@ -88,6 +75,7 @@ export const postOrderTreeTraversal = (child, rootNode, newNode, filters) => {
 };
 
 export const treeFilterIterator = (node, matcher, filteredTree, nodeCB, filters) => {
+        // eslint-disable-next-line        
         node.children ? node.children.forEach(child => {
              treeFilterIterator(child, matcher, filteredTree, nodeCB, filters);
 

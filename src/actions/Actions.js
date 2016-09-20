@@ -1,4 +1,3 @@
-import global from '../utils/global';
 import {SERVICES} from '../services/services';
 
 const constants = {
@@ -95,9 +94,22 @@ const methods = {
                     });
                 }
           };
-          
-          SERVICES.getDefaultSuggestionList(siteKey, azureStorageCB);
+
+          SERVICES.getDefaultSuggestionList(siteKey)
+                  .subscribe(tableValues => {
+                      if(tableValues.response && tableValues.response.value){
+                          let processedResults = tableValues.response.value.map(kw => {
+                              return {"category": kw.super_category.toLowerCase(), "searchTerm": kw.en_term.toLowerCase()};
+                          });
+
+                          azureStorageCB(processedResults);
+                      }
+                  },
+                  error => {
+                      console.error('An error occured trying to query the search terms: ' + error);
+                  });
         },
+        
         load_sentiment_tree_view: function(siteKey){
             let self = this;
 
@@ -110,7 +122,6 @@ const methods = {
             SERVICES.getSentimentTreeData(siteKey, azureStorageCB);
         },
         changeSearchFilter(newFilter, searchType){
-           let dataStore = this.flux.stores.DataStore.dataStore;
            this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
         },
         changeTermsFilter(newFilters){

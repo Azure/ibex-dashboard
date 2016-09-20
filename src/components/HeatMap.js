@@ -1,15 +1,24 @@
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import {Actions} from '../actions/Actions';
 import Tile from 'geotile';
 import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
 import Dialog from 'material-ui/lib/dialog';
-import env_properties from '../../config.json';
-import global from '../utils/global';
-import numeral from 'numeral';
+import numeralLibs from 'numeral';
+import L from 'leaflet';
+import {getEnvPropValue} from '../utils/Utils.js';
 import FlatButton from 'material-ui/lib/flat-button';
 import {ActivityFeed} from './ActivityFeed';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet/dist/images/layers-2x.png';
+import 'leaflet/dist/images/layers.png';
+import 'leaflet/dist/images/marker-icon-2x.png';
+import 'leaflet/dist/images/marker-icon.png';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import '../styles/HeatMap.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -24,12 +33,15 @@ export const HeatMap = React.createClass({
   getInitialState(){
       let siteKey = this.props.siteKey;
       this.getFlux().actions.ACTIVITY.load_activity_events();
-      let defaultLatitude = getEnvPropValue(siteKey, "MAP_LAT");
-      let defaultLongitude = getEnvPropValue(siteKey, "MAP_LONG");
-      
+      let defaultLocation = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_LOCATION);
+      let locationSplit = defaultLocation.split(',');
+      if(locationSplit.length !== 2){
+          throw Error("Invalid default location " + defaultLocation);
+      }
+
       return{
-          latitude: defaultLatitude,
-          longitude: defaultLongitude,
+          latitude: locationSplit[0],
+          longitude: locationSplit[1],
           openModal: false,
           selectedTileId: false,
           modalTitle: ''
@@ -61,10 +73,9 @@ export const HeatMap = React.createClass({
           
           info.options = {
             position: 'topleft'  
-          },
+          };
 
 		  info.update = props => {
-            let categoryType = self.state.categoryType;
             let categoryValue = self.state.categoryValue;
             let infoHeaderText = "<h5>{0} Mentions / Sentiment</h5>".format(categoryValue);
             let infoBoxInnerHtml = 'Click a marker to view event details<br>';
@@ -105,8 +116,8 @@ export const HeatMap = React.createClass({
     this.visibleClusters = new Set();
     this.associatedTerms = new Map();
     this.tilemap = new Map();
-    let defaultZoom = getEnvPropValue(siteKey, "MAP_ZOOM");
-    L.Icon.Default.imagePath = "/dist/assets/images";
+    let defaultZoom = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_ZOOM);
+    L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
     this.map = L.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
     L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -179,7 +190,7 @@ export const HeatMap = React.createClass({
           cssClass += " cluster-size-xl";
       }
 
-      return L.divIcon({ html: "<div><span>{0}</span></div>".format(numeral(mentions).format(mentions > 1000 ? '+0.0a' : '0a')), 
+      return L.divIcon({ html: "<div><span>{0}</span></div>".format(numeralLibs(mentions).format(mentions > 1000 ? '+0.0a' : '0a')), 
                                                          className: cssClass,
                                                          iconSize: L.point(clusterSize, clusterSize) });
   },
@@ -199,7 +210,7 @@ export const HeatMap = React.createClass({
    },
 
   mapMarkerFlushCheck(){
-      if(this.map.selectedTerm != this.state.categoryValue || this.map.datetimeSelection != this.state.datetimeSelection || this.state.renderMap){
+      if(this.map.selectedTerm !== this.state.categoryValue || this.map.datetimeSelection !== this.state.datetimeSelection || this.state.renderMap){
           this.map.datetimeSelection =  this.state.datetimeSelection;
           this.map.selectedTerm = this.state.categoryValue;
 
@@ -240,7 +251,6 @@ export const HeatMap = React.createClass({
   },
   
   fetchHeatmap(tileId, callback) {
-    let self = this;
     let siteKey = this.props.siteKey;
     let cachedTileBucket = this.loadedTileBuckets.get(tileId);
 
@@ -342,7 +352,7 @@ export const HeatMap = React.createClass({
     let termFilters = this.state.filteredTerms;
     let layerAssociations = this.associatedTerms.get(tileId);
 
-    if(Object.keys(termFilters).length == 0){
+    if(Object.keys(termFilters).length === 0){
         return false;
     }
 

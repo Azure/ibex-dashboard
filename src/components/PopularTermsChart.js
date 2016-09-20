@@ -1,6 +1,5 @@
-import {SERVICES} from '../services/services';
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
+import React from 'react';
 import {Actions} from '../actions/Actions';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -18,7 +17,7 @@ export const PopularTermsChart = React.createClass({
     let self = this;
     let datetimeSelection = this.state.datetimeSelection;
 
-    this.popularTermsChart = AmCharts.makeChart(chartDivReference, {
+    this.popularTermsChart = window.AmCharts.makeChart(chartDivReference, {
         "theme": "dark",
         "type": "serial",
         "startDuration": 1,
@@ -61,7 +60,6 @@ export const PopularTermsChart = React.createClass({
  },
 
  refreshChart(summaryMap, termColorMap){
-    let self = this;
     let maxAxesDisplayLabelChars = 16;
     let dataProvider = [];
 
@@ -92,7 +90,7 @@ export const PopularTermsChart = React.createClass({
 
      let graphDateScope = this.popularTermsChart.datetimeSelection || '';
 
-     if(graphDateScope != this.state.datetimeSelection){
+     if(graphDateScope !== this.state.datetimeSelection){
         this.refreshChart(summaryMap, termColorMap);
      }
   },

@@ -1,0 +1,30 @@
+.app-container{
+    background:#30303d;
+}
+
+.graphContainer{
+     background-color: #30303d; 
+     color: #fff;
+}
+
+.summaryPieContainer{
+    padding-right: 0px;
+}
+
+.timeSeriesContainer{
+    padding-left: 0px;
+}
+
+#graphdiv{
+    width:100%;
+    margin-bottom: 40px;
+}
+
+.termBrowserContainer{
+    padding-right: 0px;
+    margin-right: 0px;
+}
+
+.heatmapContainer{
+    padding-left: 0px!important;
+}

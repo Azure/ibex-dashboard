@@ -1,8 +1,5 @@
 import Fluxxor from 'fluxxor';
-import React, { PropTypes, Component } from 'react';
-import {Actions} from '../actions/Actions';
-import Rx from 'rx';
-import {SERVICES} from '../services/services';
+import React from 'react';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -20,7 +17,7 @@ export const TimeSeriesGraph = React.createClass({
   },
   
   initializeGraph(){
-    this.trendingTimeSeries = AmCharts.makeChart(graphDivId, {
+    this.trendingTimeSeries = window.AmCharts.makeChart(graphDivId, {
         "type": "serial",
         "mouseWheelZoomEnabled":true,
         "theme": "dark",
@@ -78,7 +75,7 @@ export const TimeSeriesGraph = React.createClass({
 
     for(let i = 1; i < graphDataset.labels.length; i++){
         let label = graphDataset.labels[i];
-        graphList.push(Object.assign({id: "v{0}".format(label == this.state.timeSeriesGraphData.mostPopularTerm ? "Max" : i), lineColor: termColorMap.get(label)}, {valueField: label}, {title: label}, graphDefaults));
+        graphList.push(Object.assign({id: "v{0}".format(label === this.state.timeSeriesGraphData.mostPopularTerm ? "Max" : i), lineColor: termColorMap.get(label)}, {valueField: label}, {title: label}, graphDefaults));
     }
     
     this.trendingTimeSeries.graphs = graphList;
@@ -94,7 +91,7 @@ export const TimeSeriesGraph = React.createClass({
 
     let graphDateScope = this.trendingTimeSeries.datetimeSelection || '';
 
-    if(graphDateScope != this.state.datetimeSelection){
+    if(graphDateScope !== this.state.datetimeSelection){
         this.refreshTrendingGraph(graphDataset, termColorMap);
     }
   },

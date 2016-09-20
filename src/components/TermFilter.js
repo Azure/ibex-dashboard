@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import {routes} from '../routes/routes';
+import React from 'react';
 import Fluxxor from 'fluxxor';
 import Multiselect from 'react-widgets/lib/Multiselect';
 
