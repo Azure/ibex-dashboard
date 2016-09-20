@@ -131,6 +131,11 @@ if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   echo Syncing Files
   "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
   exitWithMessageOnError "Kudu Sync failed"
+  cd "$DEPLOYMENT_TARGET"
+  echo Installing website npm dependencies
+  eval $NPM_CMD install
+  cd "$DEPLOYMENT_SOURCE"
+  exitWithMessageOnError "Kudu Sync failed"
 fi
 
 ##################################################################################################################################
