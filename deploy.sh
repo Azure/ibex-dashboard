@@ -123,7 +123,7 @@ fi
 
 if [ -e "$DEPLOYMENT_SOURCE/server.js" ]; then
   echo Copying server.js over to the build folder
-  copyfiles -f ./server.js "$DEPLOYMENT_SOURCE/build"
+  copy ./server.js "$DEPLOYMENT_SOURCE/build"
   exitWithMessageOnError "Unable to copy server.js over to build"
 fi
 
