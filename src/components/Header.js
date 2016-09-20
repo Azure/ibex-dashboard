@@ -1,6 +1,7 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
 import '../styles/Header.css';
+import logoURL from '../images/OCHA_Logo.png';
 import {getEnvPropValue} from '../utils/Utils.js';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -25,7 +26,7 @@ export const Header = React.createClass({
     var self = this;
     let siteKey = this.props.siteKey;
     let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
-    let logoURL = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_LOGO);
+    //let logoURL = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_LOGO);
     let initials = 'N/A';
 
     return (
