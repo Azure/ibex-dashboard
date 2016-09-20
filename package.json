@@ -3,7 +3,6 @@
   "description": "This repository holds all client / front-end related code for the Microsoft/OCHA Hackfest. .",
   "version": "0.0.1",
   "license": "MIT",
-  "homepage": "/#/site/ocha",
   "main": "./dist/js/index.min.js",
   "repository": {
     "type": "git",
