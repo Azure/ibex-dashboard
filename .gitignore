@@ -28,6 +28,7 @@ node_modules
 node_modules_old
 bower_components
 dist
+build
 tmp
 *.pem
 *.config.json

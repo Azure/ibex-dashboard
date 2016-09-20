@@ -121,13 +121,15 @@ if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
   cd - > /dev/null
 fi
 
+if [ -e "$DEPLOYMENT_SOURCE/server.js" ]; then
+  echo Copying server.js over to the build folder
+  copyfiles -f ./server.js "$DEPLOYMENT_SOURCE/build"
+  exitWithMessageOnError "Unable to copy server.js over to build"
+fi
+
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   echo Syncing Files
   "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
-  cd "$DEPLOYMENT_TARGET"
-  echo Installing website npm dependencies
-  eval $NPM_CMD install
-  cd "$DEPLOYMENT_SOURCE"
   exitWithMessageOnError "Kudu Sync failed"
 fi
 
