@@ -8,7 +8,6 @@ a:hover {
 
 .navbar-center {
     text-align: center;
-    float: none;
     display:inline-block;
 }
 
@@ -17,11 +16,11 @@ a:hover {
 }
 
 .navbar {
-  margin-bottom: 0px;
+  margin-bottom: 0px!important;
   font-size: 14px;
   font-weight: 600;
   border-bottom: 1px solid #f44d3c;
-  border-radius: 0px;
+  border-radius: 0px!important;
 }
 
 .navbar-header{

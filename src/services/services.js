@@ -1,5 +1,4 @@
 import Rx from 'rx';
-import azure from 'azure-storage';
 import 'rx-dom';
 import {Actions} from '../actions/Actions';
 import {guid, momentToggleFormats, getEnvPropValue} from '../utils/Utils.js'
@@ -69,26 +68,11 @@ export const SERVICES = {
       return Rx.DOM.getJSON(url);
   },
   
-  getDefaultSuggestionList(siteKey, cb){
-      let query = new azure.TableQuery();
-      let storageConnection = getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_CONN);
-      let searchTermsTable = getEnvPropValue(siteKey, process.env.REACT_APP_TBL_KEYWORDS);
-      let tableService = azure.createTableService(storageConnection);
-
-      tableService.queryEntities(searchTermsTable, query, null, (error, result, response) => {
-        if(!error) {
-            let processedResults = result.entries.map(item => {
-                let searchTerm = item.en_term._.toLowerCase();
-                let category = item.super_category._.toLowerCase();
-                
-                return {category, searchTerm};
-            });
-            
-            cb(processedResults);
-        }else{
-            console.error('An error occured trying to query the search terms: ' + error);
-        }
-      });
+  getDefaultSuggestionList(siteKey){
+      return Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_KEYWORDS),
+                          responseType: 'json',
+                          headers: {"Accept": "application/json;odata=nometadata"}
+                        });
   },
 
   processFolderItem(parentFolder, mappingItem, level){
@@ -106,33 +90,31 @@ export const SERVICES = {
   },
   
   getSentimentTreeData(siteKey, cb){
-      let query = new azure.TableQuery();
-      let storageConnection = getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_CONN);
-      let superCategoryTable = getEnvPropValue(siteKey, process.env.REACT_APP_TBL_CLASSIFICATION);
-      let tableService = azure.createTableService(storageConnection);
-      
-      tableService.queryEntities(superCategoryTable, query, null, (error, result, response) => {
-        if(!error) {
-            let folderTree = new Map();
-
-            result.entries.forEach(item => {
-                let parentFolder = folderTree.get(item.PartitionKey._);
-                if(!parentFolder){
-                    parentFolder = {folderName: item.PartitionKey._, subFolders: new Map(), eventCount: 0};
-                    folderTree.set(item.PartitionKey._, parentFolder);
-                }
-                
-                this.processFolderItem(parentFolder.subFolders, item, 1);
-            });
-            
-            cb(folderTree);
-        }else{
-            console.error('An error occured trying to query the category mappings table: ' + error);
-        }
-
-        return;
-      });
+      Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_CLASSIFICATION),
+                          responseType: 'json',
+                          headers: {"Accept": "application/json;odata=nometadata"}
+                        })
+            .subscribe(tableValues => {
+                  if(tableValues.response && tableValues.response.value){
+                       let folderTree = new Map();
+                                
+                       tableValues.response.value.forEach(item => {
+                             let parentFolder = folderTree.get(item.PartitionKey);
+                             if(!parentFolder){
+                                 parentFolder = {folderName: item.PartitionKey, subFolders: new Map(), eventCount: 0};
+                                 folderTree.set(item.PartitionKey, parentFolder);
+                             }
+                                    
+                             this.processFolderItem(parentFolder.subFolders, item, 1);
+                       });
+                                
+                       cb(folderTree);
+                   }
+              }, error => {
+                            console.error('An error occured trying to query the search terms: ' + error);
+              });
   },
+
   getActivityEvents: function(siteKey, categoryValue, categoryType, timespanType, dateSelection){
       let testData =[[{
         "id": 1,

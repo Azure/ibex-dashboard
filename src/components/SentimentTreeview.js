@@ -26,7 +26,7 @@ const styles = {
         padding: '0px 20px 10px 20px'
  }
 };
-
+ 
 const treeDataStyle = {
      tree: {
         base: {
@@ -140,6 +140,7 @@ export const SentimentTreeview = React.createClass({
   },
   
   onToggle(node, toggled){
+        // eslint-disable-next-line      
         if(this.state.cursor){this.state.cursor.active = false;}
         node.active = true;
         if(node.children){ node.toggled = toggled; }
@@ -224,7 +225,7 @@ export const SentimentTreeview = React.createClass({
      let defaultSearchPlaceholder = "#" + this.state.categoryValue;
 
      return (
-         <div className="panel panel-default">
+         <div className="panel panel-selector">
             <Subheader style={styles.subHeader}>Heatmap Terms</Subheader>
             <div className="row tagFilterRow">
                 <TypeaheadSearch data={defaultSearchPlaceholder}/>

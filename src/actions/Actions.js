@@ -94,9 +94,22 @@ const methods = {
                     });
                 }
           };
-          
-          SERVICES.getDefaultSuggestionList(siteKey, azureStorageCB);
+
+          SERVICES.getDefaultSuggestionList(siteKey)
+                  .subscribe(tableValues => {
+                      if(tableValues.response && tableValues.response.value){
+                          let processedResults = tableValues.response.value.map(kw => {
+                              return {"category": kw.super_category.toLowerCase(), "searchTerm": kw.en_term.toLowerCase()};
+                          });
+
+                          azureStorageCB(processedResults);
+                      }
+                  },
+                  error => {
+                      console.error('An error occured trying to query the search terms: ' + error);
+                  });
         },
+        
         load_sentiment_tree_view: function(siteKey){
             let self = this;
 

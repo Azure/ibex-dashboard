@@ -1,10 +1,24 @@
 .tagFilterRow{
-    padding: 0px 20px 10px 20px;
+    padding: 0 35px 10px;
 }
 
-.panel-default{
+.panel-selector{
       padding-bottom: 0px!important;
       background-color: #191919!important;
       border: 0px;
 }
 
+.form-control {
+    background-color: transparent;
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-color: #ccc;
+    border-color: rgba(240, 240, 240, 0.2);
+    border-radius: 0;
+    height: 30px!important;
+    color: #fefefe;
+    outline: none;
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+} 

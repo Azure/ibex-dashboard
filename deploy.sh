@@ -106,33 +106,24 @@ touch server.js
 selectNodeVersion
 
 if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
-  echo Installing RIMRAF
-  eval $NPM_CMD install rimraf -g --silent
-  echo Removing node_modules folder
+  echo Installing Create React App Package
+  eval $NPM_CMD install -g create-react-app
+  exitWithMessageOnError "create react app install failed"
+
   echo Installing NPM Packages
   eval $NPM_CMD install
   exitWithMessageOnError "npm failed"
+
+  echo Building React App
+  eval $NPM_CMD run build 
+  exitWithMessageOnError "react build failed"
+
   cd - > /dev/null
-fi
-
-if [ -e "$DEPLOYMENT_SOURCE/bower.json" ]; then
-  echo Installing Bower Packages
-  rimraf bower_components
-  eval $NPM_CMD install bower
-  exitWithMessageOnError "installing bower failed"
-  ./node_modules/.bin/bower install
-  exitWithMessageOnError "bower failed"
-fi
-
-if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
-  echo Running Gulp Build
-  eval $NPM_CMD run build
-  exitWithMessageOnError "Gulp failed"
 fi
 
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   echo Syncing Files
-  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
+  "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
   cd "$DEPLOYMENT_TARGET"
   echo Installing website npm dependencies
   eval $NPM_CMD install

@@ -160,9 +160,11 @@ a.keyword-link.pull-left {
 }
 .list-group {
     line-height: 1.3;
-    overflow: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
     width: auto;
-    height: 600px;
+    min-height: 100%;
+    height: 100%;
 }
 
 .activity-list-group{

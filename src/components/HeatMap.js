@@ -10,10 +10,15 @@ import L from 'leaflet';
 import {getEnvPropValue} from '../utils/Utils.js';
 import FlatButton from 'material-ui/lib/flat-button';
 import {ActivityFeed} from './ActivityFeed';
-import '../styles/HeatMap.css';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet/dist/images/layers-2x.png';
+import 'leaflet/dist/images/layers.png';
+import 'leaflet/dist/images/marker-icon-2x.png';
+import 'leaflet/dist/images/marker-icon.png';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import '../styles/HeatMap.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");

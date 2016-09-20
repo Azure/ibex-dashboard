@@ -1,10 +1,5 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
-import 'amcharts3';
-import 'amcharts3/amcharts/serial.js';
-import 'amcharts3/amcharts/plugins/export/export.js';
-import 'amcharts3/amcharts/themes/dark.js';
-import 'amcharts3/amcharts/plugins/export/export.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),

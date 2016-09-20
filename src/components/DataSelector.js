@@ -7,8 +7,9 @@ import SelectField from 'material-ui/lib/select-field';
 import MenuItem from 'material-ui/lib/menus/menu-item';
 import moment from 'moment';
 import {momentToggleFormats} from '../utils/Utils.js';
-import '../styles/DataSelector.css'
-import '../styles/Header.css'
+import '../styles/DataSelector.css';
+import 'react-widgets/dist/css/react-widgets.css';
+import '../styles/Header.css';
 
 const TimeSelectionOptions = [
     {label: '', timeType: 'customDatePlaceholder'},

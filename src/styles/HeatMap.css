@@ -85,5 +85,6 @@
 
 #leafletMap{
   margin-top: 0px;
+    height: 600px;
   background-color: #333;
 }

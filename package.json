@@ -24,9 +24,7 @@
   "dependencies": {
     "amcharts3": "amcharts/amcharts3",
     "async": "^2.0.1",
-    "azure-storage": "^1.3.0",
     "bootstrap": "^3.3.7",
-    "browserify-fs": "^1.0.0",
     "envify": "^3.2.0",
     "extend": "^3.0.0",
     "flux": "^2.1.1",
