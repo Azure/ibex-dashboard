@@ -17,7 +17,6 @@
   ],
   "devDependencies": {
     "react": "^0.14.3",
-    "clean": "rimraf build/*",
     "react-dom": "^0.14.3",
     "react-router": "^1.0.0-rc4",
     "react-scripts": "0.4.3"
