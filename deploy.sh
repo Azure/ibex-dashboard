@@ -121,6 +121,12 @@ if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
   cd - > /dev/null
 fi
 
+if [ -e "$DEPLOYMENT_SOURCE/Web.config" ]; then
+  echo Copying Web.config over to the build folder
+  cp Web.config build/
+  exitWithMessageOnError "Unable to copy Web.config over to build"
+fi
+
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   echo Syncing Files
   "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
