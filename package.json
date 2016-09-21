@@ -2,6 +2,7 @@
   "name": "Fortis-Client",
   "description": "This repository holds all client / front-end related code for the Microsoft/OCHA Hackfest. .",
   "version": "0.0.1",
+  "homepage": "C:\\Users\\erisch\\Source\\Repos\\Orion-Client\\build",
   "license": "MIT",
   "main": "./dist/js/index.min.js",
   "repository": {
