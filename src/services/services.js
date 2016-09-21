@@ -77,9 +77,9 @@ export const SERVICES = {
 
   processFolderItem(parentFolder, mappingItem, level){
        if(level <= maxMappingLevels){
-           let folderKey = mappingItem["level" + level + "Key"]._ || "";
+           let folderKey = mappingItem["level" + level + "Key"] || "";
            if(folderKey && !parentFolder.has(folderKey)){
-                let newFolder = {folderName: mappingItem["level" + level + "Display"]._, subFolders: new Map(), eventCount: 0};
+                let newFolder = {folderName: mappingItem["level" + level + "Display"], subFolders: new Map(), eventCount: 0};
                 parentFolder.set(folderKey, newFolder);
 
                 this.processFolderItem(newFolder.subFolders, mappingItem, level + 1);

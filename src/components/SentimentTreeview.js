@@ -5,8 +5,8 @@ import React from 'react';
 import {Treebeard, decorators} from 'react-treebeard';
 import * as filters from './TreeFilter';
 import {TypeaheadSearch} from './TypeaheadSearch';
-import '../styles/SentimentTreeView.css';
 import '../styles/Header.css';
+import '../styles/SentimentTreeView.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
