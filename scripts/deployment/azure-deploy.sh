@@ -31,6 +31,7 @@ SCRIPT_DIR="${SCRIPT_DIR%/*}"
 ARTIFACTS=$SCRIPT_DIR/../artifacts
 KUDU_SYNC_CMD=${KUDU_SYNC_CMD//\"}
 
+
 if [[ ! -n "$DEPLOYMENT_SOURCE" ]]; then
   DEPLOYMENT_SOURCE=$SCRIPT_DIR
 fi
@@ -48,6 +49,8 @@ if [[ ! -n "$DEPLOYMENT_TARGET" ]]; then
 else
   KUDU_SERVICE=true
 fi
+
+WEB_CONFIG=$DEPLOYMENT_SOURCE/scripts/deployment/Web.config
 
 if [[ ! -n "$KUDU_SYNC_CMD" ]]; then
   # Install kudu sync
@@ -121,10 +124,10 @@ if [ -e "$DEPLOYMENT_SOURCE/package.json" ]; then
   cd - > /dev/null
 fi
 
-if [ -e "$DEPLOYMENT_SOURCE/Web.config" ]; then
-  echo Copying Web.config over to the build folder
-  cp Web.config build/
-  exitWithMessageOnError "Unable to copy Web.config over to build"
+if [ -e "$WEB_CONFIG" ]; then
+  echo Copying $WEB_CONFIG over to the build folder
+  cp $WEB_CONFIG build/
+  exitWithMessageOnError "Unable to copy $WEB_CONFIG over to build"
 fi
 
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
