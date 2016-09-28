@@ -2,6 +2,7 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import {Actions} from '../actions/Actions';
 import Tile from 'geotile';
+import weightedMean from '../utils/WeightedMean';
 import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
 import Dialog from 'material-ui/lib/dialog';
@@ -62,7 +63,6 @@ export const HeatMap = React.createClass({
   
   addInfoBoxControl(){
       let info = L.control();
-      let self = this;
       
       if(this.map){
           info.onAdd = map => {
@@ -76,13 +76,8 @@ export const HeatMap = React.createClass({
           };
 
 		  info.update = props => {
-            let categoryValue = self.state.categoryValue;
-            let infoHeaderText = "<h5>{0} Mentions / Sentiment</h5>".format(categoryValue);
-            let infoBoxInnerHtml = 'Click a marker to view event details<br>';
-            
-            Object.keys(Actions.constants.SENTIMENT_COLOR_MAPPING).forEach(element => {
-                    infoBoxInnerHtml += "<i class='legend-i' style='background: {0}'></i> <span class='legend-label'>{1}</span><br>".format(Actions.constants.SENTIMENT_COLOR_MAPPING[element], element);
-            });
+            let infoHeaderText = "<h5>Sentiment Weighted Average</h5>";
+            let infoBoxInnerHtml = '<div id="sentimentGraph" />';
             
 			this._div.innerHTML = infoHeaderText + infoBoxInnerHtml;
 		  };
@@ -118,7 +113,9 @@ export const HeatMap = React.createClass({
     this.tilemap = new Map();
     let defaultZoom = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_ZOOM);
     L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
-    this.map = L.map('leafletMap', {zoomControl: false}).setView([latitude, longitude], defaultZoom);
+    this.map = L.map('leafletMap', {zoomControl: false});
+    this.map.addControl(L.control.zoom({position: 'topright'}));
+    this.map.setView([latitude, longitude], defaultZoom);
     L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18,
@@ -126,7 +123,6 @@ export const HeatMap = React.createClass({
         accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
     }).addTo(this.map);
     
-    this.map.addControl(L.control.zoom({position: 'topright'}));
     this.map.selectedTerm = this.state.categoryValue;
     this.map.datetimeSelection = this.state.datetimeSelection;
 
@@ -140,6 +136,64 @@ export const HeatMap = React.createClass({
 
     this.addClusterGroup();
     this.addInfoBoxControl();
+  },
+
+  createSentimentDistributionGraph(){
+     if(!this.sentimentIndicatorGraph){
+         this.sentimentIndicatorGraph = window.AmCharts.makeChart("sentimentGraph", {
+            "type": "serial",
+            "rotate": true,
+            "theme": "dark",
+            "autoMargins": false,
+            "marginTop": 10,
+            "marginLeft": 70,
+            "marginBottom": 30,
+            "marginRight": 10,
+            "dataProvider": [ {
+                "category": "Avg<br>Sentiment",
+                "full": 100,
+                "limit": 15,
+                "bullet": 15
+            } ],
+            "valueAxes": [ {
+                "maximum": 100,
+                "stackType": "regular",
+                "gridAlpha": 0
+            } ],
+            "startDuration": 1,
+            "graphs": [ {
+                "valueField": "full",
+                "showBalloon": false,
+                "type": "column",
+                "lineAlpha": 0,
+                "fillAlphas": 0.8,
+                "fillColors": [ "#19d228", "#f6d32b", "#fb2316" ],
+                "gradientOrientation": "horizontal",
+            }, {
+                "clustered": false,
+                "columnWidth": 0.5,
+                "fillAlphas": 1,
+                "lineColor": "#337ab7",
+                "stackable": false,
+                "type": "column",
+                "valueField": "bullet"
+            }, {
+                "columnWidth": 0.7,
+                "lineColor": "#000000",
+                "lineThickness": 3,
+                "noStepRisers": true,
+                "stackable": false,
+                "type": "step",
+                "valueField": "limit"
+            } ],
+            "columnWidth": 1,
+            "categoryField": "category",
+            "categoryAxis": {
+                "gridAlpha": 0,
+                "position": "left"
+            }
+            } );
+     }
   },
 
   addClusterGroup(){
@@ -223,6 +277,7 @@ export const HeatMap = React.createClass({
         return false;
     }
     
+    this.createSentimentDistributionGraph();
     this.mapMarkerFlushCheck();
 
     let bounds = this.map.getBounds();
@@ -236,12 +291,17 @@ export const HeatMap = React.createClass({
                                                       south: southEast.lat, 
                                                       east: southEast.lng
                                                     }, zoom);
+    this.weightedMeanValues = [];
 
     eachLimit(spanningTileIds, maxRequestLimit, this.createLayer, this.updateDataStore);
   },
 
   updateDataStore(){
       let aggregateAssociatedTermCnt = {};
+      let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
+      this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
+      this.sentimentIndicatorGraph.dataProvider[0].bullet = weightedSentiment;
+      this.sentimentIndicatorGraph.validateData();
 
       for (let tileTerms of this.associatedTerms.values()) {
           Object.keys(tileTerms).forEach(term => aggregateAssociatedTermCnt[term] = aggregateAssociatedTermCnt[term] || 0 + tileTerms[term]);
@@ -303,6 +363,10 @@ export const HeatMap = React.createClass({
        }else if(filterCluster){
            this.visibleClusters.delete(tileId);
            this.markers.removeLayer(tileGeoJson);
+       }
+
+       if(Object.keys(tilePayload).length > 0 && !filterCluster){
+           this.weightedMeanValues.push([tilePayload[sentimentFieldName], tilePayload[mentionCountFieldName]]);
        }
   },
 
