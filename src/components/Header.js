@@ -1,7 +1,8 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
 import '../styles/Header.css';
-import logoURL from '../images/OCHA_Logo.png';
+import OCHAlogoURL from '../images/OCHA_Logo.png';
+import DengueLogoURL from '../images/umea_white.svg';
 import {getEnvPropValue} from '../utils/Utils.js';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -21,12 +22,11 @@ export const Header = React.createClass({
   componentWillReceiveProps(nextProps) {
        this.setState(this.getStateFromFlux());
   },
-
+  
   render() {
     var self = this;
     let siteKey = this.props.siteKey;
     let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
-    //let logoURL = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_LOGO);
     let initials = 'N/A';
 
     return (
@@ -40,7 +40,7 @@ export const Header = React.createClass({
                       <span className="icon-bar"></span>
                   </button>
                   <a className="navbar-brand text-danger" href="#">
-                      <img role="presentation" src={logoURL} style={{display: 'inline'}} width="45" height="45" />
+                      <img role="presentation" src={siteKey === "ocha" ? OCHAlogoURL : DengueLogoURL} style={{display: 'inline'}} height="48" />
                      <span className="brandLabel">{title}</span>
                   </a>
               </div>
