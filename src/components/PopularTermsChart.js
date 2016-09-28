@@ -48,7 +48,7 @@ export const PopularTermsChart = React.createClass({
             "enabled": true
         },
         "valueAxes": [{
-            "title": "Total Mentions for " + datetimeSelection
+            "title": "Top Keywords for " + datetimeSelection
         }]
     });
 
