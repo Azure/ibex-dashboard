@@ -76,7 +76,7 @@ export const HeatMap = React.createClass({
           };
 
 		  info.update = props => {
-            let infoHeaderText = "<h5>Sentiment Weighted Average</h5>";
+            let infoHeaderText = "<h5>Sentimentometer</h5>";
             let infoBoxInnerHtml = '<div id="sentimentGraph" />';
             
 			this._div.innerHTML = infoHeaderText + infoBoxInnerHtml;
@@ -148,7 +148,7 @@ export const HeatMap = React.createClass({
             "marginTop": 10,
             "marginLeft": 70,
             "marginBottom": 30,
-            "marginRight": 10,
+            "marginRight": 25,
             "dataProvider": [ {
                 "category": "Avg<br>Sentiment",
                 "full": 100,
@@ -158,7 +158,8 @@ export const HeatMap = React.createClass({
             "valueAxes": [ {
                 "maximum": 100,
                 "stackType": "regular",
-                "gridAlpha": 0
+                "gridAlpha": 0,
+                "labelFunction": (value, formattedValue, valueAxis) =>{ if(value === 0) return "Positive"; else if(value === 50) return "Neautral"; else if(value === 100) return "Negative";}
             } ],
             "startDuration": 1,
             "graphs": [ {
@@ -167,19 +168,19 @@ export const HeatMap = React.createClass({
                 "type": "column",
                 "lineAlpha": 0,
                 "fillAlphas": 0.8,
-                "fillColors": [ "#19d228", "#f6d32b", "#fb2316" ],
+                "fillColors": [ "#337ab7", "#f6d32b", "#fb2316" ],
                 "gradientOrientation": "horizontal",
             }, {
                 "clustered": false,
                 "columnWidth": 0.5,
                 "fillAlphas": 1,
-                "lineColor": "#337ab7",
+                "lineColor": "rgb(47, 64, 141)",
                 "stackable": false,
                 "type": "column",
                 "valueField": "bullet"
             }, {
                 "columnWidth": 0.7,
-                "lineColor": "#000000",
+                "lineColor": "rgb(46, 189, 89)",
                 "lineThickness": 3,
                 "noStepRisers": true,
                 "stackable": false,
@@ -365,9 +366,20 @@ export const HeatMap = React.createClass({
            this.markers.removeLayer(tileGeoJson);
        }
 
-       if(Object.keys(tilePayload).length > 0 && !filterCluster){
-           this.weightedMeanValues.push([tilePayload[sentimentFieldName], tilePayload[mentionCountFieldName]]);
+       if(tileGeoJson && !filterCluster){
+           let geoJsonFeature = this.firstOrDefaultGeoJsonLayerFeature(tileGeoJson);
+           this.weightedMeanValues.push([geoJsonFeature.feature.properties[sentimentFieldName], geoJsonFeature.feature.properties[mentionCountFieldName]]);
        }
+  },
+  
+  firstOrDefaultGeoJsonLayerFeature(geoJsonLayers){
+      if(geoJsonLayers && geoJsonLayers._layers){
+          for (var i in geoJsonLayers._layers) {
+              if(geoJsonLayers._layers[i]){
+                  return geoJsonLayers._layers[i];
+              }
+          }
+      }
   },
 
   addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId){
