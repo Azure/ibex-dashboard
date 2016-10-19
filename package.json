@@ -16,6 +16,7 @@
     }
   ],
   "devDependencies": {
+    "mocha": "^3.1.2",
     "react": "^0.14.3",
     "react-dom": "^0.14.3",
     "react-router": "^1.0.0-rc4",
@@ -37,17 +38,20 @@
     "material-ui": "^0.14.4",
     "moment": "^2.11.2",
     "numeral": "^1.5.3",
+    "pg": "^6.1.0",
     "react-autosuggest": "2.1.1",
     "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
+    "restify": "^4.1.1",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "react-test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "test": "mocha"
   },
   "eslintConfig": {
     "extends": "./node_modules/react-scripts/config/eslint.js"

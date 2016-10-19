@@ -104,7 +104,7 @@ export const SERVICES = {
                                  parentFolder = {folderName: item.PartitionKey, subFolders: new Map(), eventCount: 0};
                                  folderTree.set(item.PartitionKey, parentFolder);
                              }
-                                    
+
                              this.processFolderItem(parentFolder.subFolders, item, 1);
                        });
                                 
