@@ -129,7 +129,7 @@ if [ -e "$WEB_CONFIG" ]; then
   cp $WEB_CONFIG build/
   exitWithMessageOnError "Unable to copy $WEB_CONFIG over to build"
 fi
-
+ 
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   echo Syncing Files
   cp "$DEPLOYMENT_SOURCE/server.js" "$DEPLOYMENT_SOURCE/build"

@@ -1,7 +1,7 @@
 "use strict"
 
 let restify = require('restify');
-let TileService = require('./src/services/TileService');
+let TileService = require('./src/services/restify/TileService');
 
 let DEFAULT_LAYER_TYPE = "associations";
 
