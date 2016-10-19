@@ -1,7 +1,7 @@
 "use strict"
 
 let assert = require('assert'),
-    tileFetchService = require('../src/services/TileService');
+    tileFetchService = require('../build/src/services/restify/TileService');
 
 describe('Validate Tile Fetch service', () => {
     it('We can succesfully fetch a tile in libya', done => {

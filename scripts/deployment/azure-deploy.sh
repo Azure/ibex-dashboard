@@ -129,10 +129,11 @@ if [ -e "$WEB_CONFIG" ]; then
   cp $WEB_CONFIG build/
   exitWithMessageOnError "Unable to copy $WEB_CONFIG over to build"
 fi
-
+ 
 if [[ "$IN_PLACE_DEPLOYMENT" -ne "1" ]]; then
   echo Syncing Files
   cp "$DEPLOYMENT_SOURCE/server.js" "$DEPLOYMENT_SOURCE/build"
+  cp -R "$DEPLOYMENT_SOURCE/src" "$DEPLOYMENT_SOURCE/build"
   "$KUDU_SYNC_CMD" -v 50 -f "$DEPLOYMENT_SOURCE/build" -t "$DEPLOYMENT_TARGET" -n "$NEXT_MANIFEST_PATH" -p "$PREVIOUS_MANIFEST_PATH" -i ".git;.hg;.deployment;deploy.sh"
   exitWithMessageOnError "Kudu Sync failed"
 fi
