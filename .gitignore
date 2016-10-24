@@ -32,3 +32,9 @@ build
 tmp
 *.pem
 *.config.json
+
+# Localhost config file
+.env
+
+# Editors
+.vscode/*

@@ -62,6 +62,10 @@ const constants = {
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS"
            },
+           FACTS : {
+               LOAD_FACTS: "LOAD:FACTS",
+               LOAD_FACT: "LOAD:FACT"
+           },
 };
 
 const methods = {
@@ -165,6 +169,36 @@ const methods = {
                             }, error => {
                                 console.log('Something went terribly wrong with loading the initial graph dataset');
                             });
+            }
+        }
+    },
+    FACTS: {
+        load_facts: function (pageSize, skip) {
+            let self = this;
+            let dataStore = this.flux.stores.FactsStore.dataStore;
+            console.log("load facts", pageSize, skip);
+            if (dataStore.facts) {
+                SERVICES.getFacts(pageSize, skip)
+                    .subscribe(response => {
+                        self.dispatch(constants.FACTS.LOAD_FACTS, { response: response });
+                    }, error => {
+                        console.warning('Could not load facts');
+                    });
+            }
+        },
+        load_fact: function (id) {
+            let self = this;
+            let dataStore = this.flux.stores.FactsStore.dataStore;
+
+            dataStore.factDetail = null;
+
+            if (!dataStore.factDetail) {
+                SERVICES.getFact(id)
+                    .subscribe(response => {
+                        self.dispatch(constants.FACTS.LOAD_FACT, { response: response });
+                    }, error => {
+                        console.warning('Could not load fact id: ' + id);
+                    });
             }
         }
     }

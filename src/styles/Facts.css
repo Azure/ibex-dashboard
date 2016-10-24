@@ -1,0 +1,113 @@
+#facts > .ReactListView > * {
+    background: #F3F3EC;
+    margin: 0 auto;
+}
+
+#facts .cell {
+    box-sizing: border-box;
+    padding-top: 20px;
+}
+
+#facts .card {
+    background: white;
+    box-sizing: border-box;
+    padding: 10px;
+    height: 100%;
+    overflow: hidden;
+    border: 0;
+    border-bottom: 1px solid #ccc;
+    position: relative;
+}
+
+#facts .card {
+    box-shadow: 2px 2px 8px #ccc;
+}
+
+#facts .card .title {
+    margin: 0;
+    padding: 0;
+    color: #ccc;
+    font-weight: normal;
+    font-size: 1.5em;
+}
+
+#facts .card .date {
+    margin: 0;
+    padding: 0;
+    color: #ccc;
+}
+
+.truncate-2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.5;
+    word-wrap: break-word;
+    color: #ccc; 
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    white-space: nowrap;
+}
+
+.loadingPage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.loadingPage > * {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.loadingPage p {
+    color: #ccc;
+}
+
+/* fact detail page */
+
+#fact .topBar {
+    background: #F3F3EC;
+    height: 44px;
+}
+
+#fact .navBtn {
+    line-height: 44px;
+}
+
+#fact .whitespace {
+    padding-top: 20px;
+}
+
+#fact h1 {
+    font-weight: normal;
+    padding-bottom: 20px;
+}
+
+#fact p {
+
+}
+
+#fact .text {
+    line-height: 2;
+}
+
+#fact .details {
+    margin-top: 20px;
+}
+
+#fact .subheading {
+    color: gray;
+}
+
+#fact .drop {
+    padding-bottom: 20px;
+}
