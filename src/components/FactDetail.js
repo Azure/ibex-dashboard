@@ -12,7 +12,7 @@ export const FactDetail = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
   getInitialState: function () {
-    var factId = this.props.factId;
+    let factId = this.props.factId;
     this.getFlux().actions.FACTS.load_fact(factId);
   },
 
@@ -57,10 +57,10 @@ export const FactDetail = React.createClass({
       );
     }
 
-    var factDetail = this.state.factDetail;
-    var fact = factDetail.fact;
-    var dateProcessed = getHumanDate(factDetail.id);
-    var datePublished = getHumanDate(fact.published_at);
+    let factDetail = this.state.factDetail;
+    let fact = factDetail.fact;
+    let dateProcessed = getHumanDate(factDetail.id);
+    let datePublished = getHumanDate(fact.published_at);
 
     return (
       <div id="fact">

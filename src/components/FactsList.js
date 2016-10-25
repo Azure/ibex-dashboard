@@ -92,7 +92,7 @@ export const FactsList = React.createClass({
     if (!this.state.facts.length > 0) {
       return (<div className="loadingPage"><p>Loading facts&hellip;</p></div>);
     }
-    var cssHeight = 'calc(100vh - ' + this.excludedHeight + 'px)';
+    let cssHeight = 'calc(100vh - ' + this.excludedHeight + 'px)';
     return (
       <div id="facts" style={{ height: cssHeight }} onScroll={this._handleScroll}>
         <ReactListView style={{ height: cssHeight }}
@@ -111,7 +111,7 @@ export const FactsList = React.createClass({
   },
 
   _renderItem(x, y, style) {
-    var item = this._getItem(x, y);
+    let item = this._getItem(x, y);
 
     // Update cell style properties
     style.height = this.cardHeight + 'px';
@@ -128,7 +128,7 @@ export const FactsList = React.createClass({
       return;
     }
 
-    var dateString = getHumanDate(item.id);
+    let dateString = getHumanDate(item.id);
     return (
       <div className="cell" style={style}>
         <div className="card">
@@ -149,11 +149,11 @@ export const FactsList = React.createClass({
   },
 
   _calcRowsAndColumns() {
-    var availableWidth = Math.min(document.documentElement.clientWidth, window.innerWidth);
-    var minColumnWidth = this.minCardWidth + this.defaultColumnGutter * 2;
-    var maxColumns = Math.floor(availableWidth / minColumnWidth);
+    let availableWidth = Math.min(document.documentElement.clientWidth, window.innerWidth);
+    let minColumnWidth = this.minCardWidth + this.defaultColumnGutter * 2;
+    let maxColumns = Math.floor(availableWidth / minColumnWidth);
     this.cardHeight = this.maxCardHeight;
-    var count = this._totalItems();
+    let count = this._totalItems();
 
     // Single column layout (compact width)
     if (maxColumns <= 1 || minColumnWidth > availableWidth) {
@@ -173,7 +173,7 @@ export const FactsList = React.createClass({
   },
 
   _totalItems() {
-    var l = this.state.facts.length;
+    let l = this.state.facts.length;
     var count = 0;
     for (var i = 0; i < l; i++) {
       count += this.state.facts[i].facts.length;
@@ -186,12 +186,12 @@ export const FactsList = React.createClass({
   },
 
   _getItem(x, y) {
-    var index = this._getIndex(x, y);
+    let index = this._getIndex(x, y);
     return this._getItemAtIndex(index);
   },
 
   _getItemAtIndex(index) {
-    var l = this.state.facts.length;
+    let l = this.state.facts.length;
     var count = 0,
       sectionIndex = 0,
       sectionTotal = 0;
@@ -212,14 +212,14 @@ export const FactsList = React.createClass({
   },
 
   _handleScroll(e) {
-    var y = e.target.scrollTop;
+    let y = e.target.scrollTop;
     if (y !== 0) {
       this.scrollTop = y;
     }
-    var scrollViewHeight = e.target.offsetHeight;
-    var contentHeight = e.target.firstChild.offsetHeight;
-    var h = contentHeight - scrollViewHeight;
-    var scrollingBuffer = h * this.scrollThreshold;
+    let scrollViewHeight = e.target.offsetHeight;
+    let contentHeight = e.target.firstChild.offsetHeight;
+    let h = contentHeight - scrollViewHeight;
+    let scrollingBuffer = h * this.scrollThreshold;
     if (h - y < scrollingBuffer) {
       // infinite scroll
       this._loadFacts();
