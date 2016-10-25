@@ -14,53 +14,85 @@ export const FactsList = React.createClass({
 
   displayName: 'FactsList',
 
-  // default card sizes
+  // Default card sizes
   minCardWidth: 320,
   maxCardHeight: 120,
   defaultColumnGutter: 20,
 
-  // calculated properties
+  // Calculated properties
   columns: 1,
   rows: 0,
   cardWidth: 0,
   cardHeight: 0,
   gutter: 0,
+  excludedHeight: 0,
 
-  // pagination properties for infinite scrolling
-  pageSize: 50,
-  skip: 0,
-  isLoading: false,
+  // Infinite scroll vars
+  isReady: true,
+  scrollThreshold: 0.2,
+  scrollTop: 0,
 
-  // page element CSS selectors used to calculate the remaining height available for infinite scrolling list view  
+  // Page element CSS selectors used to calculate the remaining height available for infinite scrolling list view  
   excludedElements: [".navbar"],
 
   _loadFacts: function () {
-    if (!this.isLoading) {
-      this.isLoading = true;
-      this.getFlux().actions.FACTS.load_facts(this.pageSize, this.skip);
-      this.skip += this.pageSize;
+    // Wait until page has rendered before trying to load next batch
+    if (this.isReady) {
+      this.ready = false;
+      this.getFlux().actions.FACTS.load_facts(this.state.pageSize, this.state.skip);
     }
   },
 
   getInitialState: function () {
-    this._loadFacts();
-  },
-
-  getStateFromFlux: function () {
-    this.isLoading = false;
-    return this.getFlux().store("FactsStore").getState();
   },
 
   componentWillReceiveProps: function (nextProps) {
     this.setState(this.getStateFromFlux());
   },
 
+  getStateFromFlux: function () {
+    return this.getFlux().store("FactsStore").getState();
+  },
+
+  componentWillMount: function() {
+    // Set properties required for redraw of List View on return
+    this.excludedHeight = this.state.pageState.excludedHeight;
+    if ( this.state.facts.length > 0 ) {
+      this._calcRowsAndColumns();
+      return;
+    }
+    this._loadFacts();
+  },
+
+  componentDidMount() {
+    // The columns will need to be recalculated when page size changes
+    window.addEventListener("resize", this._handleResize);
+    var scrollView = document.querySelector("#facts");
+    if (scrollView) {
+      // Restores last scroll position of React List View 
+      scrollView.firstChild.scrollTop = this.state.pageState.scrollTop;
+    }
+  },
+
+  componentWillUnmount() {
+    this.getFlux().actions.FACTS.save_page_state({
+      scrollTop : this.scrollTop,
+      excludedHeight : this.excludedHeight
+    });
+    window.removeEventListener("resize", this._handleResize);
+  },
+
+  shouldComponentUpdate: function(nextProps, nextState) {
+    this._calcExcludedHeight();
+    this._calcRowsAndColumns();
+    return true;
+  },
+
   render() {
     if (!this.state.facts.length > 0) {
       return (<div className="loadingPage"><p>Loading facts&hellip;</p></div>);
     }
-    this._calcRowsAndColumns();
-    var cssHeight = 'calc(100vh - ' + this._excludedHeight() + 'px)';
+    var cssHeight = 'calc(100vh - ' + this.excludedHeight + 'px)';
     return (
       <div id="facts" style={{ height: cssHeight }} onScroll={this._handleScroll}>
         <ReactListView style={{ height: cssHeight }}
@@ -74,15 +106,14 @@ export const FactsList = React.createClass({
     );
   },
 
+  componentDidUpdate: function() {
+    this.ready = true;
+  },
+
   _renderItem(x, y, style) {
     var item = this._getItem(x, y);
 
-    // error, no item 
-    if (item.id == -1) {
-      return (<div><code>Error, item not found.</code></div>);
-    }
-
-    // update cell style properties
+    // Update cell style properties
     style.height = this.cardHeight + 'px';
     if (this.columns > 1) {
       style.width = this.cardWidth + 'px';
@@ -90,6 +121,11 @@ export const FactsList = React.createClass({
     } else {
       style.width = '100%';
       style.marginLeft = '0px';
+    }
+
+    // No item available at grid position
+    if (item.id === -1) {
+      return;
     }
 
     var dateString = getHumanDate(item.id);
@@ -104,8 +140,10 @@ export const FactsList = React.createClass({
   },
 
   _columnWidth() {
-    return (this.columns > 1) ? this.cardWidth + this.gutter * 2 : this.cardWidth; // no gutter required for single column (maximize design on compact width displays)
+    // No gutter required for single column (maximize design on compact width displays)
+    return (this.columns > 1) ? this.cardWidth + this.gutter * 2 : this.cardWidth;
   },
+
   _rowHeight() {
     return this.cardHeight + this.gutter;
   },
@@ -117,7 +155,7 @@ export const FactsList = React.createClass({
     this.cardHeight = this.maxCardHeight;
     var count = this._totalItems();
 
-    // single column layout (compact width)
+    // Single column layout (compact width)
     if (maxColumns <= 1 || minColumnWidth > availableWidth) {
       this.columns = 1;
       this.rows = count;
@@ -126,7 +164,7 @@ export const FactsList = React.createClass({
       return;
     }
 
-    // adjust no. of columns depending on screen width
+    // Adjust no. of columns depending on screen width
     this.columns = maxColumns;
     this.rows = Math.ceil(count / this.columns);
     this.gutter = this.defaultColumnGutter;
@@ -166,8 +204,7 @@ export const FactsList = React.createClass({
       }
       count += sectionTotal;
     }
-    console.warn("Error getting item at index:", index, sectionIndex, '/', sectionTotal);
-    return { "id": -1, "title": "" }; // error, no record available at index
+    return { "id": -1, "title": "" }; // No record available at index
   },
 
   _getIndex(x, y) {
@@ -176,36 +213,31 @@ export const FactsList = React.createClass({
 
   _handleScroll(e) {
     var y = e.target.scrollTop;
+    if (y !== 0) {
+      this.scrollTop = y;
+    }
     var scrollViewHeight = e.target.offsetHeight;
     var contentHeight = e.target.firstChild.offsetHeight;
     var h = contentHeight - scrollViewHeight;
-    var scrollingBuffer = h * 0.2;
+    var scrollingBuffer = h * this.scrollThreshold;
     if (h - y < scrollingBuffer) {
       // infinite scroll
       this._loadFacts();
     }
   },
 
-  componentDidMount() {
-    window.addEventListener("resize", this.handleResize);
-  },
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.handleResize);
-  },
-
-  handleResize(e) {
+  _handleResize(e) {
     this.setState({ width: document.body.clientWidth, height: document.body.clientHeight });
   },
 
-  // NB: infinite scroll with this list view component only works with scroll view container using an absolute pixel height so we have to calculate the vertical space available.
-  _excludedHeight() {
+  // NB: Infinite scroll with the React List View component only works with scroll view container using an absolute pixel height so the vertical space available needs to be calculated using DOM element selectors.
+  _calcExcludedHeight() {
     var height = 0;
     var i = this.excludedElements.length;
     while (i--) {
       height += document.querySelector(this.excludedElements[i]).offsetHeight;
     }
-    return height;
+    this.excludedHeight = height;
   }
 
 });

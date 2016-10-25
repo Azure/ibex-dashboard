@@ -64,6 +64,9 @@ const constants = {
            },
            FACTS : {
                LOAD_FACTS: "LOAD:FACTS",
+               LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
+               LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
+               SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
                LOAD_FACT: "LOAD:FACT"
            },
 };
@@ -176,15 +179,19 @@ const methods = {
         load_facts: function (pageSize, skip) {
             let self = this;
             let dataStore = this.flux.stores.FactsStore.dataStore;
-            console.log("load facts", pageSize, skip);
-            if (dataStore.facts) {
+            if (!dataStore.loading) {
+                this.dispatch(constants.FACTS.LOAD_FACTS);
                 SERVICES.getFacts(pageSize, skip)
                     .subscribe(response => {
-                        self.dispatch(constants.FACTS.LOAD_FACTS, { response: response });
+                        self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
                     }, error => {
-                        console.warning('Could not load facts');
+                        console.warning('Error, could not load facts', error);
+                        self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
                     });
             }
+        },
+        save_page_state: function(pageState) {
+            this.dispatch(constants.FACTS.SAVE_PAGE_STATE, pageState);
         },
         load_fact: function (id) {
             let self = this;
@@ -197,7 +204,7 @@ const methods = {
                     .subscribe(response => {
                         self.dispatch(constants.FACTS.LOAD_FACT, { response: response });
                     }, error => {
-                        console.warning('Could not load fact id: ' + id);
+                        console.warning('Error, could not load fact id: ' + id, error);
                     });
             }
         }
