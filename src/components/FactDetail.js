@@ -11,9 +11,16 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 export const FactDetail = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
+  factId: null,
+  next: null,
+  prev: null,
+
+  _loadFactDetail: function (id) {
+    this.getFlux().actions.FACTS.load_fact(id);
+  },
+
   getInitialState: function () {
-    let factId = this.props.factId;
-    this.getFlux().actions.FACTS.load_fact(factId);
+    this._loadFactDetail(this.props.factId);
   },
 
   getStateFromFlux: function () {
@@ -22,13 +29,37 @@ export const FactDetail = React.createClass({
 
   componentWillReceiveProps: function (nextProps) {
     this.setState(this.getStateFromFlux());
+    this._loadFactDetail(nextProps.factId);
+  },
+
+  componentWillMount: function() {
+  },
+
+  shouldComponentUpdate: function(nextProps, nextState) {
+    this._getAdjacentArticles(nextProps.factId);
+    return true;
   },
 
   render() {
     // loading state
     if (!this.state.factDetail) {
       return (
-        <div className="loadingPage"><p>Loading fact&hellip;</p></div>
+        <div id="fact">
+          <div className="container-fluid">
+
+            <div className="row topBar">
+              <div className="col-md-3">
+                <Link to={`/site/${this.props.siteKey}/facts`} className="navBtn">&lt; Back</Link>
+              </div>
+              <div className="col-md-6">
+              </div>
+              <div className="col-md-3">
+              </div>
+            </div>
+
+            <div className="loadingPage"><p>Loading fact&hellip;</p></div>
+          </div>
+        </div>
       );
     }
 
@@ -39,12 +70,12 @@ export const FactDetail = React.createClass({
           <div className="container-fluid">
 
             <div className="row topBar">
-              <div className="col-md-2">
+              <div className="col-md-3">
                 <Link to={`/site/${this.props.siteKey}/facts`} className="navBtn">&lt; Back</Link>
               </div>
-              <div className="col-md-8">
+              <div className="col-md-6">
               </div>
-              <div className="col-md-2">
+              <div className="col-md-3">
               </div>
             </div>
 
@@ -60,28 +91,36 @@ export const FactDetail = React.createClass({
     let factDetail = this.state.factDetail;
     let fact = factDetail.fact;
     let dateProcessed = getHumanDate(factDetail.id);
-    let datePublished = getHumanDate(fact.published_at);
+    let datePublished = fact.published_at; //getHumanDate(fact.published_at);
 
     return (
       <div id="fact">
         <div className="container-fluid">
 
           <div className="row topBar">
-            <div className="col-md-2">
+            <div className="col-md-3">
               <Link to={`/site/${this.props.siteKey}/facts`} className="navBtn">&lt; Back</Link>
             </div>
-            <div className="col-md-8">
+            <div className="col-md-6">
             </div>
-            <div className="col-md-2">
+            <div className="col-md-3">
             </div>
           </div>
 
           <div className="row whitespace">
             <div className="col-md-3">
+              <div className="details">
+                {this.prev && <Link to={`/site/${this.props.siteKey}/facts/${this.prev.id}`} className="truncate">&larr; {this.prev.title}</Link>}
+              </div>
             </div>
             <div className="col-md-6">
-              <h1>{fact.title}</h1>
-              <p className="text">{fact.text}</p>
+              <div className="details">
+                {this.next && <Link to={`/site/${this.props.siteKey}/facts/${this.next.id}`}>{this.next.title} &rarr;</Link>}
+              </div>
+              <div className="article">
+                <h1>{fact.title}</h1>
+                <p className="text">{fact.text}</p>
+              </div>
             </div>
             <div className="col-md-3">
               <div className="details">
@@ -114,5 +153,49 @@ export const FactDetail = React.createClass({
       </div>
     );
   },
+
+  _getAdjacentArticles(id) {
+    let loadedFacts = this.state.facts;
+    let date = this._getDateWithId(id);
+    if (!loadedFacts.length > 0 || date === false) {
+      return;
+    }
+    let section = loadedFacts.find(x => x.year === date.year && x.month === date.month && x.day === date.day);
+    let sectionIndex = loadedFacts.indexOf(section);
+    let facts = section.facts;
+    let fact = facts.find(x => x.id === id);
+    let index = facts.indexOf(fact);
+    let l = facts.length;
+
+    this.prev = this.next = null;
+    if (index-1 < l) {
+      this.prev = facts[index-1];
+    }
+    if (index+1 < l) {
+      this.next = facts[index+1];
+    }
+
+    // prev section
+    if (!this.prev && sectionIndex-1 >= 0) {
+      let prevFacts = loadedFacts[sectionIndex-1].facts;
+      this.prev = prevFacts[prevFacts.length-1];
+    }
+    // next section
+    if (!this.next && sectionIndex+1 < loadedFacts.length) {
+      let nextFacts = loadedFacts[sectionIndex+1].facts;
+      this.next = nextFacts[0];
+    }
+  },
+
+  _getDateWithId(id) {
+    if (id.length < 10) {
+      return false;
+    }
+    return {
+      "year": parseInt(id.substr(0,4) ,10),
+      "month": parseInt(id.substr(5,2), 10),
+      "day": parseInt(id.substr(8,2), 10)
+    };
+  }
 
 });

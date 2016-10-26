@@ -46,12 +46,12 @@ export const FactsList = React.createClass({
   getInitialState: function () {
   },
 
-  componentWillReceiveProps: function (nextProps) {
-    this.setState(this.getStateFromFlux());
-  },
-
   getStateFromFlux: function () {
     return this.getFlux().store("FactsStore").getState();
+  },
+
+  componentWillReceiveProps: function (nextProps) {
+    this.setState(this.getStateFromFlux());
   },
 
   componentWillMount: function() {
@@ -68,7 +68,7 @@ export const FactsList = React.createClass({
     // The columns will need to be recalculated when page size changes
     window.addEventListener("resize", this._handleResize);
     var scrollView = document.querySelector("#facts");
-    if (scrollView) {
+    if (scrollView && this.state.pageState.scrollTop > this.defaultColumnGutter) {
       // Restores last scroll position of React List View 
       scrollView.firstChild.scrollTop = this.state.pageState.scrollTop;
     }
@@ -195,7 +195,7 @@ export const FactsList = React.createClass({
     var count = 0,
       sectionIndex = 0,
       sectionTotal = 0;
-    // get item in sections
+    // Get item in sections
     for (var i = 0; i < l; i++) {
       sectionIndex = index - count;
       sectionTotal = this.state.facts[i].facts.length;
@@ -221,7 +221,7 @@ export const FactsList = React.createClass({
     let h = contentHeight - scrollViewHeight;
     let scrollingBuffer = h * this.scrollThreshold;
     if (h - y < scrollingBuffer) {
-      // infinite scroll
+      // Infinite scroll
       this._loadFacts();
     }
   },

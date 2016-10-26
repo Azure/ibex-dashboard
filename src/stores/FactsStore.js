@@ -38,17 +38,30 @@ export const FactsStore = Fluxxor.createStore({
   handleLoadFactsSuccess(payload) {
     this.dataStore.loading = false;
     this.dataStore.error = null;
-    this.dataStore.facts = this.dataStore.facts.concat(payload.response);
+    this.dataStore.facts = this._mergeResults(payload.response);
     this._incrementSkip(payload.response);
     this.emit("change");
   },
 
-  _incrementSkip(sections) {
-    // Total no. of items in each section should be equal to page size...
-    var l = sections.length;
+  _mergeResults(results) {
+    // Merge sections with matching dates
+    var sections = this.dataStore.facts.concat(results);
+    sections.reduce(function (a, b, i, arr) {
+      if (a.year === b.year && a.month === b.month && a.day === b.day) {
+        a.facts = a.facts.concat(b.facts);
+        arr.splice(i, 1);
+      }
+      return b;
+    }, []);
+    return sections;
+  },
+
+  _incrementSkip(results) {
+    // Total no. of items in each new section should be equal to page size...
+    var l = results.length;
     var count = 0;
     while(l--) {
-      count += sections[l].facts.length;
+      count += results[l].facts.length;
     }
     if (count === this.dataStore.pageSize) {
       return this.dataStore.skip += this.dataStore.pageSize;

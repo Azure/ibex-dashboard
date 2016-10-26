@@ -58,7 +58,7 @@ export function getEnvPropValue(siteKey, propValueJSONStr){
  }
 
 // extracts date string using ISO 8601 format
-export function getHumanDate(dateString) {
-     var ymd = dateString.substring(0,10);
-     return moment(ymd, "YYYY-MM-DD").format("ddd MMM Do YY");
+export function getHumanDate(dateString, dateFormat="YYYY-MM-DD", newDateFormat="ddd MMM Do YY") {
+     var ymd = dateString.substr(0,10);
+     return moment(ymd, dateFormat).format(newDateFormat);
 }
