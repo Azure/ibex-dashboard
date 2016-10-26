@@ -37,6 +37,27 @@
     color: #ccc;
 }
 
+#facts .card ul.tags {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#facts .card .tags li {
+    display: block;
+    float: left;
+    margin-right: 0.5em;
+    color: #ccc;
+}
+
+#facts .card .tags li:after {
+    content: ",";
+}
+
+#facts .card .tags li:last-child:after {
+    content: "";
+}
+
 .truncate-2 {
     overflow: hidden;
     text-overflow: ellipsis;

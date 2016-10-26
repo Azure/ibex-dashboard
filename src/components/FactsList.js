@@ -16,7 +16,7 @@ export const FactsList = React.createClass({
 
   // Default card sizes
   minCardWidth: 320,
-  maxCardHeight: 120,
+  maxCardHeight: 140,
   defaultColumnGutter: 20,
 
   // Calculated properties
@@ -134,6 +134,11 @@ export const FactsList = React.createClass({
         <div className="card">
           <p className="date">{dateString}</p>
           <h3 className="title truncate-2"><Link to={`/site/${this.props.siteKey}/facts/${item.id}`}>{item.title}</Link></h3>
+          <ul className="tags">
+            {item.tags.map(function (tag) {
+              return <li key={tag}>{tag}</li>;
+            })}
+          </ul>
         </div>
       </div>
     );
