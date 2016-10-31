@@ -93,6 +93,29 @@
     color: #ccc;
 }
 
+#filters {
+    width: 100%;
+    height: 50px;
+    background: #F3F3EC;
+    overflow: hidden;
+}
+
+#filters ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#filters .radios {
+    display: block;
+    margin: 10px 20px;
+}
+
+#filters label {
+    /*background-color: #337ab7 !important;*/
+    white-space: nowrap;
+}
+
 /* fact detail page */
 
 #fact .topBar {

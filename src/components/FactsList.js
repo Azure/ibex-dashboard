@@ -1,10 +1,20 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
-import { SERVICES } from '../services/services';
 import ReactListView from 'react-list-view';
 import { Link } from 'react-router';
-import { routes } from '../routes/routes';
 import { getHumanDate } from '../utils/Utils.js';
+import { getFilteredResults } from '../utils/Fact.js';
+import RadioButton from 'material-ui/lib/radio-button';
+import RadioButtonGroup from 'material-ui/lib/radio-button-group';
+
+// Material UI style overrides
+const styles = {
+  radioButton: {
+    width: "auto",
+    float: "left",
+    marginRight: "20px"
+  },
+};
 
 const FluxMixin = Fluxxor.FluxMixin(React),
   StoreWatchMixin = Fluxxor.StoreWatchMixin("FactsStore");
@@ -27,6 +37,11 @@ export const FactsList = React.createClass({
   gutter: 0,
   excludedHeight: 0,
 
+  // Data properties
+  results: [], // (filtered) results
+  tags: [], // unique tags
+  filter: "", // search tag filter
+
   // Infinite scroll vars
   isReady: true,
   scrollThreshold: 0.2,
@@ -43,11 +58,14 @@ export const FactsList = React.createClass({
     }
   },
 
-  getInitialState: function () {
-  },
-
   getStateFromFlux: function () {
-    return this.getFlux().store("FactsStore").getState();
+    var flux = this.getFlux().store("FactsStore").getState();
+    this.tags = flux.tags;
+    if (this.filter.length === 0) {
+      this.filter = flux.pageState.filter;
+    }
+    this._updateResults(flux.facts);
+    return flux;
   },
 
   componentWillReceiveProps: function (nextProps) {
@@ -57,7 +75,7 @@ export const FactsList = React.createClass({
   componentWillMount: function() {
     // Set properties required for redraw of List View on return
     this.excludedHeight = this.state.pageState.excludedHeight;
-    if ( this.state.facts.length > 0 ) {
+    if ( this.results.length > 0 ) {
       this._calcRowsAndColumns();
       return;
     }
@@ -67,17 +85,18 @@ export const FactsList = React.createClass({
   componentDidMount() {
     // The columns will need to be recalculated when page size changes
     window.addEventListener("resize", this._handleResize);
-    var scrollView = document.querySelector("#facts");
-    if (scrollView && this.state.pageState.scrollTop > this.defaultColumnGutter) {
+    
+    if (this.state.pageState.scrollTop > this.defaultColumnGutter) {
       // Restores last scroll position of React List View 
-      scrollView.firstChild.scrollTop = this.state.pageState.scrollTop;
+      this._updateScrollTop( this.state.pageState.scrollTop );
     }
   },
 
   componentWillUnmount() {
     this.getFlux().actions.FACTS.save_page_state({
       scrollTop : this.scrollTop,
-      excludedHeight : this.excludedHeight
+      excludedHeight : this.excludedHeight,
+      filter : this.filter
     });
     window.removeEventListener("resize", this._handleResize);
   },
@@ -89,13 +108,45 @@ export const FactsList = React.createClass({
   },
 
   render() {
+    // Loading
     if (!this.state.facts.length > 0) {
       return (<div className="loadingPage"><p>Loading facts&hellip;</p></div>);
     }
+
     let cssHeight = 'calc(100vh - ' + this.excludedHeight + 'px)';
+    let cssHeight2 = 'calc(100vh - ' + (this.excludedHeight+50) + 'px)';
+    let defaultSelected = (this.filter.length > 0) ? this.filter : "All" ;
+
+    // No results
+    if (!this.results.length > 0) {
+      return (
+        <div id="facts" style={{ height: cssHeight }}>
+          <div id="filters">
+            <RadioButtonGroup name="filters" onChange={this._selectedFilter} valueSelected={defaultSelected}>
+              <RadioButton key="All" value="All" label="All" style={styles.radioButton} className="radios" />
+              {this.tags.map( tag => {
+                return <RadioButton key={tag} value={tag} label={tag} style={styles.radioButton} className="radios" />;
+              })}
+            </RadioButtonGroup>
+          </div>
+          <div style={{ height: cssHeight2 }}>
+            <p>No facts found</p>
+          </div>
+        </div>);
+    }
+
+    // List view 
     return (
       <div id="facts" style={{ height: cssHeight }} onScroll={this._handleScroll}>
-        <ReactListView style={{ height: cssHeight }}
+        <div id="filters">
+          <RadioButtonGroup name="filters" onChange={this._selectedFilter} valueSelected={defaultSelected}>
+            <RadioButton key="All" value="All" label="All" style={styles.radioButton} className="radios" />
+            {this.tags.map( tag => {
+              return <RadioButton key={tag} value={tag} label={tag} style={styles.radioButton} className="radios" />;
+            })}
+          </RadioButtonGroup>
+        </div>
+        <ReactListView style={{ height: cssHeight2 }}
           rowHeight={this._rowHeight()}
           rowCount={this.rows}
           renderItem={this._renderItem}
@@ -112,7 +163,6 @@ export const FactsList = React.createClass({
 
   _renderItem(x, y, style) {
     let item = this._getItem(x, y);
-
     // Update cell style properties
     style.height = this.cardHeight + 'px';
     if (this.columns > 1) {
@@ -133,7 +183,7 @@ export const FactsList = React.createClass({
       <div className="cell" style={style}>
         <div className="card">
           <p className="date">{dateString}</p>
-          <h3 className="title truncate-2"><Link to={`/site/${this.props.siteKey}/facts/${item.id}`}>{item.title}</Link></h3>
+          <h3 className="title truncate-2"><Link to={`/site/${this.props.siteKey}/facts/detail/${item.id}`}>{item.title}</Link></h3>
           <ul className="tags">
             {item.tags.map(function (tag) {
               return <li key={tag}>{tag}</li>;
@@ -178,16 +228,7 @@ export const FactsList = React.createClass({
   },
 
   _totalItems() {
-    let l = this.state.facts.length;
-    var count = 0;
-    for (var i = 0; i < l; i++) {
-      count += this.state.facts[i].facts.length;
-    }
-    return count;
-  },
-
-  _sections() {
-    return this.state.facts.length;
+    return this.results.length;
   },
 
   _getItem(x, y) {
@@ -196,18 +237,8 @@ export const FactsList = React.createClass({
   },
 
   _getItemAtIndex(index) {
-    let l = this.state.facts.length;
-    var count = 0,
-      sectionIndex = 0,
-      sectionTotal = 0;
-    // Get item in sections
-    for (var i = 0; i < l; i++) {
-      sectionIndex = index - count;
-      sectionTotal = this.state.facts[i].facts.length;
-      if (sectionIndex < sectionTotal) {
-        return this.state.facts[i].facts[sectionIndex];
-      }
-      count += sectionTotal;
+    if (index < this._totalItems()) {
+      return this.results[index];
     }
     return { "id": -1, "title": "" }; // No record available at index
   },
@@ -231,6 +262,13 @@ export const FactsList = React.createClass({
     }
   },
 
+  _updateScrollTop(scrollPosition) {
+    var scrollView = document.querySelector(".ReactListView");
+    if (scrollView) {
+      scrollView.scrollTop = scrollPosition;
+    }
+  },
+
   _handleResize(e) {
     this.setState({ width: document.body.clientWidth, height: document.body.clientHeight });
   },
@@ -243,7 +281,29 @@ export const FactsList = React.createClass({
       height += document.querySelector(this.excludedElements[i]).offsetHeight;
     }
     this.excludedHeight = height;
+  },
+
+  _updateResults(data) {
+    // no data, return empty results // !this.props.tags 
+    if (data.length === 0) {
+      this.results = [];
+      return;
+    }
+    // filter results
+    this.results = getFilteredResults(data, this.filter);
+  },
+
+  _selectedFilter(e, value) {
+    if ( value !== "All" ) {
+      this.filter = value;
+    } else {
+      this.filter = "";
+    }
+    // change results, force update 
+    this._updateResults(this.state.facts);
+    this._calcRowsAndColumns();
+    this.forceUpdate();
+    this._updateScrollTop(0); // reset scroll to top
   }
 
 });
-

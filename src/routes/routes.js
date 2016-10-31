@@ -10,7 +10,8 @@ export const routes = (
     	<Route path="/" component={AppPage} linkLabel="My App" href="/" icon="fa fa-share-alt-square fa">
             <Route path="/site/:siteKey" component={EntryPage} />
             <Route path="/site/:siteKey/facts" component={FactsPage} href="#/site/:siteKey/facts/" />
-            <Route path="/site/:siteKey/facts/:factId" component={FactDetailPage} />
+            <Route path="/site/:siteKey/facts/tags(/:tags)" component={FactsPage} href="#/site/:siteKey/facts/" />
+            <Route path="/site/:siteKey/facts/detail/:factId" component={FactDetailPage} />
         </Route>
     </Route>
 );

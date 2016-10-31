@@ -1,17 +1,20 @@
 import Fluxxor from 'fluxxor';
 import { Actions } from '../actions/Actions';
+import { flattenUnique } from '../utils/Utils.js';
 
 export const FactsStore = Fluxxor.createStore({
   initialize() {
     this.dataStore = {
       facts: [],
+      tags: [],
       error: null,
       loading: false,
       pageSize: 50,
       skip: 0,
       pageState: {
         scrollTop: 0,
-        excludedHeight: 0
+        excludedHeight: 0,
+        filter: "",
       },
       
       factDetail: null
@@ -38,31 +41,21 @@ export const FactsStore = Fluxxor.createStore({
   handleLoadFactsSuccess(payload) {
     this.dataStore.loading = false;
     this.dataStore.error = null;
-    this.dataStore.facts = this._mergeResults(payload.response);
+    this.dataStore.facts = this._processResults(payload.response);
     this._incrementSkip(payload.response);
     this.emit("change");
   },
 
-  _mergeResults(results) {
-    // Merge sections with matching dates
-    var sections = this.dataStore.facts.concat(results);
-    sections.reduce(function (a, b, i, arr) {
-      if (a.year === b.year && a.month === b.month && a.day === b.day) {
-        a.facts = a.facts.concat(b.facts);
-        arr.splice(i, 1);
-      }
-      return b;
-    }, []);
-    return sections;
+  _processResults(results) {
+    var facts = this.dataStore.facts.concat(results);
+    // update list of unique tags
+    this.dataStore.tags = flattenUnique( facts.map(x => x.tags) );
+    return facts;
   },
 
   _incrementSkip(results) {
     // Total no. of items in each new section should be equal to page size...
-    var l = results.length;
-    var count = 0;
-    while(l--) {
-      count += results[l].facts.length;
-    }
+    var count = results.length;
     if (count === this.dataStore.pageSize) {
       return this.dataStore.skip += this.dataStore.pageSize;
     }
