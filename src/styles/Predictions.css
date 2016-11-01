@@ -1,0 +1,25 @@
+#predictions {
+    width: 100%;
+    height: calc(100% - 53px); /* minus header height */
+    background-color: #EAEAEA; /* match Power BI background color */
+}
+
+#predictions iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* TODO: move to global css */
+html, body, #app, #pages, .fullbleed {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/* fix: only one child element can use 100% height */
+body > #map {
+    display: none;
+}

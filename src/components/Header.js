@@ -4,6 +4,7 @@ import '../styles/Header.css';
 import OCHAlogoURL from '../images/OCHA_Logo.png';
 import DengueLogoURL from '../images/umea_white.svg';
 import {getEnvPropValue} from '../utils/Utils.js';
+import { Link } from 'react-router';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -28,6 +29,8 @@ export const Header = React.createClass({
     let siteKey = this.props.siteKey;
     let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
     let initials = 'N/A';
+    // TODO: make common menus for all sites
+    let nav = (siteKey==="dengue") ? this.renderNav() : false ;
 
     return (
       <nav className="navbar navbar-trans" role="navigation">
@@ -46,7 +49,7 @@ export const Header = React.createClass({
               </div>
               <div className="navbar-collapse collapse" id="navbar-collapsible">
                   <ul className="nav navbar-nav navbar-left">
-                      <li>&nbsp;</li>
+                      {nav}
                   </ul>
                   <ul className="nav navbar-nav navbar-right">
                       <li className="userProfile">
@@ -63,5 +66,17 @@ export const Header = React.createClass({
           </div>
      </nav>
       );
+  },
+
+  renderNav() {
+      let siteKey = this.props.siteKey;
+      return (
+          <ul className="nav navbar-nav navbar-left">
+              <li><Link to={`/site/${siteKey}/`}>Dashboard</Link></li>
+              <li><Link to={`/site/${siteKey}/predictions/`}>Predictions</Link></li>
+              <li><Link to={`/site/${siteKey}/facts/`}>Facts</Link></li>
+          </ul>
+      );
   }
+
 });

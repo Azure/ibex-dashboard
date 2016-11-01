@@ -20,7 +20,7 @@
     "react": "^0.14.3",
     "react-dom": "^0.14.3",
     "react-router": "^1.0.0-rc4",
-    "react-scripts": "0.5.0"
+    "react-scripts": "0.4.3"
   },
   "dependencies": {
     "amcharts3": "amcharts/amcharts3",
@@ -58,3 +58,5 @@
     "extends": "./node_modules/react-scripts/config/eslint.js"
   }
 }
+
+        
