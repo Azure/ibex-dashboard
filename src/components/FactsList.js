@@ -1,6 +1,6 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
-import ReactListView from 'react-list-view';
+import ReactListView from './react-list-view/index';
 import { Link } from 'react-router';
 import { getHumanDate } from '../utils/Utils.js';
 import { getFilteredResults } from '../utils/Fact.js';

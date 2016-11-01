@@ -39,8 +39,8 @@
     "moment": "^2.11.2",
     "numeral": "^1.5.3",
     "pg": "^6.1.0",
+    "react-addons-create-fragment": "^0.14.0",
     "react-autosuggest": "2.1.1",
-    "react-list-view": "^1.0.0",
     "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
     "restify": "^4.1.1",
@@ -58,5 +58,3 @@
     "extends": "./node_modules/react-scripts/config/eslint.js"
   }
 }
-
-        
