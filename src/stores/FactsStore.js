@@ -1,6 +1,7 @@
 import Fluxxor from 'fluxxor';
 import { Actions } from '../actions/Actions';
 import { flattenUnique } from '../utils/Utils.js';
+import { getFilteredResults } from '../utils/Fact.js';
 
 export const FactsStore = Fluxxor.createStore({
   initialize() {
@@ -17,7 +18,11 @@ export const FactsStore = Fluxxor.createStore({
         filter: "",
       },
       
-      factDetail: null
+      factDetail: null,
+      factLinks: {
+        prev: null,
+        next: null
+      }
     };
 
     this.bindActions(
@@ -74,7 +79,30 @@ export const FactsStore = Fluxxor.createStore({
 
   handleLoadFact(payload) {
     this.dataStore.factDetail = payload.response;
+    this._getAdjacentArticles(this.dataStore.factDetail.id);
     this.emit("change");
-  }
+  },
+
+  // get prev and next fact using fact detail id
+  _getAdjacentArticles(id) { 
+    let loadedFacts = this.dataStore.facts;
+    let filter = this.dataStore.pageState.filter;
+    let facts = getFilteredResults(loadedFacts, filter);
+
+    if (!facts.length > 0) {
+      return;
+    }
+    let fact = facts.find(x => x.id === id);
+    let index = facts.indexOf(fact);
+    let l = facts.length;
+
+    this.dataStore.factLinks.prev = this.dataStore.factLinks.next = null;
+    if (index-1 < l) {
+      this.dataStore.factLinks.prev = facts[index-1];
+    }
+    if (index+1 < l) {
+      this.dataStore.factLinks.next = facts[index+1];
+    }
+  },
 
 });
