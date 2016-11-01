@@ -20,7 +20,7 @@
     "react": "^0.14.3",
     "react-dom": "^0.14.3",
     "react-router": "^1.0.0-rc4",
-    "react-scripts": "0.4.3"
+    "react-scripts": "0.5.0"
   },
   "dependencies": {
     "amcharts3": "amcharts/amcharts3",
@@ -40,6 +40,7 @@
     "numeral": "^1.5.3",
     "pg": "^6.1.0",
     "react-autosuggest": "2.1.1",
+    "react-list-view": "^1.0.0",
     "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
     "restify": "^4.1.1",

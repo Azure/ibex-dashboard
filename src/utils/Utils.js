@@ -56,3 +56,32 @@ export function getEnvPropValue(siteKey, propValueJSONStr){
 
      return propValue;
  }
+
+// extracts date string using ISO 8601 format
+export function getHumanDate(dateString, dateFormat="YYYY-MM-DD", newDateFormat="ddd MMM Do YY") {
+     var ymd = dateString.substr(0,10);
+     return moment(ymd, dateFormat).format(newDateFormat);
+}
+
+// array helpers
+export function flatten(arr){
+	return [].concat(...arr);
+}
+
+export function unique(arr){
+	return [...new Set(arr)];
+}
+
+export function flattenUnique(arr){
+	return unique(flatten(arr));
+}
+
+// NB: case sensitive
+export function contains(arr, tag) {
+	// array matches
+	if (Array.isArray(tag)) {
+		return tag.some(x => arr.indexOf(x) > -1);
+	}
+	// string match
+	return arr.indexOf(tag) > -1;
+}

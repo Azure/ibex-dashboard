@@ -1,4 +1,5 @@
 import {DataStore} from './stores/DataStore';
+import {FactsStore} from './stores/FactsStore';
 import {Actions} from './actions/Actions';
 import Fluxxor from 'fluxxor';
 import {SERVICES} from './services/services';
@@ -16,7 +17,8 @@ let history = createHistory({
 });
 
 let stores = {
-  DataStore: new DataStore(userProfile)
+  DataStore: new DataStore(userProfile),
+  FactsStore: new FactsStore()
 };
 
 let flux = new Fluxxor.Flux(stores, Actions.methods);
@@ -26,7 +28,7 @@ const createElement = (Component, props) => {
     return <Component {...props} />
 };
 
-ReactDOM.render((<Router history={history} 
+ReactDOM.render((<Router history={history}
                          createElement={createElement}>
                          {routes}
                  </Router>), document.getElementById('app'));

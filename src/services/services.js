@@ -1,12 +1,12 @@
 import Rx from 'rx';
 import 'rx-dom';
 import {Actions} from '../actions/Actions';
-import {guid, momentToggleFormats, getEnvPropValue} from '../utils/Utils.js'
+import {guid, momentToggleFormats, getEnvPropValue} from '../utils/Utils.js';
 
 const maxMappingLevels = 4;
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 
-export const SERVICES = {  
+export const SERVICES = {
   getUserAuthenticationInfo(){
    ///Make sure the AAD client id is setup in the config
    let userProfile = window.userProfile;
@@ -57,7 +57,7 @@ export const SERVICES = {
         authContext.login();
     }
   },
-  
+
   getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
      let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
@@ -67,7 +67,7 @@ export const SERVICES = {
 
       return Rx.DOM.getJSON(url);
   },
-  
+
   getDefaultSuggestionList(siteKey){
       return Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_KEYWORDS),
                           responseType: 'json',
@@ -88,7 +88,7 @@ export const SERVICES = {
            }
        }
   },
-  
+
   getSentimentTreeData(siteKey, cb){
       Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_CLASSIFICATION),
                           responseType: 'json',
@@ -97,7 +97,7 @@ export const SERVICES = {
             .subscribe(tableValues => {
                   if(tableValues.response && tableValues.response.value){
                        let folderTree = new Map();
-                                
+
                        tableValues.response.value.forEach(item => {
                              let parentFolder = folderTree.get(item.PartitionKey);
                              if(!parentFolder){
@@ -107,7 +107,7 @@ export const SERVICES = {
 
                              this.processFolderItem(parentFolder.subFolders, item, 1);
                        });
-                                
+
                        cb(folderTree);
                    }
               }, error => {
@@ -417,19 +417,29 @@ export const SERVICES = {
         "messageTitle": false,
         "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
         }]];
-      
+
       return Rx.Observable.from(testData);
   },
-  
+
   getHeatmapTiles: function(siteKey, categoryType, timespanType, categoryValue, datetimeSelection, tileId){
     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
     let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
     let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TILES);
-    
+
     let url = "{0}/{1}/{2}/{3}/{4}/{5}.json".format(hostname, blobContainer,
                                        categoryType.toLowerCase(), categoryValue.replace(" ", ""),
                                        momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat), tileId);
-                                            
+
     return Rx.DOM.getJSON(url);
+  },
+
+  getFacts: function (pageSize, skip) {
+      let url = "http://fortisfactsservice.azurewebsites.net/api/facts?pageSize={0}&skip={1}&fullInfo=false".format(pageSize, skip);
+      return Rx.DOM.getJSON(url);
+  },
+
+  getFact: function (id) {
+      let url = "http://fortisfactsservice.azurewebsites.net/api/facts/" + id;
+      return Rx.DOM.getJSON(url);
   },
 }
