@@ -2,9 +2,14 @@ import Rx from 'rx';
 import 'rx-dom';
 import {Actions} from '../actions/Actions';
 import {guid, momentToggleFormats, getEnvPropValue} from '../utils/Utils.js';
+import request from 'request';
 
 const maxMappingLevels = 4;
+const LAYER_TYPE_FILTER = "associations";
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
+
+const MIN_ZOOM = 5;
+const MAX_ZOOM = 15;
 
 export const SERVICES = {
   getUserAuthenticationInfo(){
@@ -73,46 +78,6 @@ export const SERVICES = {
                           responseType: 'json',
                           headers: {"Accept": "application/json;odata=nometadata"}
                         });
-  },
-
-  processFolderItem(parentFolder, mappingItem, level){
-       if(level <= maxMappingLevels){
-           let folderKey = mappingItem["level" + level + "Key"] || "";
-           if(folderKey && !parentFolder.has(folderKey)){
-                let newFolder = {folderName: mappingItem["level" + level + "Display"], subFolders: new Map(), eventCount: 0};
-                parentFolder.set(folderKey, newFolder);
-
-                this.processFolderItem(newFolder.subFolders, mappingItem, level + 1);
-           }else if(folderKey){
-                this.processFolderItem(parentFolder.get(folderKey).subFolders, mappingItem, level + 1);
-           }
-       }
-  },
-
-  getSentimentTreeData(siteKey, cb){
-      Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_CLASSIFICATION),
-                          responseType: 'json',
-                          headers: {"Accept": "application/json;odata=nometadata"}
-                        })
-            .subscribe(tableValues => {
-                  if(tableValues.response && tableValues.response.value){
-                       let folderTree = new Map();
-
-                       tableValues.response.value.forEach(item => {
-                             let parentFolder = folderTree.get(item.PartitionKey);
-                             if(!parentFolder){
-                                 parentFolder = {folderName: item.PartitionKey, subFolders: new Map(), eventCount: 0};
-                                 folderTree.set(item.PartitionKey, parentFolder);
-                             }
-
-                             this.processFolderItem(parentFolder.subFolders, item, 1);
-                       });
-
-                       cb(folderTree);
-                   }
-              }, error => {
-                            console.error('An error occured trying to query the search terms: ' + error);
-              });
   },
 
   getActivityEvents: function(siteKey, categoryValue, categoryType, timespanType, dateSelection){
@@ -421,16 +386,31 @@ export const SERVICES = {
       return Rx.Observable.from(testData);
   },
 
-  getHeatmapTiles: function(siteKey, categoryType, timespanType, categoryValue, datetimeSelection, tileId){
+  getHeatmapTiles: function(siteKey, timespanType, zoomLevel, keyword, datetimeSelection, bbox, layerFilters, callback){
     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-    let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
-    let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TILES);
+    let period = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+    let host = getEnvPropValue(siteKey, process.env.REACT_APP_SERVICE_HOSTS)
 
-    let url = "{0}/{1}/{2}/{3}/{4}/{5}.json".format(hostname, blobContainer,
-                                       categoryType.toLowerCase(), categoryValue.replace(" ", ""),
-                                       momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat), tileId);
+    if(bbox && Array.isArray(bbox) && bbox.length === 4){
+        var POST = {
+            url : `${host}/tilefetcher`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body : {
+                "bbox": bbox,
+                "zoomLevel": MAX_ZOOM,//zoomLevel < MIN_ZOOM ? MIN_ZOOM : zoomLevel > MAX_ZOOM ? MAX_ZOOM : zoomLevel,
+                "keyword": keyword,
+                "period": period,
+                "filteredEdges": layerFilters,
+                "layerType": LAYER_TYPE_FILTER
+            }
+        };
 
-    return Rx.DOM.getJSON(url);
+        request(POST, callback);
+    }else{
+        throw new Error(`Invalid bbox format for value [${bbox}]`);
+    }
   },
 
   getFacts: function (pageSize, skip) {

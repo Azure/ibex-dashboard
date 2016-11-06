@@ -43,6 +43,7 @@
     "react-autosuggest": "2.1.1",
     "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
+    "request": "^2.78.0",
     "restify": "^4.1.1",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3"

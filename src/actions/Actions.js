@@ -1,5 +1,27 @@
 import {SERVICES} from '../services/services';
 
+const ENGLISH_LANGUAGE = "en";
+
+function GetSearchKeywords(siteKey, languageCode, callback){
+    SERVICES.getDefaultSuggestionList(siteKey)
+         .subscribe(tableValues => {
+              if(tableValues.response && tableValues.response.value){
+                    let processedResults = tableValues.response.value.map(kw => {
+                              if(kw[`${languageCode}_term`]){
+                                  return {"category": "keyword", "searchTerm": kw[`${languageCode}_term`].toLowerCase()};
+                              }else{
+                                  throw new Error(`${languageCode} is an unsupported language`);
+                              }                              
+                    });
+
+                    callback(processedResults);
+             }
+     },
+         error => {
+              console.error('An error occured trying to query the search terms: ' + error);
+     });
+}
+
 const constants = {
            SENTIMENT_JSON_MAPPING : {
                 "0": -5,
@@ -48,8 +70,7 @@ const constants = {
                RETRIEVE_HEATMAP_TILE: "HEATMAP"
            },
            ACTIVITY : {
-               LOAD_EVENTS: "LOAD:ACTIVITIES",
-               LOAD_SENTIMENT_TREE: "LOAD:TREE-VIEW"
+               LOAD_EVENTS: "LOAD:ACTIVITIES"
            },
            GRAPHING : {
                LOAD_GRAPH_DATA: "LOAD:GRAPH_DATA",
@@ -102,31 +123,7 @@ const methods = {
                 }
           };
 
-          SERVICES.getDefaultSuggestionList(siteKey)
-                  .subscribe(tableValues => {
-                      if(tableValues.response && tableValues.response.value){
-                          let processedResults = tableValues.response.value.map(kw => {
-                              return {"category": kw.super_category.toLowerCase(), "searchTerm": kw.en_term.toLowerCase()};
-                          });
-
-                          azureStorageCB(processedResults);
-                      }
-                  },
-                  error => {
-                      console.error('An error occured trying to query the search terms: ' + error);
-                  });
-        },
-        
-        load_sentiment_tree_view: function(siteKey){
-            let self = this;
-
-            let azureStorageCB = folderTree => {
-                    if(folderTree && folderTree.size > 0){
-                        self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {folderTree});
-                    }
-            };
-
-            SERVICES.getSentimentTreeData(siteKey, azureStorageCB);
+          GetSearchKeywords(siteKey, ENGLISH_LANGUAGE, azureStorageCB);
         },
         changeSearchFilter(newFilter, searchType){
            this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});

@@ -1,6 +1,6 @@
 import Fluxxor from 'fluxxor';
 import {Actions} from '../actions/Actions';
-import * as treeFilters from '../components/TreeFilter';
+import moment from 'moment';
 
 export const DataStore = Fluxxor.createStore({
     initialize(profile) {
@@ -8,7 +8,7 @@ export const DataStore = Fluxxor.createStore({
       this.dataStore = {
           userProfile: profile,
           timespanType: 'customMonth',
-          datetimeSelection: 'March 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
+          datetimeSelection: 'October 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: 'keyword',
           siteKey: '',
           activities: [],
@@ -16,15 +16,11 @@ export const DataStore = Fluxxor.createStore({
           popularTerms: [],
           timeSeriesGraphData: {},
           sentimentChartData: [],
-          originalTermsTree: [],
           renderMap: true,
           timeseriesFromDate: false,
-          filteredTerms: {},
-          treeViewStructure: {},
-          treeData: {},
           timeseriesToDate: false,
-          associatedKeywords: {},
-          categoryValue: '',
+          associatedKeywords: new Map(),
+          categoryValue: 'benghazi',
           defaultResults: []
       }
       
@@ -33,7 +29,6 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
-            Actions.constants.ACTIVITY.LOAD_SENTIMENT_TREE, this.handleLoadSentimentTreeView,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters
@@ -55,7 +50,14 @@ export const DataStore = Fluxxor.createStore({
     },
 
     handleChangeTermFilters(newFilters){
-        this.dataStore.filteredTerms = Object.assign({}, this.dataStore.filteredTerms, newFilters);
+        let self = this;
+
+        if(Array.isArray(newFilters)){
+            for (var [term, value] of self.dataStore.associatedKeywords.entries()) {
+                    value.enabled = newFilters.indexOf(term) > -1;
+            }
+        }
+
         this.dataStore.renderMap = true;
         this.emit("change");
     },
@@ -144,10 +146,10 @@ export const DataStore = Fluxxor.createStore({
     },
     
     handleChangeDate(changedData){
+        this.dataStore.associatedKeywords = new Map();
         this.dataStore.datetimeSelection = changedData.datetimeSelection;
         this.dataStore.timespanType = changedData.timespanType;
         this.refreshGraphData(changedData.timeSeriesResponse);
-        this.dataStore.filteredTerms = {};
         this.dataStore.renderMap = true;
         this.dataStore.action = 'changedSearchTerms';
         
@@ -155,106 +157,21 @@ export const DataStore = Fluxxor.createStore({
     },
     
     handleChangeSearchTerm(changedData){
+        this.dataStore.associatedKeywords = new Map();
         this.dataStore.categoryValue = changedData.newFilter;
         this.dataStore.categoryType = changedData.searchType;
         this.dataStore.action = 'changedSearchTerms';
         this.dataStore.renderMap = true;
-        this.dataStore.filteredTerms = {};
         
         this.emit("change");
     },
     
-    handleLoadSentimentTreeView(treeView){
-        this.dataStore.treeViewStructure = this.recurseTree(treeView.folderTree);
-        this.dataStore.originalTermsTree = this.dataStore.treeViewStructure;
-        this.dataStore.treeData = this.dataStore.treeViewStructure;
-        this.updateMapAndFilters()
-
-        this.emit("change");
-    },
-
     mapDataUpdate(associatedKeywords){
+        //all assoicated terms shoul dbe enabled on the initial data load of a term.
+        let enableAllTermsByDefault = this.dataStore.associatedKeywords.size === 0;
+        
         this.dataStore.associatedKeywords = associatedKeywords;
         this.dataStore.renderMap = false;
-        this.updateMapAndFilters();
-    },
-
-    updateMapAndFilters(){
-        let self = this;
-        let termSuperSet = Object.keys(this.dataStore.associatedKeywords);
-
-        if(termSuperSet.length > 0 && Object.keys(this.dataStore.filteredTerms).length === 0){
-            termSuperSet.forEach(term=>this.dataStore.filteredTerms[term] = true);
-        }else if(termSuperSet.length === 0){
-            this.dataStore.filteredTerms = {};
-        }
-
-        if(this.dataStore.treeViewStructure.children && this.dataStore.treeViewStructure.children.length > 0){
-            let filtered = treeFilters.filterTreeByMatcher(this.dataStore.treeViewStructure, node => {
-                        return termSuperSet.indexOf((node.folderKey || "").toLowerCase()) > -1;
-                    },
-                    node => Object.assign({}, node, {eventCount: this.dataStore.associatedKeywords[node.folderKey.toLowerCase()], 
-                                                     checked: self.dataStore.filteredTerms[node.folderKey.toLowerCase()]}),
-                    self.dataStore.filteredTerms);
-            
-            this.updateTreeEventCount(filtered);
-            this.dataStore.originalTermsTree = filtered;
-            this.dataStore.treeData = filtered;
-            this.emit("change");
-        }
-    },
-
-    updateTreeEventCount(node){
-      let eventCount = 0;
-      if(node.children && node.children.length > 0){
-        for(let i in node.children){
-            if(node.children[i]){
-                eventCount += this.updateTreeEventCount(node.children[i]);
-            }
-        }
-
-        node.eventCount = eventCount;
-      }else{
-        eventCount += node.checked ? node.eventCount : 0;
-      }
-
-      return eventCount;
-  },
-
-  recurseTree(dataTree){
-      let rootItem = {
-          name: 'Associations',
-          folderKey: 'associatedKeywords',
-          toggled: true,
-          children: []
-      };
-
-      let recurseChildren = (parentDataFolder, parentListItem, levels) => {
-          if(!parentDataFolder){
-              return;
-          }
-          
-          for (let [folderKey, subFolder] of parentDataFolder.entries()) {
-              let newEntry = {
-                  name: subFolder.folderName,
-                  folderKey: folderKey,
-                  checked: false,
-                  parent: parentListItem,
-                  eventCount: 0
-              };
-              
-              parentListItem.children.push(newEntry);
-              
-              if(subFolder.subFolders.size > 0){
-                  newEntry.children = [];
-                  newEntry.eventCount = 0;
-                  recurseChildren(subFolder.subFolders, newEntry, levels + 1);
-              }
-          }
-      };
-      
-      recurseChildren(dataTree, rootItem, 1);
-      
-      return rootItem;
-  },
+        this.emit("change");
+    }
 });

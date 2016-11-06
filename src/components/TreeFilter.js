@@ -44,7 +44,7 @@ export const expandFilteredNodes = (node, filter, matcher = defaultMatcher) => {
 export const addFilteredNodeToRoot = (rootNode, child, filteredNode) => {
     // eslint-disable-next-line    
     child.children ? child.children.forEach(node => {
-        if(node.folderKey === filteredNode.folderKey){
+        if(filteredNode.children[0] && node.folderKey === filteredNode.folderKey){
             filteredNode.added = true;
             addFilteredNodeToRoot(rootNode, node, filteredNode.children[0]);
         }
@@ -62,7 +62,9 @@ export const postOrderTreeTraversal = (child, rootNode, newNode, filters) => {
         return;
     }
 
-    let displayNode = Object.assign({}, child, {children: []}, DefaultEnabledTermOption, {checked: filters.hasOwnProperty(child.folderKey) ? filters[child.folderKey] : true});
+    let term = filters.get(child.folderKey);
+
+    let displayNode = Object.assign({}, child, {children: []}, DefaultEnabledTermOption, {checked: term ? term.enabled : true});
     if(newNode.children){
         displayNode.children.push(newNode);
     }

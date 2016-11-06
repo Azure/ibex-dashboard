@@ -1,7 +1,6 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import {Actions} from '../actions/Actions';
-import Tile from 'geotile';
 import weightedMean from '../utils/WeightedMean';
 import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
@@ -23,9 +22,10 @@ import '../styles/HeatMap.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
-const maxRequestLimit = 400;
-const sentimentFieldName = 'mag_n';
-const mentionCountFieldName = 'cnt';
+const PARELLEL_TILE_LAYER_RENDER_LIMIT = 200;
+const SENTIMENT_FIELD = 'neg_sentiment';
+const TERM_NAME_FIELD = "f1";
+const TERM_MENTIONS_FIELD = "f2";
 const defaultClusterSize = 40;
 
 export const HeatMap = React.createClass({
@@ -107,9 +107,7 @@ export const HeatMap = React.createClass({
     let siteKey = this.props.siteKey;
     let latitude = this.state.latitude;
     let longitude = this.state.longitude;
-    this.loadedTileBuckets = new Map();
-    this.visibleClusters = new Set();
-    this.associatedTerms = new Map();
+    this.tileSummationMap = new Map();
     this.tilemap = new Map();
     let defaultZoom = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_ZOOM);
     L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
@@ -118,7 +116,8 @@ export const HeatMap = React.createClass({
     this.map.setView([latitude, longitude], defaultZoom);
     L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        maxZoom: 18,
+        maxZoom: 17,
+        minZoom: 6,
         id: 'dark-v9',
         accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
     }).addTo(this.map);
@@ -128,10 +127,6 @@ export const HeatMap = React.createClass({
 
     this.map.on('moveend',() => {
       this.viewportChanged();
-    });
-
-    this.map.on('zoomend',() => {
-      this.clearMap();
     });
 
     this.addClusterGroup();
@@ -203,19 +198,17 @@ export const HeatMap = React.createClass({
       if(this.map){
           this.markers = L.markerClusterGroup({
                             maxClusterRadius: 120,
+                            chunkedLoading: true,
                             iconCreateFunction: cluster => {
-                                let mentions = 0, maxSentimentLevel = 0;
+                                let maxSentimentLevel = 0, totalMentions = cluster.getAllChildMarkers().reduce((prevTotal, child) => {
+                                        maxSentimentLevel = Math.max(maxSentimentLevel, child.feature.properties[SENTIMENT_FIELD]);
 
-                                cluster.getAllChildMarkers().forEach(child => {
-                                    if(child.feature.properties[mentionCountFieldName]){
-                                        mentions += child.feature.properties[mentionCountFieldName];
-                                        maxSentimentLevel = Math.max(maxSentimentLevel, child.feature.properties[sentimentFieldName]);
-                                    }
-                                });
+                                        return child.feature.properties.mentionCount + prevTotal;
+                                }, 0);
 
                                 let cssClass = "marker-cluster marker-cluster-{0}".format(self.getSentimentCategory((maxSentimentLevel || 0) * 100));
 
-                                return self.customClusterIcon(mentions, cssClass);
+                                return self.customClusterIcon(totalMentions, cssClass);
                             },
                             singleMarkerMode: true
                         });
@@ -251,12 +244,11 @@ export const HeatMap = React.createClass({
   },
   
   viewportChanged() {
-    if (this.map) this.updateHeatmap();
+    if (this.map) {
+        this.viewPortChanged = true;
+        this.updateHeatmap();
+    }
   },  
-  
-  buildLayerId(tileId, dataStore) {
-    return "{0}|{1}".format(tileId, dataStore.timespanType);
-  },
   
   dataStoreValidated(){
       return this.state && this.state.datetimeSelection
@@ -272,6 +264,57 @@ export const HeatMap = React.createClass({
           this.clearMap();
       }
   },
+
+  updateDataStore(errors){
+      let aggregatedAssociatedTermMentions = new Map();
+
+      this.viewPortChanged = false;
+      let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
+      //bind the weigthed sentiment to the bullet chart data provider
+      this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
+      this.sentimentIndicatorGraph.dataProvider[0].bullet = weightedSentiment;
+      this.sentimentIndicatorGraph.validateData();
+
+      for (let tileTerms of this.tileSummationMap.values()) {
+          if(tileTerms.edges){
+            tileTerms.edges.forEach(term => {
+                if(term[TERM_NAME_FIELD] === "none"){
+                    return;
+                }
+
+                let totMentions = 0, termLookup = aggregatedAssociatedTermMentions.get(term[TERM_NAME_FIELD]);
+                if(termLookup){
+                    totMentions = termLookup.mentions;
+                }
+
+                aggregatedAssociatedTermMentions.set(term[TERM_NAME_FIELD].toLowerCase(), {"mentions": totMentions + term[TERM_MENTIONS_FIELD], "enabled": true});
+            });
+          }
+      }
+
+      //merge the disabled associated keys as long as the map view hasnt changed.
+      if(!this.viewPortChanged){
+          aggregatedAssociatedTermMentions = new Map([...this.state.associatedKeywords, ...aggregatedAssociatedTermMentions]);
+      }
+
+      //sort the associated terms by mention count.
+      let sortedMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort((termA, termB)=>termB[1].mentions > termA[1].mentions ? 1 : termB[1].mentions < termA[1].mentions ? -1 : 0 ));
+      this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedMap);
+  },
+
+  filterSelectedAssociatedTerms(){
+      let filteredTerms = [];
+
+      if(!this.viewPortChanged){
+        for (var [term, value] of this.state.associatedKeywords.entries()) {
+            if(value.enabled){
+                filteredTerms.push(term);
+            }
+        }
+      }
+      
+      return filteredTerms;
+  },
   
   updateHeatmap() {    
     if(!this.dataStoreValidated()){
@@ -280,172 +323,84 @@ export const HeatMap = React.createClass({
     
     this.createSentimentDistributionGraph();
     this.mapMarkerFlushCheck();
+    let siteKey = this.props.siteKey;
 
     let bounds = this.map.getBounds();
     let zoom = this.map.getZoom();
     let northWest = bounds.getNorthWest();
     let southEast = bounds.getSouthEast();
-
-    let spanningTileIds = Tile.tileIdsForBoundingBox({
-                                                      north: northWest.lat, 
-                                                      west: northWest.lng, 
-                                                      south: southEast.lat, 
-                                                      east: southEast.lng
-                                                    }, zoom);
+    let bbox = [northWest.lng, southEast.lat, southEast.lng, northWest.lat];
+    let self = this;
     this.weightedMeanValues = [];
+    this.tileSummationMap.clear();
 
-    eachLimit(spanningTileIds, maxRequestLimit, this.createLayer, this.updateDataStore);
-  },
-
-  updateDataStore(){
-      let aggregateAssociatedTermCnt = {};
-      let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
-      this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
-      this.sentimentIndicatorGraph.dataProvider[0].bullet = weightedSentiment;
-      this.sentimentIndicatorGraph.validateData();
-
-      for (let tileTerms of this.associatedTerms.values()) {
-          Object.keys(tileTerms).forEach(term => aggregateAssociatedTermCnt[term] = aggregateAssociatedTermCnt[term] || 0 + tileTerms[term]);
-      }
-
-      this.getFlux().actions.DASHBOARD.updateAssociatedTerms(aggregateAssociatedTermCnt);
-  },
-  
-  fetchHeatmap(tileId, callback) {
-    let siteKey = this.props.siteKey;
-    let cachedTileBucket = this.loadedTileBuckets.get(tileId);
-
-    if (cachedTileBucket) return callback(this.shouldFilterCachedTile(cachedTileBucket, tileId));
-
-    SERVICES.getHeatmapTiles(siteKey, this.state.categoryType, this.state.timespanType, this.state.categoryValue, this.state.datetimeSelection, tileId)
-            .subscribe(response => {
-                callback(response);
-            }, error => {
-                callback([]);
+    SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue, this.state.datetimeSelection, bbox, this.filterSelectedAssociatedTerms(), 
+            (error, response, body) => {
+                if (!error && response.statusCode === 200) {
+                    self.createLayers(body, self.updateDataStore)
+                }else{
+                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue}, ${this.state.datetimeSelection}, ${bbox}]`);
+                }
             });
   },
-
-  shouldFilterCachedTile(parentTileChildren, parentTileId){
-      let self = this;
-
-      if(Array.isArray(parentTileChildren)){
-          parentTileChildren.forEach(childTileId => self.processMapCluster(parentTileId, childTileId, {}, {}));
-      }
-
-      return [];
-  },
   
-  createLayer(tileId, callback) {
+  createLayers(response, completedCB) {
     let self = this;
-    let dataStore = this.getFlux().store("DataStore").dataStore;
-    let layerId = this.buildLayerId(tileId, dataStore);
 
-    this.fetchHeatmap(tileId, response => {
-      response.forEach(heatmapTileElement => {
-        Object.keys(heatmapTileElement).forEach(heatmapElementTileId => self.processMapCluster(tileId, heatmapElementTileId, heatmapTileElement[heatmapElementTileId], layerId));
-      });
-      
-      return callback();
-    });
+    if(response && response.response && response.response.features && Array.isArray(response.response.features)){
+        eachLimit(response.response.features, PARELLEL_TILE_LAYER_RENDER_LIMIT, (tileFeature, cb) => {
+            self.processMapCluster(tileFeature, cb);
+        }, completedCB);
+    }
   },
 
-  processMapCluster(bucketTileId, tileId, tilePayload, layerId){
-       let tileGeoJson = this.tilemap.get(tileId);
+  processMapCluster(tileFeature, callback){
+       let tileId = tileFeature.properties.tileId || "N/A";
+       let cachedTileMarker = this.tilemap.get(tileId);
 
-       if(!tileGeoJson && tilePayload){
-           tileGeoJson = this.addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId);
+       if(!cachedTileMarker && tileFeature.properties.tileId){
+           cachedTileMarker = this.addTileFeatureToMap(tileFeature);
        }
 
-       let filterCluster = this.filterMapCluster(tileGeoJson, tileId);
-
-       if(!this.visibleClusters.has(tileId) && !filterCluster){
-           this.visibleClusters.add(tileId);
-           this.markers.addLayer(tileGeoJson);
-       }else if(filterCluster){
-           this.visibleClusters.delete(tileId);
-           this.markers.removeLayer(tileGeoJson);
+       if(Array.isArray(tileFeature.properties.edges) && tileFeature.properties.edges.length > 0){
+           this.tileSummationMap.set(tileId, {"edges": tileFeature.properties.edges});
        }
+       
+       this.weightedMeanValues.push([tileFeature.properties[SENTIMENT_FIELD], tileFeature.properties.mentionCount]);
 
-       if(tileGeoJson && !filterCluster){
-           let geoJsonFeature = this.firstOrDefaultGeoJsonLayerFeature(tileGeoJson);
-           this.weightedMeanValues.push([geoJsonFeature.feature.properties[sentimentFieldName], geoJsonFeature.feature.properties[mentionCountFieldName]]);
-       }
+       callback();
   },
   
-  firstOrDefaultGeoJsonLayerFeature(geoJsonLayers){
-      if(geoJsonLayers && geoJsonLayers._layers){
-          for (var i in geoJsonLayers._layers) {
-              if(geoJsonLayers._layers[i]){
-                  return geoJsonLayers._layers[i];
-              }
-          }
-      }
-  },
-
-  addGeoJsonTileToMap(tileId, tilePayload, layerId, bucketTileId){
+  addTileFeatureToMap(tileFeature){
        try{
-            let heatmapTile = Tile.tileFromTileId(tileId);
-            let tileBucketCache = this.loadedTileBuckets.get(bucketTileId) || [];
-            tileBucketCache.push(tileId);
-
-            this.loadedTileBuckets.set(bucketTileId, tileBucketCache);
-            let geoJson = this.convertTileToGeoJSON(heatmapTile, tilePayload, layerId);
-            let heatMapLayer = L.geoJson(geoJson, {});
-            this.tilemap.set(tileId, heatMapLayer);
-            this.trackAssociatedTerms(geoJson, tileId);
-
-        return heatMapLayer;
-       }catch(e){
-           console.error("An error occured trying to grab the tile details.");
+            let mapMarker = this.featureToLeafletMarker(tileFeature);
+            this.tilemap.set(tileFeature.properties.tileId, mapMarker);
+            let heatMapLayer = L.geoJson(mapMarker, {});
+            this.markers.addLayer(heatMapLayer);
+            
+            return heatMapLayer;
+        }catch(e){
+           console.error(`An error occured trying to grab the tile details. [${e}]`);
        }
   },
 
-  /*Place the associated term count in a data structure indexed by layerId*/
-  trackAssociatedTerms(geoJsonTile, tileId){
-      let layerAssociations = this.associatedTerms.get(tileId) || {};
-
-      if(geoJsonTile.properties.associatedTerms){
-               geoJsonTile.properties.associatedTerms.forEach(termMentions =>  {
-                   let term = Object.keys(termMentions)[0];
-                   layerAssociations[term] = layerAssociations[term] || 0 + termMentions[term];
-               });
-
-               this.associatedTerms.set(tileId, layerAssociations);
+ featureToLeafletMarker(tileFeature){
+      if(tileFeature && tileFeature.coordinates && Array.isArray(tileFeature.coordinates)){
+        let leafletMarker = new L.Marker(L.latLng(tileFeature.coordinates[1], tileFeature.coordinates[0])).toGeoJSON();
+            leafletMarker.properties = Object.assign({}, leafletMarker.properties || {}, tileFeature.properties);
+        
+        return leafletMarker;
+      }else{
+          throw new Error(`invalid tile feature error[${JSON.stringify(tileFeature)}]`);
       }
-  },
-
- convertTileToGeoJSON(tile, properties, layerId){
-      let tileCentroid = new L.latLngBounds(L.latLng(tile.latitudeSouth, tile.longitudeWest), 
-                                                  L.latLng(tile.latitudeNorth, tile.longitudeEast)).getCenter();
-      
-      let geoJson = new L.Marker(tileCentroid).toGeoJSON();
-      geoJson.properties = Object.assign(geoJson.properties, properties, {layerId});
-      
-      return geoJson;
- },
-
- filterMapCluster(geoJsonTile, tileId) {
-    let termFilters = this.state.filteredTerms;
-    let layerAssociations = this.associatedTerms.get(tileId);
-
-    if(Object.keys(termFilters).length === 0){
-        return false;
-    }
-
-    return Object.keys(layerAssociations || {})
-                 .filter(key => termFilters[key])
-                 .length > 0;
  },
    
   clearMap(){
        if(this.markers){
          this.markers.clearLayers();
        }
-
-        this.associatedTerms.clear();
-        this.tilemap.clear();
-        this.visibleClusters.clear();
-        this.loadedTileBuckets.clear();
+        
+       this.tilemap.clear();
   },
    
    renderMap(){
