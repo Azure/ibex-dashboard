@@ -206,7 +206,7 @@ export const HeatMap = React.createClass({
 				progressPercentage =  Math.round(processed/total*100);
 			}
             
-            this.setProgressPercent(progressPercentage);
+            //this.setProgressPercent(progressPercentage);
   },
 
   addClusterGroup(){
@@ -312,7 +312,7 @@ export const HeatMap = React.createClass({
 
       this.viewPortChanged = false;
       this.status = 'loaded';
-      this.setProgressPercent(100);
+      //this.setProgressPercent(100);
       //sort the associated terms by mention count.
       let sortedMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort((termA, termB)=>termB[1].mentions > termA[1].mentions ? 1 : termB[1].mentions < termA[1].mentions ? -1 : 0 ));
       this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedMap);
@@ -348,7 +348,7 @@ export const HeatMap = React.createClass({
     let southEast = bounds.getSouthEast();
     let bbox = [northWest.lng, southEast.lat, southEast.lng, northWest.lat];
     let self = this;
-    this.setProgressPercent(0);
+    //this.setProgressPercent(0);
     this.weightedMeanValues = [];
     this.tileSummationMap.clear();
 
@@ -459,8 +459,7 @@ export const HeatMap = React.createClass({
                 <ActivityFeed />
           </Dialog>
           <ProgressBar  percent={this.state.mapProgressPercent} 
-                        spinner="right"
-                        className="react-progress-bar-percent-override" />
+                        spinner="right" />
         </div>
      );
   }
