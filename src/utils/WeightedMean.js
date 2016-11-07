@@ -1,11 +1,14 @@
 function weightedMean(weightedValues) {
-    var totalWeight = weightedValues.reduce((sum, weightedValue) => {
+    
+    let weight = 0;
+
+    let totalWeight = weightedValues.reduce((sum, weightedValue) => {
+        weight += weightedValue[0] * weightedValue[1];
+
         return sum + weightedValue[1];
     }, 0);
 
-    return weightedValues.reduce((mean, weightedValue) => {
-        return mean + weightedValue[0] * weightedValue[1] / totalWeight;
-    }, 0);
+    return weight / totalWeight;
 }
 
 module.exports = weightedMean;

@@ -27,6 +27,18 @@ export const Dashboard = React.createClass({
        this.setState(this.getStateFromFlux());
   },
   
+ FilterEnabledTerms(){
+      let filteredTerms = [];
+
+      for (var [term, value] of this.state.associatedKeywords.entries()) {
+          if(value.enabled){
+              filteredTerms.push(term);
+          }
+      }
+
+      return filteredTerms;
+ },  
+  
   render() {
     return (
         <div>
@@ -46,7 +58,8 @@ export const Dashboard = React.createClass({
                 </div>
                 <div className="row">
                     <div className="col-lg-2 termBrowserContainer">
-                        <SentimentTreeview {...this.props} />
+                        <SentimentTreeview {...this.props} 
+                                           enabledTerms={this.FilterEnabledTerms()} />
                     </div>
                     <div className="col-lg-10 heatmapContainer">
                       <div className="row">
