@@ -169,6 +169,14 @@ export const SentimentTreeview = React.createClass({
             children: []
         };
 
+        let noRelevantTermsItemsRoot = {
+            name: `None`,
+            folderKey: 'noneFolder',
+            checked: true,
+            toggled: true,
+            children: []
+        };
+
         let popularItemsRoot = {
             name: 'Top 5',
             folderKey: 'top5Keywords',
@@ -181,12 +189,12 @@ export const SentimentTreeview = React.createClass({
             name: 'Other Terms',
             folderKey: 'otherKeywords',
             checked: true,
-            toggled: false,
+            toggled: true,
             children: []
         };
 
         let itemCount = 0;
-        let popularTermsTotal = 0, otherTotal = 0;
+        let popularTermsTotal = 0, otherTotal = 0, noneTotal = 0;
 
         for (var [term, value] of termsMap.entries()) {
             let newEntry = {
@@ -196,7 +204,11 @@ export const SentimentTreeview = React.createClass({
                     eventCount: value.mentions
             };
 
-            if(itemCount++ < 5){
+            if(term === "none"){
+                newEntry.parent = noRelevantTermsItemsRoot;
+                noRelevantTermsItemsRoot.children.push(newEntry);
+                noneTotal += value.mentions;
+            }else if(itemCount++ < 5){
                 newEntry.parent = popularItemsRoot;
                 popularItemsRoot.children.push(newEntry);
                 popularTermsTotal += value.mentions;
@@ -208,8 +220,9 @@ export const SentimentTreeview = React.createClass({
         }
 
         rootItem.children.push(popularItemsRoot);
+        rootItem.children.push(noRelevantTermsItemsRoot);
         rootItem.children.push(otherItemsRoot);
-        rootItem.eventCount = popularTermsTotal + otherTotal;
+        rootItem.eventCount = popularTermsTotal + otherTotal + noneTotal;
 
         return rootItem;
   },

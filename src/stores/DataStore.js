@@ -9,10 +9,9 @@ export const DataStore = Fluxxor.createStore({
           userProfile: profile,
           timespanType: 'customMonth',
           datetimeSelection: 'October 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
-          categoryType: 'keyword',
+          categoryType: 'sector',
           siteKey: '',
           activities: [],
-          action: '',
           popularTerms: [],
           timeSeriesGraphData: {},
           sentimentChartData: [],
@@ -140,8 +139,6 @@ export const DataStore = Fluxxor.createStore({
            this.defaultSearchTermToMostMentioned(this.dataStore.timeSeriesGraphData.mostPopularTerm);
         }
 
-        this.dataStore.action = 'loadedGraphData';
-
         return;
     },
     
@@ -151,7 +148,6 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.timespanType = changedData.timespanType;
         this.refreshGraphData(changedData.timeSeriesResponse);
         this.dataStore.renderMap = true;
-        this.dataStore.action = 'changedSearchTerms';
         
         this.emit("change");
     },
@@ -160,7 +156,6 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.associatedKeywords = new Map();
         this.dataStore.categoryValue = changedData.newFilter;
         this.dataStore.categoryType = changedData.searchType;
-        this.dataStore.action = 'changedSearchTerms';
         this.dataStore.renderMap = true;
         
         this.emit("change");

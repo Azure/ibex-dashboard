@@ -391,6 +391,7 @@ export const SERVICES = {
     let period = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
     let host = getEnvPropValue(siteKey, process.env.REACT_APP_SERVICE_HOSTS)
 
+    console.log(`processing tile request [${keyword}, ${period}, ${bbox}, ${layerFilters.join(",")}]`)
     if(bbox && Array.isArray(bbox) && bbox.length === 4){
         var POST = {
             url : `${host}/tilefetcher`,

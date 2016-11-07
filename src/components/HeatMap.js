@@ -10,6 +10,7 @@ import L from 'leaflet';
 import {getEnvPropValue} from '../utils/Utils.js';
 import FlatButton from 'material-ui/lib/flat-button';
 import {ActivityFeed} from './ActivityFeed';
+import ProgressBar from 'react-progress-bar-plus';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet/dist/images/layers-2x.png';
 import 'leaflet/dist/images/layers.png';
@@ -19,6 +20,7 @@ import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import '../styles/HeatMap.css';
+import 'react-progress-bar-plus/lib/progress-bar.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -44,6 +46,8 @@ export const HeatMap = React.createClass({
           latitude: locationSplit[0],
           longitude: locationSplit[1],
           openModal: false,
+          mapProgressPercent: -1,
+          intervalTime: 200,
           selectedTileId: false,
           modalTitle: ''
       };
@@ -109,6 +113,7 @@ export const HeatMap = React.createClass({
     let longitude = this.state.longitude;
     this.tileSummationMap = new Map();
     this.tilemap = new Map();
+    this.status = "ready";
     let defaultZoom = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_ZOOM);
     L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
     this.map = L.map('leafletMap', {zoomControl: false});
@@ -192,6 +197,18 @@ export const HeatMap = React.createClass({
      }
   },
 
+  updateProgressBar(processed, total, elapsed, layersArray) {
+            //hide the progress bar by default
+            let progressPercentage = 100;
+
+            // if all markers have not been processed:
+            if (processed !== total) {
+				progressPercentage =  Math.round(processed/total*100);
+			}
+            
+            this.setProgressPercent(progressPercentage);
+  },
+
   addClusterGroup(){
       let self = this;
 
@@ -210,7 +227,8 @@ export const HeatMap = React.createClass({
 
                                 return self.customClusterIcon(totalMentions, cssClass);
                             },
-                            singleMarkerMode: true
+                            singleMarkerMode: true,
+                            chunkProgress: self.updateProgressBar
                         });
 
             this.markers.on('click', a => {
@@ -268,7 +286,6 @@ export const HeatMap = React.createClass({
   updateDataStore(errors){
       let aggregatedAssociatedTermMentions = new Map();
 
-      this.viewPortChanged = false;
       let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
       //bind the weigthed sentiment to the bullet chart data provider
       this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
@@ -278,10 +295,6 @@ export const HeatMap = React.createClass({
       for (let tileTerms of this.tileSummationMap.values()) {
           if(tileTerms.edges){
             tileTerms.edges.forEach(term => {
-                if(term[TERM_NAME_FIELD] === "none"){
-                    return;
-                }
-
                 let totMentions = 0, termLookup = aggregatedAssociatedTermMentions.get(term[TERM_NAME_FIELD]);
                 if(termLookup){
                     totMentions = termLookup.mentions;
@@ -297,6 +310,9 @@ export const HeatMap = React.createClass({
           aggregatedAssociatedTermMentions = new Map([...this.state.associatedKeywords, ...aggregatedAssociatedTermMentions]);
       }
 
+      this.viewPortChanged = false;
+      this.status = 'loaded';
+      this.setProgressPercent(100);
       //sort the associated terms by mention count.
       let sortedMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort((termA, termB)=>termB[1].mentions > termA[1].mentions ? 1 : termB[1].mentions < termA[1].mentions ? -1 : 0 ));
       this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedMap);
@@ -323,6 +339,7 @@ export const HeatMap = React.createClass({
     
     this.createSentimentDistributionGraph();
     this.mapMarkerFlushCheck();
+    this.status = "loading";
     let siteKey = this.props.siteKey;
 
     let bounds = this.map.getBounds();
@@ -331,6 +348,7 @@ export const HeatMap = React.createClass({
     let southEast = bounds.getSouthEast();
     let bbox = [northWest.lng, southEast.lat, southEast.lng, northWest.lat];
     let self = this;
+    this.setProgressPercent(0);
     this.weightedMeanValues = [];
     this.tileSummationMap.clear();
 
@@ -339,6 +357,7 @@ export const HeatMap = React.createClass({
                 if (!error && response.statusCode === 200) {
                     self.createLayers(body, self.updateDataStore)
                 }else{
+                    this.status = 'failed';
                     console.error(`[${error}] occured while processing tile request [${this.state.categoryValue}, ${this.state.datetimeSelection}, ${bbox}]`);
                 }
             });
@@ -395,16 +414,22 @@ export const HeatMap = React.createClass({
       }
  },
    
-  clearMap(){
+ clearMap(){
        if(this.markers){
          this.markers.clearLayers();
        }
         
        this.tilemap.clear();
   },
+
+  setProgressPercent(percent){
+    this.setState({
+        mapProgressPercent: percent
+      });
+   },
    
    renderMap(){
-     return this.map && this.state.renderMap;
+     return this.map && this.state.renderMap && this.status !== "loading";
    },
 
    render() {
@@ -433,6 +458,9 @@ export const HeatMap = React.createClass({
             onRequestClose={this.handleClose} >
                 <ActivityFeed />
           </Dialog>
+          <ProgressBar  percent={this.state.mapProgressPercent} 
+                        spinner="right"
+                        className="react-progress-bar-percent-override" />
         </div>
      );
   }

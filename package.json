@@ -41,6 +41,7 @@
     "pg": "^6.1.0",
     "react-addons-create-fragment": "^0.14.0",
     "react-autosuggest": "2.1.1",
+    "react-progress-bar-plus": "^1.2.0",
     "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
     "request": "^2.78.0",
