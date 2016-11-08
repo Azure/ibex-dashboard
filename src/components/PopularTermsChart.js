@@ -54,7 +54,7 @@ export const PopularTermsChart = React.createClass({
 
     this.popularTermsChart.addListener("clickGraphItem", e => {
         if(e.item.dataContext){
-              self.getFlux().actions.DASHBOARD.changeSearchFilter(e.item.dataContext.term, e.item.dataContext.category);
+              self.getFlux().actions.DASHBOARD.changeSearchFilter(e.item.dataContext.term, this.props.siteKey);
         }
     });
  },
@@ -80,23 +80,24 @@ export const PopularTermsChart = React.createClass({
     }
 
     this.popularTermsChart.datetimeSelection = this.state.datetimeSelection;
+    this.popularTermsChart.categoryValue = this.state.categoryValue;
     this.popularTermsChart.validateData();
  },
 
  updateChart(summaryMap, termColorMap){
-     if(!this.popularTermsChart){
+     if(!this.popularTermsChart || (this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts.length === 0)){
         this.initializeGraph();
      }
 
      let graphDateScope = this.popularTermsChart.datetimeSelection || '';
 
-     if(graphDateScope !== this.state.datetimeSelection){
+     if(graphDateScope !== this.state.datetimeSelection || this.state.categoryValue !== this.popularTermsChart.categoryValue){
         this.refreshChart(summaryMap, termColorMap);
      }
   },
   
   render() {
-   if(this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts && this.state.timeSeriesGraphData.aggregatedCounts.length > 0){
+   if(this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts){
         this.updateChart(this.state.timeSeriesGraphData.termSummaryMap, this.state.timeSeriesGraphData.termColorMap);
     }
 

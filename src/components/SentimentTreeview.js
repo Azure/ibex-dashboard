@@ -6,8 +6,10 @@ import * as filters from './TreeFilter';
 import {TypeaheadSearch} from './TypeaheadSearch';
 import '../styles/Header.css';
 import '../styles/SentimentTreeView.css';
+import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
+      parentTermsName = "Relevant Terms",
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
 const styles = {
@@ -95,6 +97,10 @@ const treeDataStyle = {
                     textAlign: 'right',
                     marginRight: '14px'
                 },
+                parentBadge: {
+                    marginRight: '28px',
+                    textAlign: 'right',
+                },
                 connector: {
                     width: '2px',
                     height: '12px',
@@ -155,15 +161,13 @@ export const SentimentTreeview = React.createClass({
   },
 
   componentWillReceiveProps(nextProps){
-      if(this.state.associatedKeywords.size > 0){
-          let treeData = this.createRelevantTermsTree(this.state.associatedKeywords);
-          this.setState({treeData: treeData, originalTreeData: treeData})
-      }
+      let treeData = this.createRelevantTermsTree(this.state.associatedKeywords);
+      this.setState({treeData: treeData, originalTreeData: treeData})
   },
 
   createRelevantTermsTree(termsMap){
         let rootItem = {
-            name: 'Relevant Mentions',
+            name: parentTermsName,
             folderKey: 'associatedKeywords',
             toggled: true,
             children: []
@@ -207,15 +211,16 @@ export const SentimentTreeview = React.createClass({
             if(term === "none"){
                 newEntry.parent = noRelevantTermsItemsRoot;
                 noRelevantTermsItemsRoot.children.push(newEntry);
-                noneTotal += value.mentions;
+                newEntry.name = this.state.categoryValue;
+                noneTotal += value.enabled ? value.mentions : 0;
             }else if(itemCount++ < 5){
                 newEntry.parent = popularItemsRoot;
                 popularItemsRoot.children.push(newEntry);
-                popularTermsTotal += value.mentions;
+                popularTermsTotal += value.enabled ? value.mentions : 0;
             }else{
                 newEntry.parent = otherItemsRoot;
                 otherItemsRoot.children.push(newEntry);
-                otherTotal += value.mentions;
+                otherTotal += value.enabled ? value.mentions : 0;
             }
         }
 
@@ -301,14 +306,21 @@ export const SentimentTreeview = React.createClass({
       }
   },
 
+  termSelected(node){
+      if(!node.children){
+          this.getFlux().actions.DASHBOARD.changeSearchFilter(node.name, this.props.siteKey);
+      }
+  },
+
   Header(props) {
         const style = props.style;
         let self = this;
         const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '16px', color: '#337ab7',  width: '100%' };
         const categoryStyle = { paddingLeft: '3px', fontSize: '16px', color: '#fff', fontWeight: 600,  width: '100%'};
-        const badgeClass = props.node.checked && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
+        let badgeClass = (props.node.checked || props.node.children) && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
         let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
         let onlyLink = <span style={style.only} onClick={this.filterNode.bind(this, props.node)}>only</span>;
+        let termClassName = !isNodeTypeCategory ? "relevantTerm" : "";
 
         return (
             <div className="row" style={!props.node.highlighted || props.node.children ? style.base : style.baseHighlight} onMouseEnter={this.onHighlight.bind(this, props.node)}>
@@ -316,13 +328,13 @@ export const SentimentTreeview = React.createClass({
                     <input type="checkbox"
                         checked={props.node.checked}
                         onChange={self.onChange.bind(this, props.node)}/>
-                    <span style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{(!isNodeTypeCategory ? "#" : "") + props.node.name} </span>
+                    <span className={termClassName} onClick={this.termSelected.bind(this, props.node)} style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{(!isNodeTypeCategory ? "#" : "") + props.node.name} </span>
                     {props.node.highlighted ? onlyLink : ""}
                 </div>
-                <div style={style.badge} className="col-md-2">                    
+                <div style={props.node.name === parentTermsName ? style.parentBadge : style.badge} className="col-md-2">
                             {
                                 props.node.eventCount && props.node.eventCount > 0 ? 
-                                    <span className={badgeClass}>{props.node.eventCount}</span> 
+                                    <span className={badgeClass}>{numeralLibs(props.node.eventCount).format(props.node.eventCount > 1000 ? '+0.0a' : '0a')}</span> 
                                 : undefined
                             }
                 </div>

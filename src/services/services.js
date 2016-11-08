@@ -4,11 +4,9 @@ import {Actions} from '../actions/Actions';
 import {guid, momentToggleFormats, getEnvPropValue} from '../utils/Utils.js';
 import request from 'request';
 
-const maxMappingLevels = 4;
 const LAYER_TYPE_FILTER = "associations";
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 
-const MIN_ZOOM = 5;
 const MAX_ZOOM = 15;
 
 export const SERVICES = {
@@ -23,8 +21,6 @@ export const SERVICES = {
       console.log('AAD Auth Client ID config is not setup in Azure for this instance');
       return {};
     }
-
-    console.log('AD ID: ' + process.env.REACT_APP_AAD_AUTH_CLIENTID);
 
     window.config = {
       instance: 'https://login.microsoftonline.com/',
@@ -63,14 +59,14 @@ export const SERVICES = {
     }
   },
 
-  getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType){
+  getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
      let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
      let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TIMESERIES);
 
-     let url = "{0}/{1}/{2}/top5.json".format(hostname, blobContainer, momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
+     let url = `${hostname}/${blobContainer}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
 
-      return Rx.DOM.getJSON(url);
+     return Rx.DOM.getJSON(url);
   },
 
   getDefaultSuggestionList(siteKey){
@@ -400,7 +396,7 @@ export const SERVICES = {
             withCredentials: false,
             body : {
                 "bbox": bbox,
-                "zoomLevel": MAX_ZOOM,//zoomLevel < MIN_ZOOM ? MIN_ZOOM : zoomLevel > MAX_ZOOM ? MAX_ZOOM : zoomLevel,
+                "zoomLevel": MAX_ZOOM,
                 "keyword": keyword,
                 "period": period,
                 "filteredEdges": layerFilters,

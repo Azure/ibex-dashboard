@@ -197,18 +197,6 @@ export const HeatMap = React.createClass({
      }
   },
 
-  updateProgressBar(processed, total, elapsed, layersArray) {
-            //hide the progress bar by default
-            let progressPercentage = 100;
-
-            // if all markers have not been processed:
-            if (processed !== total) {
-				progressPercentage =  Math.round(processed/total*100);
-			}
-            
-            //this.setProgressPercent(progressPercentage);
-  },
-
   addClusterGroup(){
       let self = this;
 
@@ -227,8 +215,7 @@ export const HeatMap = React.createClass({
 
                                 return self.customClusterIcon(totalMentions, cssClass);
                             },
-                            singleMarkerMode: true,
-                            chunkProgress: self.updateProgressBar
+                            singleMarkerMode: true
                         });
 
             this.markers.on('click', a => {
@@ -275,7 +262,7 @@ export const HeatMap = React.createClass({
    },
 
   mapMarkerFlushCheck(){
-      if(this.map.selectedTerm !== this.state.categoryValue || this.map.datetimeSelection !== this.state.datetimeSelection || this.state.renderMap){
+      if(this.map.selectedTerm !== this.state.categoryValue || this.map.datetimeSelection !== this.state.datetimeSelection || this.state.renderMap || this.viewportChanged){
           this.map.datetimeSelection =  this.state.datetimeSelection;
           this.map.selectedTerm = this.state.categoryValue;
 
@@ -421,19 +408,14 @@ export const HeatMap = React.createClass({
         
        this.tilemap.clear();
   },
-
-  setProgressPercent(percent){
-    this.setState({
-        mapProgressPercent: percent
-      });
-   },
    
-   renderMap(){
+  renderMap(){
      return this.map && this.state.renderMap && this.status !== "loading";
-   },
+  },
 
-   render() {
+  render() {
     let contentClassName = "modalContent";
+    let progressPercentage = this.status === "loaded" ? 100 : -1;
 
     const modalActions = [
       <FlatButton
@@ -446,6 +428,7 @@ export const HeatMap = React.createClass({
 
     if(this.renderMap()){
         this.updateHeatmap();
+        progressPercentage = 0;
     }
 
     return (
@@ -458,7 +441,10 @@ export const HeatMap = React.createClass({
             onRequestClose={this.handleClose} >
                 <ActivityFeed />
           </Dialog>
-          <ProgressBar  percent={this.state.mapProgressPercent} 
+          <ProgressBar  percent={progressPercentage} 
+                        intervalTime={this.state.intervalTime}
+                        autoIncrement={true}
+                        className="react-progress-bar-percent-override"
                         spinner="right" />
         </div>
      );

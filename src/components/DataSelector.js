@@ -15,6 +15,8 @@ const TimeSelectionOptions = [
     {label: '', timeType: 'customDatePlaceholder'},
     {label: 'Today', timeType: 'days', subtractFromNow: 0},
     {label: 'Yesterday', timeType: 'days', subtractFromNow: 1},
+    {label: 'This Week', timeType: 'weeks', subtractFromNow: 1},
+    {label: 'Last Week', timeType: 'weeks', subtractFromNow: 2},
     {label: 'Past Hour', timeType: 'hours', subtractFromNow: 1},
     {label: 'This Month', timeType: 'months', subtractFromNow: 0},
     {label: 'Last Month', timeType: 'months', subtractFromNow: 1},
