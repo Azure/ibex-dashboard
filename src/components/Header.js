@@ -25,11 +25,8 @@ export const Header = React.createClass({
   },
   
   render() {
-    var self = this;
     let siteKey = this.props.siteKey;
     let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
-    let initials = 'N/A';
-    // TODO: make common menus for all sites
     let nav = (siteKey==="dengue") ? this.renderNav() : false ;
 
     return (
@@ -53,11 +50,10 @@ export const Header = React.createClass({
                   </ul>
                   <ul className="nav navbar-nav navbar-right">
                       <li className="userProfile">
-                        <span className="userLabel">{self.state && self.state.given_name ? 'Hello ' + self.state.given_name : undefined}&nbsp;</span>
                         <span className="fa-stack fa-lg">
                           <i className="fa fa-square fa-stack-2x"></i>
                           <i className="fa fa-stack-1x fa-inverse" style={{color: '#222931', fontWeight: '600', fontFamily: 'Helvetica Neue,Helvetica,Arial,sans-serif'}}>
-                            {initials}
+                            
                           </i>
                         </span>
                       </li>

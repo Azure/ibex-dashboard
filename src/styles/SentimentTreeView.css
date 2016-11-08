@@ -30,6 +30,10 @@
     margin-left: 5px;
 }
 
+.relevantTerm:hover{
+    text-decoration: underline;
+}
+
 .badge-disabled{
     color: #a3a3b3!important;
     background-color: #333!important;

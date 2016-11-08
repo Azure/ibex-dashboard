@@ -22,6 +22,18 @@ function GetSearchKeywords(siteKey, languageCode, callback){
      });
 }
 
+function GetTimeSeries(datetimeSelection, timespanType, siteKey, callback, searchTerm){
+     let selectedTerm = searchTerm ? `kw-${searchTerm}` : "top5";
+
+     if(datetimeSelection && timespanType){
+           SERVICES.getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm)
+                   .subscribe(response => callback(response)
+                   , error => {
+                            console.log('Something went terribly wrong with loading the initial graph dataset');
+                   });
+     }
+}
+
 const constants = {
            SENTIMENT_JSON_MAPPING : {
                 "0": -5,
@@ -37,6 +49,9 @@ const constants = {
                 },
                 'months': {
                     format: "YYYY-MM", blobFormat: "[month]-YYYY-MM"
+                },
+                'weeks': {
+                    format: "YYYY-WW", blobFormat: "[week]-YYYY-WW"
                 },
                 'customDate': {
                     format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD"
@@ -125,8 +140,17 @@ const methods = {
 
           GetSearchKeywords(siteKey, ENGLISH_LANGUAGE, azureStorageCB);
         },
-        changeSearchFilter(newFilter, searchType){
-           this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
+        changeSearchFilter(newFilter, siteKey){
+           let self = this;
+           let dataStore = this.flux.stores.DataStore.dataStore;
+
+            let callback = response => {
+                 if(response && response.graphData && response.graphData.length > 0){
+                        self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: response, newFilter: newFilter});
+                 }
+            };
+
+            GetTimeSeries(dataStore.datetimeSelection, dataStore.timespanType, siteKey, callback, newFilter);
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
@@ -136,19 +160,14 @@ const methods = {
         },
         changeDate(siteKey, datetimeSelection, timespanType){
            let self = this;
+           let dataStore = this.flux.stores.DataStore.dataStore;
+           let callback = response => {
+                 if(response && response.graphData && response.graphData.length > 0){
+                                 self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: response, datetimeSelection: datetimeSelection, timespanType: timespanType});
+                 }
+            };
 
-           SERVICES.getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType)
-                      .subscribe(timeSeriesResponse => {
-                             if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
-                                 self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
-                             }
-                      }, error => {
-                        let emptyTimeSeries = {graphData: [], labels: []};
-                        
-                        //If we reached here then the datetime blob is not available. We should continue
-                        //to dispatch the flux operation to the front-end so the search terms / date is reflected.
-                        self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: emptyTimeSeries, datetimeSelection: datetimeSelection, timespanType: timespanType});
-           });
+            GetTimeSeries(datetimeSelection, timespanType, siteKey, callback, dataStore.categoryValue);
         }
     },
     GRAPHING : {
@@ -159,17 +178,13 @@ const methods = {
         load_timeseries_data: function(siteKey){
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
+            let callback = response => {
+                 if(response && response.graphData && response.graphData.length > 0){
+                          self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response});
+                 }
+            };
 
-            if(dataStore.datetimeSelection && dataStore.timespanType){
-                SERVICES.getPopularTermsTimeSeries(siteKey, dataStore.datetimeSelection, dataStore.timespanType)
-                            .subscribe(response => {
-                                if(response && response.graphData && response.graphData.length > 0){
-                                    self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response: response});
-                                }
-                            }, error => {
-                                console.log('Something went terribly wrong with loading the initial graph dataset');
-                            });
-            }
+            GetTimeSeries(dataStore.datetimeSelection, dataStore.timespanType, siteKey, callback, dataStore.categoryValue);
         }
     },
     FACTS: {

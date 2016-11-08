@@ -12,14 +12,13 @@ export const TypeaheadSearch = React.createClass({
   typeaheadItemSelected(suggestion, event){
     let oldValue =  this.props.data || '';
     let newValue =  suggestion.searchTerm.trim();
-    let newType =  suggestion.category.trim();
     
     if(oldValue === newValue){
         return;
     }
     
     if(oldValue !== newValue){
-        this.getFlux().actions.DASHBOARD.changeSearchFilter(newValue, newType);
+        this.getFlux().actions.DASHBOARD.changeSearchFilter(newValue, this.props.siteKey);
     }
   },
   

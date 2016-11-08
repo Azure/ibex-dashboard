@@ -53,6 +53,7 @@ export const TimeSeriesGraph = React.createClass({
         },
         "categoryAxis": {
             "parseDates": true,
+            "minPeriod": "hh",
             "equalSpacing": true,
             "axisColor": "#DADADA",
             "minorGridEnabled": true
@@ -81,23 +82,24 @@ export const TimeSeriesGraph = React.createClass({
     this.trendingTimeSeries.graphs = graphList;
     this.trendingTimeSeries.dataProvider = graphDataset.aggregatedCounts;
     this.trendingTimeSeries.datetimeSelection = this.state.datetimeSelection;
+    this.trendingTimeSeries.categoryValue = this.state.categoryValue;
     this.trendingTimeSeries.validateData();
   },
   
   updateTimeSeriesData(graphDataset, termColorMap){
-    if(!this.trendingTimeSeries){
+    if(!this.trendingTimeSeries || (this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts.length === 0)){
         this.initializeGraph();
     }
 
     let graphDateScope = this.trendingTimeSeries.datetimeSelection || '';
 
-    if(graphDateScope !== this.state.datetimeSelection){
+    if(graphDateScope !== this.state.datetimeSelection || this.state.categoryValue !== this.trendingTimeSeries.categoryValue){
         this.refreshTrendingGraph(graphDataset, termColorMap);
     }
   },
   
   render() {
-    if(this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts && this.state.timeSeriesGraphData.aggregatedCounts.length > 0){
+    if(this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts){
         this.updateTimeSeriesData(this.state.timeSeriesGraphData, this.state.timeSeriesGraphData.termColorMap);
     }
 
