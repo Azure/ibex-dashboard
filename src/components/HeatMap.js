@@ -4,12 +4,9 @@ import {Actions} from '../actions/Actions';
 import weightedMean from '../utils/WeightedMean';
 import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
-import Dialog from 'material-ui/lib/dialog';
 import numeralLibs from 'numeral';
 import L from 'leaflet';
 import {getEnvPropValue} from '../utils/Utils.js';
-import FlatButton from 'material-ui/lib/flat-button';
-import {ActivityFeed} from './ActivityFeed';
 import ProgressBar from 'react-progress-bar-plus';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet/dist/images/layers-2x.png';
@@ -35,7 +32,6 @@ export const HeatMap = React.createClass({
   
   getInitialState(){
       let siteKey = this.props.siteKey;
-      this.getFlux().actions.ACTIVITY.load_activity_events();
       let defaultLocation = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_LOCATION);
       let locationSplit = defaultLocation.split(',');
       if(locationSplit.length !== 2){
@@ -45,20 +41,11 @@ export const HeatMap = React.createClass({
       return{
           latitude: locationSplit[0],
           longitude: locationSplit[1],
-          openModal: false,
           mapProgressPercent: -1,
           intervalTime: 200,
           selectedTileId: false,
           modalTitle: ''
       };
-  },
-
-  handleOpen(layerId){
-    this.setState({openModal: true, selectedTileId: layerId});
-  },
-
-  handleClose(){
-    this.setState({openModal: false});
   },
   
   getStateFromFlux: function() {
@@ -218,13 +205,6 @@ export const HeatMap = React.createClass({
                             singleMarkerMode: true
                         });
 
-            this.markers.on('click', a => {
-                //if we're at the leaf level then show the dialog
-                if(a.layer.feature.properties.layerId){
-                    self.handleOpen(a.layer.feature.properties.layerId);
-                }
-		    });
-
             this.map.addLayer(this.markers);
       }
   },
@@ -270,7 +250,7 @@ export const HeatMap = React.createClass({
       }
   },
 
-  updateDataStore(errors){
+  updateDataStore(errors, bbox){
       let aggregatedAssociatedTermMentions = new Map();
 
       let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
@@ -302,7 +282,7 @@ export const HeatMap = React.createClass({
       //this.setProgressPercent(100);
       //sort the associated terms by mention count.
       let sortedMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort((termA, termB)=>termB[1].mentions > termA[1].mentions ? 1 : termB[1].mentions < termA[1].mentions ? -1 : 0 ));
-      this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedMap);
+      this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedMap, bbox);
   },
 
   filterSelectedAssociatedTerms(){
@@ -342,7 +322,7 @@ export const HeatMap = React.createClass({
     SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue, this.state.datetimeSelection, bbox, this.filterSelectedAssociatedTerms(), 
             (error, response, body) => {
                 if (!error && response.statusCode === 200) {
-                    self.createLayers(body, self.updateDataStore)
+                    self.createLayers(body, errors => self.updateDataStore(errors, bbox))
                 }else{
                     this.status = 'failed';
                     console.error(`[${error}] occured while processing tile request [${this.state.categoryValue}, ${this.state.datetimeSelection}, ${bbox}]`);
@@ -414,17 +394,7 @@ export const HeatMap = React.createClass({
   },
 
   render() {
-    let contentClassName = "modalContent";
     let progressPercentage = this.status === "loaded" ? 100 : -1;
-
-    const modalActions = [
-      <FlatButton
-        label="Ok"
-        primary={true}
-        keyboardFocused={true}
-        onTouchTap={this.handleClose}
-      />,
-    ];
 
     if(this.renderMap()){
         this.updateHeatmap();
@@ -433,14 +403,6 @@ export const HeatMap = React.createClass({
 
     return (
         <div>
-          <Dialog
-            actions={modalActions}
-            modal={false}
-            contentClassName={contentClassName}
-            open={this.state.openModal}
-            onRequestClose={this.handleClose} >
-                <ActivityFeed />
-          </Dialog>
           <ProgressBar  percent={progressPercentage} 
                         intervalTime={this.state.intervalTime}
                         autoIncrement={true}

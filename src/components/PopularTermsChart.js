@@ -76,7 +76,7 @@ export const PopularTermsChart = React.createClass({
 
     this.popularTermsChart.dataProvider = dataProvider;
     if(this.popularTermsChart.valueAxes && this.popularTermsChart.valueAxes.length > 0){
-        this.popularTermsChart.valueAxes[0].title = "Total Mentions for {0}".format(this.state.datetimeSelection);
+        this.popularTermsChart.valueAxes[0].title = "Top Mentions for {0}".format(this.state.datetimeSelection);
     }
 
     this.popularTermsChart.datetimeSelection = this.state.datetimeSelection;

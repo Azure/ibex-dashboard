@@ -10,20 +10,16 @@ export const DataStore = Fluxxor.createStore({
           datetimeSelection: 'November 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: '',
           siteKey: '',
-          activities: [],
-          popularTerms: [],
           timeSeriesGraphData: {},
           sentimentChartData: [],
           renderMap: true,
-          timeseriesFromDate: false,
-          timeseriesToDate: false,
           associatedKeywords: new Map(),
+          bbox: [],
           categoryValue: false,
           defaultResults: []
       }
       
       this.bindActions(
-            Actions.constants.ACTIVITY.LOAD_EVENTS, this.handleLoadActivites,
             Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.GRAPHING.LOAD_GRAPH_DATA, this.handleLoadGraphData,
@@ -159,8 +155,9 @@ export const DataStore = Fluxxor.createStore({
         this.emit("change");
     },
     
-    mapDataUpdate(associatedKeywords){
-        this.dataStore.associatedKeywords = associatedKeywords;
+    mapDataUpdate(heatmapData){
+        this.dataStore.associatedKeywords = heatmapData.associatedKeywords;
+        this.dataStore.bbox = heatmapData.bbox;
         this.dataStore.renderMap = false;
         this.emit("change");
     }

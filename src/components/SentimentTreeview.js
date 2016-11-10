@@ -24,6 +24,12 @@ const styles = {
  },
  searchBox: {
         padding: '0px 20px 10px 20px'
+ },
+ subHeaderDescription: {
+    color: '#fff',
+    fontSize: '9px',
+    fontWeight: 800,
+    paddingLeft: '4px'
  }
 };
  
@@ -315,8 +321,8 @@ export const SentimentTreeview = React.createClass({
   Header(props) {
         const style = props.style;
         let self = this;
-        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '16px', color: '#337ab7',  width: '100%' };
-        const categoryStyle = { paddingLeft: '3px', fontSize: '16px', color: '#fff', fontWeight: 600,  width: '100%'};
+        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '14px', color: '#337ab7',  width: '100%' };
+        const categoryStyle = { paddingLeft: '3px', fontSize: '14px', color: '#fff', fontWeight: 600,  width: '100%'};
         let badgeClass = (props.node.checked || props.node.children) && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
         let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
         let onlyLink = <span style={style.only} onClick={this.filterNode.bind(this, props.node)}>only</span>;
@@ -367,7 +373,7 @@ export const SentimentTreeview = React.createClass({
 
      return (
          <div className="panel panel-selector">
-            <Subheader style={styles.subHeader}>Heatmap Terms</Subheader>
+            <Subheader style={styles.subHeader}>Watchlist Terms<span style={styles.subHeaderDescription}>(Select all associations)</span></Subheader>
             <div className="row tagFilterRow">
                 <TypeaheadSearch data={defaultSearchPlaceholder}/>
             </div>
