@@ -3,6 +3,7 @@ import Fluxxor from 'fluxxor';
 import {DataSelector} from './DataSelector';
 import {HeatMap} from './HeatMap';
 import {SentimentTreeview} from './SentimentTreeview';
+import {ActivityFeed} from './ActivityFeed';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {PopularTermsChart} from './PopularTermsChart';
 import '../styles/Dashboard.css';
@@ -27,7 +28,7 @@ export const Dashboard = React.createClass({
        this.setState(this.getStateFromFlux());
   },
   
- FilterEnabledTerms(){
+  FilterEnabledTerms(){
       let filteredTerms = [];
 
       for (var [term, value] of this.state.associatedKeywords.entries()) {
@@ -37,7 +38,19 @@ export const Dashboard = React.createClass({
       }
 
       return filteredTerms;
- },  
+  },
+
+  selectedTerms(){
+      let filteredTerms = [];
+
+      for (var [term, value] of this.state.associatedKeywords.entries()) {
+            if(value.enabled){
+                filteredTerms.push(term);
+            }
+      }
+      
+      return filteredTerms;
+  },
   
   render() {
     return (
@@ -61,11 +74,19 @@ export const Dashboard = React.createClass({
                         <SentimentTreeview {...this.props} 
                                            enabledTerms={this.FilterEnabledTerms()} />
                     </div>
-                    <div className="col-lg-10 heatmapContainer">
+                    <div className="col-lg-8 heatmapContainer">
                       <div className="row">
                           <div id='leafletMap'></div>
                           <HeatMap {...this.props} />
                       </div>
+                    </div>
+                    <div className="col-lg-2">
+                        <div className="row">
+                            {this.state.bbox && this.state.bbox.length > 0 ? <ActivityFeed bbox={this.state.bbox} 
+                                                          timespanType={this.state.timespanType}
+                                                          datetimeSelection={this.state.datetimeSelection}
+                                                          edges={this.selectedTerms()} {...this.props}  /> : undefined}
+                         </div>
                     </div>
                 </div>
             </div>

@@ -27,9 +27,13 @@ function GetTimeSeries(datetimeSelection, timespanType, siteKey, callback, searc
 
      if(datetimeSelection && timespanType){
            SERVICES.getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm)
-                   .subscribe(response => callback(response)
+                   .subscribe(response => callback(response, undefined)
                    , error => {
-                            console.log('Something went terribly wrong with loading the initial graph dataset');
+                       let emptyTimeSeriesResponse = {labels: [], graphData: []};
+
+                       let errMsg = `The requested graph dataset [${datetimeSelection}, ${selectedTerm}] is unavailable`;
+                       console.error(errMsg);
+                       callback(emptyTimeSeriesResponse, errMsg);
                    });
      }
 }
@@ -42,25 +46,25 @@ const constants = {
            },
            TIMESPAN_TYPES : {
                 'hours': {
-                    format: "MM/DD/YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00"
+                    format: "MM/DD/YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00", rangeFormat: "hour"
                 },
                 'days': {
-                    format: "MM/DD/YYYY", blobFormat: "[day]-YYYY-MM-DD"
+                    format: "MM/DD/YYYY", blobFormat: "[day]-YYYY-MM-DD", rangeFormat: "day"
                 },
                 'months': {
-                    format: "YYYY-MM", blobFormat: "[month]-YYYY-MM"
+                    format: "YYYY-MM", blobFormat: "[month]-YYYY-MM", rangeFormat: "month"
                 },
                 'weeks': {
-                    format: "YYYY-WW", blobFormat: "[week]-YYYY-WW"
+                    format: "YYYY-WW", blobFormat: "[week]-YYYY-WW", rangeFormat: "week"
                 },
                 'customDate': {
-                    format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD"
+                    format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD", rangeFormat: "day"
                 },
                 'customDateTime': {
-                    format: "MM/DD/YY HH:00", reactWidgetFormat: "MMM Do YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00"
+                    format: "MM/DD/YY HH:00", reactWidgetFormat: "MMM Do YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00", rangeFormat: "hour"
                 },
                 'customMonth': {
-                    format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM"
+                    format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM", rangeFormat: "month"
                 }
            },
            MOMENT_FORMATS: {
@@ -84,9 +88,6 @@ const constants = {
            HEATMAP : {
                RETRIEVE_HEATMAP_TILE: "HEATMAP"
            },
-           ACTIVITY : {
-               LOAD_EVENTS: "LOAD:ACTIVITIES"
-           },
            GRAPHING : {
                LOAD_GRAPH_DATA: "LOAD:GRAPH_DATA",
                CHANGE_TIME_SCALE: "EDIT:TIME_SCALE"
@@ -108,23 +109,6 @@ const constants = {
 };
 
 const methods = {
-    ACTIVITY: {
-        load_activity_events: function(siteKey){
-            let self = this;
-            
-            let dataStore = this.flux.stores.DataStore.dataStore;
-            let currentKeyword = dataStore.categoryValue;
-            
-            SERVICES.getActivityEvents(siteKey, currentKeyword, dataStore.categoryType, dataStore.datetimeSelection, dataStore.timespanType)
-            .subscribe(response => {
-                if(response && response.length > 0){
-                    self.dispatch(constants.ACTIVITY.LOAD_EVENTS, {
-                                            response: response
-                    });
-                }
-            });
-        }
-    },
     DASHBOARD: {
         initialize(siteKey){
           let self = this;
@@ -144,8 +128,8 @@ const methods = {
            let self = this;
            let dataStore = this.flux.stores.DataStore.dataStore;
 
-            let callback = response => {
-                 if(response && response.graphData && response.graphData.length > 0){
+            let callback = (response, error) => {
+                 if(response && response.graphData){
                         self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: response, newFilter: newFilter});
                  }
             };
@@ -155,14 +139,14 @@ const methods = {
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
         },
-        updateAssociatedTerms(associatedKeywords){
-            this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, associatedKeywords);
+        updateAssociatedTerms(associatedKeywords, bbox){
+            this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords, bbox});
         },
         changeDate(siteKey, datetimeSelection, timespanType){
            let self = this;
            let dataStore = this.flux.stores.DataStore.dataStore;
-           let callback = response => {
-                 if(response && response.graphData && response.graphData.length > 0){
+           let callback = (response, error) => {
+                 if(response && response.graphData){
                                  self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: response, datetimeSelection: datetimeSelection, timespanType: timespanType});
                  }
             };
@@ -178,8 +162,8 @@ const methods = {
         load_timeseries_data: function(siteKey){
             let self = this;
             let dataStore = this.flux.stores.DataStore.dataStore;
-            let callback = response => {
-                 if(response && response.graphData && response.graphData.length > 0){
+            let callback = (response, error) => {
+                 if(response && response.graphData){
                           self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response});
                  }
             };

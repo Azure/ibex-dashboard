@@ -1,57 +1,5 @@
-.trends-box {
-    clear: both;
-    margin-bottom: 25px;
-    margin-top: 10px;
-    padding: 0;
-}
-
-.trends-title h5 {
-    display: inline-block;
-    font-size: 14px;
-    margin: 0 0 7px;
-    padding: 0;
-    text-overflow: ellipsis;
-    float: left;
-    font-weight: 600;
-}
-
 a.keyword-link.pull-left {
     color: blue;
-}
-
-.trends-title {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    background-color: #ffffff;
-    border-color: #e7eaec;
-    border-image: none;
-    border-style: solid solid none;
-    border-width: 3px 0 0;
-    color: inherit;
-    margin-bottom: 0;
-    padding: 14px 15px 7px;
-    min-height: 48px;
-}
-
-.trends-tools {
-    display: block;
-    float: none;
-    margin-top: 0;
-    position: relative;
-    padding: 0;
-    text-align: right;
-}
-
-.trends-content {
-    background-color: #ffffff;
-    color: inherit;
-    padding: 5px 20px 20px 20px;
-    border-color: #e7eaec;
-    border-image: none;
-    border-style: solid solid none;
-    border-width: 1px 0;
 }
 
 .feed-element:first-child {
@@ -119,6 +67,8 @@ a.keyword-link.pull-left {
 
 .news-feed-column{
     padding-left: 0px!important;
+    padding-right: 0px!important;
+    background-color: #191919!important;
 }
 
 .feed-element .well {
@@ -206,4 +156,72 @@ a.keyword-link.pull-left {
 
 .modalContent{
     height: 600px!important;
+}
+
+.infinite-list-item {
+        text-align: center;
+        margin: auto;
+        vertical-align: bottom;
+        font-weight: 700;
+        font-size: 10px;
+        color: #dfe0e6;;
+}
+
+.infinite-list-item {
+        border-bottom: 1px solid #191919;
+}
+
+.infinite-list-item:last-child span {
+        border-bottom: 0;
+}
+
+.feed-source-label{
+background-color: #333;
+}
+
+.nav>li.active>a {
+    color: #dfe0e6!important;
+    font-weight: 800;
+    border-bottom: 3px solid #84bd00!important;
+    background-color: #333!important;
+}
+
+.nav>li>a {
+    position: relative;
+    display: block;
+    border: none!important;
+    color: #88898c;
+    background-color: #333;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    font-size: 8px;
+    transition: color .2s;
+    border-bottom: 0;
+}
+
+.feed-source-header{
+    border-bottom: 1x solid #222326;
+}
+
+.infite-scroll-container{
+    background-color: #21252B;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #1c1c1f;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: #1c1c1f;
+}
+
+::-webkit-scrollbar-thumb {
+    border: 1px solid #1c1c1f;
+    border-radius: 10px;
+    background-color: #323438;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #1c1c1f;
 }
