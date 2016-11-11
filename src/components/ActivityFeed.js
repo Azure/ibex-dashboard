@@ -5,16 +5,19 @@ import '../styles/ActivityFeed.css';
 import moment from 'moment';
 import Infinite from 'react-infinite';
 import CircularProgress from 'material-ui/lib/circular-progress';
+import Highlighter from 'react-highlight-words';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
-const OFFSET_INCREMENT = 20;
+const OFFSET_INCREMENT = 18;
 const DEFAULT_LANGUAGE = "en";
-const CONTAINER_HEIGHT = 510;
+const CONTAINER_HEIGHT = 515;
+const ELEMENT_ITEM_HEIGHT = 85;
 const INFINITE_LOAD_DELAY_MS = 2000;
 const SOURCE_MAP = new Map([["all", []], ["facebook", ["facebook-messages", "facebook-comments"]], ["twitter", ["twitter"]]]);
 const MOMENT_FORMAT = "MM/DD HH:MM:s";
+const SENTIMENT_TAG_STYLE_MAP = new Map([[""]]);
 
 const styles ={
     sourceLogo: {
@@ -26,16 +29,71 @@ const styles ={
         fontWeight: 800,
         textAlign: 'left',
         color: 'rgb(146, 168, 204);'
+    },
+    highlightStyles: {
+        positive: {
+            backgroundColor: "#337ab7"
+        },
+        neutral: {
+            backgroundColor: "#caaa00"
+        },
+        negative: {
+            backgroundColor: "#f48342"
+        },
+        veryNegative: {
+            backgroundColor: "#d9534f"
+        }
+    },
+    tagStyle: {
+        marginLeft: "4px",
+        fontSize: "10px"
     }
 };
 
-const ListItem = React.createClass({
+const FortisEvent = React.createClass({
     getDefaultProps: function() {
         return {
-            height: 70
+            height: ELEMENT_ITEM_HEIGHT
         }
     },
+    getSentimentStyle(sentimentScore){
+        if(sentimentScore >= 0 && sentimentScore < 30){
+            return styles.highlightStyles.positive;
+        }else if(sentimentScore >= 30 && sentimentScore < 55){
+            return styles.highlightStyles.neutral;
+        }else if(sentimentScore >= 55 && sentimentScore < 80){
+            return styles.highlightStyles.negative;
+        }else{
+            return styles.highlightStyles.veryNegative;
+        }
+    },
+    getSentimentLabelStyle(sentimentScore){
+        if(sentimentScore >= 0 && sentimentScore < 30){
+            return "label label-primary";
+        }else if(sentimentScore >= 30 && sentimentScore < 55){
+            return "label label-neutral";
+        }else if(sentimentScore >= 55 && sentimentScore < 80){
+            return "label label-warning";
+        }else{
+            return "label label-danger";
+        }
+    },
+    innerJoin(arr1, arr2){
+        let out = new Set();
+        
+        arr1.forEach(item=>{
+            if(arr2.indexOf(item) > -1){
+                out.add(item);
+            }
+        });
+        
+        return Array.from(out);
+    },
     render: function() {
+        let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
+        let commonTermsFromFilter = this.innerJoin(this.props.edges, this.props.filters);
+        let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter]) : this.props.edges;
+
         return <div className="infinite-list-item" style={
                         {
                             height: this.props.height,
@@ -46,9 +104,13 @@ const ListItem = React.createClass({
             <h6 style={styles.listItemHeader}>
                 {this.props.source === "twitter" ? <i style={styles.sourceLogo} className="fa fa-twitter"></i> : <i style={styles.sourceLogo} className="fa fa-facebook-official"></i>}
                 {this.props.postedTime}
+                {commonTermsFromFilter.map(item=><span style={styles.tagStyle} className={tagClassName}>{item}</span>)}
             </h6>
             <div>
-                {this.props.sentence}
+                <Highlighter
+                    highlightStyle={this.getSentimentStyle(this.props.sentiment * 100)}
+                    searchWords={searchWords}
+                    textToHighlight={this.props.sentence} />
             </div>
         </div>;
     }
@@ -134,10 +196,14 @@ export const ActivityFeed = React.createClass({
                     let featureCollection = body.data.byLocation.features;
                     if(featureCollection && Array.isArray(featureCollection)){
                         featureCollection.forEach(feature => {
-                            elements.push(<ListItem id={feature.properties.messageid}
-                                                    sentence={feature.properties.sentence}
-                                                    source={feature.properties.source}
-                                                    postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)} />)
+                            elements.push(<FortisEvent id={feature.properties.messageid}
+                                                       sentence={feature.properties.sentence}
+                                                       source={feature.properties.source}
+                                                       postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
+                                                       sentiment={feature.properties.sentiment}
+                                                       edges={feature.properties.edges}
+                                                       filters = {edges}
+                                                       searchFilter={searchValue} />)
                         });
 
                         self.setState({
@@ -207,7 +273,7 @@ export const ActivityFeed = React.createClass({
                     sourceTypes.map(item => <li role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactoveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i className={item.icon}></i>{item.label}</a></li>)
                 }
             </ul>
-            <Infinite elementHeight={70}
+            <Infinite elementHeight={ELEMENT_ITEM_HEIGHT}
                       containerHeight={CONTAINER_HEIGHT}
                       infiniteLoadBeginEdgeOffset={300}
                       className="infite-scroll-container"
@@ -219,7 +285,7 @@ export const ActivityFeed = React.createClass({
             </Infinite>
             <div className="panel-footer clearfix">
                   <div className="input-group">
-                       <input ref="filterTextInput" type="text" placeholder="Filter Activity .." className="form-control input-sm" />
+                       <input ref="filterTextInput" type="text" placeholder="Filter News Feed .." className="form-control input-sm" />
                        <span className="input-group-btn">
                              <button  onClick={this.searchSubmit} className="btn btn-default btn-sm"><i className="fa fa-search"></i>
                              </button>
