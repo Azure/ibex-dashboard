@@ -9,11 +9,12 @@ import CircularProgress from 'material-ui/lib/circular-progress';
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
-const OFFSET_INCREMENT = 30;
+const OFFSET_INCREMENT = 20;
 const DEFAULT_LANGUAGE = "en";
 const CONTAINER_HEIGHT = 510;
-const INFINITE_LOAD_DELAY_MS = 2000; 
-const MOMENT_FORMAT = "MM/DD HH:MM";
+const INFINITE_LOAD_DELAY_MS = 2000;
+const SOURCE_MAP = new Map([["all", []], ["facebook", ["facebook-messages", "facebook-comments"]], ["twitter", ["twitter"]]]);
+const MOMENT_FORMAT = "MM/DD HH:MM:s";
 
 const styles ={
     sourceLogo: {
@@ -23,14 +24,15 @@ const styles ={
         fontSize: '11px',
         marginBottom: '3px',
         fontWeight: 800,
-        textAlign: 'left'
+        textAlign: 'left',
+        color: 'rgb(146, 168, 204);'
     }
 };
 
 const ListItem = React.createClass({
     getDefaultProps: function() {
         return {
-            height: 50
+            height: 70
         }
     },
     render: function() {
@@ -38,7 +40,7 @@ const ListItem = React.createClass({
                         {
                             height: this.props.height,
                             lineHeight: this.props.lineHeight,
-                            overflowY: 'scroll'
+                            overflowY: 'scroll',
                         }
                     }>
             <h6 style={styles.listItemHeader}>
@@ -62,31 +64,47 @@ export const ActivityFeed = React.createClass({
   getInitialState: function() {
         return {
             elements: [],
+            previousElementLength: 0,
             offset: 0,
+            filteredSources: [],
             isInfiniteLoading: false
         }
   },
 
   handleInfiniteLoad: function() {
         var self = this;
+        
+        //if the prevbiosuly loaded enumber of elements is less than the increment count
+        //then we reached the end of the list. 
+        if(this.state.previousElementLength > 0 && this.state.previousElementLength < OFFSET_INCREMENT){
+            this.setState({
+                isInfiniteLoading: false
+            });
+            return;
+        }
+
         this.setState({
             isInfiniteLoading: true
         });
         setTimeout(() => {
             self.processNewsFeed(self.state.elements, self.state.offset, self.props.bbox, 
-                                    self.props.edges, self.props.datetimeSelection, self.props.timespanType);
+                                    self.props.edges, self.props.datetimeSelection, self.props.timespanType, this.state.filteredSources);
         }, INFINITE_LOAD_DELAY_MS);
   },
 
-  fetchSentences: function(offset, limit, bbox, edges, datetimeSelection, timespanType, callback){
+  fetchSentences: function(offset, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, callback){
       let siteKey = this.props.siteKey;
       let period = this.props.datetimeSelection;
       
       SERVICES.FetchMessageSentences(siteKey, bbox, period, timespanType, 
-                                     limit, offset, edges, DEFAULT_LANGUAGE, undefined, callback);
+                                     limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, searchValue, callback);
   },
 
   hasChanged: function(nextProps, propertyName){
+      if(Array.isArray(nextProps[propertyName])){
+          return nextProps[propertyName].join(",") !== this.props[propertyName].join(",");
+      }
+
       if(this.props[propertyName] && nextProps[propertyName] && nextProps[propertyName] !== this.props[propertyName]){
           return true;
       }
@@ -96,20 +114,20 @@ export const ActivityFeed = React.createClass({
 
   componentWillReceiveProps: function(nextProps){
       if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")){
-          this.processNewsFeed([], 0, nextProps.bbox, nextProps.edges, nextProps.datetimeSelection, nextProps.timespanType);
+          this.processNewsFeed([], 0, nextProps.bbox, nextProps.edges, nextProps.datetimeSelection, nextProps.timespanType, [], undefined);
       }
   },
 
   componentDidMount: function(){
-      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, this.props.datetimeSelection, this.props.timespanType);
+      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, this.props.datetimeSelection, this.props.timespanType, [], undefined);
   },
 
-  buildElements: function(start, limit, elementStartList, bbox, edges, datetimeSelection, timespanType) {
+  buildElements: function(start, limit, elementStartList, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue) {
         let elements = [];
         let self = this;
         let nextOffset = start + OFFSET_INCREMENT;
 
-        this.fetchSentences(start, limit, bbox, edges, datetimeSelection, timespanType, 
+        this.fetchSentences(start, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data &&  body.data.byLocation) {
                     let featureCollection = body.data.byLocation.features;
@@ -124,20 +142,33 @@ export const ActivityFeed = React.createClass({
                         self.setState({
                             offset: nextOffset,
                             isInfiniteLoading: false,
+                            filteredSources: filteredSources,
+                            previousElementLength: elements.length,
                             elements: elementStartList.concat(elements)
                         });
                     }
                 }else{
+                    self.setState({
+                            offset: 0,
+                            isInfiniteLoading: false,
+                            filteredSources: filteredSources,
+                            previousElementLength: 0,
+                            elements: []
+                    });
                     console.error(`[${error}] occured while processing message request`);
                 }
         });
   },
 
-  processNewsFeed: function(elementStartList, offset, bbox, edges, datetimeSelection, timespanType){
+  processNewsFeed: function(elementStartList, offset, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue){
       var self = this;
-
+      this.setState({
+          isInfiniteLoading: true
+      });
+      
       if(bbox && edges && datetimeSelection && timespanType){
-          self.buildElements(offset, OFFSET_INCREMENT, elementStartList, bbox, edges, datetimeSelection, timespanType);
+          self.buildElements(offset, OFFSET_INCREMENT, elementStartList, bbox, edges, datetimeSelection, timespanType, 
+                             filteredSources, searchValue);
       }
   },
   
@@ -146,17 +177,36 @@ export const ActivityFeed = React.createClass({
             Loading... <CircularProgress />
         </div>;
   },
+
+  sourceOnClickHandler: function(filteredSources){
+      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, 
+                           this.props.datetimeSelection, this.props.timespanType, filteredSources, undefined);
+  },
+
+  searchSubmit(){
+      let searchValue = this.refs.filterTextInput.value;
+
+      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, 
+                           this.props.datetimeSelection, this.props.timespanType, this.state.filteredSources, searchValue);
+  },
   
   render() {
+    let sourceTypes = [
+        {"icon": "fa fa-share-alt", "mapName": "all", "label": "All"},
+        {"icon": "fa fa-facebook-official", "mapName": "facebook", "label": "Facebook"},
+        {"icon": "fa fa-twitter", "mapName": "twitter", "label": "Twitter"}
+    ];
+
+    let activeHeaderClass = "feed-source-label active", inactoveClass = "feed-source-label";
 
     return (
      <div className="col-lg-12 news-feed-column">
             <ul className="nav nav-tabs feed-source-header">
-                <li role="presentation" className="feed-source-label active"><a href="#" aria-controls="home"><i className="fa fa-share-alt"></i>&nbsp;All&nbsp;</a></li>
-                <li role="presentation" className="feed-source-label"><a href="#" aria-controls="profile"><i className="fa fa-facebook-official"></i>&nbsp;Facebook&nbsp;</a></li>
-                <li role="presentation" className="feed-source-label"><a href="#" aria-controls="messages"><i className="fa fa-twitter"></i>&nbsp;Twitter&nbsp;</a></li>
+                {
+                    sourceTypes.map(item => <li role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactoveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i className={item.icon}></i>{item.label}</a></li>)
+                }
             </ul>
-            <Infinite elementHeight={51}
+            <Infinite elementHeight={70}
                       containerHeight={CONTAINER_HEIGHT}
                       infiniteLoadBeginEdgeOffset={300}
                       className="infite-scroll-container"
@@ -168,9 +218,9 @@ export const ActivityFeed = React.createClass({
             </Infinite>
             <div className="panel-footer clearfix">
                   <div className="input-group">
-                       <input type="text" placeholder="Filter Activity .." className="form-control input-sm" />
+                       <input ref="filterTextInput" type="text" placeholder="Filter Activity .." className="form-control input-sm" />
                        <span className="input-group-btn">
-                             <button type="submit" className="btn btn-default btn-sm"><i className="fa fa-search"></i>
+                             <button  onClick={this.searchSubmit} className="btn btn-default btn-sm"><i className="fa fa-search"></i>
                              </button>
                        </span>
                   </div>
