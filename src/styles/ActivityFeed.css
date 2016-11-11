@@ -236,3 +236,27 @@ background-color: #333;
 ::-webkit-scrollbar-track {
     background-color: #1c1c1f;
 }
+
+.panel-footer{
+    padding: 5px 10px;
+}
+
+.form-control{
+    height: 25px!important;
+}
+
+.btn-sm{
+    padding: 2px 10px!important;
+}
+
+.label-neutral {
+    background-color: #caaa00;
+}
+
+.label-warning{
+    background-color: #f48342!important;
+}
+
+.label{
+    color:#000!important;
+}
