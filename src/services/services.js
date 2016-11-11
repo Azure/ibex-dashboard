@@ -115,7 +115,7 @@ export const SERVICES = {
   },
 
   FetchMessageSentences: function(site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges, 
-                        langCode, sourceFilter, fulltextTerm, callback){
+                        langCode, sourceFilter, mainTerm, fulltextTerm, callback){
    let fromDate, toDate;
    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
    let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
@@ -142,14 +142,14 @@ export const SERVICES = {
                                 }`;
 
         let query = `  ${fragmentView}
-                       query ByLocation($site: String!, $bbox: [Float]!, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
-                             byLocation(site: $site, bbox: $bbox, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
+                       query ByLocation($site: String!, $bbox: [Float]!, $mainTerm: String, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
+                             byLocation(site: $site, bbox: $bbox, mainTerm: $mainTerm, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
                                 ...FortisDashboardView 
                             }
                         }`;
 
         let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
-        let variables = {site, bbox, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
+        let variables = {site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
         var POST = {
             url : `${host}/api/Messages`,
             method : "POST",
