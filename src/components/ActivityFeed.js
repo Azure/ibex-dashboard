@@ -95,9 +95,10 @@ export const ActivityFeed = React.createClass({
   fetchSentences: function(offset, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, callback){
       let siteKey = this.props.siteKey;
       let period = this.props.datetimeSelection;
+      let mainTerm = this.state.categoryValue;
       
       SERVICES.FetchMessageSentences(siteKey, bbox, period, timespanType, 
-                                     limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, searchValue, callback);
+                                     limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, mainTerm, searchValue, callback);
   },
 
   hasChanged: function(nextProps, propertyName){

@@ -375,7 +375,7 @@ export const SentimentTreeview = React.createClass({
          <div className="panel panel-selector">
             <Subheader style={styles.subHeader}>Watchlist Terms<span style={styles.subHeaderDescription}>(Select all associations)</span></Subheader>
             <div className="row tagFilterRow">
-                <TypeaheadSearch data={defaultSearchPlaceholder}/>
+                <TypeaheadSearch data={defaultSearchPlaceholder} siteKey={this.props.siteKey}/>
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">
@@ -397,6 +397,7 @@ export const SentimentTreeview = React.createClass({
                             animations={false}
                             data={this.state.treeData}
                             style={treeDataStyle}
+                            siteKey={this.props.siteKey}
                             decorators={Object.assign({}, decorators, {Header: self.Header})} />
                         </div> : undefined
                 }
