@@ -28,7 +28,7 @@ const styles ={
         marginBottom: '3px',
         fontWeight: 800,
         textAlign: 'left',
-        color: 'rgb(146, 168, 204);'
+        color: 'rgb(146, 168, 204)'
     },
     highlightStyles: {
         positive: {
@@ -91,7 +91,7 @@ const FortisEvent = React.createClass({
     },
     render: function() {
         let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
-        let commonTermsFromFilter = this.innerJoin(this.props.edges, this.props.filters);
+        let commonTermsFromFilter = this.innerJoin(this.props.edges, this.props.filters.concat([this.props.mainSearchTerm]));
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter]) : this.props.edges;
 
         return <div className="infinite-list-item" style={
@@ -203,7 +203,8 @@ export const ActivityFeed = React.createClass({
                                                        sentiment={feature.properties.sentiment}
                                                        edges={feature.properties.edges}
                                                        filters = {edges}
-                                                       searchFilter={searchValue} />)
+                                                       searchFilter={searchValue}
+                                                       mainSearchTerm={this.state.categoryValue} />)
                         });
 
                         self.setState({
