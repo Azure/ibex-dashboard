@@ -194,7 +194,7 @@ background-color: #333;
     background-color: #333;
     text-transform: uppercase;
     letter-spacing: 1.1px;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 600!important;
     transition: color .2s;
     border-bottom: 0;
@@ -219,7 +219,7 @@ background-color: #333;
 }
 
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 20px;
     background-color: #1c1c1f;
 }
 
@@ -259,4 +259,5 @@ background-color: #333;
 
 .label{
     color:#000!important;
+    border-radius: 5.25em!important
 }
