@@ -12,8 +12,8 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 
 const OFFSET_INCREMENT = 18;
 const DEFAULT_LANGUAGE = "en";
-const CONTAINER_HEIGHT = 515;
 const ELEMENT_ITEM_HEIGHT = 85;
+const TOP_SECTION_HEIGHT=338;
 const INFINITE_LOAD_DELAY_MS = 2000;
 const SOURCE_MAP = new Map([["all", []], ["facebook", ["facebook-messages", "facebook-comments"]], ["twitter", ["twitter"]]]);
 const MOMENT_FORMAT = "MM/DD HH:MM:s";
@@ -46,7 +46,11 @@ const styles ={
     },
     tagStyle: {
         marginLeft: "4px",
-        fontSize: "10px"
+        fontSize: "12px"
+    },
+    highlight: {
+        backgroundColor: '#ffd54f',
+        fontWeight: '600'
     }
 };
 
@@ -108,8 +112,8 @@ const FortisEvent = React.createClass({
             </h6>
             <div>
                 <Highlighter
-                    highlightStyle={this.getSentimentStyle(this.props.sentiment * 100)}
                     searchWords={searchWords}
+                    highlightStyle={styles.highlight}
                     textToHighlight={this.props.sentence} />
             </div>
         </div>;
@@ -196,15 +200,17 @@ export const ActivityFeed = React.createClass({
                     let featureCollection = body.data.byLocation.features;
                     if(featureCollection && Array.isArray(featureCollection)){
                         featureCollection.forEach(feature => {
-                            elements.push(<FortisEvent id={feature.properties.messageid}
-                                                       sentence={feature.properties.sentence}
-                                                       source={feature.properties.source}
-                                                       postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
-                                                       sentiment={feature.properties.sentiment}
-                                                       edges={feature.properties.edges}
-                                                       filters = {edges}
-                                                       searchFilter={searchValue}
-                                                       mainSearchTerm={this.state.categoryValue} />)
+                            if(feature.properties.sentence && feature.properties.sentence.length > 2){
+                                elements.push(<FortisEvent id={feature.properties.messageid}
+                                                        sentence={feature.properties.sentence}
+                                                        source={feature.properties.source}
+                                                        postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
+                                                        sentiment={feature.properties.sentiment}
+                                                        edges={feature.properties.edges}
+                                                        filters = {edges}
+                                                        searchFilter={searchValue}
+                                                        mainSearchTerm={this.state.categoryValue} />)                               
+                            }
                         });
 
                         self.setState({
@@ -275,7 +281,7 @@ export const ActivityFeed = React.createClass({
                 }
             </ul>
             <Infinite elementHeight={ELEMENT_ITEM_HEIGHT}
-                      containerHeight={CONTAINER_HEIGHT}
+                      containerHeight={window.innerHeight-TOP_SECTION_HEIGHT}
                       infiniteLoadBeginEdgeOffset={300}
                       className="infite-scroll-container"
                       onInfiniteLoad={this.handleInfiniteLoad}

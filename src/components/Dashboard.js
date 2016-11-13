@@ -61,11 +61,11 @@ export const Dashboard = React.createClass({
                 <DataSelector {...this.props} />
                 <div className="row graphContainer">
                     <div className="col-lg-3 summaryPieContainer">
-                       <div id="popularTermsPieDiv" style={{width: '100%', height: '250px'}}></div>
+                       <div id="popularTermsPieDiv" style={{width: '100%', height: '230px'}}></div>
                        <PopularTermsChart {...this.props}/>
                     </div>
                     <div className="col-lg-9 timeSeriesContainer">
-                       <div id="graphdiv" style={{width: '100%', height: '250px', marginBottom: '0px', paddingBottom: '0px'}}></div>
+                       <div id="graphdiv" style={{width: '100%', height: '230px', marginBottom: '0px', paddingBottom: '0px'}}></div>
                        <TimeSeriesGraph {...this.props}/>
                     </div>
                 </div>
