@@ -6,6 +6,8 @@ import {SentimentTreeview} from './SentimentTreeview';
 import {ActivityFeed} from './ActivityFeed';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {PopularTermsChart} from './PopularTermsChart';
+import Dialog from 'material-ui/lib/dialog';
+import FlatButton from 'material-ui/lib/flat-button';
 import '../styles/Dashboard.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -18,6 +20,14 @@ export const Dashboard = React.createClass({
       let siteKey = this.props.siteKey;
 
       this.getFlux().actions.DASHBOARD.initialize(siteKey);
+
+      return {
+          openModal: false
+      };
+  },
+
+  handleOpen(){
+    this.setState({openModal: true});
   },
 
   getStateFromFlux: function() {
@@ -26,6 +36,10 @@ export const Dashboard = React.createClass({
 
   componentWillReceiveProps: function(nextProps) {
        this.setState(this.getStateFromFlux());
+  },
+
+  handleClose(){
+    this.setState({openModal: false});
   },
   
   FilterEnabledTerms(){
@@ -53,6 +67,16 @@ export const Dashboard = React.createClass({
   },
   
   render() {
+    let modalClassName = "modalContent";
+    const modalActions = [
+      <FlatButton
+        label="Ok"
+        primary={true}
+        keyboardFocused={true}
+        onTouchTap={this.handleClose}
+      />,
+    ];
+
     return (
         <div>
           <form>
@@ -81,6 +105,10 @@ export const Dashboard = React.createClass({
                       </div>
                     </div>
                     <div className="col-lg-2">
+                        <div>
+                            <i style={{color:"#fff", cursor: "pointer"}} className="fa fa-expand" onClick={this.handleOpen}></i>
+                            <span className="news-feed-title">Expand News Feed</span>
+                        </div>
                         <div className="row">
                             {this.state.bbox && this.state.bbox.length > 0 ? <ActivityFeed bbox={this.state.bbox} 
                                                           timespanType={this.state.timespanType}
@@ -89,6 +117,21 @@ export const Dashboard = React.createClass({
                          </div>
                     </div>
                 </div>
+                {
+                    this.state.openModal ? 
+                        <Dialog
+                            actions={modalActions}
+                            modal={false}
+                            contentClassName={modalClassName}
+                            open={this.state.openModal}
+                            onRequestClose={this.handleClose} >
+                                <ActivityFeed bbox={this.state.bbox} 
+                                              timespanType={this.state.timespanType}
+                                              datetimeSelection={this.state.datetimeSelection}
+                                              edges={this.selectedTerms()} {...this.props}  />
+                        </Dialog>
+                      : undefined
+                }
             </div>
           </div>
           </form>

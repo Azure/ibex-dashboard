@@ -155,7 +155,9 @@ a.keyword-link.pull-left {
 }
 
 .modalContent{
-    height: 600px!important;
+    height: 800px!important;
+    max-width:80%!important;
+    width: 90%
 }
 
 .infinite-list-item {
@@ -168,7 +170,7 @@ a.keyword-link.pull-left {
 }
 
 .infinite-list-item {
-        border-bottom: 1px solid #191919;
+        border-bottom: 4px solid #191919;
 }
 
 .infinite-list-item:last-child span {
