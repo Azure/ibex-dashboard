@@ -20,6 +20,14 @@
     margin-bottom: 40px;
 }
 
+.news-feed-title{
+    color: #a3a3b3;
+    text-transform: uppercase;
+     padding-left: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
 .termBrowserContainer{
     padding-right: 0px;
     margin-right: 0px;
