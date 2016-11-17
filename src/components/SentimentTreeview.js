@@ -15,7 +15,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 const styles = {
   subHeader: {
     color:'#a3a3b3',
-    paddingLeft: '11px;',
+    paddingLeft: '11px',
     fontSize: '14px',
     fontWeight: 800
   },
@@ -231,10 +231,18 @@ export const SentimentTreeview = React.createClass({
                 otherTotal += value.enabled ? value.mentions : 0;
             }
         }
+        
+        if(popularItemsRoot.children < 5){
+            popularItemsRoot.name = "Terms";
+        }
 
         rootItem.children.push(popularItemsRoot);
         rootItem.children.push(noRelevantTermsItemsRoot);
-        rootItem.children.push(otherItemsRoot);
+
+        if(otherItemsRoot.children.length > 0){
+            rootItem.children.push(otherItemsRoot);
+        }
+        
         rootItem.eventCount = popularTermsTotal + otherTotal + noneTotal;
 
         return rootItem;
@@ -316,7 +324,14 @@ export const SentimentTreeview = React.createClass({
 
   termSelected(node){
       if(!node.children){
-          this.getFlux().actions.DASHBOARD.changeSearchFilter(node.name, this.props.siteKey);
+          let selectedEntity = {
+              type: "Term",
+              properties: {
+                  name: node.name
+              }
+          };
+
+          this.getFlux().actions.DASHBOARD.changeSearchFilter(selectedEntity, this.props.siteKey);
       }
   },
 
@@ -371,13 +386,14 @@ export const SentimentTreeview = React.createClass({
   
  render(){
      let self = this;
-     let defaultSearchPlaceholder = "#" + this.state.categoryValue;
 
      return (
          <div className="panel panel-selector">
             <Subheader style={styles.subHeader}>Watchlist Terms<span style={styles.subHeaderDescription}>(Select all associations)</span></Subheader>
             <div className="row tagFilterRow">
-                <TypeaheadSearch data={defaultSearchPlaceholder} siteKey={this.props.siteKey}/>
+                <TypeaheadSearch data={this.state.categoryValue}
+                                 type={this.state.categoryType}
+                                 siteKey={this.props.siteKey} />
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">

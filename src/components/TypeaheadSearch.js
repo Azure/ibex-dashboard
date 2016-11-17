@@ -2,6 +2,7 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import '../styles/TypeaheadSearch.css';
+import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React);
 const maxDefaultResult = 12;
@@ -11,14 +12,14 @@ export const TypeaheadSearch = React.createClass({
   
   typeaheadItemSelected(suggestion, event){
     let oldValue =  this.props.data || '';
-    let newValue =  suggestion.searchTerm.trim();
+    let newValue =  suggestion.properties.name.trim();
     
     if(oldValue === newValue){
         return;
     }
     
     if(oldValue !== newValue){
-        this.getFlux().actions.DASHBOARD.changeSearchFilter(newValue, this.props.siteKey);
+        this.getFlux().actions.DASHBOARD.changeSearchFilter(suggestion, this.props.siteKey);
     }
   },
   
@@ -30,7 +31,7 @@ export const TypeaheadSearch = React.createClass({
       let filteredResults = [];
       this.getFlux().store("DataStore").dataStore.defaultResults
            .forEach(element => {
-               if(element.searchTerm.indexOf(input) > -1){
+               if(element.properties.name.toLowerCase().indexOf(input) > -1){
                    filteredResults.push(element);
                }
            });
@@ -48,9 +49,8 @@ export const TypeaheadSearch = React.createClass({
   },
   
   renderSuggestion(element, input) { // In this example, 'suggestion' is a string
-     let suggestion = element.searchTerm; 
-     let valueType = element.category;
-     
+     let suggestion = element.properties.name;
+
      let beginNormalFont = '', highlightedSequence = '', endNormalFont = '';
      let matchingPosition = suggestion.toLowerCase().indexOf(input.toLowerCase());
          beginNormalFont = suggestion.substring(0, (matchingPosition !== -1) ? matchingPosition : input.length);
@@ -61,12 +61,14 @@ export const TypeaheadSearch = React.createClass({
      }
 
     return (                                     // and it returns a ReactElement
-      <span><span className="suggestionType">{valueType}</span> - {beginNormalFont}<strong className="react-autosuggest__highlighted_search_text">{(input.length > 0)?highlightedSequence:''}</strong>{endNormalFont}</span>
+      <span className="suggestionType">{element.type} - {beginNormalFont}
+          <strong className="react-autosuggest__highlighted_search_text">{(input.length > 0)?highlightedSequence:''}</strong>{endNormalFont}
+      </span>
     );
   },
   
   suggestionValue(suggestion){  
-      return suggestion.searchTerm.trim();
+      return suggestion.properties.name.trim();
   },
   
   render: function(){
@@ -86,7 +88,7 @@ export const TypeaheadSearch = React.createClass({
                                onSuggestionSelected={this.typeaheadItemSelected}
                                suggestionValue={this.suggestionValue}
                                scrollBar={true}
-                               value={this.props.data} />
+                               value={this.props.data || ""} />
         </div>
     );
   }

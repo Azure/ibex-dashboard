@@ -23,6 +23,21 @@
   opacity: 0.7;
 }
 
+.filterLabelType{
+    color: #fff;
+    font-weight: 900;
+    font-size: 10px;
+}
+
+.mainFilterLabel{
+     font-size: 10px;
+}
+
+.filterLabel{
+  background-color: #337ab7;
+    font-size: 10px!important;
+}
+
 .react-progress-bar-percent-override{
   height: 15px;
 }
