@@ -17,7 +17,6 @@ const TOP_SECTION_HEIGHT=358;
 const INFINITE_LOAD_DELAY_MS = 2000;
 const SOURCE_MAP = new Map([["all", []], ["facebook", ["facebook-messages", "facebook-comments"]], ["twitter", ["twitter"]]]);
 const MOMENT_FORMAT = "MM/DD HH:MM:s";
-const SENTIMENT_TAG_STYLE_MAP = new Map([[""]]);
 
 const styles ={
     sourceLogo: {
@@ -73,13 +72,13 @@ const FortisEvent = React.createClass({
     },
     getSentimentLabelStyle(sentimentScore){
         if(sentimentScore >= 0 && sentimentScore < 30){
-            return "label label-primary";
+            return "label label-primary label-news-feed";
         }else if(sentimentScore >= 30 && sentimentScore < 55){
-            return "label label-neutral";
+            return "label label-neutral label-news-feed";
         }else if(sentimentScore >= 55 && sentimentScore < 80){
-            return "label label-warning";
+            return "label label-warning label-news-feed";
         }else{
-            return "label label-danger";
+            return "label label-danger label-news-feed";
         }
     },
     innerJoin(arr1, arr2){
@@ -162,9 +161,17 @@ export const ActivityFeed = React.createClass({
       let siteKey = this.props.siteKey;
       let period = this.props.datetimeSelection;
       let mainTerm = this.state.categoryValue;
+      let entityType = this.state.categoryType;
+      let location = [];
+
+      if(entityType === "Location"){
+          mainTerm = undefined;
+          location = this.state.selectedLocationCoordinates;
+      }
       
       SERVICES.FetchMessageSentences(siteKey, bbox, period, timespanType, 
-                                     limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, mainTerm, searchValue, callback);
+                                     limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, 
+                                     mainTerm, searchValue, location, callback);
   },
 
   hasChanged: function(nextProps, propertyName){
@@ -207,7 +214,7 @@ export const ActivityFeed = React.createClass({
                                                         postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
                                                         sentiment={feature.properties.sentiment}
                                                         edges={feature.properties.edges}
-                                                        filters = {edges}
+                                                        filters={edges}
                                                         searchFilter={searchValue}
                                                         mainSearchTerm={this.state.categoryValue} />)                               
                             }

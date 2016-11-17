@@ -6,6 +6,7 @@ import {SentimentTreeview} from './SentimentTreeview';
 import {ActivityFeed} from './ActivityFeed';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {PopularTermsChart} from './PopularTermsChart';
+import {PopularLocationsChart} from './PopularLocationsChart';
 import Dialog from 'material-ui/lib/dialog';
 import FlatButton from 'material-ui/lib/flat-button';
 import '../styles/Dashboard.css';
@@ -84,11 +85,15 @@ export const Dashboard = React.createClass({
               <div className="container-fluid">
                 <DataSelector {...this.props} />
                 <div className="row graphContainer">
-                    <div className="col-lg-3 summaryPieContainer">
+                    <div className="col-lg-2 summaryPieContainer">
+                       <div id="popularLocationsPieDiv" style={{width: '100%', height: '230px'}}></div>
+                       <PopularLocationsChart {...this.props} datetimeSelection={this.state.datetimeSelection}/>
+                    </div>
+                    <div className="col-lg-2 summaryPieContainer">
                        <div id="popularTermsPieDiv" style={{width: '100%', height: '230px'}}></div>
                        <PopularTermsChart {...this.props}/>
                     </div>
-                    <div className="col-lg-9 timeSeriesContainer">
+                    <div className="col-lg-8 timeSeriesContainer">
                        <div id="graphdiv" style={{width: '100%', height: '230px', marginBottom: '0px', paddingBottom: '0px'}}></div>
                        <TimeSeriesGraph {...this.props}/>
                     </div>

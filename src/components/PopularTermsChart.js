@@ -1,6 +1,7 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import {Actions} from '../actions/Actions';
+import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -19,42 +20,43 @@ export const PopularTermsChart = React.createClass({
 
     this.popularTermsChart = window.AmCharts.makeChart(chartDivReference, {
         "theme": "dark",
-        "type": "serial",
+        "type": "pie",
         "startDuration": 1,
-        "graphs": [{
-            "balloonText": "[[term]]: <b>[[value]]</b>  mentions",
-            "fillAlphas": 1,
-            "fillColorsField": "color",
-            "lineAlpha": 0.1,
-            "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
-            "type": "column",
-            "valueField": "mentions"
-        }],
-        "depth3D": 20,
-        "angle": 30,
-        "chartCursor": {
-            "categoryBalloonEnabled": false,
-            "cursorAlpha": 0,
-            "zoomable": false
-        },
-        "rotate": true,
-        "categoryField": "displayLabel",
-        "categoryAxis": {
-            "gridPosition": "start",
-            "fillAlpha": 0.05,
-            "position": "left"
-        },
+        "balloonText": "[[term]]: <b>[[mentionFmt]]</b>  mentions",
+        "labelColor": "#fff",
+        "radius": 70,
+        "labelRadius": 1,
+        "marginLeft": 20,
+        "innerRadius": 22,
+        "colorField": "color",
+        "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
+        "outlineAlpha": 0,
+        "valueField": "mentions",
+        "labelText": "[[displayLabel]] <br> [[mentionFmt]]",
+        "titleField": "displayLabel",
         "export": {
             "enabled": true
         },
-        "valueAxes": [{
-            "title": "Top Keywords for " + datetimeSelection
+        "allLabels": [{
+            "text": "Top 5 Terms",
+            "bold": true,
+            "size": 12,
+            "color": "#fff",
+            "x": 0,
+            "align": "center",
+            "y": 200
         }]
     });
 
-    this.popularTermsChart.addListener("clickGraphItem", e => {
-        if(e.item.dataContext){
-              self.getFlux().actions.DASHBOARD.changeSearchFilter(e.item.dataContext.term, this.props.siteKey);
+    this.popularTermsChart.addListener("clickSlice", e => {
+        if(e.dataItem.dataContext){
+              let entity = {
+                  "type": "Term",
+                  "properties": {
+                      "name": e.dataItem.dataContext.term
+                  }
+              };
+              self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
         }
     });
  },
@@ -70,7 +72,8 @@ export const PopularTermsChart = React.createClass({
               let label = labelSplitArr[1];
               let displayLabel = label.length > maxAxesDisplayLabelChars ? label.substring(0, maxAxesDisplayLabelChars) : label;
               let category = Actions.constants.CATEGORY_KEY_MAPPING[labelSplitArr[0]];
-              dataProvider.push({displayLabel: displayLabel, term: label, category: category, mentions: mentions, color: termColorMap.get(term)});
+              let mentionFmt = numeralLibs(mentions).format(mentions > 1000 ? '+0.0a' : '0a');
+              dataProvider.push({displayLabel: displayLabel, term: label, category: category, mentions: mentions, mentionFmt: mentionFmt, color: termColorMap.get(term)});
         }
     }
 

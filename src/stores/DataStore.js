@@ -14,7 +14,9 @@ export const DataStore = Fluxxor.createStore({
           sentimentChartData: [],
           renderMap: true,
           associatedKeywords: new Map(),
+          locations: new Map(),
           bbox: [],
+          selectedLocationCoordinates: [],
           categoryValue: false,
           defaultResults: []
       }
@@ -118,7 +120,7 @@ export const DataStore = Fluxxor.createStore({
         let termSplit = mostPopularTerm.split('-');
         if(termSplit != null && termSplit.length === 2){
                 this.dataStore.categoryValue = termSplit[1];
-                this.dataStore.categoryType = Actions.constants.CATEGORY_KEY_MAPPING[termSplit[0]];
+                this.dataStore.categoryType = "Term";
         }
     },
     
@@ -147,9 +149,14 @@ export const DataStore = Fluxxor.createStore({
     
     handleChangeSearchTerm(changedData){
         this.dataStore.associatedKeywords = new Map();
-        this.dataStore.categoryValue = changedData.newFilter;
-        this.refreshGraphData(changedData.timeSeriesResponse);
-        this.dataStore.categoryType = "keyword";
+        this.dataStore.categoryValue = changedData.selectedEntity.properties.name;
+        this.dataStore.selectedLocationCoordinates = changedData.selectedEntity.properties.coordinates || [];
+
+        if(changedData.timeSeriesResponse){
+            this.refreshGraphData(changedData.timeSeriesResponse);
+        }
+        
+        this.dataStore.categoryType = changedData.selectedEntity.type;
         this.dataStore.renderMap = true;
         
         this.emit("change");
@@ -158,6 +165,7 @@ export const DataStore = Fluxxor.createStore({
     mapDataUpdate(heatmapData){
         this.dataStore.associatedKeywords = heatmapData.associatedKeywords;
         this.dataStore.bbox = heatmapData.bbox;
+        this.dataStore.locations = heatmapData.locations;
         this.dataStore.renderMap = false;
         this.emit("change");
     }

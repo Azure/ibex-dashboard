@@ -2,23 +2,13 @@ import {SERVICES} from '../services/services';
 
 const ENGLISH_LANGUAGE = "en";
 
-function GetSearchKeywords(siteKey, languageCode, callback){
-    SERVICES.getDefaultSuggestionList(siteKey)
-         .subscribe(tableValues => {
-              if(tableValues.response && tableValues.response.value){
-                    let processedResults = tableValues.response.value.map(kw => {
-                              if(kw[`${languageCode}_term`]){
-                                  return {"category": "keyword", "searchTerm": kw[`${languageCode}_term`].toLowerCase()};
-                              }else{
-                                  throw new Error(`${languageCode} is an unsupported language`);
-                              }                              
-                    });
-
-                    callback(processedResults);
-             }
-     },
-         error => {
-              console.error('An error occured trying to query the search terms: ' + error);
+function GetSearchEdges(siteKey, languageCode, callback){
+    SERVICES.getDefaultSuggestionList(siteKey, languageCode, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                 callback(body.data.search.edges);
+            }else{
+                 throw new Error(`[${error}] occured while processing entity list request`);
+            }
      });
 }
 
@@ -112,7 +102,6 @@ const methods = {
     DASHBOARD: {
         initialize(siteKey){
           let self = this;
-          
           let azureStorageCB = results => {
                 if(results && results.length > 0){
                     self.dispatch(constants.DASHBOARD.LOAD, {
@@ -122,19 +111,23 @@ const methods = {
                 }
           };
 
-          GetSearchKeywords(siteKey, ENGLISH_LANGUAGE, azureStorageCB);
+          GetSearchEdges(siteKey, ENGLISH_LANGUAGE, azureStorageCB);
         },
-        changeSearchFilter(newFilter, siteKey){
+        changeSearchFilter(selectedEntity, siteKey){
            let self = this;
            let dataStore = this.flux.stores.DataStore.dataStore;
 
             let callback = (response, error) => {
                  if(response && response.graphData){
-                        self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: response, newFilter: newFilter});
+                        self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: response, selectedEntity: selectedEntity});
                  }
             };
 
-            GetTimeSeries(dataStore.datetimeSelection, dataStore.timespanType, siteKey, callback, newFilter);
+            if(selectedEntity.type === "Term"){
+                GetTimeSeries(dataStore.datetimeSelection, dataStore.timespanType, siteKey, callback, selectedEntity.properties.name);
+            }else{
+                self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity});
+            }
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);

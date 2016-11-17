@@ -3,8 +3,8 @@ import 'rx-dom';
 import {Actions} from '../actions/Actions';
 import {guid, momentToggleFormats, getEnvPropValue, momentGetFromToRange} from '../utils/Utils.js';
 import request from 'request';
+import geotile from 'geotile';
 
-const LAYER_TYPE_FILTER = "associations";
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 
 const MAX_ZOOM = 15;
@@ -69,35 +69,139 @@ export const SERVICES = {
      return Rx.DOM.getJSON(url);
   },
 
-  getDefaultSuggestionList(siteKey){
-      return Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_KEYWORDS),
-                          responseType: 'json',
-                          headers: {"Accept": "application/json;odata=nometadata"}
-                        });
-  },
+  getDefaultSuggestionList(site, langCode, callback){
+      let fragment = `fragment FortisDashboardView on EdgeCollection {
+                        edges {
+                            type
+                            properties {
+                                name
+                                coordinates
+                            }
+                        }
+                      }`;
 
-  getHeatmapTiles: function(siteKey, timespanType, zoomLevel, keyword, datetimeSelection, bbox, layerFilters, callback){
-    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-    let period = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
-    let host = getEnvPropValue(siteKey, process.env.REACT_APP_SERVICE_HOSTS)
+      let query = `  ${fragment}
+                      query Search($site: String!, $langCode: String){
+                            search(site: $site, langCode: $langCode) {
+                            ...FortisDashboardView
+                        }
+                      }`;
 
-    console.log(`processing tile request [${keyword}, ${period}, ${bbox}, ${layerFilters.join(",")}]`)
-    if(bbox && Array.isArray(bbox) && bbox.length === 4){
-        var POST = {
-            url : `${host}/tilefetcher`,
+      let variables = {site, langCode};
+      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let POST = {
+            url : `${host}/api/edges`,
             method : "POST",
             json: true,
             withCredentials: false,
-            body : {
-                "bbox": bbox,
-                "zoomLevel": MAX_ZOOM,
-                "keyword": keyword,
-                "period": period,
-                "filteredEdges": layerFilters,
-                "layerType": LAYER_TYPE_FILTER
-            }
+            body: { query, variables }
+      };
+
+      request(POST, callback);
+  },
+
+  getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, callback){
+      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+      let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+
+      let fragment = `fragment FortisDashboardView on FeatureCollection {
+                            type
+                            runTime
+                            features {
+                                coordinates
+                                properties {
+                                    location
+                                    population
+                                    mentions
+                                }
+                            }
+                        }`;
+
+      let query = `  ${fragment}
+                      query PopularLocations($site: String!, $langCode: String, $timespan: String!, $zoomLevel: Int) {
+                            popularLocations(site: $site, langCode: $langCode, timespan: $timespan, zoomLevel: $zoomLevel) {
+                            ...FortisDashboardView
+                        }
+                      }`;
+
+      let variables = {site, timespan, langCode, zoomLevel};
+      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let POST = {
+            url : `${host}/api/places`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+      };
+
+      request(POST, callback);
+  },
+
+  getHeatmapTiles: function(site, timespanType, zoom, mainEdge, datetimeSelection, bbox, 
+                            filteredEdges, locations, callback){
+    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+    let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+    let zoomLevel = MAX_ZOOM;
+
+    console.log(`processing tile request [${mainEdge}, ${timespan}, ${bbox}, ${filteredEdges.join(",")}]`)
+    if(bbox && Array.isArray(bbox) && bbox.length === 4){
+        let fragmentView = `fragment FortisDashboardView on FeatureCollection {
+                                type
+                                runTime
+                                    features {
+                                        type
+                                        coordinates
+                                        properties {
+                                          neg_sentiment
+                                          pos_sentiment
+                                          keyword
+                                          location
+                                          mentionCount
+                                          tileId
+                                          population
+                                          location
+                                          edges {
+                                          	f1
+                                            f2
+                                        	}
+                                          layers
+                                        }
+                                    }
+                                }`;
+
+        let query, variables;
+        
+        if(locations && locations.length > 0 && locations[0].length > 0){
+            query = `${fragmentView} 
+                        query FetchByLocations($site: String!, $bbox: [Float], $filteredEdges: [String], $timespan: String!, $zoomLevel: Int, $locations: [[Float]]!) {
+                              fetchByLocations(site: $site, bbox: $bbox, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel, locations: $locations) {
+                                ...FortisDashboardView
+                              }
+                        }`;
+
+            variables = {site, bbox, filteredEdges, timespan, zoomLevel, locations};
+        }else{
+            query =`${fragmentView}
+                       query FetchByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int) {
+                             fetchByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel) {
+                                ...FortisDashboardView 
+                             }
+                        }`;
+
+            variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel};
+        }
+
+        let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
+        
+        var POST = {
+            url : `${host}/api/tiles`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
         };
 
+        console.log(query, JSON.stringify(variables));
         request(POST, callback);
     }else{
         throw new Error(`Invalid bbox format for value [${bbox}]`);
@@ -115,10 +219,17 @@ export const SERVICES = {
   },
 
   FetchMessageSentences: function(site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges, 
-                        langCode, sourceFilter, mainTerm, fulltextTerm, callback){
+                        langCode, sourceFilter, mainTerm, fulltextTerm, searchLocation, callback){
    let fromDate, toDate;
    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
    let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
+
+   if(searchLocation && searchLocation.length === 2){
+       let tileId = geotile.tileIdFromLatLong(searchLocation[1], searchLocation[0], MAX_ZOOM);
+       let geoTileBbox = geotile.tileFromTileId(tileId);
+       bbox = [geoTileBbox.longitudeWest, geoTileBbox.latitudeSouth, geoTileBbox.longitudeEast, geoTileBbox.latitudeNorth];
+   }
+
    fromDate = dates.fromDate;
    toDate = dates.toDate;
 
@@ -157,6 +268,8 @@ export const SERVICES = {
             withCredentials: false,
             body: { query, variables }
         };
+
+        console.log(`${host}/api/Messages`);
 
         request(POST, callback);
     }else{
