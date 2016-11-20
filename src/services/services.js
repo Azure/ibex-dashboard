@@ -148,42 +148,41 @@ export const SERVICES = {
         let fragmentView = `fragment FortisDashboardView on FeatureCollection {
                                 type
                                 runTime
-                                    features {
-                                        type
-                                        coordinates
-                                        properties {
-                                          neg_sentiment
-                                          pos_sentiment
-                                          keyword
-                                          location
-                                          mentionCount
-                                          tileId
-                                          population
-                                          location
-                                          edges {
-                                          	f1
-                                            f2
-                                        	}
-                                          layers
-                                        }
+                                edges {
+                                    type
+                                    name
+                                    mentionCount
+                                }
+                                features {
+                                    type
+                                    coordinates
+                                    properties {
+                                    neg_sentiment
+                                    pos_sentiment
+                                    location
+                                    mentionCount
+                                    tileId
+                                    population
+                                    location
                                     }
+                                }
                                 }`;
 
         let query, variables;
         
         if(locations && locations.length > 0 && locations[0].length > 0){
             query = `${fragmentView} 
-                        query FetchByLocations($site: String!, $bbox: [Float], $filteredEdges: [String], $timespan: String!, $zoomLevel: Int, $locations: [[Float]]!) {
-                              fetchByLocations(site: $site, bbox: $bbox, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel, locations: $locations) {
-                                ...FortisDashboardView
+                        query FetchAllEdgesAndTilesByLocations($site: String!, $locations: [[Float]]!, $filteredEdges: [String], $timespan: String!) {
+                              fetchAllEdgesAndTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan) {
+                                    ...FortisDashboardView
                               }
                         }`;
 
-            variables = {site, bbox, filteredEdges, timespan, zoomLevel, locations};
+            variables = {site, locations, filteredEdges, timespan};
         }else{
             query =`${fragmentView}
-                       query FetchByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int) {
-                             fetchByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel) {
+                       query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int) {
+                             fetchAllEdgesAndTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel) {
                                 ...FortisDashboardView 
                              }
                         }`;
@@ -220,18 +219,9 @@ export const SERVICES = {
 
   FetchMessageSentences: function(site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges, 
                         langCode, sourceFilter, mainTerm, fulltextTerm, searchLocation, callback){
-   let fromDate, toDate;
    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
    let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
-
-   if(searchLocation && searchLocation.length === 2){
-       let tileId = geotile.tileIdFromLatLong(searchLocation[1], searchLocation[0], MAX_ZOOM);
-       let geoTileBbox = geotile.tileFromTileId(tileId);
-       bbox = [geoTileBbox.longitudeWest, geoTileBbox.latitudeSouth, geoTileBbox.longitudeEast, geoTileBbox.latitudeNorth];
-   }
-
-   fromDate = dates.fromDate;
-   toDate = dates.toDate;
+   let fromDate = dates.fromDate, toDate = dates.toDate;
 
    if(bbox && Array.isArray(bbox) && bbox.length === 4){
         let fragmentView = `fragment FortisDashboardView on FeatureCollection {
@@ -252,15 +242,28 @@ export const SERVICES = {
                                     }
                                 }`;
 
-        let query = `  ${fragmentView}
-                       query ByLocation($site: String!, $bbox: [Float]!, $mainTerm: String, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
-                             byLocation(site: $site, bbox: $bbox, mainTerm: $mainTerm, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
+        let query, variables;
+
+        if(searchLocation && searchLocation.length === 2){
+            let tileId = geotile.tileIdFromLatLong(searchLocation[1], searchLocation[0], MAX_ZOOM);
+            query = `  ${fragmentView}
+                       query ByTile($site: String!, $tileId: String!, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
+                             byTile(site: $site, tileId: $tileId, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
                                 ...FortisDashboardView 
                             }
                         }`;
+            variables = {site, tileId, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
+        }else{
+            query = `  ${fragmentView}
+                       query ByBbox($site: String!, $bbox: [Float]!, $mainTerm: String, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
+                             byBbox(site: $site, bbox: $bbox, mainTerm: $mainTerm, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
+                                ...FortisDashboardView 
+                            }
+                        }`;
+            variables = {site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
+        }
 
         let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
-        let variables = {site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
         var POST = {
             url : `${host}/api/Messages`,
             method : "POST",
@@ -268,9 +271,7 @@ export const SERVICES = {
             withCredentials: false,
             body: { query, variables }
         };
-
-        console.log(`${host}/api/Messages`);
-
+        
         request(POST, callback);
     }else{
         callback(new Error(`Invalid bbox format for value [${bbox}]`));

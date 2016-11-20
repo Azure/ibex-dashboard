@@ -9,7 +9,7 @@ import '../styles/SentimentTreeView.css';
 import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
-      parentTermsName = "Relevant Terms",
+      parentTermsName = "Term Filters",
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
 const styles = {
@@ -181,16 +181,8 @@ export const SentimentTreeview = React.createClass({
             children: []
         };
 
-        let noRelevantTermsItemsRoot = {
-            name: `None`,
-            folderKey: 'noneFolder',
-            checked: true,
-            toggled: true,
-            children: []
-        };
-
         let popularItemsRoot = {
-            name: 'Top 5',
+            name: 'Top 5 Terms',
             folderKey: 'top5Keywords',
             checked: true,
             toggled: true,
@@ -201,12 +193,12 @@ export const SentimentTreeview = React.createClass({
             name: 'Other Terms',
             folderKey: 'otherKeywords',
             checked: true,
-            toggled: true,
+            toggled: false,
             children: []
         };
 
         let itemCount = 0;
-        let popularTermsTotal = 0, otherTotal = 0, noneTotal = 0;
+        let popularTermsTotal = 0, otherTotal = 0;
 
         for (var [term, value] of termsMap.entries()) {
             let newEntry = {
@@ -216,16 +208,11 @@ export const SentimentTreeview = React.createClass({
                     eventCount: value.mentions
             };
 
-            if(term === "none"){
-                newEntry.parent = noRelevantTermsItemsRoot;
-                noRelevantTermsItemsRoot.children.push(newEntry);
-                newEntry.name = this.state.categoryValue;
-                noneTotal += value.enabled ? value.mentions : 0;
-            }else if(itemCount++ < 5){
+            if(term !== "none" && itemCount++ < 5){
                 newEntry.parent = popularItemsRoot;
                 popularItemsRoot.children.push(newEntry);
                 popularTermsTotal += value.enabled ? value.mentions : 0;
-            }else{
+            }else if(term !== "none"){
                 newEntry.parent = otherItemsRoot;
                 otherItemsRoot.children.push(newEntry);
                 otherTotal += value.enabled ? value.mentions : 0;
@@ -237,13 +224,12 @@ export const SentimentTreeview = React.createClass({
         }
 
         rootItem.children.push(popularItemsRoot);
-        rootItem.children.push(noRelevantTermsItemsRoot);
 
         if(otherItemsRoot.children.length > 0){
             rootItem.children.push(otherItemsRoot);
         }
         
-        rootItem.eventCount = popularTermsTotal + otherTotal + noneTotal;
+        rootItem.eventCount = popularTermsTotal + otherTotal;
 
         return rootItem;
   },

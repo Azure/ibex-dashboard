@@ -203,10 +203,10 @@ export const ActivityFeed = React.createClass({
 
         this.fetchSentences(start, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, 
             (error, response, body) => {
-                if(!error && response.statusCode === 200 && body.data &&  body.data.byLocation) {
-                    let featureCollection = body.data.byLocation.features;
-                    if(featureCollection && Array.isArray(featureCollection)){
-                        featureCollection.forEach(feature => {
+                if(!error && response.statusCode === 200 && body.data) {
+                    let graphQLResponse = body.data[Object.keys(body.data)[0]];
+                    if(graphQLResponse && graphQLResponse.features && Array.isArray(graphQLResponse.features)){
+                        graphQLResponse.features.forEach(feature => {
                             if(feature.properties.sentence && feature.properties.sentence.length > 2){
                                 elements.push(<FortisEvent id={feature.properties.messageid}
                                                         sentence={feature.properties.sentence}
