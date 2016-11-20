@@ -96,17 +96,15 @@ export const HeatMap = React.createClass({
             let mainSearchEntity = this.state.categoryValue;
             let associatedTerms = this.state.associatedKeywords;
             let numberOfDisplayedTerms = 0;
+            let filters = 0;
             let maxTerms = 4;
+            let infoBoxInnerHtml = '';
             let infoHeaderText = "<h5>Review Your Selection Below</h5>";
-            let infoBoxInnerHtml = `<span class="filterLabelType">
+            let infoBoxIntro = `<span class="filterLabelType">
                                         ${selectionType}:
                                     </span>
                                     <span class="label filterLabel">
                                         ${mainSearchEntity}
-                                    </span>
-                                    <span class="filterSeperation">+</span>
-                                    <span class="filterLabelType">
-                                        Term(s):
                                     </span>`;
    
             for (var [term, value] of props.entries()) {
@@ -114,14 +112,23 @@ export const HeatMap = React.createClass({
                         infoBoxInnerHtml += `<span class="filterLast">and ${props.size - numberOfDisplayedTerms} Others</span>`;
                         break;
                     }else if(value.enabled && term !== "none"){
+                         filters++;
                          infoBoxInnerHtml += `${numberOfDisplayedTerms > 1 ? '<span class="filterSeperation">+</span>' : ''}
                                               <span class="label filterLabel">
                                                 ${term}
                                               </span>`;
                     }
             }
+
+            if(filters > 0){
+                infoBoxInnerHtml = `<span class="filterSeperation">+</span>
+                                    <span class="filterLabelType">
+                                        Term(s):
+                                    </span>
+                                    ${infoBoxInnerHtml}`;
+            }
             
-			this._div.innerHTML = infoHeaderText + infoBoxInnerHtml;
+			this._div.innerHTML = infoHeaderText + infoBoxIntro + infoBoxInnerHtml;
 		  };
 
 		  info.addTo(this.map);
@@ -149,7 +156,6 @@ export const HeatMap = React.createClass({
     let siteKey = this.props.siteKey;
     let latitude = this.state.latitude;
     let longitude = this.state.longitude;
-    this.tileSummationMap = new Map();
     this.tilemap = new Map();
     this.status = "ready";
     let defaultZoom = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_ZOOM);
@@ -199,7 +205,7 @@ export const HeatMap = React.createClass({
                 "maximum": 100,
                 "stackType": "regular",
                 "gridAlpha": 0,
-                "labelFunction": (value, formattedValue, valueAxis) =>{ if(value === 0) return "Positive"; else if(value === 50) return "Neautral"; else if(value === 100) return "Negative";}
+                "labelFunction": (value, formattedValue, valueAxis) =>{ if(value === 0) return "Positive"; else if(value === 50) return "Neutral"; else if(value === 100) return "Negative";}
             } ],
             "startDuration": 1,
             "graphs": [ {
@@ -319,39 +325,35 @@ export const HeatMap = React.createClass({
       return 0;
   },
 
-  updateDataStore(errors, bbox){
-      let aggregatedAssociatedTermMentions = new Map(), aggregatedLocations = new Map();
+  edgeSelected(name, type){
+      if(this.state.associatedKeywords && this.state.associatedKeywords.size > 0 && name){
+          let edge = this.state.associatedKeywords.get(name);
 
+          return edge && edge.enabled ? true : false;
+      }else{
+          return false;
+      }
+  },
+
+  updateDataStore(errors, bbox, filters){
+      let aggregatedAssociatedTermMentions = new Map(), aggregatedLocations = new Map();
+      let self = this;
       let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
       //bind the weigthed sentiment to the bullet chart data provider
       this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
       this.sentimentIndicatorGraph.dataProvider[0].bullet = weightedSentiment;
       this.sentimentIndicatorGraph.validateData();
 
-      for (let tileTerms of this.tileSummationMap.values()) {
-          let tileMentionCount = aggregatedLocations.get(tileTerms.location) || 0;
-          aggregatedLocations.set(tileTerms.location, {"mentions": tileMentionCount + tileTerms.mentionCount, "enabled": true});
-
-          if(tileTerms.edges){
-            tileTerms.edges.forEach(term => {
-                let totMentions = 0, termLookup = aggregatedAssociatedTermMentions.get(term[TERM_NAME_FIELD]);
-                if(termLookup){
-                    totMentions = termLookup.mentions;
-                }
-
-                aggregatedAssociatedTermMentions.set(term[TERM_NAME_FIELD].toLowerCase(), {"mentions": totMentions + term[TERM_MENTIONS_FIELD], "enabled": true});
-            });
-          }
+      if(filters){
+          filters.forEach(edge => {
+             let enableFilter = self.edgeSelected(edge.name, edge.type);
+             aggregatedAssociatedTermMentions.set(edge.name.toLowerCase(), {"mentions": edge.mentionCount, "enabled": enableFilter});
+          });
       }
-
-      //merge the disabled associated keys as long as the map view hasnt changed.
-      if(!this.viewPortChanged){
-          aggregatedAssociatedTermMentions = new Map([...this.state.associatedKeywords, ...aggregatedAssociatedTermMentions]);
-      }
+      
 
       this.viewPortChanged = false;
       this.status = 'loaded';
-      //this.setProgressPercent(100);
       //sort the associated terms by mention count.
       let sortedEdgeMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort(this.sortTerms));
       this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedEdgeMap, bbox);
@@ -361,13 +363,11 @@ export const HeatMap = React.createClass({
   filterSelectedAssociatedTerms(){
       let filteredTerms = [];
 
-      if(!this.viewPortChanged){
-        for (var [term, value] of this.state.associatedKeywords.entries()) {
+      for (var [term, value] of this.state.associatedKeywords.entries()) {
             if(value.enabled){
                 filteredTerms.push(term);
             }
         }
-      }
       
       return filteredTerms;
   },
@@ -397,14 +397,12 @@ export const HeatMap = React.createClass({
     let southEast = bounds.getSouthEast();
     let bbox = [northWest.lng, southEast.lat, southEast.lng, northWest.lat];
     let self = this;
-    //this.setProgressPercent(0);
     this.weightedMeanValues = [];
-    this.tileSummationMap.clear();
 
     SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue, this.state.datetimeSelection, bbox, this.filterSelectedAssociatedTerms(), [this.state.selectedLocationCoordinates], 
             (error, response, body) => {
                 if (!error && response.statusCode === 200) {
-                    self.createLayers(body, errors => self.updateDataStore(errors, bbox))
+                    self.createLayers(body, bbox)
                 }else{
                     this.status = 'failed';
                     console.error(`[${error}] occured while processing tile request [${this.state.categoryValue}, ${this.state.datetimeSelection}, ${bbox}]`);
@@ -412,15 +410,17 @@ export const HeatMap = React.createClass({
             });
   },
   
-  createLayers(response, completedCB) {
+  createLayers(response, bbox) {
     let self = this;
 
     if(response && response.data){
         let graphQLResponse = response.data[Object.keys(response.data)[0]];
-        if(graphQLResponse.features){
+        if(graphQLResponse && graphQLResponse.features && graphQLResponse.edges){
             eachLimit(graphQLResponse.features, PARELLEL_TILE_LAYER_RENDER_LIMIT, (tileFeature, cb) => {
                  self.processMapCluster(tileFeature, cb);
-            }, completedCB);
+            }, errors => self.updateDataStore(errors, bbox, graphQLResponse.edges || []));
+        }else{
+            self.updateDataStore('Invalid GrphQL Service response', bbox, undefined);
         }
     }
   },
@@ -431,10 +431,6 @@ export const HeatMap = React.createClass({
 
        if(!cachedTileMarker && tileFeature.properties.tileId){
            cachedTileMarker = this.addTileFeatureToMap(tileFeature);
-       }
-
-       if(Array.isArray(tileFeature.properties.edges) && tileFeature.properties.edges.length > 0){
-           this.tileSummationMap.set(tileId, {"edges": tileFeature.properties.edges});
        }
        
        this.weightedMeanValues.push([tileFeature.properties[SENTIMENT_FIELD], tileFeature.properties.mentionCount]);
