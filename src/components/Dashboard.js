@@ -85,7 +85,7 @@ export const Dashboard = React.createClass({
               <div className="container-fluid">
                 <DataSelector {...this.props} />
                 <div className="row graphContainer">
-                    <div className="col-lg-2 summaryPieContainer">
+                    <div className="col-lg-3 summaryPieContainer">
                        <div id="popularLocationsPieDiv" style={{width: '100%', height: '230px'}}></div>
                        <PopularLocationsChart {...this.props} datetimeSelection={this.state.datetimeSelection}/>
                     </div>
@@ -93,7 +93,7 @@ export const Dashboard = React.createClass({
                        <div id="popularTermsPieDiv" style={{width: '100%', height: '230px'}}></div>
                        <PopularTermsChart {...this.props}/>
                     </div>
-                    <div className="col-lg-8 timeSeriesContainer">
+                    <div className="col-lg-7 timeSeriesContainer">
                        <div id="graphdiv" style={{width: '100%', height: '230px', marginBottom: '0px', paddingBottom: '0px'}}></div>
                        <TimeSeriesGraph {...this.props}/>
                     </div>

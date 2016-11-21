@@ -99,7 +99,7 @@ export const HeatMap = React.createClass({
             let filters = 0;
             let maxTerms = 4;
             let infoBoxInnerHtml = '';
-            let infoHeaderText = "<h5>Review Your Selection Below</h5>";
+            let infoHeaderText = "<h5>Review your selection below</h5>";
             let infoBoxIntro = `<span class="filterLabelType">
                                         ${selectionType}:
                                     </span>
@@ -167,7 +167,7 @@ export const HeatMap = React.createClass({
     L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 17,
-        minZoom: 6,
+        minZoom: 5,
         id: 'dark-v9',
         accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
     }).addTo(this.map);
@@ -250,6 +250,7 @@ export const HeatMap = React.createClass({
           this.markers = L.markerClusterGroup({
                             maxClusterRadius: 120,
                             chunkedLoading: true,
+                            zoomToBoundsOnClick: true,
                             iconCreateFunction: cluster => {
                                 let maxSentimentLevel = 0, totalMentions = cluster.getAllChildMarkers().reduce((prevTotal, child) => {
                                         maxSentimentLevel = Math.max(maxSentimentLevel, child.feature.properties[SENTIMENT_FIELD]);
