@@ -273,18 +273,22 @@ export const ActivityFeed = React.createClass({
   
   render() {
     let sourceTypes = [
-        {"icon": "fa fa-share-alt", "mapName": "all", "label": "All"},
-        {"icon": "fa fa-facebook-official", "mapName": "facebook", "label": "Facebook"},
-        {"icon": "fa fa-twitter", "mapName": "twitter", "label": "Twitter"}
+        {"icon": "fa fa-share-alt fa-2x", "mapName": "all", "label": "All"},
+        {"icon": "fa fa-facebook-official fa-2x", "mapName": "facebook", "label": ""},
+        {"icon": "fa fa-twitter fa-2x", "mapName": "twitter", "label": ""}
     ];
 
-    let activeHeaderClass = "feed-source-label active", inactoveClass = "feed-source-label";
+    let iconStyle = {
+        color: "#337ab7"
+    };
+
+    let activeHeaderClass = "feed-source-label active", inactiveClass = "feed-source-label";
 
     return (
      <div className="col-lg-12 news-feed-column">
             <ul className="nav nav-tabs feed-source-header">
                 {
-                    sourceTypes.map(item => <li role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactoveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i className={item.icon}></i>{item.label}</a></li>)
+                    sourceTypes.map(item => <li role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactiveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i style={iconStyle} className={item.icon}></i>{item.label}</a></li>)
                 }
             </ul>
             <Infinite elementHeight={ELEMENT_ITEM_HEIGHT}

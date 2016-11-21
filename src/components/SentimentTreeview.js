@@ -324,7 +324,7 @@ export const SentimentTreeview = React.createClass({
   Header(props) {
         const style = props.style;
         let self = this;
-        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '14px', color: '#337ab7',  width: '100%' };
+        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '12px', color: '#337ab7',  width: '100%' };
         const categoryStyle = { paddingLeft: '3px', fontSize: '14px', color: '#fff', fontWeight: 600,  width: '100%'};
         let badgeClass = (props.node.checked || props.node.children) && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
         let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
@@ -337,7 +337,7 @@ export const SentimentTreeview = React.createClass({
                     <input type="checkbox"
                         checked={props.node.checked}
                         onChange={self.onChange.bind(this, props.node)}/>
-                    <span className={termClassName} onClick={this.termSelected.bind(this, props.node)} style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{(!isNodeTypeCategory ? "#" : "") + props.node.name} </span>
+                    <span className={termClassName} onClick={this.termSelected.bind(this, props.node)} style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{props.node.name} </span>
                     {props.node.highlighted ? onlyLink : ""}
                 </div>
                 <div style={props.node.name === parentTermsName ? style.parentBadge : style.badge} className="col-md-2">
