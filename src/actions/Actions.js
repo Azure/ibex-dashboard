@@ -12,22 +12,6 @@ function GetSearchEdges(siteKey, languageCode, callback){
      });
 }
 
-function GetTimeSeries(datetimeSelection, timespanType, siteKey, callback, searchTerm){
-     let selectedTerm = searchTerm ? `kw-${searchTerm}` : "top5";
-
-     if(datetimeSelection && timespanType){
-           SERVICES.getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm)
-                   .subscribe(response => callback(response, undefined)
-                   , error => {
-                       let emptyTimeSeriesResponse = {labels: [], graphData: []};
-
-                       let errMsg = `The requested graph dataset [${datetimeSelection}, ${selectedTerm}] is unavailable`;
-                       console.error(errMsg);
-                       callback(emptyTimeSeriesResponse, errMsg);
-                   });
-     }
-}
-
 const constants = {
            SENTIMENT_JSON_MAPPING : {
                 "0": -5,
@@ -45,7 +29,7 @@ const constants = {
                     format: "YYYY-MM", blobFormat: "[month]-YYYY-MM", rangeFormat: "month"
                 },
                 'weeks': {
-                    format: "YYYY-WW", blobFormat: "[week]-YYYY-WW", rangeFormat: "week"
+                    format: "YYYY-WW", blobFormat: "[week]-YYYY-WW", rangeFormat: "isoweek"
                 },
                 'customDate': {
                     format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD", rangeFormat: "day"
@@ -74,13 +58,6 @@ const constants = {
              'g': 'group',
              'sec': 'sector',
              'st': 'status'
-           },
-           HEATMAP : {
-               RETRIEVE_HEATMAP_TILE: "HEATMAP"
-           },
-           GRAPHING : {
-               LOAD_GRAPH_DATA: "LOAD:GRAPH_DATA",
-               CHANGE_TIME_SCALE: "EDIT:TIME_SCALE"
            },
            DASHBOARD : {
                LOAD: "LOAD:DASHBOARD",
@@ -115,19 +92,8 @@ const methods = {
         },
         changeSearchFilter(selectedEntity, siteKey){
            let self = this;
-           let dataStore = this.flux.stores.DataStore.dataStore;
 
-            let callback = (response, error) => {
-                 if(response && response.graphData){
-                        self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {timeSeriesResponse: response, selectedEntity: selectedEntity});
-                 }
-            };
-
-            if(selectedEntity.type === "Term"){
-                GetTimeSeries(dataStore.datetimeSelection, dataStore.timespanType, siteKey, callback, selectedEntity.properties.name);
-            }else{
-                self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity});
-            }
+           self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity});
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
@@ -136,32 +102,7 @@ const methods = {
             this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords, bbox});
         },
         changeDate(siteKey, datetimeSelection, timespanType){
-           let self = this;
-           let dataStore = this.flux.stores.DataStore.dataStore;
-           let callback = (response, error) => {
-                 if(response && response.graphData){
-                                 self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: response, datetimeSelection: datetimeSelection, timespanType: timespanType});
-                 }
-            };
-
-            GetTimeSeries(datetimeSelection, timespanType, siteKey, callback, dataStore.categoryValue);
-        }
-    },
-    GRAPHING : {
-        edit_time_scale(fromDate, toDate){
-            this.dispatch(constants.GRAPHING.CHANGE_TIME_SCALE, {fromDate: fromDate, 
-                                                                 toDate: toDate});
-        },
-        load_timeseries_data: function(siteKey){
-            let self = this;
-            let dataStore = this.flux.stores.DataStore.dataStore;
-            let callback = (response, error) => {
-                 if(response && response.graphData){
-                          self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response});
-                 }
-            };
-
-            GetTimeSeries(dataStore.datetimeSelection, dataStore.timespanType, siteKey, callback, dataStore.categoryValue);
+           this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
         }
     },
     FACTS: {

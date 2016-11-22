@@ -1,7 +1,7 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
-import {Actions} from '../actions/Actions';
 import numeralLibs from 'numeral';
+import {SERVICES} from '../services/services';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -14,9 +14,14 @@ export const PopularTermsChart = React.createClass({
     return this.getFlux().store("DataStore").getState();
   },
 
-  initializeGraph(){
+  getInitialState: function(){
+      return {
+          selectedEdge: undefined
+      };
+  },
+
+  initializeGraph: function(){
     let self = this;
-    let datetimeSelection = this.state.datetimeSelection;
 
     this.popularTermsChart = window.AmCharts.makeChart(chartDivReference, {
         "theme": "dark",
@@ -46,64 +51,97 @@ export const PopularTermsChart = React.createClass({
             "align": "center",
             "y": 200
         }]
-    });
+ });
 
     this.popularTermsChart.addListener("clickSlice", e => {
-        if(e.dataItem.dataContext){
-              let entity = {
-                  "type": "Term",
-                  "properties": {
-                      "name": e.dataItem.dataContext.term
-                  }
-              };
-              self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
-        }
-    });
+            if(e.dataItem.dataContext){
+                let entity = {
+                    "type": "Term",
+                    "properties": {
+                        "name": e.dataItem.dataContext.term
+                    }
+                };
+                self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
+            }
+        });
  },
 
- refreshChart(summaryMap, termColorMap){
+ refreshChart: function(summaryTerms){
     let maxAxesDisplayLabelChars = 16;
-    let dataProvider = [];
+    this.popularTermsChart.dataProvider = [];
+    let sliceColors = ['#fdd400', '#84b761', '#b6d2ff', '#CD0D74', '#2f4074', '#7e6596'];
 
-    for (let [term, mentions] of summaryMap.entries()) {
-        let labelSplitArr = term.split('-');
+    if(summaryTerms && summaryTerms.length > 0){
+        this.popularTermsChart.dataProvider = summaryTerms.map(term => {
+            let displayLabel = term.name.length > maxAxesDisplayLabelChars ? term.name.substring(0, maxAxesDisplayLabelChars) : term.name;
+            let mentionFmt = numeralLibs(term.mentions).format(term.mentions > 1000 ? '+0.0a' : '0a');
+            
+            return {displayLabel: displayLabel, term: term.name, mentions: term.mentions, mentionFmt: mentionFmt, color: sliceColors.pop()};
+        });
 
-        if(labelSplitArr.length > 1){
-              let label = labelSplitArr[1];
-              let displayLabel = label.length > maxAxesDisplayLabelChars ? label.substring(0, maxAxesDisplayLabelChars) : label;
-              let category = Actions.constants.CATEGORY_KEY_MAPPING[labelSplitArr[0]];
-              let mentionFmt = numeralLibs(mentions).format(mentions > 1000 ? '+0.0a' : '0a');
-              dataProvider.push({displayLabel: displayLabel, term: label, category: category, mentions: mentions, mentionFmt: mentionFmt, color: termColorMap.get(term)});
+        if(this.popularTermsChart.valueAxes && this.popularTermsChart.valueAxes.length > 0){
+            this.popularTermsChart.valueAxes[0].title = "Top Mentions for {0}".format(this.props.timespan);
         }
     }
 
-    this.popularTermsChart.dataProvider = dataProvider;
-    if(this.popularTermsChart.valueAxes && this.popularTermsChart.valueAxes.length > 0){
-        this.popularTermsChart.valueAxes[0].title = "Top Mentions for {0}".format(this.state.datetimeSelection);
-    }
-
-    this.popularTermsChart.datetimeSelection = this.state.datetimeSelection;
-    this.popularTermsChart.categoryValue = this.state.categoryValue;
     this.popularTermsChart.validateData();
+
+    //Set the default term to the most popular
+    if(!this.state.selectedEdge){
+        this.changeMainTermToMostPopular(summaryTerms[0].name);
+    }
  },
 
- updateChart(summaryMap, termColorMap){
-     if(!this.popularTermsChart || (this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts.length === 0)){
-        this.initializeGraph();
-     }
+ changeMainTermToMostPopular: function(term){
+        let entity = {
+            "type": "Term",
+            "properties": {
+                "name": term
+             }
+        };
 
-     let graphDateScope = this.popularTermsChart.datetimeSelection || '';
+    this.setState({selectedEdge: entity.properties.name});
+    this.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
+ },
 
-     if(graphDateScope !== this.state.datetimeSelection || this.state.categoryValue !== this.popularTermsChart.categoryValue){
-        this.refreshChart(summaryMap, termColorMap);
-     }
-  },
-  
-  render() {
-   if(this.state.timeSeriesGraphData && this.state.timeSeriesGraphData.aggregatedCounts){
-        this.updateChart(this.state.timeSeriesGraphData.termSummaryMap, this.state.timeSeriesGraphData.termColorMap);
+ hasChanged: function(nextProps, propertyName){
+      if(Array.isArray(nextProps[propertyName])){
+          return nextProps[propertyName].join(",") !== this.props[propertyName].join(",");
+      }
+
+      if(this.props[propertyName] && nextProps[propertyName] && nextProps[propertyName] !== this.props[propertyName]){
+          return true;
+      }
+
+      return false;
+ },
+
+ componentWillReceiveProps: function(nextProps){
+    let hasTimeSpanChanged = this.hasChanged(nextProps, "timespan");
+    if(!this.popularTermsChart){
+        this.initializeGraph();     
+        this.updateChart(nextProps.mainEdge, nextProps.timespan, nextProps.timespanType);
+    }else if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged){
+        this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.timespanType);
     }
+ },
 
+ updateChart: function(mainEdge, timespan, timespanType){
+     let self = this;
+
+     SERVICES.getPopularTerms(this.props.siteKey, timespan, timespanType, mainEdge, 
+            (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data) {
+                    let graphQLResponse = body.data[Object.keys(body.data)[0]];
+
+                    self.refreshChart(graphQLResponse.edges);
+                }else{
+                    console.error(`[${error}] occured while processing popular terms graphql request`);
+                }
+            });
+ },
+
+ render: function() {
     return (
         <div>
         </div>

@@ -3,7 +3,6 @@ import 'rx-dom';
 import {Actions} from '../actions/Actions';
 import {guid, momentToggleFormats, getEnvPropValue, momentGetFromToRange} from '../utils/Utils.js';
 import request from 'request';
-import geotile from 'geotile';
 
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 
@@ -59,14 +58,53 @@ export const SERVICES = {
     }
   },
 
-  getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm){
+ getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm, callback){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
      let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
      let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TIMESERIES);
 
      let url = `${hostname}/${blobContainer}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
 
-     return Rx.DOM.getJSON(url);
+     let GET = {
+            url : url,
+            json: true,
+            withCredentials: false
+     };
+
+     request(GET, callback);
+  },
+
+  getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, callback){
+      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+      let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+      let additionalTerms = selectedTerm ? [selectedTerm] : [];
+
+      let fragment = `fragment FortisDashboardView on EdgeList {
+                        runTime
+                        edges {
+                            name
+                            mentions
+                        }
+                      }`;
+
+      let query = `  ${fragment}
+                      query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!) {
+                        whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan) {
+                            ...FortisDashboardView
+                        }
+                      }`;
+
+      let variables = {site, additionalTerms, timespan};
+      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let POST = {
+            url : `${host}/api/terms`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+      };
+
+      request(POST, callback);
   },
 
   getDefaultSuggestionList(site, langCode, callback){
@@ -200,7 +238,6 @@ export const SERVICES = {
             body: { query, variables }
         };
 
-        console.log(query, JSON.stringify(variables));
         request(POST, callback);
     }else{
         throw new Error(`Invalid bbox format for value [${bbox}]`);
@@ -218,7 +255,7 @@ export const SERVICES = {
   },
 
   FetchMessageSentences: function(site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges, 
-                        langCode, sourceFilter, mainTerm, fulltextTerm, searchLocation, callback){
+                        langCode, sourceFilter, mainTerm, fulltextTerm, coordinates, callback){
    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
    let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
    let fromDate = dates.fromDate, toDate = dates.toDate;
@@ -244,15 +281,14 @@ export const SERVICES = {
 
         let query, variables;
 
-        if(searchLocation && searchLocation.length === 2){
-            let tileId = geotile.tileIdFromLatLong(searchLocation[1], searchLocation[0], MAX_ZOOM);
+        if(coordinates && coordinates.length === 2){
             query = `  ${fragmentView}
-                       query ByTile($site: String!, $tileId: String!, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
-                             byTile(site: $site, tileId: $tileId, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
+                       query ByLocation($site: String!, $coordinates: [Float]!, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
+                             byLocation(site: $site, coordinates: $coordinates, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
                                 ...FortisDashboardView 
                             }
                         }`;
-            variables = {site, tileId, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
+            variables = {site, coordinates, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
         }else{
             query = `  ${fragmentView}
                        query ByBbox($site: String!, $bbox: [Float]!, $mainTerm: String, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 

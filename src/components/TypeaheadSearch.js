@@ -2,7 +2,6 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import Autosuggest from 'react-autosuggest';
 import '../styles/TypeaheadSearch.css';
-import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React);
 const maxDefaultResult = 12;

@@ -23,8 +23,6 @@ const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 const PARELLEL_TILE_LAYER_RENDER_LIMIT = 200;
 const SENTIMENT_FIELD = 'neg_sentiment';
-const TERM_NAME_FIELD = "f1";
-const TERM_MENTIONS_FIELD = "f2";
 const defaultClusterSize = 40;
 
 export const HeatMap = React.createClass({
@@ -94,7 +92,6 @@ export const HeatMap = React.createClass({
 		  info.update = props => {
             let selectionType = this.state.categoryType;
             let mainSearchEntity = this.state.categoryValue;
-            let associatedTerms = this.state.associatedKeywords;
             let numberOfDisplayedTerms = 0;
             let filters = 0;
             let maxTerms = 4;
@@ -337,7 +334,7 @@ export const HeatMap = React.createClass({
   },
 
   updateDataStore(errors, bbox, filters){
-      let aggregatedAssociatedTermMentions = new Map(), aggregatedLocations = new Map();
+      let aggregatedAssociatedTermMentions = new Map();
       let self = this;
       let weightedSentiment = weightedMean(this.weightedMeanValues) * 100;
       //bind the weigthed sentiment to the bullet chart data provider

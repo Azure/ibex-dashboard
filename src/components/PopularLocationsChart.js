@@ -65,7 +65,6 @@ export const PopularLocationsChart = React.createClass({
  refreshChart(locations){
     let maxAxesDisplayLabelChars = 16;
     let dataProvider = [];
-    let sliceColors = [];
 
     locations.forEach(location => {
               let label = location.properties.location;
@@ -83,10 +82,10 @@ export const PopularLocationsChart = React.createClass({
     this.popularLocationsChart.validateData();
  },
 
- updateChart(period){
+ updateChart(period, timespanType){
      let self = this;
 
-     SERVICES.getMostPopularPlaces(this.props.siteKey, period, this.state.timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, (error, response, body) => {
+     SERVICES.getMostPopularPlaces(this.props.siteKey, period, timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     if(body && body.data && body.data.popularLocations && body.data.popularLocations.features){
                         self.refreshChart(body.data.popularLocations.features);
@@ -100,9 +99,9 @@ export const PopularLocationsChart = React.createClass({
   componentWillReceiveProps(nextProps){
       if(!this.popularLocationsChart){
           this.initializeGraph();
-          this.updateChart(nextProps.datetimeSelection);
+          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType);
       }else if(this.props.datetimeSelection !== nextProps.datetimeSelection){
-          this.updateChart(nextProps.datetimeSelection);
+          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType);
       }
   },
   

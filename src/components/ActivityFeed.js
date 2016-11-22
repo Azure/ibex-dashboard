@@ -94,8 +94,8 @@ const FortisEvent = React.createClass({
     },
     render: function() {
         let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
-        let commonTermsFromFilter = this.innerJoin(this.props.edges, this.props.filters.concat([this.props.mainSearchTerm]));
-        let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter]) : this.props.edges;
+        let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
+        let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
 
         return <div className="infinite-list-item" style={
                         {
@@ -153,23 +153,24 @@ export const ActivityFeed = React.createClass({
         });
         setTimeout(() => {
             self.processNewsFeed(self.state.elements, self.state.offset, self.props.bbox, 
-                                    self.props.edges, self.props.datetimeSelection, self.props.timespanType, this.state.filteredSources);
+                                 self.props.edges, self.props.datetimeSelection, self.props.timespanType, 
+                                 this.state.filteredSources, this.props.categoryValue, this.props.categoryType);
         }, INFINITE_LOAD_DELAY_MS);
   },
 
-  fetchSentences: function(offset, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, callback){
+  fetchSentences: function(offset, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, 
+                           searchValue, categoryValue, categoryType, callback){
       let siteKey = this.props.siteKey;
-      let period = this.props.datetimeSelection;
-      let mainTerm = this.state.categoryValue;
-      let entityType = this.state.categoryType;
+      let mainTerm = categoryValue;
+      let entityType = categoryType;
       let location = [];
 
-      if(entityType === "Location"){
+      if(categoryType === "Location"){
           mainTerm = undefined;
           location = this.state.selectedLocationCoordinates;
       }
       
-      SERVICES.FetchMessageSentences(siteKey, bbox, period, timespanType, 
+      SERVICES.FetchMessageSentences(siteKey, bbox, datetimeSelection, timespanType, 
                                      limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, 
                                      mainTerm, searchValue, location, callback);
   },
@@ -187,21 +188,26 @@ export const ActivityFeed = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps){
-      if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")){
-          this.processNewsFeed([], 0, nextProps.bbox, nextProps.edges, nextProps.datetimeSelection, nextProps.timespanType, [], undefined);
+      if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") 
+       ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")
+       ||  this.hasChanged(nextProps, "categoryValue")){
+          this.processNewsFeed([], 0, nextProps.bbox, nextProps.edges, nextProps.datetimeSelection, 
+                               nextProps.timespanType, [], undefined, nextProps.categoryValue, nextProps.categoryType);
       }
   },
 
   componentDidMount: function(){
-      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, this.props.datetimeSelection, this.props.timespanType, [], undefined);
+      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, this.props.datetimeSelection, 
+                           this.props.timespanType, [], undefined, this.props.categoryValue, this.props.categoryType);
   },
 
-  buildElements: function(start, limit, elementStartList, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue) {
+  buildElements: function(start, limit, elementStartList, bbox, edges, datetimeSelection, timespanType, 
+                          filteredSources, searchValue, categoryValue, categoryType) {
         let elements = [];
         let self = this;
         let nextOffset = start + OFFSET_INCREMENT;
 
-        this.fetchSentences(start, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, 
+        this.fetchSentences(start, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, categoryValue, categoryType, 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
                     let graphQLResponse = body.data[Object.keys(body.data)[0]];
@@ -216,32 +222,28 @@ export const ActivityFeed = React.createClass({
                                                         edges={feature.properties.edges}
                                                         filters={edges}
                                                         searchFilter={searchValue}
-                                                        mainSearchTerm={this.state.categoryValue} />)                               
+                                                        mainSearchTerm={this.props.categoryValue} />)                               
                             }
                         });
 
-                        self.setState({
-                            offset: nextOffset,
-                            isInfiniteLoading: false,
-                            filteredSources: filteredSources,
-                            previousElementLength: elements.length,
-                            elements: elementStartList.concat(elements)
-                        });
+                        elements = elementStartList.concat(elements);
                     }
                 }else{
-                    self.setState({
-                            offset: 0,
-                            isInfiniteLoading: false,
-                            filteredSources: filteredSources,
-                            previousElementLength: 0,
-                            elements: []
-                    });
                     console.error(`[${error}] occured while processing message request`);
                 }
+                
+                self.setState({
+                     offset: nextOffset,
+                     isInfiniteLoading: false,
+                     filteredSources: filteredSources,
+                     previousElementLength: elements.length,
+                     elements: elements
+                });
         });
   },
 
-  processNewsFeed: function(elementStartList, offset, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue){
+  processNewsFeed: function(elementStartList, offset, bbox, edges, datetimeSelection, timespanType, filteredSources, 
+                            searchValue, categoryValue, categoryType){
       var self = this;
       this.setState({
           isInfiniteLoading: true
@@ -249,7 +251,7 @@ export const ActivityFeed = React.createClass({
       
       if(bbox && edges && datetimeSelection && timespanType){
           self.buildElements(offset, OFFSET_INCREMENT, elementStartList, bbox, edges, datetimeSelection, timespanType, 
-                             filteredSources, searchValue);
+                             filteredSources, searchValue, categoryValue, categoryType);
       }
   },
   
@@ -261,14 +263,16 @@ export const ActivityFeed = React.createClass({
 
   sourceOnClickHandler: function(filteredSources){
       this.processNewsFeed([], 0, this.props.bbox, this.props.edges, 
-                           this.props.datetimeSelection, this.props.timespanType, filteredSources, undefined);
+                           this.props.datetimeSelection, this.props.timespanType, filteredSources, undefined,
+                           this.props.categoryValue, this.props.categoryType);
   },
 
   searchSubmit(){
       let searchValue = this.refs.filterTextInput.value;
 
       this.processNewsFeed([], 0, this.props.bbox, this.props.edges, 
-                           this.props.datetimeSelection, this.props.timespanType, this.state.filteredSources, searchValue);
+                           this.props.datetimeSelection, this.props.timespanType, this.state.filteredSources, 
+                           searchValue, this.props.categoryValue, this.props.categoryType);
   },
   
   render() {
