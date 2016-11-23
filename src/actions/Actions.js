@@ -1,5 +1,17 @@
 import {SERVICES} from '../services/services';
 
+const ENGLISH_LANGUAGE = "en";
+
+function GetSearchEdges(siteKey, languageCode, callback){
+    SERVICES.getDefaultSuggestionList(siteKey, languageCode, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                 callback(body.data.search.edges);
+            }else{
+                 throw new Error(`[${error}] occured while processing entity list request`);
+            }
+     });
+}
+
 const constants = {
            SENTIMENT_JSON_MAPPING : {
                 "0": -5,
@@ -8,22 +20,25 @@ const constants = {
            },
            TIMESPAN_TYPES : {
                 'hours': {
-                    format: "MM/DD/YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00"
+                    format: "MM/DD/YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00", rangeFormat: "hour"
                 },
                 'days': {
-                    format: "MM/DD/YYYY", blobFormat: "[day]-YYYY-MM-DD"
+                    format: "MM/DD/YYYY", blobFormat: "[day]-YYYY-MM-DD", rangeFormat: "day"
                 },
                 'months': {
-                    format: "YYYY-MM", blobFormat: "[month]-YYYY-MM"
+                    format: "YYYY-MM", blobFormat: "[month]-YYYY-MM", rangeFormat: "month"
+                },
+                'weeks': {
+                    format: "YYYY-WW", blobFormat: "[week]-YYYY-WW", rangeFormat: "isoweek"
                 },
                 'customDate': {
-                    format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD"
+                    format: "MM/DD/YYYY", reactWidgetFormat: "MMM Do YYYY", blobFormat: "[day]-YYYY-MM-DD", rangeFormat: "day"
                 },
                 'customDateTime': {
-                    format: "MM/DD/YY HH:00", reactWidgetFormat: "MMM Do YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00"
+                    format: "MM/DD/YY HH:00", reactWidgetFormat: "MMM Do YYYY HH:00", blobFormat: "[hour]-YYYY-MM-DDHH:00", rangeFormat: "hour"
                 },
                 'customMonth': {
-                    format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM"
+                    format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM", rangeFormat: "month"
                 }
            },
            MOMENT_FORMATS: {
@@ -43,17 +58,6 @@ const constants = {
              'g': 'group',
              'sec': 'sector',
              'st': 'status'
-           },
-           HEATMAP : {
-               RETRIEVE_HEATMAP_TILE: "HEATMAP"
-           },
-           ACTIVITY : {
-               LOAD_EVENTS: "LOAD:ACTIVITIES",
-               LOAD_SENTIMENT_TREE: "LOAD:TREE-VIEW"
-           },
-           GRAPHING : {
-               LOAD_GRAPH_DATA: "LOAD:GRAPH_DATA",
-               CHANGE_TIME_SCALE: "EDIT:TIME_SCALE"
            },
            DASHBOARD : {
                LOAD: "LOAD:DASHBOARD",
@@ -80,27 +84,9 @@ const constants = {
 };
 
 const methods = {
-    ACTIVITY: {
-        load_activity_events: function(siteKey){
-            let self = this;
-            
-            let dataStore = this.flux.stores.DataStore.dataStore;
-            let currentKeyword = dataStore.categoryValue;
-            
-            SERVICES.getActivityEvents(siteKey, currentKeyword, dataStore.categoryType, dataStore.datetimeSelection, dataStore.timespanType)
-            .subscribe(response => {
-                if(response && response.length > 0){
-                    self.dispatch(constants.ACTIVITY.LOAD_EVENTS, {
-                                            response: response
-                    });
-                }
-            });
-        }
-    },
     DASHBOARD: {
         initialize(siteKey){
           let self = this;
-          
           let azureStorageCB = results => {
                 if(results && results.length > 0){
                     self.dispatch(constants.DASHBOARD.LOAD, {
@@ -110,77 +96,21 @@ const methods = {
                 }
           };
 
-          SERVICES.getDefaultSuggestionList(siteKey)
-                  .subscribe(tableValues => {
-                      if(tableValues.response && tableValues.response.value){
-                          let processedResults = tableValues.response.value.map(kw => {
-                              return {"category": kw.super_category.toLowerCase(), "searchTerm": kw.en_term.toLowerCase()};
-                          });
-
-                          azureStorageCB(processedResults);
-                      }
-                  },
-                  error => {
-                      console.error('An error occured trying to query the search terms: ' + error);
-                  });
+          GetSearchEdges(siteKey, ENGLISH_LANGUAGE, azureStorageCB);
         },
-        
-        load_sentiment_tree_view: function(siteKey){
-            let self = this;
+        changeSearchFilter(selectedEntity, siteKey){
+           let self = this;
 
-            let azureStorageCB = folderTree => {
-                    if(folderTree && folderTree.size > 0){
-                        self.dispatch(constants.ACTIVITY.LOAD_SENTIMENT_TREE, {folderTree});
-                    }
-            };
-
-            SERVICES.getSentimentTreeData(siteKey, azureStorageCB);
-        },
-        changeSearchFilter(newFilter, searchType){
-           this.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {newFilter, searchType});
+           self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity});
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
         },
-        updateAssociatedTerms(associatedKeywords){
-            this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, associatedKeywords);
+        updateAssociatedTerms(associatedKeywords, bbox){
+            this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords, bbox});
         },
         changeDate(siteKey, datetimeSelection, timespanType){
-           let self = this;
-
-           SERVICES.getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType)
-                      .subscribe(timeSeriesResponse => {
-                             if(timeSeriesResponse && timeSeriesResponse.graphData && timeSeriesResponse.graphData.length > 0){
-                                 self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse, datetimeSelection, timespanType});
-                             }
-                      }, error => {
-                        let emptyTimeSeries = {graphData: [], labels: []};
-                        
-                        //If we reached here then the datetime blob is not available. We should continue
-                        //to dispatch the flux operation to the front-end so the search terms / date is reflected.
-                        self.dispatch(constants.DASHBOARD.CHANGE_DATE, {timeSeriesResponse: emptyTimeSeries, datetimeSelection: datetimeSelection, timespanType: timespanType});
-           });
-        }
-    },
-    GRAPHING : {
-        edit_time_scale(fromDate, toDate){
-            this.dispatch(constants.GRAPHING.CHANGE_TIME_SCALE, {fromDate: fromDate, 
-                                                                 toDate: toDate});
-        },
-        load_timeseries_data: function(siteKey){
-            let self = this;
-            let dataStore = this.flux.stores.DataStore.dataStore;
-
-            if(dataStore.datetimeSelection && dataStore.timespanType){
-                SERVICES.getPopularTermsTimeSeries(siteKey, dataStore.datetimeSelection, dataStore.timespanType)
-                            .subscribe(response => {
-                                if(response && response.graphData && response.graphData.length > 0){
-                                    self.dispatch(constants.GRAPHING.LOAD_GRAPH_DATA, {response: response});
-                                }
-                            }, error => {
-                                console.log('Something went terribly wrong with loading the initial graph dataset');
-                            });
-            }
+           this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
         }
     },
     FACTS: {

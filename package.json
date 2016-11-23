@@ -43,8 +43,12 @@
     "react-autosuggest": "2.1.1",
     "react-table": "^3.1.2",
     "react-tabs": "^0.8.2",
+    "react-highlight-words": "^0.6.0",
+    "react-infinite": "^0.8.0",
+    "react-progress-bar-plus": "^1.2.0",
     "react-treebeard": "^1.1.2",
     "react-widgets": "^3.2.4",
+    "request": "^2.78.0",
     "restify": "^4.1.1",
     "rx": "^4.0.7",
     "rx-dom": "^7.0.3"

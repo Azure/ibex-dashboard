@@ -1,29 +1,37 @@
 import Fluxxor from 'fluxxor';
 import Subheader from './Subheader';
-import {TermFilter} from './TermFilter';
 import React from 'react';
 import {Treebeard, decorators} from 'react-treebeard';
 import * as filters from './TreeFilter';
 import {TypeaheadSearch} from './TypeaheadSearch';
 import '../styles/Header.css';
 import '../styles/SentimentTreeView.css';
+import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
+      parentTermsName = "Term Filters",
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
 
 const styles = {
   subHeader: {
     color:'#a3a3b3',
+    paddingLeft: '11px',
+    fontSize: '14px',
     fontWeight: 800
   },
   component: {
      display: 'block',
      verticalAlign: 'top',
-     overflowX: 'auto',
-     width: '400px'
+     width: '100%'
  },
  searchBox: {
         padding: '0px 20px 10px 20px'
+ },
+ subHeaderDescription: {
+    color: '#fff',
+    fontSize: '8px',
+    fontWeight: 800,
+    paddingLeft: '4px'
  }
 };
  
@@ -54,7 +62,7 @@ const treeDataStyle = {
             toggle: {
                 base: {
                     position: 'relative',
-                    display: 'inline-block',
+                    display: 'inline-flex',
                     verticalAlign: 'top',
                     marginLeft: '-5px',
                     height: '24px',
@@ -76,9 +84,30 @@ const treeDataStyle = {
             },
             header: {
                 base: {
-                    display: 'inline-block',
+                    display: 'inline-flex',
                     verticalAlign: 'top',
+                    width: '100%',
                     color: '#9DA5AB'
+                },
+                baseHighlight: {
+                    background: 'rgb(49, 54, 63)',
+                    display: 'inline-flex',
+                    verticalAlign: 'top',
+                    width: '100%',
+                    color: '#9DA5AB'
+                },
+                only: {
+                    fontSize: '14px',
+                    textDecoration: 'underline',
+                    fontWeight: '500'
+                },
+                badge: {
+                    textAlign: 'right',
+                    marginRight: '14px'
+                },
+                parentBadge: {
+                    marginRight: '28px',
+                    textAlign: 'right',
                 },
                 connector: {
                     width: '2px',
@@ -91,6 +120,7 @@ const treeDataStyle = {
                 },
                 title: {
                     lineHeight: '24px',
+                    display: 'inline-flex',
                     verticalAlign: 'middle'
                 }
             },
@@ -132,11 +162,76 @@ export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
-      let siteKey = this.props.siteKey;
+      return {
+          treeData: {},
+          originalTreeData: {}
+      }
+  },
 
-      this.getFlux().actions.DASHBOARD.load_sentiment_tree_view(siteKey);
+  componentWillReceiveProps(nextProps){
+      let treeData = this.createRelevantTermsTree(this.state.associatedKeywords);
+      this.setState({treeData: treeData, originalTreeData: treeData})
+  },
 
-      return {}
+  createRelevantTermsTree(termsMap){
+        let rootItem = {
+            name: parentTermsName,
+            folderKey: 'associatedKeywords',
+            toggled: true,
+            children: []
+        };
+
+        let popularItemsRoot = {
+            name: 'Top 5 Terms',
+            folderKey: 'top5Keywords',
+            checked: true,
+            toggled: true,
+            children: []
+        };
+
+        let otherItemsRoot = {
+            name: 'Other Terms',
+            folderKey: 'otherKeywords',
+            checked: true,
+            toggled: false,
+            children: []
+        };
+
+        let itemCount = 0;
+        let popularTermsTotal = 0, otherTotal = 0;
+
+        for (var [term, value] of termsMap.entries()) {
+            let newEntry = {
+                    name: term,
+                    folderKey: term,
+                    checked: value.enabled,
+                    eventCount: value.mentions
+            };
+
+            if(term !== "none" && itemCount++ < 5){
+                newEntry.parent = popularItemsRoot;
+                popularItemsRoot.children.push(newEntry);
+                popularTermsTotal += value.enabled ? value.mentions : 0;
+            }else if(term !== "none"){
+                newEntry.parent = otherItemsRoot;
+                otherItemsRoot.children.push(newEntry);
+                otherTotal += value.enabled ? value.mentions : 0;
+            }
+        }
+        
+        if(popularItemsRoot.children < 5){
+            popularItemsRoot.name = "Terms";
+        }
+
+        rootItem.children.push(popularItemsRoot);
+
+        if(otherItemsRoot.children.length > 0){
+            rootItem.children.push(otherItemsRoot);
+        }
+        
+        rootItem.eventCount = popularTermsTotal + otherTotal;
+
+        return rootItem;
   },
   
   onToggle(node, toggled){
@@ -151,51 +246,106 @@ export const SentimentTreeview = React.createClass({
     return this.getFlux().store("DataStore").getState();
   },
 
-  changeCheckedStateForChildren(node, cb){
+  changeCheckedStateForChildren(node, filters, cb){
       let self = this;
-      cb(node);
+      cb(node, filters);
 
       if(node.children && node.children.length > 0){
-          node.children.map(item => self.changeCheckedStateForChildren(item, cb));
+          node.children.map(item => self.changeCheckedStateForChildren(item, filters, cb));
       }
   },
 
   onChange(node){
-      let filters = this.state.filteredTerms;
-      this.changeCheckedStateForChildren(node, child => filters[child.folderKey] = !filters[child.folderKey]);
+      let filters = this.props.enabledTerms;
+      let checkboxActionCB = (nodeElement, filterList) => {
+          let addTerm = !nodeElement.checked;
+          let termIndex = filterList.indexOf(nodeElement.folderKey);
+
+          if(!addTerm && termIndex > -1){
+              filterList.splice(termIndex, 1);
+          }else{
+              filterList.push(nodeElement.folderKey);
+          }
+      }
+
+      this.changeCheckedStateForChildren(node, filters, checkboxActionCB);
       this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
+  },
+
+  filterNode(filteredNode){
+       let filters = [filteredNode.name];
+       this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
   },
 
   onFilterMouseUp(e){
         const filter = e.target.value.trim();
-        let fullDataset = this.state.originalTermsTree;
 
-        if(!filter){ return this.setState({treeData:fullDataset}); }
-        var filtered = filters.filterTree(fullDataset, filter);
+        if(!filter){ return this.setState({treeData: this.state.originalTreeData}); }
+        var filtered = filters.filterTree(this.state.treeData, filter);
         filtered = filters.expandFilteredNodes(filtered, filter);
         this.setState({treeData: filtered});
+  },
+
+  changeHighlightedStateForChildren(node, highlightedNodeName){
+      let self = this;
+      if(node.name === highlightedNodeName){
+          node.highlighted = true;
+      }else{
+          node.highlighted = false;
+      }
+
+      if(node.children && node.children.length > 0){
+          node.children.map(item => self.changeHighlightedStateForChildren(item, highlightedNodeName));
+      }
+  },
+
+  onHighlight(node){
+      if(!node.children){
+        let treeData = this.state.treeData;
+        this.changeHighlightedStateForChildren(treeData, node.name);
+
+        this.setState({treeData});
+      }
+  },
+
+  termSelected(node){
+      if(!node.children){
+          let selectedEntity = {
+              type: "Term",
+              properties: {
+                  name: node.name
+              }
+          };
+
+          this.getFlux().actions.DASHBOARD.changeSearchFilter(selectedEntity, this.props.siteKey);
+      }
   },
 
   Header(props) {
         const style = props.style;
         let self = this;
-        const termStyle = { paddingLeft: '3px', fontWeight: 800, color: '#337ab7' };
-        const categorytyle = { paddingLeft: '3px', fontSize: '13px', color: '#fff', fontWeight: 600};
-        const badgeClass = props.node.checked && props.node.children && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
+        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '12px', color: '#337ab7',  width: '100%' };
+        const categoryStyle = { paddingLeft: '3px', fontSize: '14px', color: '#fff', fontWeight: 600,  width: '100%'};
+        let badgeClass = (props.node.checked || props.node.children) && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
         let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
+        let onlyLink = <span style={style.only} onClick={this.filterNode.bind(this, props.node)}>only</span>;
+        let termClassName = !isNodeTypeCategory ? "relevantTerm" : "";
 
         return (
-            <div style={style.base}>
-                <div style={style.title}>
+            <div className="row" style={!props.node.highlighted || props.node.children ? style.base : style.baseHighlight} onMouseEnter={this.onHighlight.bind(this, props.node)}>
+                <div className="col-md-10" style={style.title}>
                     <input type="checkbox"
                         checked={props.node.checked}
                         onChange={self.onChange.bind(this, props.node)}/>
-                        <span style={ !isNodeTypeCategory ? termStyle : categorytyle }>{(!isNodeTypeCategory ? "#" : "") + props.node.name}</span>
-                        {
-                            props.node.eventCount && props.node.eventCount > 0 ? 
-                                <span className={badgeClass}>{props.node.eventCount}</span> 
-                            : undefined
-                        }
+                    <span className={termClassName} onClick={this.termSelected.bind(this, props.node)} style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{props.node.name} </span>
+                    {props.node.highlighted ? onlyLink : ""}
+                </div>
+                <div style={props.node.name === parentTermsName ? style.parentBadge : style.badge} className="col-md-2">
+                            {
+                                props.node.eventCount && props.node.eventCount > 0 ? 
+                                    <span className={badgeClass}>{numeralLibs(props.node.eventCount).format(props.node.eventCount > 1000 ? '+0.0a' : '0a')}</span> 
+                                : undefined
+                            }
                 </div>
             </div>
         );   
@@ -222,16 +372,14 @@ export const SentimentTreeview = React.createClass({
   
  render(){
      let self = this;
-     let defaultSearchPlaceholder = "#" + this.state.categoryValue;
 
      return (
          <div className="panel panel-selector">
-            <Subheader style={styles.subHeader}>Heatmap Terms</Subheader>
+            <Subheader style={styles.subHeader}>Watchlist Terms<span style={styles.subHeaderDescription}>(Select all associations)</span></Subheader>
             <div className="row tagFilterRow">
-                <TypeaheadSearch data={defaultSearchPlaceholder}/>
-            </div>
-            <div className="row tagFilterRow">
-                <TermFilter data={this.state.associatedKeywords ? Object.keys(this.state.associatedKeywords) : [] } />
+                <TypeaheadSearch data={this.state.categoryValue}
+                                 type={this.state.categoryType}
+                                 siteKey={this.props.siteKey} />
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">
@@ -253,6 +401,7 @@ export const SentimentTreeview = React.createClass({
                             animations={false}
                             data={this.state.treeData}
                             style={treeDataStyle}
+                            siteKey={this.props.siteKey}
                             decorators={Object.assign({}, decorators, {Header: self.Header})} />
                         </div> : undefined
                 }

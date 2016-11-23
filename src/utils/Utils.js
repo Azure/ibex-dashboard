@@ -17,6 +17,15 @@ export function momentToggleFormats(dateString, fromFormat, targetFormat){
       return moment(dateString, fromFormat).format(targetFormat);
  }
 
+ export function momentGetFromToRange(dateString, fromFormat, rangeType){
+      let sourceMoment = moment(dateString, fromFormat);
+      
+      return {
+          fromDate: sourceMoment.startOf(rangeType).format(),
+          toDate: sourceMoment.endOf(rangeType).format(),
+      };
+ }
+
 function GetSitePrefixKey(siteKey){
      let propNamePrefix;
 

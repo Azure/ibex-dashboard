@@ -1,10 +1,12 @@
 import Rx from 'rx';
 import 'rx-dom';
 import {Actions} from '../actions/Actions';
-import {guid, momentToggleFormats, getEnvPropValue} from '../utils/Utils.js';
+import {guid, momentToggleFormats, getEnvPropValue, momentGetFromToRange} from '../utils/Utils.js';
+import request from 'request';
 
-const maxMappingLevels = 4;
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
+
+const MAX_ZOOM = 15;
 
 export const SERVICES = {
   getUserAuthenticationInfo(){
@@ -18,8 +20,6 @@ export const SERVICES = {
       console.log('AAD Auth Client ID config is not setup in Azure for this instance');
       return {};
     }
-
-    console.log('AD ID: ' + process.env.REACT_APP_AAD_AUTH_CLIENTID);
 
     window.config = {
       instance: 'https://login.microsoftonline.com/',
@@ -58,379 +58,190 @@ export const SERVICES = {
     }
   },
 
-  getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType){
+ getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm, callback){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
      let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
      let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TIMESERIES);
 
-     let url = "{0}/{1}/{2}/top5.json".format(hostname, blobContainer, momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat));
+     let url = `${hostname}/${blobContainer}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
 
-      return Rx.DOM.getJSON(url);
+     let GET = {
+            url : url,
+            json: true,
+            withCredentials: false
+     };
+
+     request(GET, callback);
   },
 
-  getDefaultSuggestionList(siteKey){
-      return Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_KEYWORDS),
-                          responseType: 'json',
-                          headers: {"Accept": "application/json;odata=nometadata"}
-                        });
+  getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, callback){
+      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+      let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+      let additionalTerms = selectedTerm ? [selectedTerm] : [];
+
+      let fragment = `fragment FortisDashboardView on EdgeList {
+                        runTime
+                        edges {
+                            name
+                            mentions
+                        }
+                      }`;
+
+      let query = `  ${fragment}
+                      query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!) {
+                        whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan) {
+                            ...FortisDashboardView
+                        }
+                      }`;
+
+      let variables = {site, additionalTerms, timespan};
+      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let POST = {
+            url : `${host}/api/terms`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+      };
+
+      request(POST, callback);
   },
 
-  processFolderItem(parentFolder, mappingItem, level){
-       if(level <= maxMappingLevels){
-           let folderKey = mappingItem["level" + level + "Key"] || "";
-           if(folderKey && !parentFolder.has(folderKey)){
-                let newFolder = {folderName: mappingItem["level" + level + "Display"], subFolders: new Map(), eventCount: 0};
-                parentFolder.set(folderKey, newFolder);
+  getDefaultSuggestionList(site, langCode, callback){
+      let fragment = `fragment FortisDashboardView on EdgeCollection {
+                        edges {
+                            type
+                            properties {
+                                name
+                                coordinates
+                            }
+                        }
+                      }`;
 
-                this.processFolderItem(newFolder.subFolders, mappingItem, level + 1);
-           }else if(folderKey){
-                this.processFolderItem(parentFolder.get(folderKey).subFolders, mappingItem, level + 1);
-           }
-       }
+      let query = `  ${fragment}
+                      query Search($site: String!, $langCode: String){
+                            search(site: $site, langCode: $langCode) {
+                            ...FortisDashboardView
+                        }
+                      }`;
+
+      let variables = {site, langCode};
+      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let POST = {
+            url : `${host}/api/edges`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+      };
+
+      request(POST, callback);
   },
 
-  getSentimentTreeData(siteKey, cb){
-      Rx.DOM.ajax({url: getEnvPropValue(siteKey, process.env.REACT_APP_TBL_CLASSIFICATION),
-                          responseType: 'json',
-                          headers: {"Accept": "application/json;odata=nometadata"}
-                        })
-            .subscribe(tableValues => {
-                  if(tableValues.response && tableValues.response.value){
-                       let folderTree = new Map();
+  getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, callback){
+      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+      let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
 
-                       tableValues.response.value.forEach(item => {
-                             let parentFolder = folderTree.get(item.PartitionKey);
-                             if(!parentFolder){
-                                 parentFolder = {folderName: item.PartitionKey, subFolders: new Map(), eventCount: 0};
-                                 folderTree.set(item.PartitionKey, parentFolder);
-                             }
+      let fragment = `fragment FortisDashboardView on FeatureCollection {
+                            type
+                            runTime
+                            features {
+                                coordinates
+                                properties {
+                                    location
+                                    population
+                                    mentions
+                                }
+                            }
+                        }`;
 
-                             this.processFolderItem(parentFolder.subFolders, item, 1);
-                       });
+      let query = `  ${fragment}
+                      query PopularLocations($site: String!, $langCode: String, $timespan: String!, $zoomLevel: Int) {
+                            popularLocations(site: $site, langCode: $langCode, timespan: $timespan, zoomLevel: $zoomLevel) {
+                            ...FortisDashboardView
+                        }
+                      }`;
 
-                       cb(folderTree);
-                   }
-              }, error => {
-                            console.error('An error occured trying to query the search terms: ' + error);
-              });
+      let variables = {site, timespan, langCode, zoomLevel};
+      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let POST = {
+            url : `${host}/api/places`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+      };
+
+      request(POST, callback);
   },
 
-  getActivityEvents: function(siteKey, categoryValue, categoryType, timespanType, dateSelection){
-      let testData =[[{
-        "id": 1,
-        "name": "Kathy Wood",
-        "source": "facebook",
-        "timeLabel": "1 hour ago",
-        "eventSubSource": "AP",
-        "sentence": "@RealBenCarson</a> says he will never forgive <a href='#'>@HillaryClinton</a> for <a href='#'>#Benghazi</a>",
-        "dataType": "comment",
-        "messageTitle": "Refugees Fleeing Bengazi",
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a3.jpg"
-        }, {
-        "id": 2,
-        "name": "Lisa Bell",
-        "source": "facebook",
-        "timeLabel": "2 hours ago",
-        "eventSubSource": "AP",
-        "sentence": "Vestibulum rutrum rutrum neque.",
-        "dataType": "comment",
-        "messageTitle": "Hunger Hits Tripoli",
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 3,
-        "name": "Samuel Dunn",
-        "source": "facebook",
-        "timeLabel": "2 hours ago",
-        "eventSubSource": "BBC",
-        "sentence": "Fusce consequat.",
-        "dataType": "comment",
-        "messageTitle": "ISIS attack in Benghazi",
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/profile.jpg"
-        }, {
-        "id": 4,
-        "name": "Philip Price",
-        "source": "facebook",
-        "timeLabel": "4 hours ago",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Integer non velit. Donec diam neque, vestibulum eget, vulputate ut, ultrices vel, augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec pharetra, magna vestibulum aliquet ultrices, erat tortor sollicitudin mi, sit amet lobortis sapien sapien non mi.",
-        "dataType": "comment",
-        "messageTitle": "Water Famine Continues",
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 5,
-        "name": "Linda Nguyen",
-        "source": "twitter",
-        "timeLabel": "1:33 PM",
-        "eventSubSource": "AP",
-        "sentence": "Etiam justo. Etiam pretium iaculis justo. In hac habitasse platea dictumst.",
-        "dataType": "post",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a5.jpg"
-        }, {
-        "id": 6,
-        "name": "Heather Freeman",
-        "source": "twitter",
-        "timeLabel": "2:30 AM",
-        "eventSubSource": "AP",
-        "sentence": "Donec dapibus. Duis at velit eu est congue elementum. In hac habitasse platea dictumst.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 7,
-        "name": "Diane Hernandez",
-        "source": "twitter",
-        "timeLabel": "3:05 AM",
-        "eventSubSource": "AP",
-        "sentence": "Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vivamus vestibulum sagittis sapien.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 8,
-        "name": "Jennifer Willis",
-        "source": "facebook",
-        "timeLabel": "5:47 AM",
-        "eventSubSource": "AP",
-        "sentence": "Morbi non lectus.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 9,
-        "name": "Maria Porter",
-        "source": "twitter",
-        "timeLabel": "2:03 AM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Nulla ac enim. In tempor, turpis nec euismod scelerisque, quam turpis adipiscing lorem, vitae mattis nibh ligula nec sem.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 10,
-        "name": "Walter Chapman",
-        "source": "twitter",
-        "timeLabel": "9:18 AM",
-        "eventSubSource": "Libyan Times",
-        "sentence": "Morbi non lectus. Aliquam sit amet diam in magna bibendum imperdiet.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 11,
-        "name": "Kathleen Nelson",
-        "source": "twitter",
-        "timeLabel": "2:16 PM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "In tempor, turpis nec euismod scelerisque, quam turpis adipiscing lorem, vitae mattis nibh ligula nec sem. Duis aliquam convallis nunc. Proin at turpis a pede posuere nonummy.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 12,
-        "name": "Bruce Day",
-        "source": "facebook",
-        "timeLabel": "11:20 PM",
-        "eventSubSource": "AP",
-        "sentence": "Nulla facilisi.",
-        "dataType": "post",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 13,
-        "name": "Lawrence Parker",
-        "source": "facebook",
-        "timeLabel": "6:49 AM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Nullam porttitor lacus at turpis. Donec posuere metus vitae ipsum. Aliquam non mauris.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 14,
-        "name": "Johnny Ruiz",
-        "source": "facebook",
-        "timeLabel": "7:55 AM",
-        "eventSubSource": "AP",
-        "sentence": "Morbi ut odio.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://www.material-ui.com/images/ok-128.jpg"
-        }, {
-        "id": 15,
-        "name": "Ashley Fernandez",
-        "source": "facebook",
-        "timeLabel": "3:39 PM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Fusce lacus purus, aliquet at, feugiat non, pretium quis, lectus.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 16,
-        "name": "Bonnie Wells",
-        "source": "facebook",
-        "timeLabel": "2:32 PM",
-        "eventSubSource": "AP",
-        "sentence": "Aliquam augue quam, sollicitudin vitae, consectetuer eget, rutrum at, lorem.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 17,
-        "name": "Barbara Montgomery",
-        "source": "twitter",
-        "timeLabel": "4:28 PM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 18,
-        "name": "Marie Mitchell",
-        "source": "twitter",
-        "timeLabel": "12:27 AM",
-        "eventSubSource": "BBC",
-        "sentence": "Donec dapibus. Duis at velit eu est congue elementum. In hac habitasse platea dictumst.",
-        "dataType": "post",
-        "messageTitle": false,
-        "avatar": "http://www.material-ui.com/images/ok-128.jpg"
-        }, {
-        "id": 19,
-        "name": "Doris Garcia",
-        "source": "facebook",
-        "timeLabel": "8:11 AM",
-        "eventSubSource": "BBC",
-        "sentence": "Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Proin interdum mauris non ligula pellentesque ultrices.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 20,
-        "name": "Gregory Warren",
-        "source": "facebook",
-        "timeLabel": "11:18 AM",
-        "eventSubSource": "BBC",
-        "sentence": "Maecenas ut massa quis augue luctus tincidunt. Nulla mollis molestie lorem.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 21,
-        "name": "Samuel Fisher",
-        "source": "facebook",
-        "timeLabel": "8:38 AM",
-        "eventSubSource": "AP",
-        "sentence": "Fusce posuere felis sed lacus. Morbi sem mauris, laoreet ut, rhoncus aliquet, pulvinar sed, nisl. Nunc rhoncus dui vel sem.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 22,
-        "name": "Theresa Wilson",
-        "source": "twitter",
-        "timeLabel": "7:15 PM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Aliquam erat volutpat. In congue.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 23,
-        "name": "Jeremy Sims",
-        "source": "twitter",
-        "timeLabel": "1:58 PM",
-        "eventSubSource": "BBC",
-        "sentence": "Nunc purus.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 24,
-        "name": "Bonnie Carr",
-        "source": "twitter",
-        "timeLabel": "10:29 AM",
-        "eventSubSource": "BBC",
-        "sentence": "Etiam faucibus cursus urna.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 25,
-        "name": "Richard Ortiz",
-        "source": "facebook",
-        "timeLabel": "1:13 PM",
-        "eventSubSource": "Libyan Times",
-        "sentence": "Curabitur in libero ut massa volutpat convallis.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 26,
-        "name": "Martin Cunningham",
-        "source": "twitter",
-        "timeLabel": "4:39 PM",
-        "eventSubSource": "Al Jazeera",
-        "sentence": "Suspendisse ornare consequat lectus. In est risus, auctor sed, tristique in, tempus sit amet, sem.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 27,
-        "name": "Henry Perkins",
-        "source": "facebook",
-        "timeLabel": "6:37 PM",
-        "eventSubSource": "AP",
-        "sentence": "Morbi a ipsum. Integer a nibh.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://www.material-ui.com/images/ok-128.jpg"
-        }, {
-        "id": 28,
-        "name": "Jennifer Rodriguez",
-        "source": "twitter",
-        "timeLabel": "9:54 PM",
-        "eventSubSource": "Libyan Times",
-        "sentence": "Nunc purus. Phasellus in felis.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 29,
-        "name": "Bonnie Coleman",
-        "source": "facebook",
-        "timeLabel": "1:27 PM",
-        "eventSubSource": "AP",
-        "sentence": "Quisque erat eros, viverra eget, congue eget, semper rutrum, nulla. Nunc purus.",
-        "dataType": "tweet",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }, {
-        "id": 30,
-        "name": "Ralph Frazier",
-        "source": "facebook",
-        "timeLabel": "9:23 PM",
-        "eventSubSource": "BBC",
-        "sentence": "Suspendisse potenti. Cras in purus eu magna vulputate luctus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.",
-        "dataType": "comment",
-        "messageTitle": false,
-        "avatar": "http://webapplayers.com/inspinia_admin-v2.4/img/a2.jpg"
-        }]];
-
-      return Rx.Observable.from(testData);
-  },
-
-  getHeatmapTiles: function(siteKey, categoryType, timespanType, categoryValue, datetimeSelection, tileId){
+  getHeatmapTiles: function(site, timespanType, zoom, mainEdge, datetimeSelection, bbox, 
+                            filteredEdges, locations, callback){
     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-    let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
-    let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TILES);
+    let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+    let zoomLevel = MAX_ZOOM;
 
-    let url = "{0}/{1}/{2}/{3}/{4}/{5}.json".format(hostname, blobContainer,
-                                       categoryType.toLowerCase(), categoryValue.replace(" ", ""),
-                                       momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat), tileId);
+    console.log(`processing tile request [${mainEdge}, ${timespan}, ${bbox}, ${filteredEdges.join(",")}]`)
+    if(bbox && Array.isArray(bbox) && bbox.length === 4){
+        let fragmentView = `fragment FortisDashboardView on FeatureCollection {
+                                type
+                                runTime
+                                edges {
+                                    type
+                                    name
+                                    mentionCount
+                                }
+                                features {
+                                    type
+                                    coordinates
+                                    properties {
+                                    neg_sentiment
+                                    pos_sentiment
+                                    location
+                                    mentionCount
+                                    tileId
+                                    population
+                                    location
+                                    }
+                                }
+                                }`;
 
-    return Rx.DOM.getJSON(url);
+        let query, variables;
+        
+        if(locations && locations.length > 0 && locations[0].length > 0){
+            query = `${fragmentView} 
+                        query FetchAllEdgesAndTilesByLocations($site: String!, $locations: [[Float]]!, $filteredEdges: [String], $timespan: String!) {
+                              fetchAllEdgesAndTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan) {
+                                    ...FortisDashboardView
+                              }
+                        }`;
+
+            variables = {site, locations, filteredEdges, timespan};
+        }else{
+            query =`${fragmentView}
+                       query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int) {
+                             fetchAllEdgesAndTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel) {
+                                ...FortisDashboardView 
+                             }
+                        }`;
+
+            variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel};
+        }
+
+        let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
+        
+        var POST = {
+            url : `${host}/api/tiles`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+    }else{
+        throw new Error(`Invalid bbox format for value [${bbox}]`);
+    }
   },
 
   getFacts: function (pageSize, skip) {
@@ -441,6 +252,66 @@ export const SERVICES = {
   getFact: function (id) {
       let url = "http://fortisfactsservice.azurewebsites.net/api/facts/" + id;
       return Rx.DOM.getJSON(url);
+  },
+
+  FetchMessageSentences: function(site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges, 
+                        langCode, sourceFilter, mainTerm, fulltextTerm, coordinates, callback){
+   let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+   let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
+   let fromDate = dates.fromDate, toDate = dates.toDate;
+
+   if(bbox && Array.isArray(bbox) && bbox.length === 4){
+        let fragmentView = `fragment FortisDashboardView on FeatureCollection {
+                                type
+                                runTime
+                                    features {
+                                        type
+                                        coordinates
+                                        properties {
+                                            messageid,
+                                            sentence,
+                                            edges,
+                                            createdtime,
+                                            sentiment,
+                                            orig_language,
+                                            source
+                                        }
+                                    }
+                                }`;
+
+        let query, variables;
+
+        if(coordinates && coordinates.length === 2){
+            query = `  ${fragmentView}
+                       query ByLocation($site: String!, $coordinates: [Float]!, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
+                             byLocation(site: $site, coordinates: $coordinates, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
+                                ...FortisDashboardView 
+                            }
+                        }`;
+            variables = {site, coordinates, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
+        }else{
+            query = `  ${fragmentView}
+                       query ByBbox($site: String!, $bbox: [Float]!, $mainTerm: String, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
+                             byBbox(site: $site, bbox: $bbox, mainTerm: $mainTerm, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
+                                ...FortisDashboardView 
+                            }
+                        }`;
+            variables = {site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
+        }
+
+        let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
+        var POST = {
+            url : `${host}/api/Messages`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+        
+        request(POST, callback);
+    }else{
+        callback(new Error(`Invalid bbox format for value [${bbox}]`));
+    }
   },
 
   getAdminKeywords: function(){
