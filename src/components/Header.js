@@ -31,7 +31,7 @@ export const Header = React.createClass({
 
     return (
       <nav className="navbar navbar-trans" role="navigation">
-          <div classNameName="container">
+          <div>
               <div className="navbar-header">
                   <button type="button" className="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapsible">
                       <span className="sr-only">Toggle navigation</span>

@@ -5,16 +5,12 @@ import Fluxxor from 'fluxxor';
 import {SERVICES} from './services/services';
 import React from 'react';
 import {default as ReactDOM} from "react-dom";
-import {default as Router } from 'react-router'
+import { Router, browserHistory } from 'react-router';
 import {routes} from './routes/routes';
-import createHistory from 'history/lib/createHashHistory';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/css/bootstrap-theme.css';
 
 let userProfile = (window.location.host.indexOf('localhost:')===-1)?SERVICES.getUserAuthenticationInfo():Actions.constants.USER_PROFILE;
-let history = createHistory({
-  queryKey: false
-});
 
 let stores = {
   DataStore: new DataStore(userProfile),
@@ -28,7 +24,7 @@ const createElement = (Component, props) => {
     return <Component {...props} />
 };
 
-ReactDOM.render((<Router history={history}
-                         createElement={createElement}>
-                         {routes}
-                 </Router>), document.getElementById('app'));
+ReactDOM.render((<Router history={browserHistory}
+                         createElement={createElement} 
+                         routes={routes} />), 
+                  document.getElementById('app'));

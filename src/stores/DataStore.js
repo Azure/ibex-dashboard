@@ -9,29 +9,21 @@ export const DataStore = Fluxxor.createStore({
           timespanType: 'customMonth',
           datetimeSelection: 'November 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: '',
-          siteKey: '',
           renderMap: true,
+          siteKey: '',
           associatedKeywords: new Map(),
           locations: new Map(),
           bbox: [],
           selectedLocationCoordinates: [],
-          categoryValue: false,
-          defaultResults: []
+          categoryValue: false
       }
       
       this.bindActions(
-            Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters
       );
-    },
-
-    handleLoadDefaultSearchResults(searchResults){
-        this.dataStore.defaultResults = searchResults.response;
-        this.dataStore.siteKey = searchResults.siteKey;
-        this.emit("change");
     },
 
     getState() {

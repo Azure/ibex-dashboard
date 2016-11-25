@@ -2,6 +2,13 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import numeralLibs from 'numeral';
 import {SERVICES} from '../services/services';
+import 'amcharts3/amcharts/amcharts';
+import 'amcharts3/amcharts/serial';
+import 'amcharts3/amcharts/pie';
+import 'amcharts3-export';
+import 'amcharts3-export/export.css';
+import 'amcharts3/amcharts/themes/dark';
+
 
 const MAX_ZOOM = 15;
 const DEFAULT_LANGUAGE = "en";

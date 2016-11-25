@@ -1,79 +1,118 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
+import {SERVICES} from '../services/services';
 import Autosuggest from 'react-autosuggest';
+import match from 'autosuggest-highlight/match';
+import parse from 'autosuggest-highlight/parse';
 import '../styles/TypeaheadSearch.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React);
-const maxDefaultResult = 12;
+//const maxDefaultResult = 12;
+const ENGLISH_LANGUAGE = "en";
+const getSuggestionValue = suggestion => suggestion.properties.name.trim();
+const getSuggestions = (value, defaultSuggestions) => {
+  const inputValue = value.trim().toLowerCase();
+  const inputLength = inputValue.length;
+
+  return inputLength === 0 || defaultSuggestions.length === 0 ? [] 
+      : defaultSuggestions.filter(edge => edge.properties.name.toLowerCase().indexOf(inputValue) > -1);
+};
 
 export const TypeaheadSearch = React.createClass({
   mixins: [FluxMixin],
-  
-  typeaheadItemSelected(suggestion, event){
-    let oldValue =  this.props.data || '';
-    let newValue =  suggestion.properties.name.trim();
-    
-    if(oldValue === newValue){
-        return;
-    }
-    
-    if(oldValue !== newValue){
-        this.getFlux().actions.DASHBOARD.changeSearchFilter(suggestion, this.props.siteKey);
-    }
-  },
-  
-  defaultSuggestions(){
-        return this.getFlux().store("DataStore").dataStore.defaultResults;
-  },
-  
-  filterResults(input, callback){
-      let filteredResults = [];
-      this.getFlux().store("DataStore").dataStore.defaultResults
-           .forEach(element => {
-               if(element.properties.name.toLowerCase().indexOf(input) > -1){
-                   filteredResults.push(element);
-               }
-           });
-           
-      callback(null, filteredResults);
-  },
-  
-  getSuggestions(input, callback) {
-    let defaultSuggestions = this.defaultSuggestions();
-    if(input === ''){
-      callback(null, defaultSuggestions.slice(0, Math.min(defaultSuggestions.length, maxDefaultResult)));
-    } else {
-      this.filterResults(input, callback);
-    }
-  },
-  
-  renderSuggestion(element, input) { // In this example, 'suggestion' is a string
-     let suggestion = element.properties.name;
 
-     let beginNormalFont = '', highlightedSequence = '', endNormalFont = '';
-     let matchingPosition = suggestion.toLowerCase().indexOf(input.toLowerCase());
-         beginNormalFont = suggestion.substring(0, (matchingPosition !== -1) ? matchingPosition : input.length);
+  getInitialState(){
+      return {
+          suggestions: [],
+          defaultResults: [],
+          value: ''
+      }
+  },
 
-     if(matchingPosition !== -1){
-       highlightedSequence = suggestion.substring(matchingPosition, matchingPosition + input.length);
-       endNormalFont = suggestion.substring(matchingPosition + input.length, suggestion.length);
-     }
+  loadEdgesFromService(siteKey, languageCode, callback){
+    SERVICES.getDefaultSuggestionList(siteKey, languageCode, (error, response, body) => {
+            if (!error && response.statusCode === 200) {
+                 callback(body.data.search.edges);
+            }else{
+                 throw new Error(`[${error}] occured while processing entity list request`);
+            }
+     });
+  },
 
-    return (                                     // and it returns a ReactElement
-      <span className="suggestionType">{element.type} - {beginNormalFont}
-          <strong className="react-autosuggest__highlighted_search_text">{(input.length > 0)?highlightedSequence:''}</strong>{endNormalFont}
+  componentDidMount(){
+      let siteKey = this.props.siteKey;
+      let self = this;
+      let searchCB = defaultResults => {
+                if(defaultResults && defaultResults.length > 0){
+                    self.setState({defaultResults});
+                }
+      };
+
+      this.loadEdgesFromService(siteKey, ENGLISH_LANGUAGE, searchCB);
+  },
+
+  componentWillReceiveProps(nextProps) {
+       const value = nextProps.data;
+
+       if(value !== this.state.value){
+           this.setState({value});
+       }
+  },
+
+  onSuggestionSelected(event, { suggestion }){
+    this.getFlux().actions.DASHBOARD.changeSearchFilter(suggestion, this.props.siteKey);
+  },
+
+  onChange(event, { newValue }){
+    const value = newValue;
+
+    this.setState({value});
+  },
+
+  onSuggestionsFetchRequested({ value }){
+    this.setState({
+      suggestions: getSuggestions(value, this.state.defaultResults)
+    });
+  },
+  
+  renderSuggestion(element, {query}) { 
+    const suggestionText = `${element.properties.name}`;
+    const matches = match(suggestionText, query);
+    const parts = parse(suggestionText, matches);
+    const iconMap = new Map([["Location", "fa fa-map-marker fa-2x"], ["Term", "fa fa-tag fa-2x"]]);
+
+    return (
+      <span className="suggestion-content">
+        <span className="type">
+          {<i className={iconMap.get(element.type)} />}
+        </span>
+        <span className="name">
+          {
+            parts.map((part, index) => {
+              const className = part.highlight ? 'highlight' : null;
+
+              return (
+                <span className={className} key={index}>{part.text}</span>
+              );
+            })
+          }
+        </span>
       </span>
     );
   },
-  
-  suggestionValue(suggestion){  
-      return suggestion.properties.name.trim();
+
+  onSuggestionsClearRequested(){
+    this.setState({
+      suggestions: []
+    });
   },
   
   render: function(){
-    let inputAttributes = {
-          className: 'form-control form-control-search',
-          placeholder: this.props.data || ''
+    const { suggestions, value } = this.state;
+    const inputProps = {
+      placeholder: 'Type \'c\'',
+      value,
+      onChange: this.onChange
     };
 
     return (
@@ -81,13 +120,14 @@ export const TypeaheadSearch = React.createClass({
                   <span className="input-group-addon">
                       <i className="fa fa-search"></i>
                   </span>
-                  <Autosuggest suggestions={this.getSuggestions}
-                               inputAttributes={inputAttributes}
-                               suggestionRenderer={this.renderSuggestion}
-                               onSuggestionSelected={this.typeaheadItemSelected}
-                               suggestionValue={this.suggestionValue}
-                               scrollBar={true}
-                               value={this.props.data || ""} />
+                  <Autosuggest suggestions={suggestions}
+                               inputProps={inputProps}
+                               focusInputOnSuggestionClick={true}
+                               onSuggestionSelected={this.onSuggestionSelected}
+                               onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                               onSuggestionsClearRequested={this.onSuggestionsClearRequested}                               
+                               renderSuggestion={this.renderSuggestion}
+                               getSuggestionValue={getSuggestionValue} />
         </div>
     );
   }

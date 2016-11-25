@@ -2,6 +2,12 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import numeralLibs from 'numeral';
 import {SERVICES} from '../services/services';
+import 'amcharts3/amcharts/amcharts';
+import 'amcharts3/amcharts/serial';
+import 'amcharts3/amcharts/pie';
+import 'amcharts3-export';
+import 'amcharts3-export/export.css';
+import 'amcharts3/amcharts/themes/dark';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -116,12 +122,16 @@ export const PopularTermsChart = React.createClass({
       return false;
  },
 
+ componentDidMount: function(){
+    if(!this.popularTermsChart){
+            this.initializeGraph();
+            this.updateChart(this.props.mainEdge, this.props.timespan, this.props.timespanType);
+    }
+ },
+
  componentWillReceiveProps: function(nextProps){
     let hasTimeSpanChanged = this.hasChanged(nextProps, "timespan");
-    if(!this.popularTermsChart){
-        this.initializeGraph();     
-        this.updateChart(nextProps.mainEdge, nextProps.timespan, nextProps.timespanType);
-    }else if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged){
+    if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged){
         this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.timespanType);
     }
  },
@@ -141,7 +151,7 @@ export const PopularTermsChart = React.createClass({
             });
  },
 
- render: function() {
+ render: function() { 
     return (
         <div>
         </div>

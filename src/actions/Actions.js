@@ -1,17 +1,5 @@
 import {SERVICES} from '../services/services';
 
-const ENGLISH_LANGUAGE = "en";
-
-function GetSearchEdges(siteKey, languageCode, callback){
-    SERVICES.getDefaultSuggestionList(siteKey, languageCode, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                 callback(body.data.search.edges);
-            }else{
-                 throw new Error(`[${error}] occured while processing entity list request`);
-            }
-     });
-}
-
 const constants = {
            SENTIMENT_JSON_MAPPING : {
                 "0": -5,
@@ -60,7 +48,6 @@ const constants = {
              'st': 'status'
            },
            DASHBOARD : {
-               LOAD: "LOAD:DASHBOARD",
                CHANGE_SEARCH: "SEARCH:CHANGE",
                CHANGE_DATE: "DATE:CHANGE",
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
@@ -77,19 +64,6 @@ const constants = {
 
 const methods = {
     DASHBOARD: {
-        initialize(siteKey){
-          let self = this;
-          let azureStorageCB = results => {
-                if(results && results.length > 0){
-                    self.dispatch(constants.DASHBOARD.LOAD, {
-                                            response: results,
-                                            siteKey: siteKey
-                    });
-                }
-          };
-
-          GetSearchEdges(siteKey, ENGLISH_LANGUAGE, azureStorageCB);
-        },
         changeSearchFilter(selectedEntity, siteKey){
            let self = this;
 

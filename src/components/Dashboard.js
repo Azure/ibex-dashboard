@@ -7,8 +7,8 @@ import {ActivityFeed} from './ActivityFeed';
 import {TimeSeriesGraph} from './TimeSeriesGraph';
 import {PopularTermsChart} from './PopularTermsChart';
 import {PopularLocationsChart} from './PopularLocationsChart';
-import Dialog from 'material-ui/lib/dialog';
-import FlatButton from 'material-ui/lib/flat-button';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
 import '../styles/Dashboard.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -18,10 +18,6 @@ export const Dashboard = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState: function() {
-      let siteKey = this.props.siteKey;
-
-      this.getFlux().actions.DASHBOARD.initialize(siteKey);
-
       return {
           openModal: false
       };

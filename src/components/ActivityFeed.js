@@ -4,7 +4,7 @@ import {SERVICES} from '../services/services';
 import '../styles/ActivityFeed.css';
 import moment from 'moment';
 import Infinite from 'react-infinite';
-import CircularProgress from 'material-ui/lib/circular-progress';
+import CircularProgress from 'material-ui/CircularProgress';
 import Highlighter from 'react-highlight-words';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -107,7 +107,7 @@ const FortisEvent = React.createClass({
             <h6 style={styles.listItemHeader}>
                 {this.props.source === "twitter" ? <i style={styles.sourceLogo} className="fa fa-twitter"></i> : <i style={styles.sourceLogo} className="fa fa-facebook-official"></i>}
                 {this.props.postedTime}
-                {commonTermsFromFilter.map(item=><span style={styles.tagStyle} className={tagClassName}>{item}</span>)}
+                {commonTermsFromFilter.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
             </h6>
             <div>
                 <Highlighter
@@ -162,7 +162,6 @@ export const ActivityFeed = React.createClass({
                            searchValue, categoryValue, categoryType, callback){
       let siteKey = this.props.siteKey;
       let mainTerm = categoryValue;
-      let entityType = categoryType;
       let location = [];
 
       if(categoryType === "Location"){
@@ -214,7 +213,8 @@ export const ActivityFeed = React.createClass({
                     if(graphQLResponse && graphQLResponse.features && Array.isArray(graphQLResponse.features)){
                         graphQLResponse.features.forEach(feature => {
                             if(feature.properties.sentence && feature.properties.sentence.length > 2){
-                                elements.push(<FortisEvent id={feature.properties.messageid}
+                                elements.push(<FortisEvent key={feature.properties.messageid} 
+                                                        id={feature.properties.messageid}
                                                         sentence={feature.properties.sentence}
                                                         source={feature.properties.source}
                                                         postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
@@ -279,7 +279,8 @@ export const ActivityFeed = React.createClass({
     let sourceTypes = [
         {"icon": "fa fa-share-alt fa-2x", "mapName": "all", "label": "All"},
         {"icon": "fa fa-facebook-official fa-2x", "mapName": "facebook", "label": ""},
-        {"icon": "fa fa-twitter fa-2x", "mapName": "twitter", "label": ""}
+        {"icon": "fa fa-twitter fa-2x", "mapName": "twitter", "label": ""},
+        {"icon": "fa fa-font fa-2x", "mapName": "acled", "label": ""}
     ];
 
     let iconStyle = {
@@ -292,7 +293,7 @@ export const ActivityFeed = React.createClass({
      <div className="col-lg-12 news-feed-column">
             <ul className="nav nav-tabs feed-source-header">
                 {
-                    sourceTypes.map(item => <li role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactiveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i style={iconStyle} className={item.icon}></i>{item.label}</a></li>)
+                    sourceTypes.map(item => <li key={item.mapName} role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactiveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i style={iconStyle} className={item.icon}></i>{item.label}</a></li>)
                 }
             </ul>
             <Infinite elementHeight={ELEMENT_ITEM_HEIGHT}

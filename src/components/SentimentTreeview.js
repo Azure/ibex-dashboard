@@ -154,10 +154,6 @@ decorators.Toggle = (props) => {
       );
 };
 
-decorators.Toggle.propTypes = {
-    style: React.PropTypes.object
-};
-
 export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
@@ -352,14 +348,8 @@ export const SentimentTreeview = React.createClass({
   },
 
   Toggle(props){
-      let isNodeTypeCategory = props.node && props.node.children && props.node.children.length > 0;
       let iconComponent = {};
-      let iconStyle = {color: '#fff'};
       const style = props.style;
-
-      if(isNodeTypeCategory){
-          iconStyle = props.node.toggled ? <i className="fa fa-plus fa-1" style={iconStyle}></i> : <i className="fa fa-minus fa-1" style={iconStyle}></i>;
-      }
 
       return (
         <div style={style.base}>

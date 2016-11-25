@@ -6,8 +6,11 @@ export const EntryPage = React.createClass({
   render() {
     return (
     <div>
-	    <Header flux={this.props.flux} {...this.props.params} routePage="Dashboard" />
-        <Dashboard flux={this.props.flux} {...this.props.params} />
+	    <Header flux={this.props.flux} 
+              {...this.props.params} 
+              routePage="Dashboard" />
+      <Dashboard flux={this.props.flux} 
+              {...this.props.params} />
     </div>
   )}
 });
