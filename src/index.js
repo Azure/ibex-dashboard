@@ -5,7 +5,7 @@ import Fluxxor from 'fluxxor';
 import {SERVICES} from './services/services';
 import React from 'react';
 import {default as ReactDOM} from "react-dom";
-import { Router, browserHistory } from 'react-router';
+import { Router, hashHistory } from 'react-router';
 import {routes} from './routes/routes';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/css/bootstrap-theme.css';
@@ -24,7 +24,7 @@ const createElement = (Component, props) => {
     return <Component {...props} />
 };
 
-ReactDOM.render((<Router history={browserHistory}
+ReactDOM.render((<Router history={hashHistory}
                          createElement={createElement} 
                          routes={routes} />), 
                   document.getElementById('app'));
