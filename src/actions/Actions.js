@@ -29,6 +29,11 @@ const constants = {
                     format: "MMMM YYYY", reactWidgetFormat: "MMMM YYYY", blobFormat: "[month]-YYYY-MM", rangeFormat: "month"
                 }
            },
+           DATA_SOURCES: new Map([["all", {"display": "All", "sourceValues":[], "icon": "fa fa-share-alt", "label": "All"}], 
+                            ["facebook", {"display": "Facebook", "sourceValues":["facebook-messages", "facebook-comments"], "icon": "fa fa-facebook-official", "label": ""}], 
+                            ["twitter", {"display": "Twitter", "sourceValues":["twitter"], "label": "", "icon": "fa fa-twitter"}], 
+                            ["acled", {"display": "acled", "sourceValues":["acled"], "label": "", "icon": "fa fa-font"}]
+                          ]),
            MOMENT_FORMATS: {
                "timeScaleDate": "MM/DD/YY HH:00"
            },
@@ -50,6 +55,8 @@ const constants = {
            DASHBOARD : {
                CHANGE_SEARCH: "SEARCH:CHANGE",
                CHANGE_DATE: "DATE:CHANGE",
+               CHANGE_SOURCE: "UPDATE:DATA_SOURCE",
+               CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS"
            },
@@ -62,15 +69,32 @@ const constants = {
            },
 };
 
+const DataSources = source => constants.DATA_SOURCES.has(source) ? constants.DATA_SOURCES.get(source).sourceValues : undefined;
+const DataSourceLookup = requestedSource => {
+    for (let [source, value] of constants.DATA_SOURCES.entries()) {
+        if(value.sourceValues.indexOf(requestedSource) > -1){
+            return value;
+        }
+    }
+
+    return undefined;
+};
+
 const methods = {
     DASHBOARD: {
-        changeSearchFilter(selectedEntity, siteKey){
+        changeSearchFilter(selectedEntity, siteKey, colorMap){
            let self = this;
 
-           self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity});
+           self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity, colorMap});
+        },
+        termsColorMap(colorMap){
+            this.dispatch(constants.DASHBOARD.CHANGE_COLOR_MAP, {colorMap})
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
+        },
+        filterDataSource(dataSource){
+           this.dispatch(constants.DASHBOARD.CHANGE_SOURCE, dataSource);
         },
         updateAssociatedTerms(associatedKeywords, bbox){
             this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords, bbox});
@@ -117,5 +141,7 @@ const methods = {
 
 export const Actions = {
   constants: constants,
-  methods: methods
+  methods: methods,
+  DataSources: DataSources,
+  DataSourceLookup
 };

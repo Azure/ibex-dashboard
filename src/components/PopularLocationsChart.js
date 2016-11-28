@@ -2,6 +2,7 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import numeralLibs from 'numeral';
 import {SERVICES} from '../services/services';
+import {Actions} from '../actions/Actions';
 import 'amcharts3/amcharts/amcharts';
 import 'amcharts3/amcharts/serial';
 import 'amcharts3/amcharts/pie';
@@ -89,10 +90,10 @@ export const PopularLocationsChart = React.createClass({
     this.popularLocationsChart.validateData();
  },
 
- updateChart(period, timespanType){
+ updateChart(period, timespanType, dataSource){
      let self = this;
 
-     SERVICES.getMostPopularPlaces(this.props.siteKey, period, timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, (error, response, body) => {
+     SERVICES.getMostPopularPlaces(this.props.siteKey, period, timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, Actions.DataSources(dataSource), (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     if(body && body.data && body.data.popularLocations && body.data.popularLocations.features){
                         self.refreshChart(body.data.popularLocations.features);
@@ -106,9 +107,9 @@ export const PopularLocationsChart = React.createClass({
   componentWillReceiveProps(nextProps){
       if(!this.popularLocationsChart){
           this.initializeGraph();
-          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType);
-      }else if(this.props.datetimeSelection !== nextProps.datetimeSelection){
-          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType);
+          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType, nextProps.dataSource);
+      }else if(this.props.datetimeSelection !== nextProps.datetimeSelection || this.props.dataSource !== nextProps.dataSource){
+          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType, nextProps.dataSource);
       }
   },
   

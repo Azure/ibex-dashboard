@@ -85,7 +85,8 @@ export const Dashboard = React.createClass({
                        <div id="popularLocationsPieDiv" style={{width: '100%', height: '230px'}}></div>
                        <PopularLocationsChart {...this.props} 
                              datetimeSelection={this.state.datetimeSelection}
-                             timespanType={this.state.timespanType} />
+                             timespanType={this.state.timespanType}
+                             dataSource={this.state.dataSource} />
                     </div>
                     <div className="col-lg-2 summaryPieContainer">
                        <div id="popularTermsPieDiv" style={{width: '100%', height: '230px'}}></div>
@@ -93,7 +94,8 @@ export const Dashboard = React.createClass({
                                           mainEdge={this.state.categoryValue}
                                           edgeType={this.state.categoryType}
                                           timespanType={this.state.timespanType}
-                                          timespan={this.state.datetimeSelection} />
+                                          timespan={this.state.datetimeSelection}
+                                          dataSource={this.state.dataSource} />
                     </div>
                     <div className="col-lg-7 timeSeriesContainer">
                        <div id="graphdiv" style={{width: '100%', height: '230px', marginBottom: '0px', paddingBottom: '0px'}}></div>
@@ -101,6 +103,7 @@ export const Dashboard = React.createClass({
                                           mainEdge={this.state.categoryValue}
                                           edgeType={this.state.categoryType}
                                           timespanType={this.state.timespanType}
+                                          dataSource={this.state.dataSource}
                                           timespan={this.state.datetimeSelection} />
                     </div>
                 </div>
@@ -125,8 +128,10 @@ export const Dashboard = React.createClass({
                                                           timespanType={this.state.timespanType}
                                                           datetimeSelection={this.state.datetimeSelection}
                                                           categoryValue={this.state.categoryValue}
+                                                          dataSource={this.state.dataSource}
                                                           categoryType={this.state.categoryType}
-                                                          edges={this.selectedTerms()} {...this.props}  /> : undefined}
+                                                          edges={this.selectedTerms()} 
+                                                          {...this.props}  /> : undefined}
                          </div>
                     </div>
                 </div>
@@ -139,8 +144,11 @@ export const Dashboard = React.createClass({
                             open={this.state.openModal}
                             onRequestClose={this.handleClose} >
                                 <ActivityFeed bbox={this.state.bbox} 
+                                              dataSource={this.state.dataSource}
                                               timespanType={this.state.timespanType}
                                               datetimeSelection={this.state.datetimeSelection}
+                                              categoryValue={this.state.categoryValue}
+                                              categoryType={this.state.categoryType}
                                               edges={this.selectedTerms()} {...this.props}  />
                         </Dialog>
                       : undefined

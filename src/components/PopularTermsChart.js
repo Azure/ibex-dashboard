@@ -2,6 +2,7 @@ import Fluxxor from 'fluxxor';
 import React from 'react';
 import numeralLibs from 'numeral';
 import {SERVICES} from '../services/services';
+import {Actions} from '../actions/Actions';
 import 'amcharts3/amcharts/amcharts';
 import 'amcharts3/amcharts/serial';
 import 'amcharts3/amcharts/pie';
@@ -74,15 +75,17 @@ export const PopularTermsChart = React.createClass({
 
  refreshChart: function(summaryTerms){
     let maxAxesDisplayLabelChars = 16;
+    let colorMap = new Map();
     this.popularTermsChart.dataProvider = [];
     let sliceColors = ['#fdd400', '#84b761', '#b6d2ff', '#CD0D74', '#2f4074', '#7e6596'];
-
+    
     if(summaryTerms && summaryTerms.length > 0){
         this.popularTermsChart.dataProvider = summaryTerms.map(term => {
+            let color = sliceColors.pop();
             let displayLabel = term.name.length > maxAxesDisplayLabelChars ? term.name.substring(0, maxAxesDisplayLabelChars) : term.name;
             let mentionFmt = numeralLibs(term.mentions).format(term.mentions > 1000 ? '+0.0a' : '0a');
-            
-            return {displayLabel: displayLabel, term: term.name, mentions: term.mentions, mentionFmt: mentionFmt, color: sliceColors.pop()};
+            colorMap.set(term.name, color);
+            return {displayLabel: displayLabel, term: term.name, mentions: term.mentions, mentionFmt: mentionFmt, color: color};
         });
 
         if(this.popularTermsChart.valueAxes && this.popularTermsChart.valueAxes.length > 0){
@@ -94,11 +97,13 @@ export const PopularTermsChart = React.createClass({
 
     //Set the default term to the most popular
     if(!this.state.selectedEdge){
-        this.changeMainTermToMostPopular(summaryTerms[0].name);
+        this.changeMainTermToMostPopular(summaryTerms[0].name, colorMap);
+    }else{
+        this.getFlux().actions.DASHBOARD.termsColorMap(colorMap);
     }
  },
 
- changeMainTermToMostPopular: function(term){
+ changeMainTermToMostPopular: function(term, colorMap){
         let entity = {
             "type": "Term",
             "properties": {
@@ -107,7 +112,7 @@ export const PopularTermsChart = React.createClass({
         };
 
     this.setState({selectedEdge: entity.properties.name});
-    this.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
+    this.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey, colorMap);
  },
 
  hasChanged: function(nextProps, propertyName){
@@ -125,21 +130,21 @@ export const PopularTermsChart = React.createClass({
  componentDidMount: function(){
     if(!this.popularTermsChart){
             this.initializeGraph();
-            this.updateChart(this.props.mainEdge, this.props.timespan, this.props.timespanType);
+            this.updateChart(this.props.mainEdge, this.props.timespan, this.props.timespanType, this.props.dataSource);
     }
  },
 
  componentWillReceiveProps: function(nextProps){
     let hasTimeSpanChanged = this.hasChanged(nextProps, "timespan");
-    if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged){
-        this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.timespanType);
+    if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged || this.hasChanged(nextProps, "dataSource")){
+        this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.timespanType, nextProps.dataSource);
     }
  },
 
- updateChart: function(mainEdge, timespan, timespanType){
+ updateChart: function(mainEdge, timespan, timespanType, dataSource){
      let self = this;
 
-     SERVICES.getPopularTerms(this.props.siteKey, timespan, timespanType, mainEdge, 
+     SERVICES.getPopularTerms(this.props.siteKey, timespan, timespanType, mainEdge, Actions.DataSources(dataSource), 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
                     let graphQLResponse = body.data[Object.keys(body.data)[0]];

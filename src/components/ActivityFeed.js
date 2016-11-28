@@ -1,6 +1,7 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import {SERVICES} from '../services/services';
+import {Actions} from '../actions/Actions';
 import '../styles/ActivityFeed.css';
 import moment from 'moment';
 import Infinite from 'react-infinite';
@@ -15,9 +16,8 @@ const DEFAULT_LANGUAGE = "en";
 const ELEMENT_ITEM_HEIGHT = 85;
 const TOP_SECTION_HEIGHT=358;
 const INFINITE_LOAD_DELAY_MS = 2000;
-const SOURCE_MAP = new Map([["all", []], ["facebook", ["facebook-messages", "facebook-comments"]], ["twitter", ["twitter"]]]);
 const MOMENT_FORMAT = "MM/DD HH:MM:s";
-
+const activeHeaderClass = "feed-source-label active", inactiveClass = "feed-source-label";
 const styles ={
     sourceLogo: {
         color: "#337ab7"
@@ -96,6 +96,7 @@ const FortisEvent = React.createClass({
         let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
         let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
+        let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
 
         return <div className="infinite-list-item" style={
                         {
@@ -105,7 +106,7 @@ const FortisEvent = React.createClass({
                         }
                     }>
             <h6 style={styles.listItemHeader}>
-                {this.props.source === "twitter" ? <i style={styles.sourceLogo} className="fa fa-twitter"></i> : <i style={styles.sourceLogo} className="fa fa-facebook-official"></i>}
+                <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
                 {commonTermsFromFilter.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
             </h6>
@@ -131,7 +132,7 @@ export const ActivityFeed = React.createClass({
             elements: [],
             previousElementLength: 0,
             offset: 0,
-            filteredSources: [],
+            filteredSource: "all",
             isInfiniteLoading: false
         }
   },
@@ -141,37 +142,50 @@ export const ActivityFeed = React.createClass({
         
         //if the prevbiosuly loaded enumber of elements is less than the increment count
         //then we reached the end of the list. 
-        if(this.state.previousElementLength > 0 && this.state.previousElementLength < OFFSET_INCREMENT){
+        if(this.state.previousElementLength === 0){
+            return;
+        } else if(this.state.previousElementLength < OFFSET_INCREMENT){
             this.setState({
                 isInfiniteLoading: false
             });
-            return;
+        }else{
+            this.setState({
+                isInfiniteLoading: true
+            });
+            setTimeout(() => {
+                const params = {...self.props, elementStartList: self.state.elements, offset: self.state.offset, filteredSource: this.state.filteredSource}; 
+                self.processNewsFeed(params);
+            }, INFINITE_LOAD_DELAY_MS);
         }
-
-        this.setState({
-            isInfiniteLoading: true
-        });
-        setTimeout(() => {
-            self.processNewsFeed(self.state.elements, self.state.offset, self.props.bbox, 
-                                 self.props.edges, self.props.datetimeSelection, self.props.timespanType, 
-                                 this.state.filteredSources, this.props.categoryValue, this.props.categoryType);
-        }, INFINITE_LOAD_DELAY_MS);
   },
 
-  fetchSentences: function(offset, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, 
-                           searchValue, categoryValue, categoryType, callback){
-      let siteKey = this.props.siteKey;
-      let mainTerm = categoryValue;
+  fetchSentences: function(requestPayload, callback){
+      let {categoryValue, timespanType, searchValue, limit, offset, edges, siteKey, 
+           categoryType, filteredSource, bbox, datetimeSelection} = requestPayload;
       let location = [];
 
       if(categoryType === "Location"){
-          mainTerm = undefined;
+          categoryValue = undefined;
           location = this.state.selectedLocationCoordinates;
       }
       
       SERVICES.FetchMessageSentences(siteKey, bbox, datetimeSelection, timespanType, 
-                                     limit, offset, edges, DEFAULT_LANGUAGE, filteredSources, 
-                                     mainTerm, searchValue, location, callback);
+                                     limit, offset, edges, DEFAULT_LANGUAGE, Actions.DataSources(filteredSource), 
+                                     categoryValue, searchValue, location, callback);
+  },
+
+  renderDataSourceTabs: function(iconStyle){
+    let tabs  = [], self = this;
+    if(this.state.dataSource === "all"){
+        for (let [source, value] of Actions.constants.DATA_SOURCES.entries()) {
+                tabs.push(<li key={source} role="presentation" className={source === self.state.filteredSource ? activeHeaderClass : inactiveClass}><a onClick={self.sourceOnClickHandler.bind(self, source)}><i style={iconStyle} className={`${value.icon} fa-2x`}></i>{value.label}</a></li>)
+        }
+    }else if(this.state.filteredSource){
+        let tabSchema = Actions.constants.DATA_SOURCES.get(this.state.filteredSource); 
+        tabs.push(<li key={this.state.filteredSource} role="presentation" className={activeHeaderClass}><a onClick={self.sourceOnClickHandler.bind(self, this.state.filteredSource)}><i style={iconStyle} className={`${tabSchema.icon} fa-2x`}></i>{tabSchema.label}</a></li>)
+    }
+
+    return tabs;
   },
 
   hasChanged: function(nextProps, propertyName){
@@ -189,24 +203,26 @@ export const ActivityFeed = React.createClass({
   componentWillReceiveProps: function(nextProps){
       if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") 
        ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")
-       ||  this.hasChanged(nextProps, "categoryValue")){
-          this.processNewsFeed([], 0, nextProps.bbox, nextProps.edges, nextProps.datetimeSelection, 
-                               nextProps.timespanType, [], undefined, nextProps.categoryValue, nextProps.categoryType);
+       ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")){
+
+          const params = {...nextProps, elementStartList: [], offset: 0, filteredSource: nextProps.dataSource};
+
+          this.setState({filteredSource: params.filteredSource});
+          this.processNewsFeed(params);
       }
   },
 
   componentDidMount: function(){
-      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, this.props.datetimeSelection, 
-                           this.props.timespanType, [], undefined, this.props.categoryValue, this.props.categoryType);
+      const params = {...this.props, elementStartList: [], offset: 0, filteredSource: this.state.filteredSource};
+      this.processNewsFeed(params);
   },
 
-  buildElements: function(start, limit, elementStartList, bbox, edges, datetimeSelection, timespanType, 
-                          filteredSources, searchValue, categoryValue, categoryType) {
+  buildElements: function(requestPayload) {
         let elements = [];
         let self = this;
-        let nextOffset = start + OFFSET_INCREMENT;
+        let nextOffset = requestPayload.start + OFFSET_INCREMENT;
 
-        this.fetchSentences(start, limit, bbox, edges, datetimeSelection, timespanType, filteredSources, searchValue, categoryValue, categoryType, 
+        this.fetchSentences(requestPayload, 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
                     let graphQLResponse = body.data[Object.keys(body.data)[0]];
@@ -220,13 +236,13 @@ export const ActivityFeed = React.createClass({
                                                         postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
                                                         sentiment={feature.properties.sentiment}
                                                         edges={feature.properties.edges}
-                                                        filters={edges}
-                                                        searchFilter={searchValue}
+                                                        filters={requestPayload.edges}
+                                                        searchFilter={requestPayload.searchValue}
                                                         mainSearchTerm={this.props.categoryValue} />)                               
                             }
                         });
 
-                        elements = elementStartList.concat(elements);
+                        elements = requestPayload.elementStartList.concat(elements);
                     }
                 }else{
                     console.error(`[${error}] occured while processing message request`);
@@ -235,23 +251,21 @@ export const ActivityFeed = React.createClass({
                 self.setState({
                      offset: nextOffset,
                      isInfiniteLoading: false,
-                     filteredSources: filteredSources,
+                     filteredSource: requestPayload.filteredSource,
                      previousElementLength: elements.length,
                      elements: elements
                 });
         });
   },
 
-  processNewsFeed: function(elementStartList, offset, bbox, edges, datetimeSelection, timespanType, filteredSources, 
-                            searchValue, categoryValue, categoryType){
-      var self = this;
+  processNewsFeed: function(filteredSources){
+      const params = {...filteredSources, limit: OFFSET_INCREMENT, start: filteredSources.offset};
       this.setState({
           isInfiniteLoading: true
       });
       
-      if(bbox && edges && datetimeSelection && timespanType){
-          self.buildElements(offset, OFFSET_INCREMENT, elementStartList, bbox, edges, datetimeSelection, timespanType, 
-                             filteredSources, searchValue, categoryValue, categoryType);
+      if(params.bbox && params.edges && params.datetimeSelection && params.timespanType){
+          this.buildElements(params);
       }
   },
   
@@ -261,40 +275,28 @@ export const ActivityFeed = React.createClass({
         </div>;
   },
 
-  sourceOnClickHandler: function(filteredSources){
-      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, 
-                           this.props.datetimeSelection, this.props.timespanType, filteredSources, undefined,
-                           this.props.categoryValue, this.props.categoryType);
+  sourceOnClickHandler: function(filteredSource){
+      const params = {...this.props, elementStartList: [], offset: 0, filteredSource: filteredSource};
+
+      this.processNewsFeed(params);
   },
 
   searchSubmit(){
-      let searchValue = this.refs.filterTextInput.value;
+      const params = {...this.props, limit: OFFSET_INCREMENT, searchValue: this.refs.filterTextInput.value, filteredSource: this.state.filteredSource,
+                      elementStartList: [], offset: 0};
 
-      this.processNewsFeed([], 0, this.props.bbox, this.props.edges, 
-                           this.props.datetimeSelection, this.props.timespanType, this.state.filteredSources, 
-                           searchValue, this.props.categoryValue, this.props.categoryType);
+      this.processNewsFeed(params);
   },
   
   render() {
-    let sourceTypes = [
-        {"icon": "fa fa-share-alt fa-2x", "mapName": "all", "label": "All"},
-        {"icon": "fa fa-facebook-official fa-2x", "mapName": "facebook", "label": ""},
-        {"icon": "fa fa-twitter fa-2x", "mapName": "twitter", "label": ""},
-        {"icon": "fa fa-font fa-2x", "mapName": "acled", "label": ""}
-    ];
-
     let iconStyle = {
         color: "#337ab7"
     };
 
-    let activeHeaderClass = "feed-source-label active", inactiveClass = "feed-source-label";
-
     return (
      <div className="col-lg-12 news-feed-column">
             <ul className="nav nav-tabs feed-source-header">
-                {
-                    sourceTypes.map(item => <li key={item.mapName} role="presentation" className={SOURCE_MAP.get(item.mapName) && SOURCE_MAP.get(item.mapName).join(" ") === this.state.filteredSources.join(" ") ? activeHeaderClass : inactiveClass}><a onClick={this.sourceOnClickHandler.bind(this, SOURCE_MAP.get(item.mapName))}><i style={iconStyle} className={item.icon}></i>{item.label}</a></li>)
-                }
+                { this.renderDataSourceTabs(iconStyle) }
             </ul>
             <Infinite elementHeight={ELEMENT_ITEM_HEIGHT}
                       containerHeight={window.innerHeight-TOP_SECTION_HEIGHT}

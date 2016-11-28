@@ -6,6 +6,7 @@ import momentLocalizer from 'react-widgets/lib/localizers/moment';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import moment from 'moment';
+import {DataSourceFilter} from './DataSourceFilter';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import {momentToggleFormats} from '../utils/Utils.js';
 import '../styles/DataSelector.css';
@@ -145,6 +146,9 @@ export const DataSelector = React.createClass({
                         <span>&nbsp;Refresh</span>
                  </button>
             }
+            </div>
+            <div>
+                <DataSourceFilter />
             </div>
          </div>
      </div>

@@ -171,7 +171,7 @@ export const HeatMap = React.createClass({
     
     this.map.selectedTerm = this.state.categoryValue;
     this.map.datetimeSelection = this.state.datetimeSelection;
-
+    this.map.dataSource = this.state.dataSource;
     this.map.on('moveend',() => {
       this.viewportChanged();
     });
@@ -299,9 +299,14 @@ export const HeatMap = React.createClass({
    },
 
   mapMarkerFlushCheck(){
-      if(this.map.selectedTerm !== this.state.categoryValue || this.map.datetimeSelection !== this.state.datetimeSelection || this.state.renderMap || this.viewportChanged){
+      if(this.map.selectedTerm !== this.state.categoryValue || 
+         this.map.datetimeSelection !== this.state.datetimeSelection || 
+         this.map.dataSource !== this.state.dataSource || 
+         this.state.renderMap || this.viewportChanged){
+
           this.map.datetimeSelection =  this.state.datetimeSelection;
           this.map.selectedTerm = this.state.categoryValue;
+          this.map.dataSource = this.state.dataSource;
 
           this.clearMap();
       }
@@ -397,7 +402,8 @@ export const HeatMap = React.createClass({
     let self = this;
     this.weightedMeanValues = [];
 
-    SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue, this.state.datetimeSelection, bbox, this.filterSelectedAssociatedTerms(), [this.state.selectedLocationCoordinates], 
+    SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue, this.state.datetimeSelection, 
+                             bbox, this.filterSelectedAssociatedTerms(), [this.state.selectedLocationCoordinates], Actions.DataSources(this.state.dataSource), 
             (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     self.createLayers(body, bbox)

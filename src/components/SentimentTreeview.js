@@ -14,7 +14,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 
 const styles = {
   subHeader: {
-    color:'#a3a3b3',
+    color:'rgb(46, 189, 89)',
     paddingLeft: '11px',
     fontSize: '14px',
     fontWeight: 800
@@ -28,7 +28,7 @@ const styles = {
         padding: '0px 20px 10px 20px'
  },
  subHeaderDescription: {
-    color: '#fff',
+    color: '#a3a3b3',
     fontSize: '8px',
     fontWeight: 800,
     paddingLeft: '4px'
