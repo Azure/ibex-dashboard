@@ -174,11 +174,11 @@ export const ActivityFeed = React.createClass({
 
   renderDataSourceTabs: function(iconStyle){
     let tabs  = [], self = this;
-    if(this.state.dataSource === "all"){
+    if(this.props.dataSource === "all"){
         for (let [source, value] of Actions.constants.DATA_SOURCES.entries()) {
                 tabs.push(<li key={source} role="presentation" className={source === self.state.filteredSource ? activeHeaderClass : inactiveClass}><a onClick={self.sourceOnClickHandler.bind(self, source)}><i style={iconStyle} className={`${value.icon} fa-2x`}></i>{value.label}</a></li>)
         }
-    }else if(this.state.filteredSource){
+    }else{
         let tabSchema = Actions.constants.DATA_SOURCES.get(this.state.filteredSource); 
         tabs.push(<li key={this.state.filteredSource} role="presentation" className={activeHeaderClass}><a onClick={self.sourceOnClickHandler.bind(self, this.state.filteredSource)}><i style={iconStyle} className={`${tabSchema.icon} fa-2x`}></i>{tabSchema.label}</a></li>)
     }
@@ -211,7 +211,7 @@ export const ActivityFeed = React.createClass({
   },
 
   componentDidMount: function(){
-      const params = {...this.props, elementStartList: [], offset: 0, filteredSource: this.state.filteredSource};
+      const params = {...this.props, elementStartList: [], offset: 0, filteredSource: this.props.dataSource};
       this.processNewsFeed(params);
   },
 

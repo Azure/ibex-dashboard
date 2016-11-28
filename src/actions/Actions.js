@@ -71,6 +71,7 @@ const constants = {
 
 const DataSources = source => constants.DATA_SOURCES.has(source) ? constants.DATA_SOURCES.get(source).sourceValues : undefined;
 const DataSourceLookup = requestedSource => {
+    // eslint-disable-next-line
     for (let [source, value] of constants.DATA_SOURCES.entries()) {
         if(value.sourceValues.indexOf(requestedSource) > -1){
             return value;
