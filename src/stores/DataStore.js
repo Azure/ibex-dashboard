@@ -9,29 +9,25 @@ export const DataStore = Fluxxor.createStore({
           timespanType: 'customMonth',
           datetimeSelection: 'November 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: '',
-          siteKey: '',
+          dataSource: 'all',
           renderMap: true,
+          siteKey: '',
           associatedKeywords: new Map(),
           locations: new Map(),
           bbox: [],
+          colorMap: new Map(),
           selectedLocationCoordinates: [],
-          categoryValue: false,
-          defaultResults: []
+          categoryValue: false
       }
       
       this.bindActions(
-            Actions.constants.DASHBOARD.LOAD, this.handleLoadDefaultSearchResults,
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
-            Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters
+            Actions.constants.DASHBOARD.CHANGE_COLOR_MAP, this.handleChangeColorMap,
+            Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters,
+            Actions.constants.DASHBOARD.CHANGE_SOURCE, this.handleDataSourceChange
       );
-    },
-
-    handleLoadDefaultSearchResults(searchResults){
-        this.dataStore.defaultResults = searchResults.response;
-        this.dataStore.siteKey = searchResults.siteKey;
-        this.emit("change");
     },
 
     getState() {
@@ -40,6 +36,17 @@ export const DataStore = Fluxxor.createStore({
     
     handleLoadActivites(activities){
         this.dataStore.activities = activities.response;
+        this.emit("change");
+    },
+
+    handleDataSourceChange(dataSource){
+        this.dataStore.dataSource = dataSource;
+        this.dataStore.renderMap = true;
+        this.emit("change");
+    },
+
+    handleChangeColorMap(changedMap){
+        this.dataStore.colorMap = changedMap.colorMap;
         this.emit("change");
     },
     
@@ -71,6 +78,10 @@ export const DataStore = Fluxxor.createStore({
         this.dataStore.selectedLocationCoordinates = changedData.selectedEntity.properties.coordinates || [];
         this.dataStore.categoryType = changedData.selectedEntity.type;
         this.dataStore.renderMap = true;
+        
+        if(changedData.colorMap){
+            this.dataStore.colorMap = changedData.colorMap;
+        }
         
         this.emit("change");
     },

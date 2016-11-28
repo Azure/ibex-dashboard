@@ -3,9 +3,11 @@ import React from 'react';
 import {Actions} from '../actions/Actions';
 import DateTimePicker from 'react-widgets/lib/DateTimePicker';
 import momentLocalizer from 'react-widgets/lib/localizers/moment';
-import SelectField from 'material-ui/lib/select-field';
-import MenuItem from 'material-ui/lib/menus/menu-item';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 import moment from 'moment';
+import {DataSourceFilter} from './DataSourceFilter';
+import injectTapEventPlugin from 'react-tap-event-plugin';
 import {momentToggleFormats} from '../utils/Utils.js';
 import '../styles/DataSelector.css';
 import 'react-widgets/dist/css/react-widgets.css';
@@ -17,7 +19,6 @@ const TimeSelectionOptions = [
     {label: 'Yesterday', timeType: 'days', subtractFromNow: 1},
     {label: 'This Week', timeType: 'weeks', subtractFromNow: 1},
     {label: 'Last Week', timeType: 'weeks', subtractFromNow: 2},
-    {label: 'Past Hour', timeType: 'hours', subtractFromNow: 1},
     {label: 'This Month', timeType: 'months', subtractFromNow: 0},
     {label: 'Last Month', timeType: 'months', subtractFromNow: 1},
     {label: 'Select Date', timeType: 'customDate', subtractFromNow: 0},
@@ -26,6 +27,7 @@ const TimeSelectionOptions = [
 ];
 
 momentLocalizer(moment);
+injectTapEventPlugin();
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -101,7 +103,7 @@ export const DataSelector = React.createClass({
                                   timeValue = timeOption.timeType;
                               }
                               
-                              menuItems.push(<MenuItem value={timeValue} primaryText={label}/>);
+                              menuItems.push(<MenuItem key={label.toString()} value={timeValue} primaryText={label}/>);
      });
      
      return menuItems;
@@ -144,6 +146,9 @@ export const DataSelector = React.createClass({
                         <span>&nbsp;Refresh</span>
                  </button>
             }
+            </div>
+            <div>
+                <DataSourceFilter />
             </div>
          </div>
      </div>

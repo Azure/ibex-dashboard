@@ -1,6 +1,12 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import {SERVICES} from '../services/services';
+import 'amcharts3/amcharts/amcharts';
+import 'amcharts3/amcharts/serial';
+import 'amcharts3/amcharts/pie';
+import 'amcharts3-export';
+import 'amcharts3-export/export.css';
+import 'amcharts3/amcharts/themes/dark';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -85,16 +91,14 @@ export const TimeSeriesGraph = React.createClass({
         "hideBulletsCount": 30
     };
 
-    let sliceColors = ['#fdd400', '#84b761', '#b6d2ff', '#CD0D74', '#2f4074', '#7e6596'];
     let self = this;
-    let labelAggregatedMap = new Map();
     this.trendingTimeSeries.graphs = [];
     this.trendingTimeSeries.dataProvider = [];
 
-    if(graphDataset && graphDataset.labels && graphDataset.graphData){
+    if(graphDataset && graphDataset.labels && graphDataset.graphData && this.state.colorMap){
         //Start off by ensuring the timeslices are order by date. 
         let timeseriesDataset = {
-            "labels": graphDataset.labels,
+            "labels": graphDataset.labels.map(label=>label.indexOf('-') > -1 ? label.split('-')[1] : label),
             "graphData": graphDataset.graphData.sort((a, b) => a[0]>b[0] ? 1 : a[0]<b[0] ? -1 : 0 )
         };
 
@@ -106,21 +110,21 @@ export const TimeSeriesGraph = React.createClass({
             while(tsIndex < hourlyAggregate.length - 1){
                 let label = timeseriesDataset.labels[labelIndex++];
                 graphEntry[label] = hourlyAggregate[++tsIndex] + hourlyAggregate[++tsIndex];
-                let totalTermMentions = (labelAggregatedMap.get(label) || 0) + graphEntry[label];
-                labelAggregatedMap.set(label, totalTermMentions);
             }
 
             return graphEntry;
         });
 
-        let sortedLabelMap = new Map([...labelAggregatedMap.entries()].sort(this.sortLabels));
-
-        for (var [label] of sortedLabelMap.entries()) {
-            self.trendingTimeSeries.graphs.push(Object.assign({ id: `v${label}`, 
-                                                lineColor: sliceColors.pop()}, 
-                                                {valueField: label}, 
-                                                {title: label}, graphDefaults));
-        }
+        //Set one bar for each label. Ensure the line color is consistent with the donut chart
+        if(timeseriesDataset.labels){
+            timeseriesDataset.labels.filter(label=>label.length > 1)
+                                    .forEach(label => {
+                                                self.trendingTimeSeries.graphs.push(Object.assign({ id: `v${label}`, 
+                                                    lineColor: self.state.colorMap.get(label)}, 
+                                                    {valueField: label}, 
+                                                    {title: label}, graphDefaults));
+            });
+        }        
     }
 
     this.trendingTimeSeries.validateData();

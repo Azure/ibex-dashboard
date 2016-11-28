@@ -1,11 +1,11 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
-import ReactListView from './react-list-view/index';
+import ReactListView from 'react-list-view';
 import { Link } from 'react-router';
 import { getHumanDate } from '../utils/Utils.js';
 import { getFilteredResults } from '../utils/Fact.js';
-import RadioButton from 'material-ui/lib/radio-button';
-import RadioButtonGroup from 'material-ui/lib/radio-button-group';
+import RadioButton from 'material-ui/RadioButton';
+import RadioButtonGroup from 'material-ui/RadioButton/RadioButtonGroup';
 
 // Material UI style overrides
 const styles = {

@@ -74,7 +74,7 @@ export const SERVICES = {
      request(GET, callback);
   },
 
-  getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, callback){
+  getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, sourceFilter, callback){
       let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
       let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
       let additionalTerms = selectedTerm ? [selectedTerm] : [];
@@ -88,13 +88,13 @@ export const SERVICES = {
                       }`;
 
       let query = `  ${fragment}
-                      query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!) {
-                        whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan) {
+                      query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!, $sourceFilter: [String]) {
+                        whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan, sourceFilter: $sourceFilter) {
                             ...FortisDashboardView
                         }
                       }`;
 
-      let variables = {site, additionalTerms, timespan};
+      let variables = {site, additionalTerms, timespan, sourceFilter};
       let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
       let POST = {
             url : `${host}/api/terms`,
@@ -138,7 +138,7 @@ export const SERVICES = {
       request(POST, callback);
   },
 
-  getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, callback){
+  getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback){
       let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
       let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
 
@@ -156,13 +156,13 @@ export const SERVICES = {
                         }`;
 
       let query = `  ${fragment}
-                      query PopularLocations($site: String!, $langCode: String, $timespan: String!, $zoomLevel: Int) {
-                            popularLocations(site: $site, langCode: $langCode, timespan: $timespan, zoomLevel: $zoomLevel) {
+                      query PopularLocations($site: String!, $langCode: String, $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
+                            popularLocations(site: $site, langCode: $langCode, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
                             ...FortisDashboardView
                         }
                       }`;
 
-      let variables = {site, timespan, langCode, zoomLevel};
+      let variables = {site, timespan, langCode, zoomLevel, sourceFilter};
       let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
       let POST = {
             url : `${host}/api/places`,
@@ -176,7 +176,7 @@ export const SERVICES = {
   },
 
   getHeatmapTiles: function(site, timespanType, zoom, mainEdge, datetimeSelection, bbox, 
-                            filteredEdges, locations, callback){
+                            filteredEdges, locations, sourceFilter, callback){
     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
     let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
     let zoomLevel = MAX_ZOOM;
@@ -210,22 +210,22 @@ export const SERVICES = {
         
         if(locations && locations.length > 0 && locations[0].length > 0){
             query = `${fragmentView} 
-                        query FetchAllEdgesAndTilesByLocations($site: String!, $locations: [[Float]]!, $filteredEdges: [String], $timespan: String!) {
-                              fetchAllEdgesAndTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan) {
+                        query FetchAllEdgesAndTilesByLocations($site: String!, $locations: [[Float]]!, $filteredEdges: [String], $timespan: String!, $sourceFilter: [String]) {
+                              fetchAllEdgesAndTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan, sourceFilter: $sourceFilter) {
                                     ...FortisDashboardView
                               }
                         }`;
 
-            variables = {site, locations, filteredEdges, timespan};
+            variables = {site, locations, filteredEdges, timespan, sourceFilter};
         }else{
             query =`${fragmentView}
-                       query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int) {
-                             fetchAllEdgesAndTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel) {
+                       query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
+                             fetchAllEdgesAndTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
                                 ...FortisDashboardView 
                              }
                         }`;
 
-            variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel};
+            variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel, sourceFilter};
         }
 
         let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
