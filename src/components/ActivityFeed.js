@@ -142,9 +142,7 @@ export const ActivityFeed = React.createClass({
         
         //if the prevbiosuly loaded enumber of elements is less than the increment count
         //then we reached the end of the list. 
-        if(this.state.previousElementLength === 0){
-            return;
-        } else if(this.state.previousElementLength < OFFSET_INCREMENT){
+        if(this.state.previousElementLength < OFFSET_INCREMENT){
             this.setState({
                 isInfiniteLoading: false
             });
