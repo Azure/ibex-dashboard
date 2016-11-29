@@ -312,5 +312,48 @@ export const SERVICES = {
     }else{
         callback(new Error(`Invalid bbox format for value [${bbox}]`));
     }
+  },
+
+  getAdminKeywords: function(){
+       return Rx.Observable.from([[{
+           ar_term:"كلنتن",
+           en_term: "Clinton"
+       },
+       {
+           ar_term:"منظمة غير حكومية",
+           en_term: "Non-Governmental Organization"
+       }
+       ]]);
+  },
+
+  getAdminFbPages: function(){
+       return Rx.Observable.from([[{
+           url:"BritishCouncilLibya",
+       },
+       {
+           url:"truthlibya",
+       },
+       {
+           url:"ukinlibya",
+       }
+       ]]);
+  },
+  getAdminLanguage:function(){
+      return Rx.Observable.from(["en"]);
+  },
+  getAdminTargetRegion :function(){
+      return Rx.Observable.from(["29.626,16.216"]);
+  },
+
+  getAdminLocalities: function(){
+       return Rx.Observable.from([[{
+           ar_name:"Mudīrīyat أم الرزم",
+           name: "Mudīrīyat Umm ar Rizam"
+       },
+       {
+           ar_name: "زيغان",
+           name: "Bardīyah"
+       }
+       ]]);
   }
 }
