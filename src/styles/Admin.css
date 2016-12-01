@@ -3,8 +3,6 @@
     padding: 1em;
     height: 100%;
     width: 100%;
-
-
 }
 
 .adminTable{
@@ -91,9 +89,10 @@
     -ms-filter: "progid: DXImageTransform.Microsoft.Alpha(Opacity=50)";
     filter: alpha(opacity=50);
     cursor: default}
-.ReactTable .-pagination .-btn: not([disabled]):hover {
+.ReactTable .-pagination {
     background: rgba(0,0,0,0.3);
-    color: #fff}
+    color: #fff;
+}
 .ReactTable .-pagination .-previous,.ReactTable .-pagination .-center,.ReactTable .-pagination .-next {
     margin: 3px 0}
 .ReactTable .-pagination .-previous,.ReactTable .-pagination .-next {
