@@ -39,6 +39,8 @@
     "react-addons-create-fragment": "^15.4.1",
     "react-autosuggest": "^7.0.1",
     "react-dom": "^15.4.1",
+    "react-table": "^3.1.2",
+    "react-tabs": "^0.8.2",
     "react-highlight-words": "^0.6.0",
     "react-infinite": "^0.10.0",
     "react-list-view": "^1.0.0",

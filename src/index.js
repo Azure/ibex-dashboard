@@ -1,5 +1,6 @@
 import {DataStore} from './stores/DataStore';
 import {FactsStore} from './stores/FactsStore';
+import {AdminStore} from './stores/AdminStore';
 import {Actions} from './actions/Actions';
 import Fluxxor from 'fluxxor';
 import {SERVICES} from './services/services';
@@ -14,7 +15,8 @@ let userProfile = (window.location.host.indexOf('localhost:')===-1)?SERVICES.get
 
 let stores = {
   DataStore: new DataStore(userProfile),
-  FactsStore: new FactsStore()
+  FactsStore: new FactsStore(),
+  AdminStore: new AdminStore()
 };
 
 let flux = new Fluxxor.Flux(stores, Actions.methods);
