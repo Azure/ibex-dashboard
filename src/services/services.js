@@ -107,23 +107,34 @@ export const SERVICES = {
       request(POST, callback);
   },
 
-  getDefaultSuggestionList(site, langCode, callback){
-      let fragment = `fragment FortisDashboardView on EdgeCollection {
-                        edges {
-                            type
-                            properties {
+  getDefaultSuggestionList(site, langCode, type, callback){
+      let fragment = `fragment FortisDashboardTermEdges on TermCollection {
+                            runTime
+                            edges {
                                 name
-                                coordinates
+                                type
                             }
                         }
-                      }`;
+
+                        fragment FortisDashboardLocationEdges on LocationCollection {
+                            runTime
+                            edges {
+                                name
+                                type
+                                coordinates
+                                population
+                            }
+                        }`;
 
       let query = `  ${fragment}
-                      query Search($site: String!, $langCode: String){
-                            search(site: $site, langCode: $langCode) {
-                            ...FortisDashboardView
-                        }
-                      }`;
+                      query FetchAllEdge($site: String!, $langCode: String) {
+                            locations: locations(site: $site, langCode: $langCode) {
+                                ...FortisDashboardLocationEdges
+                            }
+                            terms: terms(site: $site, langCode: $langCode) {
+                                ...FortisDashboardTermEdges
+                            }
+                        }`;
 
       let variables = {site, langCode};
       let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
@@ -177,52 +188,63 @@ export const SERVICES = {
 
   getHeatmapTiles: function(site, timespanType, zoom, mainEdge, datetimeSelection, bbox, 
                             filteredEdges, locations, sourceFilter, callback){
-    let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-    let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
-    let zoomLevel = MAX_ZOOM;
+    const formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+    const timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+    const zoomLevel = MAX_ZOOM;
 
     console.log(`processing tile request [${mainEdge}, ${timespan}, ${bbox}, ${filteredEdges.join(",")}]`)
     if(bbox && Array.isArray(bbox) && bbox.length === 4){
-        let fragmentView = `fragment FortisDashboardView on FeatureCollection {
-                                type
-                                runTime
-                                edges {
-                                    type
-                                    name
-                                    mentionCount
-                                }
-                                features {
-                                    type
-                                    coordinates
-                                    properties {
-                                    neg_sentiment
-                                    pos_sentiment
-                                    location
-                                    mentionCount
-                                    tileId
-                                    population
-                                    location
-                                    }
-                                }
-                                }`;
+        const featuresFragmentView = `fragment FortisDashboardViewFeatures on FeatureCollection {
+                                        runTime
+                                        features {
+                                            type
+                                            coordinates
+                                            properties {
+                                                neg_sentiment
+                                                pos_sentiment
+                                                location
+                                                mentionCount
+                                                tileId
+                                                population
+                                                location
+                                            }
+                                        }
+                                     }`;
+
+        const edgesFragmentView = `fragment FortisDashboardViewEdges on EdgeCollection {
+                                        runTime
+                                        edges {
+                                            type
+                                            name
+                                            mentionCount
+                                        }
+                                    }`;
 
         let query, variables;
         
         if(locations && locations.length > 0 && locations[0].length > 0){
-            query = `${fragmentView} 
+            query = `${edgesFragmentView}
+                     ${featuresFragmentView}
                         query FetchAllEdgesAndTilesByLocations($site: String!, $locations: [[Float]]!, $filteredEdges: [String], $timespan: String!, $sourceFilter: [String]) {
-                              fetchAllEdgesAndTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan, sourceFilter: $sourceFilter) {
-                                    ...FortisDashboardView
-                              }
+                            features: fetchTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan, sourceFilter: $sourceFilter) {
+                                ...FortisDashboardViewFeatures
+                            }
+                            edges: fetchEdgesByLocations(site: $site, locations: $locations, timespan: $timespan, sourceFilter: $sourceFilter) {
+                                ...FortisDashboardViewEdges
+                            }
                         }`;
 
             variables = {site, locations, filteredEdges, timespan, sourceFilter};
         }else{
-            query =`${fragmentView}
-                       query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
-                             fetchAllEdgesAndTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
-                                ...FortisDashboardView 
-                             }
+            query =`${edgesFragmentView}
+                    ${featuresFragmentView}
+                      query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
+                            features: fetchTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
+                                ...FortisDashboardViewFeatures
+                            }
+                            edges: fetchEdgesByBBox(site: $site, bbox: $bbox, zoomLevel: $zoomLevel, mainEdge: $mainEdge, timespan: $timespan, sourceFilter: $sourceFilter) {
+                                ...FortisDashboardViewEdges
+                            }
                         }`;
 
             variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel, sourceFilter};
@@ -312,18 +334,6 @@ export const SERVICES = {
     }else{
         callback(new Error(`Invalid bbox format for value [${bbox}]`));
     }
-  },
-
-  getAdminKeywords: function(){
-       return Rx.Observable.from([[{
-           ar_term:"كلنتن",
-           en_term: "Clinton"
-       },
-       {
-           ar_term:"منظمة غير حكومية",
-           en_term: "Non-Governmental Organization"
-       }
-       ]]);
   },
 
   getAdminFbPages: function(){

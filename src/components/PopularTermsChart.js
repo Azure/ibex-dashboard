@@ -64,9 +64,7 @@ export const PopularTermsChart = React.createClass({
             if(e.dataItem.dataContext){
                 let entity = {
                     "type": "Term",
-                    "properties": {
-                        "name": e.dataItem.dataContext.term
-                    }
+                    "name": e.dataItem.dataContext.term
                 };
                 self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
             }
@@ -106,12 +104,10 @@ export const PopularTermsChart = React.createClass({
  changeMainTermToMostPopular: function(term, colorMap){
         let entity = {
             "type": "Term",
-            "properties": {
-                "name": term
-             }
+            "name": term
         };
 
-    this.setState({selectedEdge: entity.properties.name});
+    this.setState({selectedEdge: entity.name});
     this.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey, colorMap);
  },
 

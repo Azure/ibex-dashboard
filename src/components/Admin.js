@@ -47,6 +47,8 @@ export const Admin = React.createClass({
                         <Tab>Search keywords</Tab>
                         <Tab>Target region</Tab>
                         <Tab>Localities</Tab>
+                        <Tab>Blacklisted Term(s)</Tab>
+                        <Tab>Portal Sites</Tab>
                     </TabList>
 
                     <TabPanel>
@@ -70,7 +72,7 @@ export const Admin = React.createClass({
                         <div className="adminTable">
                             <ReactTable
                                 data={this.state.settings.keywords}
-                                columns={[{  header: 'ar_term', accessor: 'ar_term' }, {  header: 'en_term', accessor: 'en_term' }]}
+                                columns={[{  header: 'en_term', accessor: 'name' }]}
                                 pageSize='10'
                                 />
                         </div>
@@ -87,7 +89,18 @@ export const Admin = React.createClass({
                         <div className="adminTable">
                             <ReactTable
                                 data={this.state.settings.localities}
-                                columns={[{  header: 'name', accessor: 'name' }, {  header: 'ar_name', accessor: 'ar_name' }]}
+                                columns={[{  header: 'name', accessor: 'name' }, {  header: 'coordinates', accessor: 'coordinates' }]}
+                                pageSize='10'
+                                />
+                        </div>
+                    </TabPanel>
+                    <TabPanel>
+                        <h2>Blacklisted Term(s)</h2>
+
+                        <div className="adminTable">
+                            <ReactTable
+                                data={this.state.settings.localities}
+                                columns={[{  header: 'name', accessor: 'name' }, {  header: 'coordinates', accessor: 'coordinates' }]}
                                 pageSize='10'
                                 />
                         </div>

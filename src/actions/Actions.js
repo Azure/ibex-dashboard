@@ -32,7 +32,8 @@ const constants = {
            DATA_SOURCES: new Map([["all", {"display": "All", "sourceValues":[], "icon": "fa fa-share-alt", "label": "All"}], 
                             ["facebook", {"display": "Facebook", "sourceValues":["facebook-messages", "facebook-comments"], "icon": "fa fa-facebook-official", "label": ""}], 
                             ["twitter", {"display": "Twitter", "sourceValues":["twitter"], "label": "", "icon": "fa fa-twitter"}], 
-                            ["acled", {"display": "acled", "sourceValues":["acled"], "label": "", "icon": "fa fa-font"}]
+                            ["acled", {"display": "acled", "sourceValues":["acled"], "label": "", "icon": "fa fa-font"}],
+                            ["tadaweb", {"display": "Tadaweb", "sourceValues":["tadaweb"], "label": "", "icon": "fa fa-text-width"}]
                           ]),
            MOMENT_FORMATS: {
                "timeScaleDate": "MM/DD/YY HH:00"
@@ -149,29 +150,39 @@ const methods = {
     ADMIN: {
         load_keywords: function () {
             let self = this;
+            const keywordType = "Term";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.getAdminKeywords()
-                    .subscribe(response => {
-                        self.dispatch(constants.ADMIN.LOAD_KEYWORDS, { keywords: response });
-                    }, error => {
-                        console.warning('Error, could not load facts', error);
-                        self.dispatch(constants.ADMIN.LOAD_FAIL, { error: error });
-                    });
+                SERVICES.getDefaultSuggestionList("ocha", "en", keywordType, (error, response, body) => {
+                        if (!error && response.statusCode === 200) {
+                            const response = body.data.search.edges.map(term=>{
+                                  return Object.assign({}, {"name": term.properties.name});
+                            });
+                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, { keywords: response});
+                        }else{
+                            let error = 'Error, could not load keywords for admin page';
+                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                        }
+                });
             }
         },
 
         load_localities: function () {
             let self = this;
+            const locationType = "Location";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.getAdminLocalities()
-                    .subscribe(response => {
-                        self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response });
-                    }, error => {
-                        console.warning('Error, could not load facts', error);
-                        self.dispatch(constants.ADMIN.LOAD_FAIL, { error: error });
-                    });
+                SERVICES.getDefaultSuggestionList("ocha", "en", locationType, (error, response, body) => {
+                        if (!error && response.statusCode === 200) {
+                            const response = body.data.search.edges.map(location=>{
+                                  return Object.assign({}, {"name": location.properties.name, "coordinates": location.properties.coordinates.join(",")});
+                            });
+                            self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response});
+                        }else{
+                            let error = 'Error, could not load keywords for admin page';
+                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                        }
+                });
             }
         },
 

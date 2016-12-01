@@ -9,13 +9,13 @@ import '../styles/TypeaheadSearch.css';
 const FluxMixin = Fluxxor.FluxMixin(React);
 //const maxDefaultResult = 12;
 const ENGLISH_LANGUAGE = "en";
-const getSuggestionValue = suggestion => suggestion.properties.name.trim();
+const getSuggestionValue = suggestion => suggestion.name.trim();
 const getSuggestions = (value, defaultSuggestions) => {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
 
   return inputLength === 0 || defaultSuggestions.length === 0 ? [] 
-      : defaultSuggestions.filter(edge => edge.properties.name.toLowerCase().indexOf(inputValue) > -1);
+      : defaultSuggestions.filter(edge => edge.name.toLowerCase().indexOf(inputValue) > -1);
 };
 
 export const TypeaheadSearch = React.createClass({
@@ -30,9 +30,9 @@ export const TypeaheadSearch = React.createClass({
   },
 
   loadEdgesFromService(siteKey, languageCode, callback){
-    SERVICES.getDefaultSuggestionList(siteKey, languageCode, (error, response, body) => {
+    SERVICES.getDefaultSuggestionList(siteKey, languageCode, undefined, (error, response, body) => {
             if (!error && response.statusCode === 200) {
-                 callback(body.data.search.edges);
+                 callback(body.data.locations.edges.concat(body.data.terms.edges));
             }else{
                  throw new Error(`[${error}] occured while processing entity list request`);
             }
@@ -76,7 +76,7 @@ export const TypeaheadSearch = React.createClass({
   },
   
   renderSuggestion(element, {query}) { 
-    const suggestionText = `${element.properties.name}`;
+    const suggestionText = `${element.name}`;
     const matches = match(suggestionText, query);
     const parts = parse(suggestionText, matches);
     const iconMap = new Map([["Location", "fa fa-map-marker fa-2x"], ["Term", "fa fa-tag fa-2x"]]);

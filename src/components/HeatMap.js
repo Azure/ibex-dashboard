@@ -418,11 +418,11 @@ export const HeatMap = React.createClass({
     let self = this;
 
     if(response && response.data){
-        let graphQLResponse = response.data[Object.keys(response.data)[0]];
-        if(graphQLResponse && graphQLResponse.features && graphQLResponse.edges){
-            eachLimit(graphQLResponse.features, PARELLEL_TILE_LAYER_RENDER_LIMIT, (tileFeature, cb) => {
+        const { features, edges } = response.data;
+        if(features && edges){
+            eachLimit(features.features, PARELLEL_TILE_LAYER_RENDER_LIMIT, (tileFeature, cb) => {
                  self.processMapCluster(tileFeature, cb);
-            }, errors => self.updateDataStore(errors, bbox, graphQLResponse.edges || []));
+            }, errors => self.updateDataStore(errors, bbox, edges.edges || []));
         }else{
             self.updateDataStore('Invalid GrphQL Service response', bbox, undefined);
         }
