@@ -60,10 +60,8 @@ export const PopularLocationsChart = React.createClass({
         if(e.dataItem.dataContext){
               let entity = {
                   "type": "Location",
-                  "properties": {
-                      "name": e.dataItem.dataContext.term,
-                      "coordinates": e.dataItem.dataContext.coordinates,
-                  }
+                  "name": e.dataItem.dataContext.term,
+                  "coordinates": e.dataItem.dataContext.coordinates
               };
               self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
         }
