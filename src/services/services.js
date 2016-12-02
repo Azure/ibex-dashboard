@@ -271,6 +271,19 @@ export const SERVICES = {
       return Rx.DOM.getJSON(url);
   },
 
+  getFactsWithFilter: function (pageSize, skip, tagFilterArray=[]) {
+      let tagFilterQuery = "";
+      if (tagFilterArray.length > 0) {
+        tagFilterQuery = "&tagFilter=" + tagFilterArray.map(encodeURI).join(":");
+      }
+      let url = "http://fortisfactsservice-staging.azurewebsites.net/api/facts/?pageSize={0}&skip={1}&fullInfo=false{2}".format(pageSize, skip, tagFilterQuery);
+      return Rx.DOM.getJSON(url);
+  },
+
+  getFactTags: function () {
+      return Rx.DOM.getJSON("http://fortisfactsservice-staging.azurewebsites.net/api/facts/?tagsOnly=true");
+  },
+
   getFact: function (id) {
       let url = "http://fortisfactsservice.azurewebsites.net/api/facts/" + id;
       return Rx.DOM.getJSON(url);

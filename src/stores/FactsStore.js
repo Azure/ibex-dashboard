@@ -1,6 +1,5 @@
 import Fluxxor from 'fluxxor';
 import { Actions } from '../actions/Actions';
-import { flattenUnique } from '../utils/Utils.js';
 import { getFilteredResults } from '../utils/Fact.js';
 
 export const FactsStore = Fluxxor.createStore({
@@ -9,13 +8,11 @@ export const FactsStore = Fluxxor.createStore({
       facts: [],
       tags: [],
       error: null,
-      loading: false,
-      pageSize: 50,
+      loaded: false,
       skip: 0,
+      pageSize: 50,
       pageState: {
-        scrollTop: 0,
-        excludedHeight: 0,
-        filter: "",
+        filter: []
       },
       
       factDetail: null,
@@ -26,10 +23,10 @@ export const FactsStore = Fluxxor.createStore({
     };
 
     this.bindActions(
-      Actions.constants.FACTS.LOAD_FACTS, this.handleLoadFacts,
       Actions.constants.FACTS.LOAD_FACTS_SUCCESS, this.handleLoadFactsSuccess,
       Actions.constants.FACTS.LOAD_FACTS_FAIL, this.handleLoadFactsFail,
       Actions.constants.FACTS.SAVE_PAGE_STATE, this.handleSavePageState,
+      Actions.constants.FACTS.LOAD_FACT_TAGS, this.handleLoadFactTags,
       // Detail view
       Actions.constants.FACTS.LOAD_FACT, this.handleLoadFact
     );
@@ -39,12 +36,8 @@ export const FactsStore = Fluxxor.createStore({
     return this.dataStore;
   },
 
-  handleLoadFacts() {
-    this.dataStore.loading = true;
-  },
-
   handleLoadFactsSuccess(payload) {
-    this.dataStore.loading = false;
+    this.dataStore.loaded = true;
     this.dataStore.error = null;
     this.dataStore.facts = this._processResults(payload.response);
     this._incrementSkip(payload.response);
@@ -52,10 +45,7 @@ export const FactsStore = Fluxxor.createStore({
   },
 
   _processResults(results) {
-    var facts = this.dataStore.facts.concat(results);
-    // update list of unique tags
-    this.dataStore.tags = flattenUnique( facts.map(x => x.tags) );
-    return facts;
+    return this.dataStore.facts.concat(results);
   },
 
   _incrementSkip(results) {
@@ -69,7 +59,7 @@ export const FactsStore = Fluxxor.createStore({
   },
 
   handleLoadFactsFail(payload) {
-    this.dataStore.loading = false;
+    this.dataStore.loaded = true;
     this.dataStore.error = payload.error;
   },
 
@@ -77,6 +67,13 @@ export const FactsStore = Fluxxor.createStore({
     this.dataStore.pageState = pageState;
   },
 
+  // fact tags
+  handleLoadFactTags(payload) {
+    this.dataStore.tags = payload.response;
+    this.emit("change");
+  },
+
+  // fact detail 
   handleLoadFact(payload) {
     this.dataStore.factDetail = payload.response;
     this._getAdjacentArticles(this.dataStore.factDetail.id);

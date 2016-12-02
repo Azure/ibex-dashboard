@@ -62,11 +62,11 @@ const constants = {
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS"
            },
            FACTS : {
-               LOAD_FACTS: "LOAD:FACTS",
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
                LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
                SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
-               LOAD_FACT: "LOAD:FACT"
+               LOAD_FACT: "LOAD:FACT",
+               LOAD_FACT_TAGS: "LOAD:FACT_TAGS"
            },
            ADMIN : {
                LOAD_KEYWORDS: "LOAD:KEYWORDS",
@@ -114,37 +114,33 @@ const methods = {
         }
     },
     FACTS: {
-        load_facts: function (pageSize, skip) {
+        load_facts: function (pageSize, skip, tagFilterArray = []) {
             let self = this;
-            let dataStore = this.flux.stores.FactsStore.dataStore;
-            if (!dataStore.loading) {
-                this.dispatch(constants.FACTS.LOAD_FACTS);
-                SERVICES.getFacts(pageSize, skip)
-                    .subscribe(response => {
-                        self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
-                    }, error => {
-                        console.warning('Error, could not load facts', error);
-                        self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
-                    });
-            }
+            SERVICES.getFactsWithFilter(pageSize, skip, tagFilterArray)
+                .subscribe(response => {
+                    self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
+                }, error => {
+                    console.warn('Error, could not load facts', error);
+                    self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
+                });
         },
-        save_page_state: function(pageState) {
+        load_fact_tags: function () {
+            let self = this;
+            SERVICES.getFactTags().subscribe(response => {
+                self.dispatch(constants.FACTS.LOAD_FACT_TAGS, { response: response });
+            });
+        },
+        save_page_state: function (pageState) {
             this.dispatch(constants.FACTS.SAVE_PAGE_STATE, pageState);
         },
         load_fact: function (id) {
             let self = this;
-            let dataStore = this.flux.stores.FactsStore.dataStore;
-
-            dataStore.factDetail = null;
-
-            if (!dataStore.factDetail) {
-                SERVICES.getFact(id)
+            SERVICES.getFact(id)
                     .subscribe(response => {
                         self.dispatch(constants.FACTS.LOAD_FACT, { response: response });
                     }, error => {
                         console.warning('Error, could not load fact id: ' + id, error);
                     });
-            }
         }
     },
     ADMIN: {
