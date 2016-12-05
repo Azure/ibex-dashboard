@@ -1,11 +1,11 @@
 import Rx from 'rx';
 import 'rx-dom';
 import {Actions} from '../actions/Actions';
-import {guid, momentToggleFormats, getEnvPropValue, momentGetFromToRange} from '../utils/Utils.js';
+import {guid, momentToggleFormats, momentGetFromToRange} from '../utils/Utils.js';
 import request from 'request';
 
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
-
+const TIMESERIES_BLOB_CONTAINER_NAME = "ericroz-bytime";
 const MAX_ZOOM = 15;
 
 export const SERVICES = {
@@ -53,17 +53,16 @@ export const SERVICES = {
 
         return window.userProfile;
     } else {
-        // We are not logged in.  Try to login.
         authContext.login();
     }
   },
 
- getPopularTermsTimeSeries(siteKey, datetimeSelection, timespanType, selectedTerm, callback){
+ getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-     let hostname = blobHostnamePattern.format(getEnvPropValue(siteKey, process.env.REACT_APP_STORAGE_ACCT_NAME));
-     let blobContainer = getEnvPropValue(siteKey, process.env.REACT_APP_BLOB_TIMESERIES);
+     let hostname = blobHostnamePattern.format(accountName);
+     let blobContainer = TIMESERIES_BLOB_CONTAINER_NAME;
 
-     let url = `${hostname}/${blobContainer}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
+     let url = `${hostname}/${blobContainer}/${dataSource}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
 
      let GET = {
             url : url,
@@ -95,7 +94,7 @@ export const SERVICES = {
                       }`;
 
       let variables = {site, additionalTerms, timespan, sourceFilter};
-      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let host = process.env.REACT_APP_SERVICE_HOST;
       let POST = {
             url : `${host}/api/terms`,
             method : "POST",
@@ -107,37 +106,46 @@ export const SERVICES = {
       request(POST, callback);
   },
 
-  getDefaultSuggestionList(site, langCode, type, callback){
-      let fragment = `fragment FortisDashboardTermEdges on TermCollection {
-                            runTime
-                            edges {
-                                name
-                                type
-                            }
-                        }
+  fetchEdges(site, langCode, edgeType, callback){
+      const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
+                                        runTime
+                                        edges {
+                                            name
+                                            type
+                                            coordinates
+                                            population
+                                        }
+                                    }`;
 
-                        fragment FortisDashboardLocationEdges on LocationCollection {
-                            runTime
-                            edges {
-                                name
-                                type
-                                coordinates
-                                population
-                            }
-                        }`;
+      const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
+                                    runTime
+                                    edges {
+                                        name
+                                        type
+                                    }
+                                }`;
 
-      let query = `  ${fragment}
-                      query FetchAllEdge($site: String!, $langCode: String) {
-                            locations: locations(site: $site, langCode: $langCode) {
+     const locationsQuery = `locations: locations(site: $site, langCode: $langCode) {
                                 ...FortisDashboardLocationEdges
-                            }
-                            terms: terms(site: $site, langCode: $langCode) {
+                            }`;
+
+     const termsQuery = `terms: terms(site: $site, langCode: $langCode) {
                                 ...FortisDashboardTermEdges
-                            }
+                         }`;
+
+     const fragments = `${edgeType === "All" || edgeType === "Location" ? locationEdgeFragment : ``}
+                        ${edgeType === "All" || edgeType === "Term" ? termsEdgeFragment : ``}`;
+
+     const queries = `${edgeType === "All" || edgeType === "Location" ? locationsQuery : ``}
+                      ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
+
+      let query = `  ${fragments}
+                      query FetchAllEdge($site: String!, $langCode: String) {
+                            ${queries}
                         }`;
 
       let variables = {site, langCode};
-      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let host = process.env.REACT_APP_SERVICE_HOST;
       let POST = {
             url : `${host}/api/edges`,
             method : "POST",
@@ -174,7 +182,7 @@ export const SERVICES = {
                       }`;
 
       let variables = {site, timespan, langCode, zoomLevel, sourceFilter};
-      let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS);
+      let host = process.env.REACT_APP_SERVICE_HOST;
       let POST = {
             url : `${host}/api/places`,
             method : "POST",
@@ -250,7 +258,7 @@ export const SERVICES = {
             variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel, sourceFilter};
         }
 
-        let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
+        let host = process.env.REACT_APP_SERVICE_HOST
         
         var POST = {
             url : `${host}/api/tiles`,
@@ -264,6 +272,74 @@ export const SERVICES = {
     }else{
         throw new Error(`Invalid bbox format for value [${bbox}]`);
     }
+  },
+
+  getSiteDefintion(siteId, retrieveSiteList, callback){
+        let fragment = `fragment FortisSiteDefinitionView on SiteCollection {
+                            sites {
+                                name
+                                properties {
+                                    targetBbox
+                                    defaultZoomLevel
+                                    logo
+                                    title
+                                    defaultLocation
+                                    storageConnectionString
+                                    featuresConnectionString
+                                    supportedLanguages
+                                }
+                            }
+                        }
+                        ${retrieveSiteList ? `fragment FortisSitesListView on SiteCollection {
+                            sites {
+                                name
+                            }
+                        }`: ``}`;
+
+        let query = `  ${fragment}
+                        query Sites($siteId: String) {
+                            siteDefinition: sites(siteId: $siteId) {
+                                ...FortisSiteDefinitionView
+                            }
+                            ${retrieveSiteList ? `siteList: sites(siteId: "") {
+                                ...FortisSitesListView
+                            }`: ``}
+                        }`;
+                        
+        let variables = {siteId};
+        
+        console.log('getSiteDefintion called');
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url : `${host}/api/settings`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+        
+        request(POST, callback);
+  },
+
+  createOrReplaceSite(siteName, siteDefinition, callback){
+        let query = `  mutation CreateOrReplaceSite($input: SiteDefinition!) {
+                            createOrReplaceSite(input: $input) {
+                                name
+                            }
+                        }`;
+                        
+        let variables = {input: siteDefinition};
+
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url : `${host}/api/settings`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+        
+        request(POST, callback);
   },
 
   getFacts: function (pageSize, skip) {
@@ -321,7 +397,7 @@ export const SERVICES = {
             variables = {site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
         }
 
-        let host = getEnvPropValue(site, process.env.REACT_APP_SERVICE_HOSTS)
+        let host = process.env.REACT_APP_SERVICE_HOST
         var POST = {
             url : `${host}/api/Messages`,
             method : "POST",

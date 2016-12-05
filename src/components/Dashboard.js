@@ -99,12 +99,16 @@ export const Dashboard = React.createClass({
                     </div>
                     <div className="col-lg-7 timeSeriesContainer">
                        <div id="graphdiv" style={{width: '100%', height: '230px', marginBottom: '0px', paddingBottom: '0px'}}></div>
-                       <TimeSeriesGraph {...this.props}
-                                          mainEdge={this.state.categoryValue}
-                                          edgeType={this.state.categoryType}
-                                          timespanType={this.state.timespanType}
-                                          dataSource={this.state.dataSource}
-                                          timespan={this.state.datetimeSelection} />
+                        { this.state.settings.properties ? 
+                            <TimeSeriesGraph {...this.props}
+                                                mainEdge={this.state.categoryValue}
+                                                edgeType={this.state.categoryType}
+                                                timespanType={this.state.timespanType}
+                                                storageConnection={this.state.settings.properties.storageConnectionString}
+                                                dataSource={this.state.dataSource}
+                                                timespan={this.state.datetimeSelection} />
+                            : undefined
+                        }
                     </div>
                 </div>
                 <div className="row">

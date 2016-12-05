@@ -10,6 +10,7 @@ export const DataStore = Fluxxor.createStore({
           datetimeSelection: 'November 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: '',
           dataSource: 'all',
+          settings: {},
           renderMap: true,
           siteKey: '',
           associatedKeywords: new Map(),
@@ -23,6 +24,7 @@ export const DataStore = Fluxxor.createStore({
       this.bindActions(
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
+            Actions.constants.DASHBOARD.INITIALIZE, this.intializeDashboard,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
             Actions.constants.DASHBOARD.CHANGE_COLOR_MAP, this.handleChangeColorMap,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters,
@@ -36,6 +38,11 @@ export const DataStore = Fluxxor.createStore({
     
     handleLoadActivites(activities){
         this.dataStore.activities = activities.response;
+        this.emit("change");
+    },
+
+    intializeDashboard(siteSettings){
+        this.dataStore.settings = siteSettings;
         this.emit("change");
     },
 

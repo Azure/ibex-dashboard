@@ -9,6 +9,7 @@ import '../styles/TypeaheadSearch.css';
 const FluxMixin = Fluxxor.FluxMixin(React);
 //const maxDefaultResult = 12;
 const ENGLISH_LANGUAGE = "en";
+const ALL_EDGE_TYPES = "All";
 const getSuggestionValue = suggestion => suggestion.name.trim();
 const getSuggestions = (value, defaultSuggestions) => {
   const inputValue = value.trim().toLowerCase();
@@ -30,7 +31,7 @@ export const TypeaheadSearch = React.createClass({
   },
 
   loadEdgesFromService(siteKey, languageCode, callback){
-    SERVICES.getDefaultSuggestionList(siteKey, languageCode, undefined, (error, response, body) => {
+    SERVICES.fetchEdges(siteKey, languageCode, ALL_EDGE_TYPES, (error, response, body) => {
             if (!error && response.statusCode === 200) {
                  callback(body.data.locations.edges.concat(body.data.terms.edges));
             }else{
@@ -120,14 +121,18 @@ export const TypeaheadSearch = React.createClass({
                   <span className="input-group-addon">
                       <i className="fa fa-search"></i>
                   </span>
-                  <Autosuggest suggestions={suggestions}
-                               inputProps={inputProps}
-                               focusInputOnSuggestionClick={true}
-                               onSuggestionSelected={this.onSuggestionSelected}
-                               onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
-                               onSuggestionsClearRequested={this.onSuggestionsClearRequested}                               
-                               renderSuggestion={this.renderSuggestion}
-                               getSuggestionValue={getSuggestionValue} />
+                  { 
+                    this.props.data ? 
+                      <Autosuggest suggestions={suggestions}
+                                inputProps={inputProps}
+                                focusInputOnSuggestionClick={true}
+                                onSuggestionSelected={this.onSuggestionSelected}
+                                onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+                                onSuggestionsClearRequested={this.onSuggestionsClearRequested}                               
+                                renderSuggestion={this.renderSuggestion}
+                                getSuggestionValue={getSuggestionValue} />
+                                : undefined
+                  }
         </div>
     );
   }
