@@ -263,3 +263,7 @@ background-color: #333;
     color:#000!important;
     border-radius: 5.25em!important
 }
+.translate-button{
+    height: 20px;
+    margin-left: 3px;
+}

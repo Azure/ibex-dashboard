@@ -17,7 +17,9 @@ export const DataStore = Fluxxor.createStore({
           bbox: [],
           colorMap: new Map(),
           selectedLocationCoordinates: [],
-          categoryValue: false
+          categoryValue: false,
+          language: 'en',
+          supportedLanguages:['en', 'ar']
       }
       
       this.bindActions(
@@ -26,7 +28,8 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
             Actions.constants.DASHBOARD.CHANGE_COLOR_MAP, this.handleChangeColorMap,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters,
-            Actions.constants.DASHBOARD.CHANGE_SOURCE, this.handleDataSourceChange
+            Actions.constants.DASHBOARD.CHANGE_SOURCE, this.handleDataSourceChange,
+            Actions.constants.DASHBOARD.CHANGE_LANGUAGE, this.handleLanguageChange
       );
     },
 
@@ -42,6 +45,11 @@ export const DataStore = Fluxxor.createStore({
     handleDataSourceChange(dataSource){
         this.dataStore.dataSource = dataSource;
         this.dataStore.renderMap = true;
+        this.emit("change");
+    },
+
+    handleLanguageChange(language){
+        this.dataStore.language = language;
         this.emit("change");
     },
 

@@ -295,7 +295,7 @@ export const SERVICES = {
                                             edges,
                                             createdtime,
                                             sentiment,
-                                            orig_language,
+                                            language,
                                             source
                                         }
                                     }
@@ -365,5 +365,30 @@ export const SERVICES = {
            name: "Bardīyah"
        }
        ]]);
-  }
+  },
+
+  translate: function (sentence, fromLanguage, toLanguage, callback) {
+      let query = `
+        fragment TranslationView on TranslationResult{
+            translatedSentence
+            } 
+
+            query FetchEvent($sentence: String!, $fromLanguage: String!, $toLanguage: String!) {
+
+            translate(sentence: $sentence, fromLanguage: $fromLanguage, toLanguage: $toLanguage){
+                ...TranslationView
+            }
+        }`
+      let variables = {sentence, fromLanguage, toLanguage};
+      let host = "http://fortisfactsservice.azurewebsites.net"
+      var POST = {
+           url : `${host}/api/Messages`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+        
+        request(POST, callback);
+  },
 }

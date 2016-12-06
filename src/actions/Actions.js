@@ -59,7 +59,8 @@ const constants = {
                CHANGE_SOURCE: "UPDATE:DATA_SOURCE",
                CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
-               CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS"
+               CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS",
+               CHANGE_LANGUAGE: "UPDATE:CHANGE_LANGUAGE"
            },
            FACTS : {
                LOAD_FACTS: "LOAD:FACTS",
@@ -111,6 +112,9 @@ const methods = {
         },
         changeDate(siteKey, datetimeSelection, timespanType){
            this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
+        },
+        changeLanguage(language){
+           this.dispatch(constants.DASHBOARD.CHANGE_LANGUAGE, language);
         }
     },
     FACTS: {

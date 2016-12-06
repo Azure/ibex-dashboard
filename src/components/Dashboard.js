@@ -130,6 +130,7 @@ export const Dashboard = React.createClass({
                                                           categoryValue={this.state.categoryValue}
                                                           dataSource={this.state.dataSource}
                                                           categoryType={this.state.categoryType}
+                                                          language = {this.getStateFromFlux().language}
                                                           edges={this.selectedTerms()} 
                                                           {...this.props}  /> : undefined}
                          </div>
@@ -149,7 +150,8 @@ export const Dashboard = React.createClass({
                                               datetimeSelection={this.state.datetimeSelection}
                                               categoryValue={this.state.categoryValue}
                                               categoryType={this.state.categoryType}
-                                              edges={this.selectedTerms()} {...this.props}  />
+                                              edges={this.selectedTerms()} {...this.props} 
+                                              language = {this.getStateFromFlux().language} />
                         </Dialog>
                       : undefined
                 }

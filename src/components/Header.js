@@ -5,6 +5,8 @@ import OCHAlogoURL from '../images/OCHA_Logo.png';
 import DengueLogoURL from '../images/umea_white.svg';
 import {getEnvPropValue} from '../utils/Utils.js';
 import { Link } from 'react-router';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -23,11 +25,16 @@ export const Header = React.createClass({
   componentWillReceiveProps(nextProps) {
        this.setState(this.getStateFromFlux());
   },
+
+  changeLanguage(event, index, value){
+      this.getFlux().actions.DASHBOARD.changeLanguage(value);
+  },
   
   render() {
     let siteKey = this.props.siteKey;
     let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
     let nav = (siteKey==="dengue") ? this.renderNav() : false ;
+    let self = this;
 
     return (
       <nav className="navbar navbar-trans" role="navigation">
@@ -49,14 +56,16 @@ export const Header = React.createClass({
                       {nav}
                   </ul>
                   <ul className="nav navbar-nav navbar-right">
-                      <li className="userProfile">
-                        <span className="fa-stack fa-lg">
-                          <i className="fa fa-square fa-stack-2x"></i>
-                          <i className="fa fa-stack-1x fa-inverse" style={{color: '#222931', fontWeight: '600', fontFamily: 'Helvetica Neue,Helvetica,Arial,sans-serif'}}>
-                            
-                          </i>
-                        </span>
-                      </li>
+                     <SelectField underlineStyle={{ borderColor: '#337ab7', borderBottom: 'solid 3px' }}
+                                labelStyle={{ fontWeight: 600, color: '#2ebd59' }}
+                                value={this.state.language}
+                                autoWidth ={true}
+                                style = {{width:'45px'}}
+                                onChange={self.changeLanguage}>
+                                 {this.state.supportedLanguages.map(function (lang) {
+                                        return <MenuItem key={lang} value={lang} primaryText={lang} />                                
+                                })}
+                    </SelectField>
                   </ul>
               </div>
           </div>

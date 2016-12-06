@@ -104,11 +104,12 @@ const FortisEvent = React.createClass({
                             lineHeight: this.props.lineHeight,
                             overflowY: 'scroll',
                         }
-                    }>
+                    }>             
             <h6 style={styles.listItemHeader}>
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
                 {commonTermsFromFilter.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
+                {this.props.pageLanguage!=this.props.language ? <button className="translate-button" onClick={() => this.props.translate(this.props.sentence, this.props.language, this.props.id)}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter
@@ -201,7 +202,8 @@ export const ActivityFeed = React.createClass({
   componentWillReceiveProps: function(nextProps){
       if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") 
        ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")
-       ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")){
+       ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")
+       ||  this.hasChanged(nextProps, "language") ){
 
           const params = {...nextProps, elementStartList: [], offset: 0, filteredSource: nextProps.dataSource};
 
@@ -214,6 +216,35 @@ export const ActivityFeed = React.createClass({
       const params = {...this.props, elementStartList: [], offset: 0, filteredSource: this.props.dataSource};
       this.processNewsFeed(params);
   },
+
+  translateEvent(sentence, fromLanguage, eventId){   
+    let self = this;
+    SERVICES.translate(sentence, fromLanguage, this.props.language, function (error, response, body) {
+        let updatedElements = self.state.elements.map(element => {
+            if (element.key == eventId) {
+                return <FortisEvent key={element.key}
+                    id={element.props.id}
+                    sentence={body.data.translate.translatedSentence}
+                    source={element.props.source}
+                    postedTime={element.props.postedTime}
+                    sentiment={element.props.sentiment}
+                    edges={element.props.edges}
+                    filters={element.props.edges}
+                    searchFilter={element.props.searchFilter}
+                    mainSearchTerm={element.props.mainSearchTerm}
+                    language={self.props.language}
+                    pageLanguage={element.props.pageLanguage}
+                    translate={self.translateEvent} />;
+            }
+            else {
+                return element;
+            }
+        })
+        self.setState({
+            elements: updatedElements
+        });
+    })
+},
 
   buildElements: function(requestPayload) {
         let elements = [];
@@ -236,7 +267,10 @@ export const ActivityFeed = React.createClass({
                                                         edges={feature.properties.edges}
                                                         filters={requestPayload.edges}
                                                         searchFilter={requestPayload.searchValue}
-                                                        mainSearchTerm={this.props.categoryValue} />)                               
+                                                        mainSearchTerm={this.props.categoryValue} 
+                                                        language={feature.properties.language}     
+                                                        pageLanguage={this.props.language}
+                                                        translate={this.translateEvent}/>)                               
                             }
                         });
 
