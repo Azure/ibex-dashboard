@@ -1,9 +1,5 @@
 import React from 'react';
-import Fluxxor from 'fluxxor';
 import '../styles/Header.css';
-import OCHAlogoURL from '../images/OCHA_Logo.png';
-import DengueLogoURL from '../images/umea_white.svg';
-import {getEnvPropValue} from '../utils/Utils.js';
 import { Link } from 'react-router';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
@@ -36,6 +32,12 @@ export const Header = React.createClass({
     let nav = (siteKey==="dengue") ? this.renderNav() : false ;
     let self = this;
 
+export const Header = React.createClass({  
+  render() {
+    const title = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.title : "";
+    const nav = (this.props.siteKey==="dengue") ? this.renderNav() : false ;
+    const logo = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.logo : false;
+
     return (
       <nav className="navbar navbar-trans" role="navigation">
           <div>
@@ -47,7 +49,10 @@ export const Header = React.createClass({
                       <span className="icon-bar"></span>
                   </button>
                   <a className="navbar-brand text-danger" href="#">
-                      <img role="presentation" src={siteKey === "ocha" ? OCHAlogoURL : DengueLogoURL} style={{display: 'inline'}} height="48" />
+                     {
+                         logo ? <img role="presentation" src={logo.startsWith("http:") ? logo : `${process.env.PUBLIC_URL}/images/${logo}`} style={{display: 'inline'}} height="48" /> 
+                            : undefined 
+                     }                     
                      <span className="brandLabel">{title}</span>
                   </a>
               </div>

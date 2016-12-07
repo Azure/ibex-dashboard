@@ -101,8 +101,7 @@ const FortisEvent = React.createClass({
         return <div className="infinite-list-item" style={
                         {
                             height: this.props.height,
-                            lineHeight: this.props.lineHeight,
-                            overflowY: 'scroll',
+                            lineHeight: this.props.lineHeight
                         }
                     }>             
             <h6 style={styles.listItemHeader}>
