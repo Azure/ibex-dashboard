@@ -131,14 +131,10 @@ const methods = {
         changeDate(siteKey, datetimeSelection, timespanType){
            this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
         },
-<<<<<<< HEAD
         changeLanguage(language){
            this.dispatch(constants.DASHBOARD.CHANGE_LANGUAGE, language);
            this.dispatch(constants.FACTS.CHANGE_LANGUAGE, language);
         }
-=======
-
->>>>>>> CatalystCode/Fortis-Client/settings
     },
     FACTS: {
         load_facts: function (pageSize, skip) {

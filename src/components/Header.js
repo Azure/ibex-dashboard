@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/Header.css';
 import { Link } from 'react-router';
+import Fluxxor from 'fluxxor';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 
@@ -25,14 +26,6 @@ export const Header = React.createClass({
   changeLanguage(event, index, value){
       this.getFlux().actions.DASHBOARD.changeLanguage(value);
   },
-  
-  render() {
-    let siteKey = this.props.siteKey;
-    let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
-    let nav = (siteKey==="dengue") ? this.renderNav() : false ;
-    let self = this;
-
-export const Header = React.createClass({  
   render() {
     const title = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.title : "";
     const nav = (this.props.siteKey==="dengue") ? this.renderNav() : false ;
@@ -60,7 +53,7 @@ export const Header = React.createClass({
                   <ul className="nav navbar-nav navbar-left">
                       {nav}
                   </ul>
-                  <ul className="nav navbar-nav navbar-right">
+                 <ul className="nav navbar-nav navbar-right">
                      <SelectField underlineStyle={{ borderColor: '#337ab7', borderBottom: 'solid 3px' }}
                                 labelStyle={{ fontWeight: 600, color: '#2ebd59' }}
                                 value={this.state.language}
