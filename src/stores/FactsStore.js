@@ -24,7 +24,6 @@ export const FactsStore = Fluxxor.createStore({
     };
 
     this.bindActions(
-      Actions.constants.FACTS.LOAD_FACTS, this.handleLoadFacts,
       Actions.constants.FACTS.INITIALIZE, this.intializeSettings,
       Actions.constants.FACTS.LOAD_FACTS_SUCCESS, this.handleLoadFactsSuccess,
       Actions.constants.FACTS.LOAD_FACTS_FAIL, this.handleLoadFactsFail,

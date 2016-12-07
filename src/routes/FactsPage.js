@@ -13,7 +13,7 @@ export const FactsPage = React.createClass({
       this.getFlux().actions.FACTS.load_settings(this.props.params.siteKey);
   },
   getStateFromFlux() {
-        return this.getFlux().store("AdminStore").getState();
+        return this.getFlux().store("FactsStore").getState();
   },
   render() {
     return (
