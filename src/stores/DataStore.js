@@ -18,8 +18,8 @@ export const DataStore = Fluxxor.createStore({
           colorMap: new Map(),
           selectedLocationCoordinates: [],
           categoryValue: false,
-          language: 'en',
-          supportedLanguages:['en', 'ar']
+          language: 'ru',
+          supportedLanguages:['en', 'ar', "ru"]
       }
       
       this.bindActions(

@@ -3,6 +3,7 @@ import 'rx-dom';
 import {Actions} from '../actions/Actions';
 import {guid, momentToggleFormats, getEnvPropValue, momentGetFromToRange} from '../utils/Utils.js';
 import request from 'request';
+import Promise from 'promise';
 
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 
@@ -367,7 +368,7 @@ export const SERVICES = {
        ]]);
   },
 
-  translate: function (sentence, fromLanguage, toLanguage, callback) {
+  translateSentence: function (sentence, fromLanguage, toLanguage) {
       let query = `
         fragment TranslationView on TranslationResult{
             translatedSentence
@@ -388,7 +389,15 @@ export const SERVICES = {
             withCredentials: false,
             body: { query, variables }
         };
-        
-        request(POST, callback);
-  },
+        return new Promise((resolve, reject) => {
+             request(POST, (error, response, body) => {
+                 if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
+                    resolve(body.data.translate.translatedSentence);
+                 }
+                 else{
+                    reject (error || 'Translate request failed: ' + JSON.stringify(response));
+                 }
+             });
+         });
+  }
 }

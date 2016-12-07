@@ -7,6 +7,7 @@ import moment from 'moment';
 import Infinite from 'react-infinite';
 import CircularProgress from 'material-ui/CircularProgress';
 import Highlighter from 'react-highlight-words';
+import Promise from 'promise';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -97,7 +98,6 @@ const FortisEvent = React.createClass({
         let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
         let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
-
         return <div className="infinite-list-item" style={
                         {
                             height: this.props.height,
@@ -109,7 +109,7 @@ const FortisEvent = React.createClass({
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
                 {commonTermsFromFilter.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
-                {this.props.pageLanguage!=this.props.language ? <button className="translate-button" onClick={() => this.props.translate(this.props.sentence, this.props.language, this.props.id)}>Translate</button> : ''}
+                {this.props.pageLanguage!=this.props.language ? <button className="translate-button" onClick={() => this.props.translate(this.props, searchWords)}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter
@@ -217,39 +217,37 @@ export const ActivityFeed = React.createClass({
       this.processNewsFeed(params);
   },
 
-  translateEvent(sentence, fromLanguage, eventId){   
+  translateEvent(event, tags){   
     let self = this;
-    SERVICES.translate(sentence, fromLanguage, this.props.language, function (error, response, body) {
-        if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
-            let updatedElements = self.state.elements.map(element => {
-                if (element.key == eventId) {
-                    return <FortisEvent key={element.key}
-                        id={element.props.id}
-                        sentence={body.data.translate.translatedSentence}
-                        source={element.props.source}
-                        postedTime={element.props.postedTime}
-                        sentiment={element.props.sentiment}
-                        edges={element.props.edges}
-                        filters={element.props.edges}
-                        searchFilter={element.props.searchFilter}
-                        mainSearchTerm={element.props.mainSearchTerm}
-                        language={self.props.language}
-                        pageLanguage={element.props.pageLanguage}
-                        translate={self.translateEvent} />;
-                }
-                else {
-                    return element;
-                }
-            });
-            self.setState({
-                elements: updatedElements
-            });
-        }
-        else{
-            console.log(error);
-        }
-        
-    })
+    let sentenceTranslatePromise = SERVICES.translateSentence(event.sentence, event.language, this.props.language);
+    let dateTranslatePromise = SERVICES.translateSentence(event.postedTime, event.language, this.props.language);
+    Promise.all([sentenceTranslatePromise, dateTranslatePromise]).then(translatedValues => {
+        let translatedSentence = translatedValues[0];
+        let translatedDate = translatedValues[1];
+        let updatedElements = self.state.elements.map(element => {
+            if (element.key == event.id) {
+                return <FortisEvent key={element.key}
+                    id={element.props.id}
+                    sentence={translatedSentence}
+                    source={element.props.source}
+                    postedTime={translatedDate}
+                    sentiment={element.props.sentiment}
+                    edges={element.props.edges}
+                    filters={element.props.edges}
+                    searchFilter={element.props.searchFilter}
+                    mainSearchTerm={element.props.mainSearchTerm}
+                    language={self.props.language}
+                    pageLanguage={element.props.pageLanguage}
+                    translate={self.translateEvent} />;
+            }
+            else {
+                return element;
+            }
+        });
+        self.setState({
+            elements: updatedElements
+        });
+    });
 },
 
   buildElements: function(requestPayload) {
