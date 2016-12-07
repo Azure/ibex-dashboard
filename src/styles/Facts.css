@@ -1,4 +1,8 @@
-#facts > .ReactListView > * {
+#facts .noResults {
+    padding: 20px;
+}
+
+#facts .ReactListView > * {
     background: #F3F3EC;
     margin: 0 auto;
 }
@@ -95,15 +99,27 @@
 
 #filters {
     width: 100%;
-    height: 50px;
+    height: 36px;
     background: #F3F3EC;
     overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #E3E3DC;
 }
 
 #filters ul {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+#filters ul > li {
+    float: left;
+}
+
+#filters ul > li .link {
+    display: block;
+    padding: 10px;
+    cursor: pointer;
 }
 
 #filters .radios {
@@ -114,6 +130,13 @@
 #filters label {
     /*background-color: #337ab7 !important;*/
     white-space: nowrap;
+}
+
+#filters .uniqueTags {
+    padding: 0 20px;
+    /* place tag links above list view */
+    position: absolute;
+    z-index: 1;
 }
 
 /* fact detail page */

@@ -2,16 +2,13 @@ import 'react-table/react-table.css'
 import ReactDataGrid from 'react-data-grid-r15';
 import React from 'react';
 import Fluxxor from 'fluxxor';
+// eslint-disable-next-line
 import ReactDataGridPlugins from 'react-data-grid-r15/addons';
 import 'react-data-grid-r15/dist/react-data-grid.css'
 import {guid} from '../utils/Utils.js';
 
-const Editors             = window.ReactDataGridPlugins.Editors;
-const Selectors           = window.ReactDataGridPlugins.Data.Selectors;
 const Toolbar             = window.ReactDataGridPlugins.Toolbar;
-const Filters             = window.ReactDataGridPlugins.Filters;
-const AutoCompleteEditor  = window.ReactDataGridPlugins.Editors.AutoComplete;
-const DropDownEditor      = window.ReactDataGridPlugins.Editors.DropDownEditor;
+//const AutoCompleteEditor  = window.ReactDataGridPlugins.Editors.AutoComplete;
 const RowKeyField = "RowKey";
 const FluxMixin = Fluxxor.FluxMixin(React), StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
 
@@ -208,7 +205,6 @@ export const DataGrid = React.createClass({
             <span style={styles.rowSelectionLabel}>{this.state.selectedRows.length} {rowText} selected</span>
             <ReactDataGrid
                   ref="grid"
-                  enableRowSelect={true}
                   onGridSort={this.handleGridSort}
                   enableCellSelect={true}
                   onCellCopyPaste={null}

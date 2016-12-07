@@ -94,3 +94,14 @@ export function contains(arr, tag) {
 	// string match
 	return arr.indexOf(tag) > -1;
 }
+
+export function containsEqualValues(a, b) {
+	return a.length === b.length && a.every( (i,j) => i === b[j] );
+}
+
+// Material UI helper: Returns label from selected checkbox
+export function getCheckedLabel(e) {
+    let label = e.target.getAttribute('data-reactid');
+    let matches = label.match(/\$([a-zA-Z0-9\s\-_]+)/);
+    return matches
+}
