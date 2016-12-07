@@ -11,7 +11,7 @@ import {routes} from './routes/routes';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/css/bootstrap-theme.css';
 
-let userProfile = (window.location.host.indexOf('localhost:')===-1)?SERVICES.getUserAuthenticationInfo():Actions.constants.USER_PROFILE;
+let userProfile = Actions.constants.USER_PROFILE;
 
 let stores = {
   DataStore: new DataStore(userProfile),

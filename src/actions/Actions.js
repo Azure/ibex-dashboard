@@ -223,16 +223,10 @@ const methods = {
             if (!dataStore.loading) {
                 SERVICES.fetchEdges(siteId, "en", edgeType, (error, response, body) => {
                         if (!error && response.statusCode === 200) {
-                            const response = body.data.terms.edges.map(term=>{
-                                  let termData = {"name": term.name};
-                                  languages.forEach(lang=>{
-                                      if(lang !== "en"){
-                                          termData[`name_${lang}`] = term[`name_${lang}`];
-                                      }
-                                  });
-                                  return termData;
-                            });
-                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, response);
+                            let response = body.data.terms.edges;
+                            
+                            let action = false;
+                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
                         }else{
                             let error = 'Error, could not load keywords for admin page';
                             self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
@@ -240,7 +234,31 @@ const methods = {
                 });
             }
         },
+        remove_keywords: function(siteId, deletedRows){
+            let self = this;
 
+            SERVICES.removeKeywords(siteId, deletedRows, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data.removeKeywords) {
+                    const response = body.data.removeKeywords.edges;
+                    const action = 'removed';
+                    self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
+        save_keywords: function(siteId, modifiedKeywords){
+            let self = this;
+            SERVICES.saveKeywords(siteId, modifiedKeywords, (error, response, body) => {
+                if(!error && response.statusCode === 200) {
+                    const action = 'saved';
+                    const response = body.data.addKeywords.edges;
+                    self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
         load_localities: function () {
             let self = this;
             const edgeType = "Location";

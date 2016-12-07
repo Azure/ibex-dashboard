@@ -112,17 +112,17 @@ export const Dashboard = React.createClass({
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-lg-2 termBrowserContainer">
+                    <div className="col-md-3 termBrowserContainer">
                         <SentimentTreeview {...this.props} 
                                            enabledTerms={this.FilterEnabledTerms()} />
                     </div>
-                    <div className="col-lg-8 heatmapContainer">
+                    <div className="col-md-6 heatmapContainer">
                       <div className="row">
                           <div id='leafletMap'></div>
                           <HeatMap {...this.props} />
                       </div>
                     </div>
-                    <div className="col-lg-2">
+                    <div className="col-md-3">
                         <div>
                             <i style={{color:"#fff", cursor: "pointer"}} className="fa fa-expand" onClick={this.handleOpen}></i>
                             <span className="news-feed-title">Expand News Feed</span>

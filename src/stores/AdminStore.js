@@ -34,8 +34,9 @@ export const AdminStore = Fluxxor.createStore({
         this.emit("change");
     },
 
-    handleLoadTerms(terms){
-        this.dataStore.watchlist = terms;
+    handleLoadTerms(response){
+        this.dataStore.watchlist = response.response;
+        this.dataStore.action = response.action || false;
         this.emit("change");
     },
 
@@ -73,9 +74,14 @@ export const AdminStore = Fluxxor.createStore({
                     filterable: true,
                     resizable: true
         };
-
-        const columns = languages.map(lang => Object.assign({}, defaultColDef, {key: lang !== "en" ? `name_${lang}` : 'name', 
-                                                                              name: lang !== "en" ? `name_${lang}` : 'name'}));
+        let columns = [];
+        columns.push(Object.assign({}, defaultColDef, {editable: false, key: "RowKey", name: "Term ID"}));
+        languages.forEach(lang => {
+            columns.push(Object.assign({}, defaultColDef, {key: lang !== "en" ? `name_${lang}` : 'name', 
+                                              name: lang !== "en" ? `name_${lang}` : 'name'}))
+            
+        });
+              
         this.dataStore.termGridColumns = columns;
     },
 

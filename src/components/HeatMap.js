@@ -30,15 +30,8 @@ export const HeatMap = React.createClass({
   
   getInitialState(){
       let siteKey = this.props.siteKey;
-      let defaultLocation = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_LOCATION);
-      let locationSplit = defaultLocation.split(',');
-      if(locationSplit.length !== 2){
-          throw Error("Invalid default location " + defaultLocation);
-      }
 
       return{
-          latitude: parseFloat(locationSplit[0]),
-          longitude: parseFloat(locationSplit[1]),
           mapProgressPercent: -1,
           intervalTime: 200,
           selectedTileId: false,
@@ -65,7 +58,7 @@ export const HeatMap = React.createClass({
           };
 
 		  info.update = props => {
-            let infoHeaderText = "<h5>Sentimentometer</h5>";
+            let infoHeaderText = "<h5>Average Sentiment</h5>";
             let infoBoxInnerHtml = '<div id="sentimentGraph" />';
             
 			this._div.innerHTML = infoHeaderText + infoBoxInnerHtml;
@@ -151,34 +144,37 @@ export const HeatMap = React.createClass({
   
   componentDidMount(){
     let siteKey = this.props.siteKey;
-    let latitude = this.state.latitude;
-    let longitude = this.state.longitude;
-    this.tilemap = new Map();
-    this.status = "ready";
-    let defaultZoom = getEnvPropValue(siteKey, process.env.REACT_APP_MAP_ZOOM);
-    L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
-    this.map = L.map('leafletMap', {zoomControl: false});
-    this.map.addControl(L.control.zoom({position: 'topright'}));
-    this.map.setView([latitude, longitude], defaultZoom);
-    this.map.coordinates = [longitude, latitude];
-    L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-        maxZoom: 17,
-        minZoom: 5,
-        id: 'dark-v9',
-        accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
-    }).addTo(this.map);
-    
-    this.map.selectedTerm = this.state.categoryValue;
-    this.map.datetimeSelection = this.state.datetimeSelection;
-    this.map.dataSource = this.state.dataSource;
-    this.map.on('moveend',() => {
-      this.viewportChanged();
-    });
+    if(this.state.settings.properties.defaultLocation && this.state.settings.properties.defaultZoomLevel){
+        const defaultLocation = this.state.settings.properties.defaultLocation;
+        const latitude = defaultLocation[1];
+        const longitude = defaultLocation[0];
+        this.tilemap = new Map();
+        this.status = "ready";
+        const defaultZoom = this.state.settings.properties.defaultZoomLevel;
+        L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
+        this.map = L.map('leafletMap', {zoomControl: false});
+        this.map.addControl(L.control.zoom({position: 'topright'}));
+        this.map.setView([latitude, longitude], defaultZoom);
+        this.map.coordinates = [longitude, latitude];
+        L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+            maxZoom: 17,
+            minZoom: 5,
+            id: 'dark-v9',
+            accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
+        }).addTo(this.map);
+        
+        this.map.selectedTerm = this.state.categoryValue;
+        this.map.datetimeSelection = this.state.datetimeSelection;
+        this.map.dataSource = this.state.dataSource;
+        this.map.on('moveend',() => {
+        this.viewportChanged();
+        });
 
-    this.addClusterGroup();
-    this.addInfoBoxControl();
-    this.addBreadCrumbControl();
+        this.addClusterGroup();
+        this.addInfoBoxControl();
+        this.addBreadCrumbControl();
+    }
   },
 
   createSentimentDistributionGraph(){

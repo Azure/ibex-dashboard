@@ -9,54 +9,6 @@ const TIMESERIES_BLOB_CONTAINER_NAME = "ericroz-bytime";
 const MAX_ZOOM = 15;
 
 export const SERVICES = {
-  getUserAuthenticationInfo(){
-   ///Make sure the AAD client id is setup in the config
-   let userProfile = window.userProfile;
-
-    if(userProfile && userProfile.given_name)
-       return userProfile;
-
-    if(!process.env.REACT_APP_AAD_AUTH_CLIENTID || process.env.REACT_APP_AAD_AUTH_CLIENTID === ''){
-      console.log('AAD Auth Client ID config is not setup in Azure for this instance');
-      return {};
-    }
-
-    window.config = {
-      instance: 'https://login.microsoftonline.com/',
-      tenant: 'microsoft.com',
-      clientId: process.env.REACT_APP_AAD_AUTH_CLIENTID,
-      postLogoutRedirectUri: 'http://www.microsoft.com',
-      cacheLocation: 'localStorage', // enable this for IE, as sessionStorage does not work for localhost.
-    };
-
-    let authContext = new window.AuthenticationContext(window.config);
-
-    var isCallback = authContext.isCallback(window.location.hash);
-    authContext.handleWindowCallback();
-
-    if (isCallback && !authContext.getLoginError()) {
-        window.location = authContext._getItem(authContext.CONSTANTS.STORAGE.LOGIN_REQUEST);
-    }
-    // Check Login Status, Update UI
-    var user = authContext.getCachedUser();
-    if (user) {
-        let sessionId = guid();
-        // We are logged in. We're is good!
-        window.userProfile = {
-          unique_name: user.profile.upn,
-          family_name: user.profile.family_name,
-          given_name: user.profile.given_name,
-          sessionId: sessionId
-        };
-
-        window.appInsights.trackEvent("login", {profileId: window.userProfile.unique_name});
-
-        return window.userProfile;
-    } else {
-        authContext.login();
-    }
-  },
-
  getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback){
      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
      let hostname = blobHostnamePattern.format(accountName);
@@ -122,6 +74,8 @@ export const SERVICES = {
                                     edges {
                                         name
                                         type
+                                        name_ar
+                                        RowKey
                                     }
                                 }`;
 
@@ -321,6 +275,36 @@ export const SERVICES = {
         request(POST, callback);
   },
 
+  saveKeywords(site, edges, callback){
+        const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
+                                    edges {
+                                        name
+                                        type
+                                        name_ar
+                                        RowKey
+                                    }
+                                }`;
+        const query = `${termsEdgeFragment} 
+                        mutation AddKeywords($input: EdgeTerms!) {
+                            addKeywords(input: $input) {
+                                ...FortisDashboardTermEdges
+                            }
+                        }`;
+
+        const variables = {input: {site, edges}};
+
+        const host = process.env.REACT_APP_SERVICE_HOST
+        const POST = {
+            url : `${host}/api/edges`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+        
+        request(POST, callback);
+  },
+
   createOrReplaceSite(siteName, siteDefinition, callback){
         let query = `  mutation CreateOrReplaceSite($input: SiteDefinition!) {
                             createOrReplaceSite(input: $input) {
@@ -333,6 +317,36 @@ export const SERVICES = {
         let host = process.env.REACT_APP_SERVICE_HOST
         var POST = {
             url : `${host}/api/settings`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+        
+        request(POST, callback);
+  },
+
+  removeKeywords(site, edges, callback){
+        const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
+                                    edges {
+                                        name
+                                        type
+                                        name_ar
+                                        RowKey
+                                    }
+                                }`;
+        const query = `${termsEdgeFragment} 
+                        mutation RemoveKeywords($input: EdgeTerms!) {
+                            removeKeywords(input: $input) {
+                                ...FortisDashboardTermEdges
+                            }
+                        }`;
+                        
+        const variables = {input: {site, edges}};
+
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url : `${host}/api/edges`,
             method : "POST",
             json: true,
             withCredentials: false,
