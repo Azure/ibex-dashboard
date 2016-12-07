@@ -10,6 +10,7 @@ export const FactsStore = Fluxxor.createStore({
       tags: [],
       error: null,
       loading: false,
+      settings: {},
       pageSize: 50,
       skip: 0,
       pageState: {
@@ -27,6 +28,7 @@ export const FactsStore = Fluxxor.createStore({
 
     this.bindActions(
       Actions.constants.FACTS.LOAD_FACTS, this.handleLoadFacts,
+      Actions.constants.FACTS.INITIALIZE, this.intializeSettings,
       Actions.constants.FACTS.LOAD_FACTS_SUCCESS, this.handleLoadFactsSuccess,
       Actions.constants.FACTS.LOAD_FACTS_FAIL, this.handleLoadFactsFail,
       Actions.constants.FACTS.SAVE_PAGE_STATE, this.handleSavePageState,
@@ -48,6 +50,11 @@ export const FactsStore = Fluxxor.createStore({
     this.dataStore.error = null;
     this.dataStore.facts = this._processResults(payload.response);
     this._incrementSkip(payload.response);
+    this.emit("change");
+  },
+
+  intializeSettings(siteSettings){
+    this.dataStore.settings = siteSettings;
     this.emit("change");
   },
 

@@ -20,6 +20,11 @@ const styles = {
             },
             buttonRow: {
                 marginTop: '20px'
+            },
+            labelInfo: {
+                fontStyle: 'italic',
+                fontWeight: 400,
+                color: '#000'
             }
     }
 };
@@ -56,8 +61,10 @@ export const AdminSettings = React.createClass({
     handleSaveSettings(){
         const {targetBbox, defaultLocation, defaultZoomLevel} = this.props.siteSettings.properties;
         const {name, storageConnectionString, title, logo, featuresConnectionString, supportedLanguages} = this.refs;
+        const languageArray = supportedLanguages.value.split(",");
+        const languageJSON = `["${languageArray.join('","')}"]`;
         const siteDefintion = {name: name.value, targetBbox: targetBbox, logo:logo.value, defaultLocation:defaultLocation, 
-                               defaultZoomLevel:defaultZoomLevel, supportedLanguages: JSON.parse(supportedLanguages.value), 
+                               defaultZoomLevel:defaultZoomLevel, supportedLanguages: JSON.parse(languageJSON), 
                                title:title.value, featuresConnectionString:featuresConnectionString.value, 
                                storageConnectionString:storageConnectionString.value};
 
@@ -114,7 +121,7 @@ export const AdminSettings = React.createClass({
                             <div className="validation"></div>
                         </div>
                         <div className="form-group">
-                            <label>Supported Languages(JSON array)<span>*</span></label>
+                            <label>Supported Languages(<span style={styles.settings.labelInfo}>comma seperated i.e. en,ar</span>)<span>*</span></label>
                             <input onChange={this.handleChange} required name="supportedLanguages" ref="supportedLanguages" value={this.state.siteSettings.properties.supportedLanguages} type="text" style={styles.settings.input} className="form-control settings" aria-label="..." />
                             <div className="validation"></div>
                         </div>

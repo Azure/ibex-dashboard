@@ -66,6 +66,7 @@ const constants = {
                LOAD_FACTS: "LOAD:FACTS",
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
                LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
+               INITIALIZE: "INIT",
                SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
                LOAD_FACT: "LOAD:FACT"
            },
@@ -145,6 +146,23 @@ const methods = {
                         self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
                     });
             }
+        },
+        load_settings: function(siteName){
+            let self = this;
+            const LOAD_SITE_LIST = true;
+
+            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
+                    if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
+                        const settings = body.data.siteDefinition.sites;
+                        if(settings && settings.length > 0){
+                            self.dispatch(constants.FACTS.INITIALIZE, settings[0]);
+                        }else{
+                            console.error(`site [${siteName}] does not exist.`);
+                        }
+                    }else{
+                        console.error(`[${error}] occured while processing message request`);
+                    }
+            });
         },
         save_page_state: function(pageState) {
             this.dispatch(constants.FACTS.SAVE_PAGE_STATE, pageState);
