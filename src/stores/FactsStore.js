@@ -22,10 +22,13 @@ export const FactsStore = Fluxxor.createStore({
       factLinks: {
         prev: null,
         next: null
-      }
+      },
+      language: 'en',
+      supportedLanguages:['en', 'ar']
     };
 
     this.bindActions(
+      Actions.constants.FACTS.CHANGE_LANGUAGE, this.handleLanguageChange,
       Actions.constants.FACTS.LOAD_FACTS, this.handleLoadFacts,
       Actions.constants.FACTS.LOAD_FACTS_SUCCESS, this.handleLoadFactsSuccess,
       Actions.constants.FACTS.LOAD_FACTS_FAIL, this.handleLoadFactsFail,
@@ -41,6 +44,12 @@ export const FactsStore = Fluxxor.createStore({
 
   handleLoadFacts() {
     this.dataStore.loading = true;
+  },
+
+  handleLanguageChange(language){
+      console.log("FactsStore. Language cganged.")
+      this.dataStore.language = language;
+      this.emit("change");
   },
 
   handleLoadFactsSuccess(payload) {

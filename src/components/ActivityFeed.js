@@ -220,29 +220,35 @@ export const ActivityFeed = React.createClass({
   translateEvent(sentence, fromLanguage, eventId){   
     let self = this;
     SERVICES.translate(sentence, fromLanguage, this.props.language, function (error, response, body) {
-        let updatedElements = self.state.elements.map(element => {
-            if (element.key == eventId) {
-                return <FortisEvent key={element.key}
-                    id={element.props.id}
-                    sentence={body.data.translate.translatedSentence}
-                    source={element.props.source}
-                    postedTime={element.props.postedTime}
-                    sentiment={element.props.sentiment}
-                    edges={element.props.edges}
-                    filters={element.props.edges}
-                    searchFilter={element.props.searchFilter}
-                    mainSearchTerm={element.props.mainSearchTerm}
-                    language={self.props.language}
-                    pageLanguage={element.props.pageLanguage}
-                    translate={self.translateEvent} />;
-            }
-            else {
-                return element;
-            }
-        })
-        self.setState({
-            elements: updatedElements
-        });
+        if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
+            let updatedElements = self.state.elements.map(element => {
+                if (element.key == eventId) {
+                    return <FortisEvent key={element.key}
+                        id={element.props.id}
+                        sentence={body.data.translate.translatedSentence}
+                        source={element.props.source}
+                        postedTime={element.props.postedTime}
+                        sentiment={element.props.sentiment}
+                        edges={element.props.edges}
+                        filters={element.props.edges}
+                        searchFilter={element.props.searchFilter}
+                        mainSearchTerm={element.props.mainSearchTerm}
+                        language={self.props.language}
+                        pageLanguage={element.props.pageLanguage}
+                        translate={self.translateEvent} />;
+                }
+                else {
+                    return element;
+                }
+            });
+            self.setState({
+                elements: updatedElements
+            });
+        }
+        else{
+            console.log(error);
+        }
+        
     })
 },
 

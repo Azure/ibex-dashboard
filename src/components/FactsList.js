@@ -1,6 +1,7 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
 import ReactListView from 'react-list-view';
+import {SERVICES} from '../services/services';
 import { Link } from 'react-router';
 import { getHumanDate } from '../utils/Utils.js';
 import { getFilteredResults } from '../utils/Fact.js';
@@ -14,6 +15,10 @@ const styles = {
     float: "left",
     marginRight: "20px"
   },
+  button:{
+    float: "right",
+    color: "#337ab7"
+  }
 };
 
 const FluxMixin = Fluxxor.FluxMixin(React),
@@ -69,6 +74,7 @@ export const FactsList = React.createClass({
   },
 
   componentWillReceiveProps: function (nextProps) {
+    console.log("componentWillReceiveProps");
     this.setState(this.getStateFromFlux());
   },
 
@@ -161,6 +167,26 @@ export const FactsList = React.createClass({
     this.ready = true;
   },
 
+  translate(sentence, fromLanguage, toLanguage, factId) {
+      let self = this;
+      SERVICES.translate(sentence, fromLanguage, toLanguage, function (error, response, body) {
+        if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
+          self.state.facts.forEach(fact => {
+              if (fact.id === factId) {
+                fact.language = toLanguage;
+                fact.title = body.data.translate.translatedSentence
+              }
+          })
+        }
+        else{
+            console.log(error);
+        }
+        self.setState({
+            elements: self.state
+        });
+      })
+  },
+
   _renderItem(x, y, style) {
     let item = this._getItem(x, y);
     // Update cell style properties
@@ -178,11 +204,18 @@ export const FactsList = React.createClass({
       return;
     }
 
+    
+
     let dateString = getHumanDate(item.id);
+
     return (
       <div className="cell" style={style}>
         <div className="card">
-          <p className="date">{dateString}</p>
+          <p className="date">{dateString}
+           {this.state.language!=item.language ?<button style={styles.button} 
+           onClick={() => this.translate(item.title, item.language, this.state.language, item.id)}>Translate</button>: ''}
+          </p>
+          
           <h3 className="title truncate-2"><Link to={`/site/${this.props.siteKey}/facts/detail/${item.id}`}>{item.title}</Link></h3>
           <ul className="tags">
             {item.tags.map(function (tag) {

@@ -67,7 +67,8 @@ const constants = {
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
                LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
                SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
-               LOAD_FACT: "LOAD:FACT"
+               LOAD_FACT: "LOAD:FACT",
+               CHANGE_LANGUAGE: "UPDATE:CHANGE_LANGUAGE"
            },
            ADMIN : {
                LOAD_KEYWORDS: "LOAD:KEYWORDS",
@@ -115,6 +116,7 @@ const methods = {
         },
         changeLanguage(language){
            this.dispatch(constants.DASHBOARD.CHANGE_LANGUAGE, language);
+           this.dispatch(constants.FACTS.CHANGE_LANGUAGE, language);
         }
     },
     FACTS: {

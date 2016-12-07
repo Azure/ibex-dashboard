@@ -380,7 +380,7 @@ export const SERVICES = {
             }
         }`
       let variables = {sentence, fromLanguage, toLanguage};
-      let host = "http://fortisfactsservice.azurewebsites.net"
+      let host = "http://localhost:8000"//"http://fortisfactsservice.azurewebsites.net"
       var POST = {
            url : `${host}/api/Messages`,
             method : "POST",
