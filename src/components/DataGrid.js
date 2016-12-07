@@ -132,7 +132,7 @@ export const DataGrid = React.createClass({
                 columnData.forEach(pastedColumn => {
                     if(currentColumn < this.props.columns.length){
                         let colData = {};
-                        colData[this.props.columns[currentColumn].key] = pastedColumn;
+                        colData[this.props.columns[currentColumn].key] = pastedColumn.replace(/[\n\r]/g, '');
                         rowData = Object.assign({}, rowData, colData);
                     }
                     currentColumn++

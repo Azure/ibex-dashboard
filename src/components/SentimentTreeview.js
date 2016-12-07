@@ -377,7 +377,7 @@ export const SentimentTreeview = React.createClass({
                           <i className="fa fa-filter"></i>
                         </span>
                         <input type="text"
-                            className="form-control"
+                            className="form-control edgeFilterInput"
                             placeholder="Search the association list..."
                             onKeyUp={self.onFilterMouseUp} />
                     </div>
