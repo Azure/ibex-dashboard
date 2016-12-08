@@ -51,6 +51,11 @@ const styles ={
     highlight: {
         backgroundColor: '#ffd54f',
         fontWeight: '600'
+    },
+    translateButton: {
+        height: "20px",
+        marginLeft: "3px",
+        lineHeight: '1'
     }
 };
 
@@ -118,7 +123,7 @@ const FortisEvent = React.createClass({
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
                 {commonTermsFromFilterTranslated.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
-                {this.props.pageLanguage!=this.props.language ? <button className="translate-button" onClick={() => this.props.translate(this.props)}>Translate</button> : ''}
+                {this.props.pageLanguage!=this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={() => this.props.translate(this.props)}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter

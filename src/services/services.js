@@ -238,7 +238,7 @@ export const SERVICES = {
     }
   },
 
-  getSiteDefintion(siteId, retrieveSiteList){
+    getSiteDefintion(siteId, retrieveSiteList, callback){
         let fragment = `fragment FortisSiteDefinitionView on SiteCollection {
                             sites {
                                 name
@@ -280,17 +280,8 @@ export const SERVICES = {
             withCredentials: false,
             body: { query, variables }
         };
-         return new Promise((resolve, reject) => {
-             request(POST, (error, response, body) => {
-                 if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
-                    resolve(body.data.siteDefinition);
-                 }
-                 else {
-                    reject (error || 'Get site definition request failed: ' + JSON.stringify(response));
-                 }
-             });
-         });
-       
+        
+        request(POST, callback);
   },
 
   saveKeywords(site, edges, callback){

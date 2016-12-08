@@ -27,7 +27,6 @@ export const Header = React.createClass({
     const title = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.title : "";
     const nav = (this.props.siteKey==="dengue") ? this.renderNav() : false ;
     const logo = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.logo : false;
-
     return (
       <nav className="navbar navbar-trans" role="navigation">
           <div>
@@ -57,7 +56,7 @@ export const Header = React.createClass({
                                 autoWidth ={true}
                                 style = {{width:'45px'}}
                                 onChange={this.changeLanguage}>
-                                {this.state.settings.properties.supportedLanguages.map(function (lang) {
+                                {this.props.siteSettings.properties.supportedLanguages.map(function (lang) {
                                         return <MenuItem key={lang} value={lang} primaryText={lang} />                                
                                 })}
                     </SelectField>

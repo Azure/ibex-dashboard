@@ -106,8 +106,10 @@ const methods = {
         },
         initializeDashboard(siteId){
             let self = this;
-            SERVICES.getSiteDefintion(siteId, false).then(result => {              
-                    let siteSettings = result.sites[0];
+
+            SERVICES.getSiteDefintion(siteId, false, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
+                    let siteSettings = body.data.siteDefinition.sites[0];
                     SERVICES.fetchEdges(siteId, siteSettings.properties.supportedLanguages, "Term").then(keywordsArray => {
                         let keywordsDictionary = {};
                         keywordsArray.forEach(keywordObject =>{
@@ -120,10 +122,11 @@ const methods = {
                         siteSettings.properties.keywords = keywordsDictionary;
                         self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
                     });       
-            }, error => {
-                    console.error(error);
+                    
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
                 }
-            );
+            });
         },
         termsColorMap(colorMap){
             this.dispatch(constants.DASHBOARD.CHANGE_COLOR_MAP, {colorMap})
