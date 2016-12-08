@@ -5,11 +5,12 @@ import ReactTable from 'react-table'
 import {AdminSiteList} from './AdminSiteList';
 import {AdminSettings} from './AdminSettings';
 import {AdminWatchlist} from './AdminWatchlist';
+import {CustomEventsEditor} from './CustomEventsEditor';
 import '../styles/Admin.css'
 
 const FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
-const SETTINGS_TAB = 0, WATCHLIST_TAB = 1;
+const SETTINGS_TAB = 0, WATCHLIST_TAB = 1, CUSTOM_EVENTS_TAB = 3;
 const styles = {
     container: {
         panel: {
@@ -95,6 +96,10 @@ export const Admin = React.createClass({
                                     <TabPanel>
                                         <h2>Event Import</h2>
                                         <div className="adminTable">
+                                        {
+                                             this.state.settings && this.state.settings.properties && this.state.index === CUSTOM_EVENTS_TAB ? 
+                                                    <CustomEventsEditor {...this.props}/> : undefined
+                                        }
                                         </div>
                                     </TabPanel>
                                     <TabPanel>
