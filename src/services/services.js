@@ -1,7 +1,7 @@
 import Rx from 'rx';
 import 'rx-dom';
 import {Actions} from '../actions/Actions';
-import {guid, momentToggleFormats, momentGetFromToRange} from '../utils/Utils.js';
+import {momentToggleFormats, momentGetFromToRange} from '../utils/Utils.js';
 import request from 'request';
 import Promise from 'promise';
 
@@ -16,7 +16,6 @@ export const SERVICES = {
      let blobContainer = TIMESERIES_BLOB_CONTAINER_NAME;
 
      let url = `${hostname}/${blobContainer}/${dataSource}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
-
      let GET = {
             url : url,
             json: true,
@@ -378,6 +377,19 @@ export const SERVICES = {
   getFacts: function (pageSize, skip) {
       let url = "http://fortisfactsservice.azurewebsites.net/api/facts?pageSize={0}&skip={1}&fullInfo=false".format(pageSize, skip);
       return Rx.DOM.getJSON(url);
+  },
+
+  getFactsWithFilter: function (pageSize, skip, tagFilterArray=[]) {
+      let tagFilterQuery = "";
+      if (tagFilterArray.length > 0) {
+        tagFilterQuery = "&tagFilter=" + tagFilterArray.map(encodeURI).join(":");
+      }
+      let url = "http://fortisfactsservice-staging.azurewebsites.net/api/facts/?pageSize={0}&skip={1}&fullInfo=false{2}".format(pageSize, skip, tagFilterQuery);
+      return Rx.DOM.getJSON(url);
+  },
+
+  getFactTags: function () {
+      return Rx.DOM.getJSON("http://fortisfactsservice-staging.azurewebsites.net/api/facts/?tagsOnly=true");
   },
 
   getFact: function (id) {

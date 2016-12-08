@@ -27,6 +27,12 @@ export const FactDetail = React.createClass({
   },
 
   render() {
+    let filter = "";
+    if (this.state.pageState.filter.length > 0) {
+      filter = "tags/" + this.state.pageState.filter.join('+');
+    }
+    const back = "/site/{0}/facts/{1}".format( this.props.siteKey, filter );
+
     // loading state
     if (!this.state.factDetail) {
       return (
@@ -35,7 +41,7 @@ export const FactDetail = React.createClass({
 
             <div className="row topBar">
               <div className="col-md-3">
-                <Link to={`/site/${this.props.siteKey}/facts`} className="navBtn">&lt; Back</Link>
+                <Link to={back} className="navBtn">&lt; Back</Link>
               </div>
               <div className="col-md-6">
               </div>
@@ -57,7 +63,7 @@ export const FactDetail = React.createClass({
 
             <div className="row topBar">
               <div className="col-md-3">
-                <Link to={`/site/${this.props.siteKey}/facts`} className="navBtn">&lt; Back</Link>
+                <Link to={back} className="navBtn">&lt; Back</Link>
               </div>
               <div className="col-md-6">
               </div>
@@ -88,7 +94,7 @@ export const FactDetail = React.createClass({
 
           <div className="row topBar">
             <div className="col-md-3">
-              <Link to={`/site/${this.props.siteKey}/facts`} className="navBtn">&lt; Back</Link>
+              <Link to={back} className="navBtn">&lt; Back</Link>
             </div>
             <div className="col-md-6">
             </div>
@@ -123,16 +129,16 @@ export const FactDetail = React.createClass({
 
                 <p className="subheading">Sources</p>
                 <ul className="drop">
-                  {fact.sources.map(function (item) {
-                    return <li key={item}><a href={item} className="truncate" target="_blank">{item}</a></li>;
+                  {fact.sources.map(function (url) {
+                    return <li key={url}><a href={url} className="truncate" target="_blank">{url}</a></li>;
                   })}
                 </ul>
 
                 <p className="subheading">Tags</p>
                 <ul className="drop">
-                  {fact.tags.map(function (item) {
-                    return <li key={item}>{item}</li>;
-                  })}
+                  {fact.tags.map(function (tag) {
+                    return <li key={tag}><Link to={`/site/${this.props.siteKey}/facts/tags/${tag}`}>{tag}</Link></li>;
+                  },this)}
                 </ul>
               </div>
             </div>

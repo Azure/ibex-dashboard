@@ -61,15 +61,16 @@ const constants = {
                CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS",
-               CHANGE_LANGUAGE: "UPDATE:CHANGE_LANGUAGE"
+               CHANGE_LANGUAGE: "DASHBOARD:CHANGE_LANGUAGE"
            },
            FACTS : {
-               LOAD_FACTS: "LOAD:FACTS",
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
                LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
+               INITIALIZE: "INIT",
                SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
                LOAD_FACT: "LOAD:FACT",
-               CHANGE_LANGUAGE: "UPDATE:CHANGE_LANGUAGE"
+               CHANGE_LANGUAGE: "FACTS:CHANGE_LANGUAGE",
+               LOAD_FACT_TAGS: "LOAD:FACT_TAGS"
            },
            ADMIN : {
                LOAD_KEYWORDS: "LOAD:KEYWORDS",
@@ -145,37 +146,50 @@ const methods = {
         }
     },
     FACTS: {
-        load_facts: function (pageSize, skip) {
+        load_facts: function (pageSize, skip, tagFilterArray = []) {
             let self = this;
-            let dataStore = this.flux.stores.FactsStore.dataStore;
-            if (!dataStore.loading) {
-                this.dispatch(constants.FACTS.LOAD_FACTS);
-                SERVICES.getFacts(pageSize, skip)
-                    .subscribe(response => {
-                        self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
-                    }, error => {
-                        console.warning('Error, could not load facts', error);
-                        self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
-                    });
-            }
+            SERVICES.getFactsWithFilter(pageSize, skip, tagFilterArray)
+                .subscribe(response => {
+                    self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
+                }, error => {
+                    console.warn('Error, could not load facts', error);
+                    self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
+                });
         },
-        save_page_state: function(pageState) {
+        load_fact_tags: function () {
+            let self = this;
+            SERVICES.getFactTags().subscribe(response => {
+                self.dispatch(constants.FACTS.LOAD_FACT_TAGS, { response: response });
+            });
+        },
+        load_settings: function(siteName){
+            let self = this;
+            const LOAD_SITE_LIST = true;
+
+            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
+                    if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
+                        const settings = body.data.siteDefinition.sites;
+                        if(settings && settings.length > 0){
+                            self.dispatch(constants.FACTS.INITIALIZE, settings[0]);
+                        }else{
+                            console.error(`site [${siteName}] does not exist.`);
+                        }
+                    }else{
+                        console.error(`[${error}] occured while processing message request`);
+                    }
+            });
+        },
+        save_page_state: function (pageState) {
             this.dispatch(constants.FACTS.SAVE_PAGE_STATE, pageState);
         },
         load_fact: function (id) {
             let self = this;
-            let dataStore = this.flux.stores.FactsStore.dataStore;
-
-            dataStore.factDetail = null;
-
-            if (!dataStore.factDetail) {
-                SERVICES.getFact(id)
+            SERVICES.getFact(id)
                     .subscribe(response => {
                         self.dispatch(constants.FACTS.LOAD_FACT, { response: response });
                     }, error => {
                         console.warning('Error, could not load fact id: ' + id, error);
                     });
-            }
         }
     },
     ADMIN: {

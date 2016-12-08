@@ -6,7 +6,6 @@ import eachLimit from 'async/eachLimit';
 import {SERVICES} from '../services/services';
 import numeralLibs from 'numeral';
 import L from 'leaflet';
-import {getEnvPropValue} from '../utils/Utils.js';
 import ProgressBar from 'react-progress-bar-plus';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet/dist/images/layers-2x.png';
@@ -29,8 +28,6 @@ export const HeatMap = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
-      let siteKey = this.props.siteKey;
-
       return{
           mapProgressPercent: -1,
           intervalTime: 200,
@@ -143,7 +140,6 @@ export const HeatMap = React.createClass({
   },
   
   componentDidMount(){
-    let siteKey = this.props.siteKey;
     if(this.state.settings.properties.defaultLocation && this.state.settings.properties.defaultZoomLevel){
         const defaultLocation = this.state.settings.properties.defaultLocation;
         const latitude = defaultLocation[1];
