@@ -110,9 +110,9 @@ const methods = {
             SERVICES.getSiteDefintion(siteId, false, (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
                     let siteSettings = body.data.siteDefinition.sites[0];
-                    SERVICES.fetchEdges(siteId, siteSettings.properties.supportedLanguages, "Term").then(keywordsArray => {
+                    SERVICES.fetchEdges(siteId, siteSettings.properties.supportedLanguages, "All").then(edges => {
                         let keywordsDictionary = {};
-                        keywordsArray.forEach(keywordObject =>{
+                        edges.terms.edges.forEach(keywordObject =>{
                             let wordByLanguageMap = {};
                             siteSettings.properties.supportedLanguages.forEach(language => {
                                 wordByLanguageMap[language] = keywordObject[language=='en'?'name':'name_'+language];
@@ -120,6 +120,7 @@ const methods = {
                             keywordsDictionary[keywordObject.name.toLowerCase()] = wordByLanguageMap;
                         })
                         siteSettings.properties.keywords = keywordsDictionary;
+                        siteSettings.properties.edges=edges.terms.edges.concat(edges.locations.edges);
                         self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
                     });       
                     

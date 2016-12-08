@@ -10,13 +10,16 @@ const FluxMixin = Fluxxor.FluxMixin(React);
 //const maxDefaultResult = 12;
 const ENGLISH_LANGUAGE = "en";
 const ALL_EDGE_TYPES = "All";
-const getSuggestionValue = suggestion => suggestion.name.trim();
-const getSuggestions = (value, defaultSuggestions) => {
+const getSuggestionValue = (suggestion, lang) => {return suggestion[lang =='en'? 'name': 'name_'+lang].trim();}
+const getSuggestions = (value, defaultSuggestions, lang) => {
+
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-
   return inputLength === 0 || defaultSuggestions.length === 0 ? [] 
-      : defaultSuggestions.filter(edge => edge.name.toLowerCase().indexOf(inputValue) > -1);
+      : defaultSuggestions.filter(edge => {
+          let fieldName = lang =='en'? 'name': 'name_'+lang;
+          return edge[fieldName] && (edge[fieldName].toLowerCase().indexOf(inputValue) > -1)
+      });
 };
 
 export const TypeaheadSearch = React.createClass({
@@ -25,16 +28,20 @@ export const TypeaheadSearch = React.createClass({
   getInitialState(){
       return {
           suggestions: [],
+          defaultResults: [],
           value: ''
       }
   },
-
 
   componentWillReceiveProps(nextProps) {
        const value = nextProps.data;
 
        if(value !== this.state.value){
            this.setState({value});
+       }
+
+       if(nextProps.edges != this.state.defaultResults){
+          this.setState({defaultResults: this.props.edges});
        }
   },
 
@@ -50,13 +57,12 @@ export const TypeaheadSearch = React.createClass({
 
   onSuggestionsFetchRequested({ value }){
     this.setState({
-      suggestions: getSuggestions(value, this.props.edges)
+      suggestions: getSuggestions(value, this.state.defaultResults, this.props.language)
     });
   },
   
-  renderSuggestion(element, language, {query}) { 
-    const suggestionText = element[language=='en'?'name':'name_'+language];
-    console.log("suggestionText", suggestionText);
+  renderSuggestion(element, {query}) { 
+    const suggestionText = element[this.props.language == 'en'? 'name': 'name_'+this.props.language];
     const matches = match(suggestionText, query);
     const parts = parse(suggestionText, matches);
     const iconMap = new Map([["Location", "fa fa-map-marker fa-2x"], ["Term", "fa fa-tag fa-2x"]]);
@@ -109,7 +115,7 @@ export const TypeaheadSearch = React.createClass({
                                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}                               
                                 renderSuggestion={this.renderSuggestion}
-                                getSuggestionValue={getSuggestionValue} />
+                                getSuggestionValue={(value)=>getSuggestionValue(value, this.props.language)} />
                                 : undefined
                   }
         </div>

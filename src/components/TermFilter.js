@@ -13,6 +13,7 @@ export const TermFilter = React.createClass({
   },
   
   onFilterChange(filters){
+      console.log("jjjd", filters);
       this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
   },
 
