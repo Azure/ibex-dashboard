@@ -96,7 +96,17 @@ const FortisEvent = React.createClass({
     render: function() {
         let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
         let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
+        
+        let commonTermsFromFilterTranslated = commonTermsFromFilter.map(term =>{
+            return this.props.keywordsDictionary[term][this.props.pageLanguage];
+        });
+
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
+
+        let searchWordsTranslated = searchWords.map(term => {
+            return this.props.keywordsDictionary[term.toLowerCase()][this.props.pageLanguage];
+        });
+
         let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
         return <div className="infinite-list-item" style={
                         {
@@ -107,12 +117,12 @@ const FortisEvent = React.createClass({
             <h6 style={styles.listItemHeader}>
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
-                {commonTermsFromFilter.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
-                {this.props.pageLanguage!=this.props.language ? <button className="translate-button" onClick={() => this.props.translate(this.props, searchWords)}>Translate</button> : ''}
+                {commonTermsFromFilterTranslated.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
+                {this.props.pageLanguage!=this.props.language ? <button className="translate-button" onClick={() => this.props.translate(this.props)}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter
-                    searchWords={searchWords}
+                    searchWords={searchWordsTranslated}
                     highlightStyle={styles.highlight}
                     textToHighlight={this.props.sentence} />
             </div>
@@ -216,25 +226,24 @@ export const ActivityFeed = React.createClass({
       this.processNewsFeed(params);
   },
 
-  translateEvent(event, tags){   
+  translateEvent(event){   
     let self = this;
-    let sentenceTranslatePromise = SERVICES.translateSentence(event.sentence, event.language, this.props.language);
-    let dateTranslatePromise = SERVICES.translateSentence(event.postedTime, event.language, this.props.language);
-    Promise.all([sentenceTranslatePromise, dateTranslatePromise]).then(translatedValues => {
-        let translatedSentence = translatedValues[0];
-        let translatedDate = translatedValues[1];
+    console.log(event);
+    SERVICES.translateSentence(event.sentence, event.language, this.props.language).then(translatedSentence => {
+        console.log(translatedSentence);
         let updatedElements = self.state.elements.map(element => {
             if (element.key == event.id) {
-                return <FortisEvent key={element.key}
-                    id={element.props.id}
+                return <FortisEvent key={event.id}
+                    id={event.id}
                     sentence={translatedSentence}
                     source={element.props.source}
-                    postedTime={translatedDate}
+                    postedTime={element.props.postedTime}
                     sentiment={element.props.sentiment}
                     edges={element.props.edges}
                     filters={element.props.edges}
                     searchFilter={element.props.searchFilter}
                     mainSearchTerm={element.props.mainSearchTerm}
+                    keywordsDictionary={this.state.settings.properties.keywords}  
                     language={self.props.language}
                     pageLanguage={element.props.pageLanguage}
                     translate={self.translateEvent} />;
@@ -246,6 +255,8 @@ export const ActivityFeed = React.createClass({
         self.setState({
             elements: updatedElements
         });
+    }, error => {
+        console.error(error);
     });
 },
 
@@ -271,7 +282,8 @@ export const ActivityFeed = React.createClass({
                                                         filters={requestPayload.edges}
                                                         searchFilter={requestPayload.searchValue}
                                                         mainSearchTerm={this.props.categoryValue} 
-                                                        language={feature.properties.language}     
+                                                        language={feature.properties.language}  
+                                                        keywordsDictionary={this.state.settings.properties.keywords}   
                                                         pageLanguage={this.props.language}
                                                         translate={this.translateEvent}/>)                               
                             }

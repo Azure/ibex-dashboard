@@ -25,32 +25,10 @@ export const TypeaheadSearch = React.createClass({
   getInitialState(){
       return {
           suggestions: [],
-          defaultResults: [],
           value: ''
       }
   },
 
-  loadEdgesFromService(siteKey, languageCode, callback){
-    SERVICES.fetchEdges(siteKey, languageCode, ALL_EDGE_TYPES, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                 callback(body.data.locations.edges.concat(body.data.terms.edges));
-            }else{
-                 throw new Error(`[${error}] occured while processing entity list request`);
-            }
-     });
-  },
-
-  componentDidMount(){
-      let siteKey = this.props.siteKey;
-      let self = this;
-      let searchCB = defaultResults => {
-                if(defaultResults && defaultResults.length > 0){
-                    self.setState({defaultResults});
-                }
-      };
-
-      this.loadEdgesFromService(siteKey, ENGLISH_LANGUAGE, searchCB);
-  },
 
   componentWillReceiveProps(nextProps) {
        const value = nextProps.data;
@@ -72,12 +50,13 @@ export const TypeaheadSearch = React.createClass({
 
   onSuggestionsFetchRequested({ value }){
     this.setState({
-      suggestions: getSuggestions(value, this.state.defaultResults)
+      suggestions: getSuggestions(value, this.props.edges)
     });
   },
   
-  renderSuggestion(element, {query}) { 
-    const suggestionText = `${element.name}`;
+  renderSuggestion(element, language, {query}) { 
+    const suggestionText = element[language=='en'?'name':'name_'+language];
+    console.log("suggestionText", suggestionText);
     const matches = match(suggestionText, query);
     const parts = parse(suggestionText, matches);
     const iconMap = new Map([["Location", "fa fa-map-marker fa-2x"], ["Term", "fa fa-tag fa-2x"]]);

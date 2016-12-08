@@ -11,10 +11,6 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 export const Header = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
-  getInitialState(){
-    return {given_name: 'Erik'};  
-  },
-  
   getStateFromFlux() {
     return this.getFlux().store("DataStore").getState();
   },
@@ -26,6 +22,7 @@ export const Header = React.createClass({
   changeLanguage(event, index, value){
       this.getFlux().actions.DASHBOARD.changeLanguage(value);
   },
+
   render() {
     const title = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.title : "";
     const nav = (this.props.siteKey==="dengue") ? this.renderNav() : false ;
@@ -59,8 +56,8 @@ export const Header = React.createClass({
                                 value={this.state.language}
                                 autoWidth ={true}
                                 style = {{width:'45px'}}
-                                onChange={self.changeLanguage}>
-                                 {this.state.supportedLanguages.map(function (lang) {
+                                onChange={this.changeLanguage}>
+                                {this.state.settings.properties.supportedLanguages.map(function (lang) {
                                         return <MenuItem key={lang} value={lang} primaryText={lang} />                                
                                 })}
                     </SelectField>

@@ -105,16 +105,24 @@ const methods = {
         },
         initializeDashboard(siteId){
             let self = this;
-
-            SERVICES.getSiteDefintion(siteId, false, (error, response, body) => {
-                if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
-                    const siteSettings = body.data.siteDefinition.sites[0];
-                    self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
-                    
-                }else{
-                    console.error(`[${error}] occured while processing message request`);
+            SERVICES.getSiteDefintion(siteId, false).then(result => {              
+                    let siteSettings = result.sites[0];
+                    SERVICES.fetchEdges(siteId, siteSettings.properties.supportedLanguages, "Term").then(keywordsArray => {
+                        let keywordsDictionary = {};
+                        keywordsArray.forEach(keywordObject =>{
+                            let wordByLanguageMap = {};
+                            siteSettings.properties.supportedLanguages.forEach(language => {
+                                wordByLanguageMap[language] = keywordObject[language=='en'?'name':'name_'+language];
+                            })
+                            keywordsDictionary[keywordObject.name.toLowerCase()] = wordByLanguageMap;
+                        })
+                        siteSettings.properties.keywords = keywordsDictionary;
+                        self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
+                    });       
+            }, error => {
+                    console.error(error);
                 }
-            });
+            );
         },
         termsColorMap(colorMap){
             this.dispatch(constants.DASHBOARD.CHANGE_COLOR_MAP, {colorMap})
@@ -178,6 +186,7 @@ const methods = {
             SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
                     if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
                         const settings = body.data.siteDefinition.sites;
+                        console.log(settings);
                         if(settings && settings.length > 0){
                             const action = false;
                             self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: settings[0], 
@@ -226,17 +235,13 @@ const methods = {
             const edgeType = "Term";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.fetchEdges(siteId, "en", edgeType, (error, response, body) => {
-                        if (!error && response.statusCode === 200) {
-                            let response = body.data.terms.edges;
-                            
+                console.log('load_keywords');
+                SERVICES.fetchEdges(siteId,languages, edgeType).then(result => {                
                             let action = false;
-                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
-                        }else{
-                            let error = 'Error, could not load keywords for admin page';
-                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
-                        }
-                });
+                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {result, action});
+                }, error => {
+                    self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                })
             }
         },
         remove_keywords: function(siteId, deletedRows){
@@ -264,22 +269,20 @@ const methods = {
                 }
             });
         },
-        load_localities: function () {
+        load_localities: function (languages) {
             let self = this;
             const edgeType = "Location";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.fetchEdges("ocha", "en", edgeType, (error, response, body) => {
-                        if (!error && response.statusCode === 200) {
-                            const response = body.data.locations.edges.map(location=>{
+                console.log('load_localities');
+                SERVICES.fetchEdges("ocha", languages, edgeType).then( result => {             
+                            const response = result.map(location=>{
                                   return Object.assign({}, {"name": location.name, "coordinates": location.coordinates.join(",")});
                             });
                             self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response});
-                        }else{
-                            let error = 'Error, could not load keywords for admin page';
+                        }, error => {
                             self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
-                        }
-                });
+                        });
             }
         },
 

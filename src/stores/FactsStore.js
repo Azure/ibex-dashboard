@@ -23,8 +23,7 @@ export const FactsStore = Fluxxor.createStore({
         prev: null,
         next: null
       },
-      language: 'en',
-      supportedLanguages:['en', 'ar']
+      language: 'en'
     };
 
     this.bindActions(

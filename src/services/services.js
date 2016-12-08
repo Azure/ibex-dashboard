@@ -59,11 +59,12 @@ export const SERVICES = {
       request(POST, callback);
   },
 
-  fetchEdges(site, langCode, edgeType, callback){
+  fetchEdges(site, languages, edgeType, callback){
       const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
                                         runTime
                                         edges {
-                                            name
+                                            name,
+                                            name_ar,
                                             type
                                             coordinates
                                             population
@@ -73,18 +74,18 @@ export const SERVICES = {
       const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
                                     runTime
                                     edges {
-                                        name
+                                        name,
+                                        name_ar,
                                         type
-                                        name_ar
                                         RowKey
                                     }
                                 }`;
 
-     const locationsQuery = `locations: locations(site: $site, langCode: $langCode) {
+     const locationsQuery = `locations: locations(site: $site, languages: $languages) {
                                 ...FortisDashboardLocationEdges
                             }`;
 
-     const termsQuery = `terms: terms(site: $site, langCode: $langCode) {
+     const termsQuery = `terms: terms(site: $site, languages: $languages) {
                                 ...FortisDashboardTermEdges
                          }`;
 
@@ -95,11 +96,11 @@ export const SERVICES = {
                       ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
 
       let query = `  ${fragments}
-                      query FetchAllEdge($site: String!, $langCode: String) {
+                      query FetchAllEdge($site: String!, $languages: [String]!) {
                             ${queries}
                         }`;
 
-      let variables = {site, langCode};
+      let variables = {site, languages};
       let host = process.env.REACT_APP_SERVICE_HOST;
       let POST = {
             url : `${host}/api/edges`,
@@ -109,7 +110,16 @@ export const SERVICES = {
             body: { query, variables }
       };
 
-      request(POST, callback);
+      return new Promise((resolve, reject) => {
+             request(POST, (error, response, body) => {
+                 if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
+                    resolve(body.data.terms.edges);
+                 }
+                 else {
+                    reject (error || 'Get site definition request failed: ' + JSON.stringify(response));
+                 }
+             });
+         });
   },
 
   getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback){
@@ -229,7 +239,7 @@ export const SERVICES = {
     }
   },
 
-  getSiteDefintion(siteId, retrieveSiteList, callback){
+  getSiteDefintion(siteId, retrieveSiteList){
         let fragment = `fragment FortisSiteDefinitionView on SiteCollection {
                             sites {
                                 name
@@ -263,7 +273,6 @@ export const SERVICES = {
                         
         let variables = {siteId};
         
-        console.log('getSiteDefintion called');
         let host = process.env.REACT_APP_SERVICE_HOST
         var POST = {
             url : `${host}/api/settings`,
@@ -272,8 +281,17 @@ export const SERVICES = {
             withCredentials: false,
             body: { query, variables }
         };
-        
-        request(POST, callback);
+         return new Promise((resolve, reject) => {
+             request(POST, (error, response, body) => {
+                 if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
+                    resolve(body.data.siteDefinition);
+                 }
+                 else {
+                    reject (error || 'Get site definition request failed: ' + JSON.stringify(response));
+                 }
+             });
+         });
+       
   },
 
   saveKeywords(site, edges, callback){
@@ -471,7 +489,7 @@ export const SERVICES = {
             }
         }`
       let variables = {sentence, fromLanguage, toLanguage};
-      let host = "http://localhost:8000"//"http://fortisfactsservice.azurewebsites.net"
+      let host = process.env.REACT_APP_SERVICE_HOST;
       var POST = {
            url : `${host}/api/Messages`,
             method : "POST",
