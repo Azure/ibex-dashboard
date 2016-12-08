@@ -56,20 +56,25 @@ const constants = {
            DASHBOARD : {
                CHANGE_SEARCH: "SEARCH:CHANGE",
                CHANGE_DATE: "DATE:CHANGE",
+               INITIALIZE: "INIT",
                CHANGE_SOURCE: "UPDATE:DATA_SOURCE",
                CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS"
            },
            FACTS : {
-               LOAD_FACTS: "LOAD:FACTS",
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
                LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
+               INITIALIZE: "INIT",
                SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
-               LOAD_FACT: "LOAD:FACT"
+               LOAD_FACT: "LOAD:FACT",
+               LOAD_FACT_TAGS: "LOAD:FACT_TAGS"
            },
            ADMIN : {
                LOAD_KEYWORDS: "LOAD:KEYWORDS",
+               LOAD_SETTINGS: "LOAD:SETTINGS",
+               SAVE_SETTINGS: "SAVE:SETTINGS",
+               CREATE_SITE: "CREATE:SITE",
                LOAD_FB_PAGES: "LOAD:FB_PAGES",
                LOAD_LOCALITIES: "LOAD:LOCALITIES",
                GET_LANGUAGE: "GET:LANGUAGE",
@@ -97,6 +102,19 @@ const methods = {
 
            self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity, colorMap});
         },
+        initializeDashboard(siteId){
+            let self = this;
+
+            SERVICES.getSiteDefintion(siteId, false, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
+                    const siteSettings = body.data.siteDefinition.sites[0];
+                    self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
+                    
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
         termsColorMap(colorMap){
             this.dispatch(constants.DASHBOARD.CHANGE_COLOR_MAP, {colorMap})
         },
@@ -111,54 +129,118 @@ const methods = {
         },
         changeDate(siteKey, datetimeSelection, timespanType){
            this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
-        }
+        },
+
     },
     FACTS: {
-        load_facts: function (pageSize, skip) {
+        load_facts: function (pageSize, skip, tagFilterArray = []) {
             let self = this;
-            let dataStore = this.flux.stores.FactsStore.dataStore;
-            if (!dataStore.loading) {
-                this.dispatch(constants.FACTS.LOAD_FACTS);
-                SERVICES.getFacts(pageSize, skip)
-                    .subscribe(response => {
-                        self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
-                    }, error => {
-                        console.warning('Error, could not load facts', error);
-                        self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
-                    });
-            }
+            SERVICES.getFactsWithFilter(pageSize, skip, tagFilterArray)
+                .subscribe(response => {
+                    self.dispatch(constants.FACTS.LOAD_FACTS_SUCCESS, { response: response });
+                }, error => {
+                    console.warn('Error, could not load facts', error);
+                    self.dispatch(constants.FACTS.LOAD_FACTS_FAIL, { error: error });
+                });
         },
-        save_page_state: function(pageState) {
+        load_fact_tags: function () {
+            let self = this;
+            SERVICES.getFactTags().subscribe(response => {
+                self.dispatch(constants.FACTS.LOAD_FACT_TAGS, { response: response });
+            });
+        },
+        load_settings: function(siteName){
+            let self = this;
+            const LOAD_SITE_LIST = true;
+
+            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
+                    if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
+                        const settings = body.data.siteDefinition.sites;
+                        if(settings && settings.length > 0){
+                            self.dispatch(constants.FACTS.INITIALIZE, settings[0]);
+                        }else{
+                            console.error(`site [${siteName}] does not exist.`);
+                        }
+                    }else{
+                        console.error(`[${error}] occured while processing message request`);
+                    }
+            });
+        },
+        save_page_state: function (pageState) {
             this.dispatch(constants.FACTS.SAVE_PAGE_STATE, pageState);
         },
         load_fact: function (id) {
             let self = this;
-            let dataStore = this.flux.stores.FactsStore.dataStore;
-
-            dataStore.factDetail = null;
-
-            if (!dataStore.factDetail) {
-                SERVICES.getFact(id)
+            SERVICES.getFact(id)
                     .subscribe(response => {
                         self.dispatch(constants.FACTS.LOAD_FACT, { response: response });
                     }, error => {
                         console.warning('Error, could not load fact id: ' + id, error);
                     });
-            }
         }
     },
     ADMIN: {
-        load_keywords: function () {
+        load_settings: function(siteName){
             let self = this;
-            const keywordType = "Term";
+            const LOAD_SITE_LIST = true;
+
+            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
+                    if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
+                        const settings = body.data.siteDefinition.sites;
+                        if(settings && settings.length > 0){
+                            const action = false;
+                            self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: settings[0], 
+                                                                          action: action, 
+                                                                          originalSiteName: siteName, 
+                                                                          siteList: body.data.siteList.sites});
+                        }else{
+                            console.error(`site [${siteName}] does not exist.`);
+                        }
+                    }else{
+                        console.error(`[${error}] occured while processing message request`);
+                    }
+            });
+        },
+        save_settings: function(siteName, modifiedSettings){
+            let self = this;
+
+            SERVICES.createOrReplaceSite(siteName, modifiedSettings, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data && body.data.createOrReplaceSite) {
+                    const action = 'Saved';
+                    let mutatedSettings = Object.assign({}, {name: modifiedSettings.name}, {properties: modifiedSettings});
+                    delete mutatedSettings.properties.name;
+
+                    self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: mutatedSettings, 
+                                                                  originalSiteName: siteName, 
+                                                                  action: action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
+        create_site: function(siteName, modifiedSettings){
+            let self = this;
+
+            SERVICES.createOrReplaceSite(siteName, modifiedSettings, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data && body.data.createOrReplaceSite) {
+                    const action = 'Saved';
+                    self.dispatch(constants.ADMIN.CREATE_SITE, {siteName, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
+        load_keywords: function (siteId, languages) {
+            let self = this;
+            const edgeType = "Term";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.getDefaultSuggestionList("ocha", "en", keywordType, (error, response, body) => {
+                SERVICES.fetchEdges(siteId, "en", edgeType, (error, response, body) => {
                         if (!error && response.statusCode === 200) {
-                            const response = body.data.search.edges.map(term=>{
-                                  return Object.assign({}, {"name": term.properties.name});
-                            });
-                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, { keywords: response});
+                            let response = body.data.terms.edges;
+                            
+                            let action = false;
+                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
                         }else{
                             let error = 'Error, could not load keywords for admin page';
                             self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
@@ -166,16 +248,40 @@ const methods = {
                 });
             }
         },
+        remove_keywords: function(siteId, deletedRows){
+            let self = this;
 
+            SERVICES.removeKeywords(siteId, deletedRows, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data.removeKeywords) {
+                    const response = body.data.removeKeywords.edges;
+                    const action = 'removed';
+                    self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
+        save_keywords: function(siteId, modifiedKeywords){
+            let self = this;
+            SERVICES.saveKeywords(siteId, modifiedKeywords, (error, response, body) => {
+                if(!error && response.statusCode === 200) {
+                    const action = 'saved';
+                    const response = body.data.addKeywords.edges;
+                    self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+            });
+        },
         load_localities: function () {
             let self = this;
-            const locationType = "Location";
+            const edgeType = "Location";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.getDefaultSuggestionList("ocha", "en", locationType, (error, response, body) => {
+                SERVICES.fetchEdges("ocha", "en", edgeType, (error, response, body) => {
                         if (!error && response.statusCode === 200) {
-                            const response = body.data.search.edges.map(location=>{
-                                  return Object.assign({}, {"name": location.properties.name, "coordinates": location.properties.coordinates.join(",")});
+                            const response = body.data.locations.edges.map(location=>{
+                                  return Object.assign({}, {"name": location.name, "coordinates": location.coordinates.join(",")});
                             });
                             self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response});
                         }else{

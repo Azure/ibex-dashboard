@@ -10,6 +10,18 @@ import 'amcharts3/amcharts/themes/dark';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
+      ParseAccountName = connectionString => {
+          const matchingField = "AccountName=";
+          const matchedPosition = connectionString.indexOf(matchingField);
+
+          if(matchedPosition > -1){
+              const endPosition = connectionString.indexOf(";", matchedPosition);
+
+              return connectionString.substring(matchedPosition + matchingField.length, endPosition); 
+          }else{
+              return undefined;
+          }
+      },
       graphDivId = "graphdiv";
 
 export const TimeSeriesGraph = React.createClass({
@@ -130,11 +142,13 @@ export const TimeSeriesGraph = React.createClass({
     this.trendingTimeSeries.validateData();
  },
   
- updateChart: function(mainEdge, timespan, timespanType){
+ updateChart: function(mainEdge, timespan, dataSource, timespanType){
      let self = this;
      let selectedTerm = mainEdge ? `kw-${mainEdge}` : "top5";
-
-     SERVICES.getPopularTermsTimeSeries(this.props.siteKey, timespan, timespanType, selectedTerm, 
+     
+     if(this.state.settings.properties && this.state.settings.properties.storageConnectionString){
+         const accountName = ParseAccountName(this.state.settings.properties.storageConnectionString);
+         SERVICES.getPopularTermsTimeSeries(this.props.siteKey, accountName, timespan, timespanType, selectedTerm, dataSource, 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body) {
                     self.refreshChart(body);
@@ -142,7 +156,10 @@ export const TimeSeriesGraph = React.createClass({
                     console.error(`[${error}] occured while processing popular terms graphql request`);
                     self.refreshChart({});
                 }
-     });
+         });
+     }else{
+         console.error("Required site settings are missing error.");
+     }
  },
 
  hasChanged: function(nextProps, propertyName){
@@ -162,9 +179,9 @@ export const TimeSeriesGraph = React.createClass({
 
     if(!this.trendingTimeSeries){
         this.initializeGraph();     
-        this.updateChart(nextProps.mainEdge, nextProps.timespan, nextProps.timespanType);
-    }else if((this.hasChanged(nextProps, "mainEdge") && nextProps.edgeType === "Term") || hasTimeSpanChanged){
-        this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.timespanType);
+        this.updateChart(nextProps.mainEdge, nextProps.timespan, nextProps.dataSource, nextProps.timespanType);
+    }else if((this.hasChanged(nextProps, "mainEdge") && nextProps.edgeType === "Term") || hasTimeSpanChanged || this.hasChanged(nextProps, "dataSource")){
+        this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.dataSource, nextProps.timespanType);
     }
  },
   

@@ -1,33 +1,12 @@
 import React from 'react';
-import Fluxxor from 'fluxxor';
 import '../styles/Header.css';
-import OCHAlogoURL from '../images/OCHA_Logo.png';
-import DengueLogoURL from '../images/umea_white.svg';
-import {getEnvPropValue} from '../utils/Utils.js';
 import { Link } from 'react-router';
 
-const FluxMixin = Fluxxor.FluxMixin(React),
-      StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
-
-export const Header = React.createClass({
-  mixins: [FluxMixin, StoreWatchMixin],
-  
-  getInitialState(){
-    return {given_name: 'Erik'};  
-  },
-  
-  getStateFromFlux() {
-    return this.getFlux().store("DataStore").getState();
-  },
-
-  componentWillReceiveProps(nextProps) {
-       this.setState(this.getStateFromFlux());
-  },
-  
+export const Header = React.createClass({  
   render() {
-    let siteKey = this.props.siteKey;
-    let title = getEnvPropValue(siteKey, process.env.REACT_APP_SITE_TITLE);
-    let nav = (siteKey==="dengue") ? this.renderNav() : false ;
+    const title = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.title : "";
+    const nav = (this.props.siteKey==="dengue") ? this.renderNav() : false ;
+    const logo = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.logo : false;
 
     return (
       <nav className="navbar navbar-trans" role="navigation">
@@ -40,7 +19,10 @@ export const Header = React.createClass({
                       <span className="icon-bar"></span>
                   </button>
                   <a className="navbar-brand text-danger" href="#">
-                      <img role="presentation" src={siteKey === "ocha" ? OCHAlogoURL : DengueLogoURL} style={{display: 'inline'}} height="48" />
+                     {
+                         logo ? <img role="presentation" src={logo.startsWith("http:") ? logo : `${process.env.PUBLIC_URL}/images/${logo}`} style={{display: 'inline'}} height="48" /> 
+                            : undefined 
+                     }                     
                      <span className="brandLabel">{title}</span>
                   </a>
               </div>
