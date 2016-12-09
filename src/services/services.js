@@ -236,6 +236,7 @@ export const SERVICES = {
                                     defaultZoomLevel
                                     logo
                                     title
+                                    fbToken
                                     defaultLocation
                                     storageConnectionString
                                     featuresConnectionString
