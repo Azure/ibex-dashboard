@@ -60,13 +60,13 @@ export const AdminSettings = React.createClass({
 
     handleSaveSettings(){
         const {targetBbox, defaultLocation, defaultZoomLevel} = this.props.siteSettings.properties;
-        const {name, storageConnectionString, title, logo, featuresConnectionString, supportedLanguages} = this.refs;
+        const {name, storageConnectionString, title, logo, fbToken, featuresConnectionString, supportedLanguages} = this.refs;
         const languageArray = supportedLanguages.value.split(",");
         const languageJSON = `["${languageArray.join('","')}"]`;
         const siteDefintion = {name: name.value, targetBbox: targetBbox, logo:logo.value, defaultLocation:defaultLocation, 
                                defaultZoomLevel:defaultZoomLevel, supportedLanguages: JSON.parse(languageJSON), 
                                title:title.value, featuresConnectionString:featuresConnectionString.value, 
-                               storageConnectionString:storageConnectionString.value};
+                               storageConnectionString:storageConnectionString.value, fbToken:fbToken.value};
 
         this.getFlux().actions.ADMIN.save_settings(this.props.siteKey, siteDefintion);
     },
@@ -123,6 +123,11 @@ export const AdminSettings = React.createClass({
                         <div className="form-group">
                             <label>Supported Languages(<span style={styles.settings.labelInfo}>comma seperated i.e. en,ar</span>)<span>*</span></label>
                             <input onChange={this.handleChange} required name="supportedLanguages" ref="supportedLanguages" value={this.state.siteSettings.properties.supportedLanguages} type="text" style={styles.settings.input} className="form-control settings" aria-label="..." />
+                            <div className="validation"></div>
+                        </div>
+                        <div className="form-group">
+                            <label>Facebook Graph API Access Token<span>*</span></label>
+                            <input onChange={this.handleChange} required name="fbToken" ref="fbToken" value={this.state.siteSettings.properties.fbToken} type="text" style={styles.settings.input} className="form-control settings" aria-label="..." />
                             <div className="validation"></div>
                         </div>
                         <div className="form-group">
