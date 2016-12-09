@@ -61,6 +61,7 @@ export const TypeaheadSearch = React.createClass({
   },
 
   onSuggestionSelected(event, { suggestion }){
+    event.preventDefault();
     this.getFlux().actions.DASHBOARD.changeSearchFilter(suggestion, this.props.siteKey);
   },
 
