@@ -6,7 +6,7 @@ import request from 'request';
 import Promise from 'promise';
 
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
-const TIMESERIES_BLOB_CONTAINER_NAME = "ericroz-bytime";
+const TIMESERIES_BLOB_CONTAINER_NAME = "processed-timeseries-bysource";
 const MAX_ZOOM = 15;
 
 export const SERVICES = {
@@ -247,6 +247,7 @@ export const SERVICES = {
                                     defaultZoomLevel
                                     logo
                                     title
+                                    fbToken
                                     defaultLocation
                                     storageConnectionString
                                     featuresConnectionString

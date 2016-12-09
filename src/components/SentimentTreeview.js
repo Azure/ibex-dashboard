@@ -326,7 +326,7 @@ export const SentimentTreeview = React.createClass({
                     <input type="checkbox"
                         checked={props.node.checked}
                         onChange={self.onChange.bind(this, props.node)}/>
-                    <span className={termClassName} onClick={this.termSelected.bind(this, props.node)} style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{props.node.name} </span>
+                    <span className={termClassName} onClick={()=>this.termSelected(props.node)} style={ !isNodeTypeCategory ? termStyle : categoryStyle }>{props.node.name} </span>
                     {props.node.highlighted ? onlyLink : ""}
                 </div>
                 <div style={props.node.name === parentTermsName ? style.parentBadge : style.badge} className="col-md-2">
