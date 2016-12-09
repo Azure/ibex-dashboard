@@ -97,7 +97,7 @@ export const AdminSettings = React.createClass({
                     <div className="col-lg-10">
                         <div className="form-group">
                             <label htmlFor="siteName">Site Name<span>*</span></label>
-                            <input onChange={this.handleChange} required aria-required="true" data-rule="required" name="name" data-msg="Please enter a site name" ref="name" value={this.state.siteSettings.name} type="text" style={styles.settings.input} className="form-control settings" aria-label="siteName" />
+                            <input readOnly onChange={this.handleChange} required aria-required="true" data-rule="required" name="name" data-msg="Please enter a site name" ref="name" value={this.state.siteSettings.name} type="text" style={styles.settings.input} className="form-control settings" aria-label="siteName" />
                             <div className="validation"></div>
                         </div>
                         <div className="form-group">

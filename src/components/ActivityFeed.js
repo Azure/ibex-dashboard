@@ -281,7 +281,7 @@ export const ActivityFeed = React.createClass({
   searchSubmit(){
       const params = {...this.props, limit: OFFSET_INCREMENT, searchValue: this.refs.filterTextInput.value, filteredSource: this.state.filteredSource,
                       elementStartList: [], offset: 0};
-
+      event.preventDefault();
       this.processNewsFeed(params);
   },
   
@@ -309,7 +309,7 @@ export const ActivityFeed = React.createClass({
                   <div className="input-group">
                        <input ref="filterTextInput" type="text" placeholder="Filter News Feed .." className="form-control input-sm" />
                        <span className="input-group-btn">
-                             <button  onClick={this.searchSubmit} className="btn btn-default btn-sm"><i className="fa fa-search"></i>
+                             <button onClick={this.searchSubmit} className="btn btn-default btn-sm"><i className="fa fa-search"></i>
                              </button>
                        </span>
                   </div>
