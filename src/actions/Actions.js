@@ -101,34 +101,49 @@ const methods = {
     DASHBOARD: {
         changeSearchFilter(selectedEntity, siteKey, colorMap){
            let self = this;
-
            self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity, colorMap});
         },
-        initializeDashboard(siteId){
+        initializeDashboard(siteId) {
             let self = this;
 
             SERVICES.getSiteDefintion(siteId, false, (error, response, body) => {
-                if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
+                if (!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
                     let siteSettings = body.data.siteDefinition.sites[0];
-                    SERVICES.fetchEdges(siteId, siteSettings.properties.supportedLanguages, "All").then(edges => {
-                        let keywordsDictionary = {};
-                        edges.terms.edges.forEach(keywordObject =>{
+                    let languages = siteSettings.properties.supportedLanguages;
+                    SERVICES.fetchEdges(siteId, languages, "All").then(edges => {
+                        let edgesDictionary = {};
+                        edges.terms.edges.concat(edges.locations.edges).forEach(edgeObject => {
                             let wordByLanguageMap = {};
-                            siteSettings.properties.supportedLanguages.forEach(language => {
-                                wordByLanguageMap[language] = keywordObject[language=='en'?'name':'name_'+language];
+                            languages.forEach(language => {
+                                if(language == 'en'){
+                                    wordByLanguageMap[language] = edgeObject['name'];
+                                }
+                                else{
+                                    wordByLanguageMap[language] = edgeObject['name_' + language] || edgeObject[language+'_name'];
+                                }
                             })
-                            keywordsDictionary[keywordObject.name.toLowerCase()] = wordByLanguageMap;
+                            edgesDictionary[edgeObject.name.toLowerCase()] = wordByLanguageMap;
                         })
-                        siteSettings.properties.keywords = keywordsDictionary;
-                        siteSettings.properties.edges=edges.terms.edges.concat(edges.locations.edges);
+                        siteSettings.properties.edgesByLanguages = edgesDictionary;
+                        
+                        siteSettings.properties.edges = edges.terms.edges.concat(edges.locations.edges).map(edge => {
+                            languages.forEach(language => {
+                                if (edge[language + '_name']) {
+                                    edge['name_' + language] = edge[language + '_name'];
+                                }
+                            });
+                            edge["name_en"] = edge["name"];
+                            return edge;
+                        });
                         self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
-                    });       
-                    
-                }else{
+                    });
+
+                } else {
                     console.error(`[${error}] occured while processing message request`);
                 }
             });
         },
+   
         termsColorMap(colorMap){
             this.dispatch(constants.DASHBOARD.CHANGE_COLOR_MAP, {colorMap})
         },
@@ -204,7 +219,6 @@ const methods = {
             SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
                     if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
                         const settings = body.data.siteDefinition.sites;
-                        console.log(settings);
                         if(settings && settings.length > 0){
                             const action = false;
                             self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: settings[0], 
@@ -253,7 +267,6 @@ const methods = {
             const edgeType = "Term";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                console.log('load_keywords');
                 SERVICES.fetchEdges(siteId,languages, edgeType).then(result => {                
                             let action = false;
                             self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {result, action});
@@ -292,7 +305,6 @@ const methods = {
             const edgeType = "Location";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                console.log('load_localities');
                 SERVICES.fetchEdges("ocha", languages, edgeType).then( result => {             
                             const response = result.map(location=>{
                                   return Object.assign({}, {"name": location.name, "coordinates": location.coordinates.join(",")});

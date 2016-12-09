@@ -63,7 +63,7 @@ export const SERVICES = {
                                         runTime
                                         edges {
                                             name,
-                                            name_ar,
+                                            ar_name,
                                             type
                                             coordinates
                                             population
@@ -112,7 +112,6 @@ export const SERVICES = {
       return new Promise((resolve, reject) => {
              request(POST, (error, response, body) => {
                  if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
-                     console.log(body);
                     resolve(body.data);
                  }
                  else {

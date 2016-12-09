@@ -56,6 +56,7 @@ export const DataStore = Fluxxor.createStore({
 
     handleLanguageChange(language){
         this.dataStore.language = language;
+        this.dataStore.renderMap = true;
         this.emit("change");
     },
 
@@ -88,7 +89,12 @@ export const DataStore = Fluxxor.createStore({
     
     handleChangeSearchTerm(changedData){
         this.dataStore.associatedKeywords = new Map();
-        this.dataStore.categoryValue = changedData.selectedEntity[this.dataStore.language=='en' ? 'name' : 'name_'+this.dataStore.language];
+        this.dataStore.categoryValue = changedData.selectedEntity;
+        let settings = this.dataStore.settings.properties;
+        settings.supportedLanguages.forEach(lang => {
+            let name = (changedData.selectedEntity.name_en||changedData.selectedEntity.name).toLowerCase();
+            this.dataStore.categoryValue["name_"+lang]=settings.edgesByLanguages[name][lang];
+        })
         this.dataStore.selectedLocationCoordinates = changedData.selectedEntity.coordinates || [];
         this.dataStore.categoryType = changedData.selectedEntity.type;
         this.dataStore.renderMap = true;

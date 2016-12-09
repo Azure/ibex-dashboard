@@ -103,13 +103,13 @@ const FortisEvent = React.createClass({
         let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
         
         let commonTermsFromFilterTranslated = commonTermsFromFilter.map(term =>{
-            return this.props.keywordsDictionary[term][this.props.pageLanguage];
+            return this.props.edgesByLanguages[term.toLowerCase()][this.props.pageLanguage];
         });
 
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
 
         let searchWordsTranslated = searchWords.map(term => {
-            return this.props.keywordsDictionary[term.toLowerCase()][this.props.pageLanguage];
+            return this.props.edgesByLanguages[term.toLowerCase()][this.props.pageLanguage];
         });
 
         let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
@@ -181,10 +181,9 @@ export const ActivityFeed = React.createClass({
           categoryValue = undefined;
           location = this.state.selectedLocationCoordinates;
       }
-      
       SERVICES.FetchMessageSentences(siteKey, bbox, datetimeSelection, timespanType, 
                                      limit, offset, edges, DEFAULT_LANGUAGE, Actions.DataSources(filteredSource), 
-                                     categoryValue, searchValue, location, callback);
+                                     categoryValue?categoryValue.name.toLowerCase():categoryValue, searchValue, location, callback);
   },
 
   renderDataSourceTabs: function(iconStyle){
@@ -222,6 +221,7 @@ export const ActivityFeed = React.createClass({
           const params = {...nextProps, elementStartList: [], offset: 0, filteredSource: nextProps.dataSource};
 
           this.setState({filteredSource: params.filteredSource});
+
           this.processNewsFeed(params);
       }
   },
@@ -233,9 +233,7 @@ export const ActivityFeed = React.createClass({
 
   translateEvent(event){   
     let self = this;
-    console.log(event);
     SERVICES.translateSentence(event.sentence, event.language, this.props.language).then(translatedSentence => {
-        console.log(translatedSentence);
         let updatedElements = self.state.elements.map(element => {
             if (element.key == event.id) {
                 return <FortisEvent key={event.id}
@@ -248,7 +246,7 @@ export const ActivityFeed = React.createClass({
                     filters={element.props.edges}
                     searchFilter={element.props.searchFilter}
                     mainSearchTerm={element.props.mainSearchTerm}
-                    keywordsDictionary={this.state.settings.properties.keywords}  
+                    edgesByLanguages={this.state.settings.properties.edgesByLanguages}  
                     language={self.props.language}
                     pageLanguage={element.props.pageLanguage}
                     translate={self.translateEvent} />;
@@ -286,14 +284,13 @@ export const ActivityFeed = React.createClass({
                                                         edges={feature.properties.edges}
                                                         filters={requestPayload.edges}
                                                         searchFilter={requestPayload.searchValue}
-                                                        mainSearchTerm={this.props.categoryValue} 
+                                                        mainSearchTerm={this.props.categoryValue.name} 
                                                         language={feature.properties.language}  
-                                                        keywordsDictionary={this.state.settings.properties.keywords}   
+                                                        edgesByLanguages={this.state.settings.properties.edgesByLanguages}   
                                                         pageLanguage={this.props.language}
                                                         translate={this.translateEvent}/>)                               
                             }
                         });
-
                         elements = requestPayload.elementStartList.concat(elements);
                     }
                 }else{

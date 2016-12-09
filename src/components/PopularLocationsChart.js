@@ -60,7 +60,7 @@ export const PopularLocationsChart = React.createClass({
         if(e.dataItem.dataContext){
               let entity = {
                   "type": "Location",
-                  "name": e.dataItem.dataContext.term,
+                  "name": e.dataItem.dataContext.name_en,
                   "coordinates": e.dataItem.dataContext.coordinates
               };
               self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
@@ -68,20 +68,20 @@ export const PopularLocationsChart = React.createClass({
     });
  },
 
- refreshChart(locations){
+ refreshChart(locations, lang){
     let maxAxesDisplayLabelChars = 16;
     let dataProvider = [];
 
     locations.forEach(location => {
-              let label = location.properties.location;
+              let label = location.properties['name_'+lang];
               let mentions = location.properties.mentions;
               let coordinates = location.coordinates;
               let population = numeralLibs(location.properties.population).format(location.properties.population > 1000 ? '+0.0a' : '0a');
               let displayLabel = label.length > maxAxesDisplayLabelChars ? label.substring(0, maxAxesDisplayLabelChars) : label;
               let mentionFmt = numeralLibs(mentions).format(mentions > 1000 ? '+0.0a' : '0a');
-              dataProvider.push({coordinates: coordinates, population: population, 
+              dataProvider.push(Object.assign({}, location.properties, {coordinates: coordinates, population: population,
                                  displayLabel: displayLabel, term: label, category: "Location",
-                                 mentions: mentions, mentionFmt: mentionFmt, color: '#ccc'});
+                                 mentions: mentions, mentionFmt: mentionFmt, color: '#ccc'}));
     });
 
     this.popularLocationsChart.dataProvider = dataProvider;
@@ -94,10 +94,17 @@ export const PopularLocationsChart = React.createClass({
      SERVICES.getMostPopularPlaces(this.props.siteKey, period, timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, Actions.DataSources(dataSource), (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     if(body && body.data && body.data.popularLocations && body.data.popularLocations.features){
-                        self.refreshChart(body.data.popularLocations.features);
+                        let popularLocations =  body.data.popularLocations.features.map(location =>{
+                            self.state.settings.properties.supportedLanguages.forEach(lang => {
+                                location.properties['name_'+lang] = self.state.settings.properties.edgesByLanguages[location.properties.location.toLowerCase()][lang];
+                            });
+                            return location;
+                        });             
+                        self.refreshChart(popularLocations, self.props.language);
                     }
+
                 }else{
-                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue}, ${this.state.datetimeSelection}`);
+                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue.name}, ${this.state.datetimeSelection}`);
                 }
       });
   },
@@ -106,7 +113,8 @@ export const PopularLocationsChart = React.createClass({
       if(!this.popularLocationsChart){
           this.initializeGraph();
           this.updateChart(nextProps.datetimeSelection, nextProps.timespanType, nextProps.dataSource);
-      }else if(this.props.datetimeSelection !== nextProps.datetimeSelection || this.props.dataSource !== nextProps.dataSource){
+      }else if(this.props.datetimeSelection !== nextProps.datetimeSelection || this.props.dataSource !== nextProps.dataSource 
+            || this.props.language !== nextProps.language){
           this.updateChart(nextProps.datetimeSelection, nextProps.timespanType, nextProps.dataSource);
       }
   },
