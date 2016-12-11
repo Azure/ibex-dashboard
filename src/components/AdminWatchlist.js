@@ -25,7 +25,9 @@ export const AdminWatchlist = React.createClass({
          this.state.termGridColumns.length > 0 ? 
             <DataGrid rowHeight={40}
                       minHeight={500}
-                      rowKey="name"
+                      rowKey="RowKey"
+                      uniqueKey="name"
+                      guidAutofillColumn="RowKey"
                       handleSave={this.handleSave}
                       handleRemove={this.handleRemove}
                       columns={this.state.termGridColumns}

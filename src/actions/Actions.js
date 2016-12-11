@@ -75,6 +75,8 @@ const constants = {
                LOAD_SETTINGS: "LOAD:SETTINGS",
                SAVE_SETTINGS: "SAVE:SETTINGS",
                CREATE_SITE: "CREATE:SITE",
+               SAVE_TWITTER_ACCTS: "SAVE:TWITTER_ACCTS",
+               LOAD_TWITTER_ACCTS: "LOAD:TWITTER_ACCTS",
                LOAD_FB_PAGES: "LOAD:FB_PAGES",
                LOAD_LOCALITIES: "LOAD:LOCALITIES",
                GET_LANGUAGE: "GET:LANGUAGE",
@@ -228,6 +230,46 @@ const methods = {
                 }else{
                     console.error(`[${error}] occured while processing message request`);
                 }
+            });
+        },
+        save_twitter_accts: function(siteName, twitterAccts){
+            let self = this;
+            const mutationNameTwitterAcctModify = "modifyTwitterAccounts";
+
+            SERVICES.saveTwitterAccounts(siteName, twitterAccts, mutationNameTwitterAcctModify, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data && body.data.streams) {
+                    const action = 'saved';
+                    const streams = body.data.streams;
+                    self.dispatch(constants.ADMIN.LOAD_TWITTER_ACCTS, {streams, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+           });
+        },
+        remove_twitter_accts: function(siteName, twitterAccts){
+            let self = this;
+            const mutationNameTwitterAcctModifyRemove = "removeTwitterAccounts";
+            SERVICES.saveTwitterAccounts(siteName, twitterAccts, mutationNameTwitterAcctModifyRemove, (error, response, body) => {
+                if(!error && response.statusCode === 200 && body.data && body.data.streams) {
+                    const action = 'saved';
+                    const streams = body.data.streams;
+                    self.dispatch(constants.ADMIN.LOAD_TWITTER_ACCTS, {streams, action});
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
+           });
+        },
+        load_twitter_accts: function (siteId) {
+            let self = this;
+            SERVICES.getTwitterAccounts(siteId, (error, response, body) => {
+                        if (!error && response.statusCode === 200) {
+                            const streams = body.data.streams;
+                            let action = false;
+                            self.dispatch(constants.ADMIN.LOAD_TWITTER_ACCTS, {streams, action});
+                        }else{
+                            let error = 'Error, could not load twitter accts for admin page';
+                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                        }
             });
         },
         load_keywords: function (siteId, languages) {

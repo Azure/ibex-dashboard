@@ -7,6 +7,7 @@ export const AdminStore = Fluxxor.createStore({
             settings: {},
             siteList: [],
             loading: false,
+            twitterAccounts: [],
             termGridColumns: [],
             watchlist: [],
             action: false,
@@ -20,6 +21,7 @@ export const AdminStore = Fluxxor.createStore({
             Actions.constants.ADMIN.GET_LANGUAGE, this.handleLoadPayload,
             Actions.constants.ADMIN.GET_TARGET_REGION, this.handleLoadPayload,
             Actions.constants.ADMIN.LOAD_SETTINGS, this.handleLoadSettings,
+            Actions.constants.ADMIN.LOAD_TWITTER_ACCTS, this.handleLoadTwitterAccts,
             Actions.constants.ADMIN.LOAD_FAIL, this.handleLoadPayloadFail,
             Actions.constants.ADMIN.CREATE_SITE, this.handleCreateSite
         );
@@ -31,6 +33,12 @@ export const AdminStore = Fluxxor.createStore({
 
     handleLoadPayload(payload) {
         this.dataStore.settings = Object.assign(this.dataStore.settings, payload);
+        this.emit("change");
+    },
+
+    handleLoadTwitterAccts(response){
+        this.dataStore.twitterAccounts = response.streams.accounts;
+        this.dataStore.action = response.action || false;
         this.emit("change");
     },
 
