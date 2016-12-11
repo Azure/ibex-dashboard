@@ -6,11 +6,12 @@ import {AdminSiteList} from './AdminSiteList';
 import {AdminSettings} from './AdminSettings';
 import {AdminWatchlist} from './AdminWatchlist';
 import {CustomEventsEditor} from './CustomEventsEditor';
+import {AdminTwitterAccounts} from './AdminTwitterAccounts';
 import '../styles/Admin.css'
 
 const FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
-const SETTINGS_TAB = 0, WATCHLIST_TAB = 1, CUSTOM_EVENTS_TAB = 3;
+const SETTINGS_TAB = 0, WATCHLIST_TAB = 1, CUSTOM_EVENTS_TAB = 3, TWITTER_ACCOUNTS_TAB = 5;
 const styles = {
     container: {
         panel: {
@@ -60,7 +61,7 @@ export const Admin = React.createClass({
                                         <Tab>Monitored Areas</Tab>
                                         <Tab>Event Import</Tab>
                                         <Tab>Facebook pages</Tab>
-                                        <Tab>Target region</Tab>
+                                        <Tab>Twitter API Accounts</Tab>
                                         <Tab>Blacklisted Term(s)</Tab>
                                     </TabList>
                                     <TabPanel>
@@ -113,8 +114,13 @@ export const Admin = React.createClass({
                                         </div>
                                     </TabPanel>
                                     <TabPanel>
-                                        <h2>Target region</h2>
-                                        <h3> {this.state.settings.targetRegion}</h3>
+                                        <h2>Twitter API Accounts</h2>
+                                        <div>
+                                        {
+                                             this.state.settings && this.state.settings.properties && this.state.index === TWITTER_ACCOUNTS_TAB ? 
+                                                    <AdminTwitterAccounts {...this.props}/> : undefined
+                                        }
+                                        </div>
 
                                     </TabPanel>
                                     <TabPanel>

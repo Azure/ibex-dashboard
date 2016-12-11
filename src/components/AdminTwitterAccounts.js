@@ -6,67 +6,74 @@ const FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
 
 const columns = [
-    {editable: false, key: "RowKey", name: "Event ID"},
+    {editable: true, 
+     required: true,
+     key: "accountName", 
+     name: "Twitter App Name"},
     {
         editable:true,
         sortable : true,
-        filterable: true,
+        filterable: false,
         resizable: true,
-        name: "Event Date",
-        key: "created_at"
+        required: true,
+        name: "Consumer Key",
+        key: "consumerKey"
     },
     {
         editable:true,
         sortable : true,
-        filterable: true,
+        required: true,
+        filterable: false,
         resizable: true,
-        name: "Location Coordinates",
-        key: "geo"
+        name: "Consumer Secret",
+        key: "consumerSecret"
     },
     {
         editable:true,
         sortable : true,
-        filterable: true,
+        required: true,
+        filterable: false,
         resizable: true,
-        name: "Event Source",
-        key: "source"
+        name: "Token",
+        key: "token"
     },
     {
         editable:true,
         sortable : true,
-        filterable: true,
+        required: true,
+        filterable: false,
         resizable: true,
-        name: "Event Content",
-        key: "message"
+        name: "Token Secret",
+        key: "tokenSecret"
     }
 ];
 
-export const CustomEventsEditor = React.createClass({
+export const AdminTwitterAccounts = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin],
 
     componentDidMount(){
-        //this.getFlux().actions.ADMIN.load_keywords(this.props.siteKey,this.state.settings.properties.supportedLanguages || []);
+        this.getFlux().actions.ADMIN.load_twitter_accts(this.props.siteKey);
     },
     getStateFromFlux() {
         return this.getFlux().store("AdminStore").getState();
     },
     handleSave(mutatedRows, columns){
-        //this.getFlux().actions.ADMIN.save_keywords(this.props.siteKey, mutatedRows);
+        this.getFlux().actions.ADMIN.save_twitter_accts(this.props.siteKey, mutatedRows);
     },
     handleRemove(deletedRows){
-        //this.getFlux().actions.ADMIN.remove_keywords(this.props.siteKey, deletedRows);
+        this.getFlux().actions.ADMIN.remove_twitter_accts(this.props.siteKey, deletedRows);
     },
     render(){
         return (
-         columns.length > 0 ? 
+          this.state.twitterAccounts ? 
             <DataGrid rowHeight={40}
                       minHeight={500}
-                      rowKey="RowKey"
-                      guidAutofillColumn="RowKey"
+                      rowKey="accountName"
+                      uniqueKey="accountName"
                       handleSave={this.handleSave}
                       handleRemove={this.handleRemove}
                       columns={columns}
-                      rows={[]} />
+                      rows={this.state.twitterAccounts} />
             : <div />
         );
     }
