@@ -60,7 +60,7 @@ export const PopularLocationsChart = React.createClass({
         if(e.dataItem.dataContext){
               let entity = {
                   "type": "Location",
-                  "name": e.dataItem.dataContext.name_en,
+                  "name": e.dataItem.dataContext.name,
                   "coordinates": e.dataItem.dataContext.coordinates
               };
               self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
@@ -98,6 +98,7 @@ export const PopularLocationsChart = React.createClass({
                             self.state.settings.properties.supportedLanguages.forEach(lang => {
                                 location.properties['name_'+lang] = self.state.settings.properties.edgesByLanguages[location.properties.location.toLowerCase()][lang];
                             });
+                            location.properties['name'] = self.state.settings.properties.edgesByLanguages[location.properties.location.toLowerCase()]['en'];
                             return location;
                         });             
                         self.refreshChart(popularLocations, self.props.language);

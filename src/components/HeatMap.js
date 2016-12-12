@@ -346,6 +346,7 @@ export const HeatMap = React.createClass({
              self.state.settings.properties.supportedLanguages.forEach(lang => {
                  value["name_"+lang] = self.state.settings.properties.edgesByLanguages[edge.name.toLowerCase()][lang]
              });
+             value['name']=self.state.settings.properties.edgesByLanguages[edge.name.toLowerCase()]['en'];
              aggregatedAssociatedTermMentions.set(edge.name.toLowerCase(), value);
           });
       }

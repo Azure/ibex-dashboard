@@ -7,7 +7,6 @@ import moment from 'moment';
 import Infinite from 'react-infinite';
 import CircularProgress from 'material-ui/CircularProgress';
 import Highlighter from 'react-highlight-words';
-import Promise from 'promise';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -233,35 +232,38 @@ export const ActivityFeed = React.createClass({
 
   translateEvent(event){   
     let self = this;
-    SERVICES.translateSentence(event.sentence, event.language, this.props.language).then(translatedSentence => {
-        let updatedElements = self.state.elements.map(element => {
-            if (element.key == event.id) {
-                return <FortisEvent key={event.id}
-                    id={event.id}
-                    sentence={translatedSentence}
-                    source={element.props.source}
-                    postedTime={element.props.postedTime}
-                    sentiment={element.props.sentiment}
-                    edges={element.props.edges}
-                    filters={element.props.edges}
-                    searchFilter={element.props.searchFilter}
-                    mainSearchTerm={element.props.mainSearchTerm}
-                    edgesByLanguages={this.state.settings.properties.edgesByLanguages}  
-                    language={self.props.language}
-                    pageLanguage={element.props.pageLanguage}
-                    translate={self.translateEvent} />;
-            }
-            else {
-                return element;
-            }
-        });
-        self.setState({
-            elements: updatedElements
-        });
-    }, error => {
-        console.error(error);
+    SERVICES.translateSentence(event.sentence, event.language, this.props.language, (translatedSentence, error) => {
+        if(translatedSentence){
+            let updatedElements = self.state.elements.map(element => {
+                if (element.key == event.id) {
+                    return <FortisEvent key={event.id}
+                        id={event.id}
+                        sentence={translatedSentence}
+                        source={element.props.source}
+                        postedTime={element.props.postedTime}
+                        sentiment={element.props.sentiment}
+                        edges={element.props.edges}
+                        filters={element.props.edges}
+                        searchFilter={element.props.searchFilter}
+                        mainSearchTerm={element.props.mainSearchTerm}
+                        edgesByLanguages={this.state.settings.properties.edgesByLanguages}  
+                        language={self.props.language}
+                        pageLanguage={element.props.pageLanguage}
+                        translate={self.translateEvent} />;
+                }
+                else {
+                    return element;
+                }
+            });
+            self.setState({
+                elements: updatedElements
+            });
+        }
+    else {
+        console.error(`[${error}] occured while translating sentense`);
+    }
     });
-},
+ },
 
   buildElements: function(requestPayload) {
         let elements = [];

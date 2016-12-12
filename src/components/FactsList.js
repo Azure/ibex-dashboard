@@ -140,17 +140,23 @@ export const FactsList = React.createClass({
 
   translate(sentence, fromLanguage, toLanguage, factId) {
       let self = this;
-      SERVICES.translateSentence(sentence, fromLanguage, toLanguage).then( translatedSentence => {
-        self.state.facts.forEach(fact => {
-            if (fact.id === factId) {
-              fact.language = toLanguage;
-              fact.title = translatedSentence
-            }
-        });
-        self.setState({
-            elements: self.state
-        });
-      })
+      SERVICES.translateSentence(sentence, fromLanguage, toLanguage, (translatedSentence, error) => {
+        if(translatedSentence){
+          self.state.facts.forEach(fact => {
+              if (fact.id === factId) {
+                fact.language = toLanguage;
+                fact.title = translatedSentence
+              }
+          });
+          self.setState({
+              elements: self.state
+          });
+        }
+        else{
+          console.error(`[${error}] occured while translating sentense`);
+        }
+      }
+      );
   },
 
   renderCardItem(item, style) {

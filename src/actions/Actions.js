@@ -108,9 +108,9 @@ const methods = {
         initializeDashboard(siteId) {
             let self = this;
 
-            SERVICES.getSiteDefintion(siteId, false, (error, response, body) => {
-                if (!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
-                    let siteSettings = body.data.siteDefinition.sites[0];
+            SERVICES.getSiteDefintion(siteId, false, (response, error) => {
+                if (response) {
+                    let siteSettings = response.siteDefinition.sites[0];
                     let languages = siteSettings.properties.supportedLanguages;
                     SERVICES.fetchEdges(siteId, languages, "All", (edges, error) => {
                         if (edges){
@@ -193,17 +193,12 @@ const methods = {
             let self = this;
             const LOAD_SITE_LIST = true;
 
-            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
-                    if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
-                        const settings = body.data.siteDefinition.sites;
-                        if(settings && settings.length > 0){
-                            self.dispatch(constants.FACTS.INITIALIZE, settings[0]);
-                        }else{
-                            console.error(`site [${siteName}] does not exist.`);
-                        }
-                    }else{
-                        console.error(`[${error}] occured while processing message request`);
-                    }
+            SERVICES.getSiteDefintion(siteName, false, (response, error) => {
+                if (response) {
+                    self.dispatch(constants.FACTS.INITIALIZE, response.siteDefinition.sites[0]);
+                }else{
+                    console.error(`[${error}] occured while processing message request`);
+                }
             });
         },
         save_page_state: function (pageState) {
@@ -224,15 +219,14 @@ const methods = {
             let self = this;
             const LOAD_SITE_LIST = true;
 
-            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (error, response, body) => {
-                    if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition) {
-                        const settings = body.data.siteDefinition.sites;
-                        if(settings && settings.length > 0){
+            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (response, error) => {
+                    if(response) {
+                        if(response.siteDefinition.sites.length > 0){
                             const action = false;
-                            self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: settings[0], 
+                            self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: response.siteDefinition.sites[0], 
                                                                           action: action, 
                                                                           originalSiteName: siteName, 
-                                                                          siteList: body.data.siteList.sites});
+                                                                          siteList: response.siteList.sites});
                         }else{
                             console.error(`site [${siteName}] does not exist.`);
                         }

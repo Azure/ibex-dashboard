@@ -95,7 +95,7 @@ export const SERVICES = {
                       ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
 
       let query = `  ${fragments}
-                      query FetchAllEdge($site: String!, $languages: [String]!) {
+                      query FetchAllEdge($site: String!, $languages: [String]) {
                             ${queries}
                         }`;
 
@@ -114,7 +114,7 @@ export const SERVICES = {
                 callback(body.data);
             }
             else {
-                callback (undefined, error || 'Get site definition request failed: ' + JSON.stringify(response));
+                callback (undefined, error || 'Fetch edges request failed: ' + JSON.stringify(response));
             }
         });
          
@@ -282,7 +282,14 @@ export const SERVICES = {
             body: { query, variables }
         };
 
-        request(POST, callback);
+        request(POST, (error, response, body) => {
+            if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
+                callback(body.data);
+            }
+            else {
+                callback (undefined, error || 'Get site definition request failed: ' + JSON.stringify(response));
+            }
+        });
     },
 
     saveTwitterAccounts(site, accounts, mutation, callback) {
@@ -542,7 +549,7 @@ export const SERVICES = {
        ]]);
   },
 
-  translateSentence: function (sentence, fromLanguage, toLanguage) {
+  translateSentence: function (sentence, fromLanguage, toLanguage, callback) {
       let query = `
         fragment TranslationView on TranslationResult{
             translatedSentence
@@ -563,15 +570,14 @@ export const SERVICES = {
             withCredentials: false,
             body: { query, variables }
         };
-        return new Promise((resolve, reject) => {
-             request(POST, (error, response, body) => {
-                 if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
-                    resolve(body.data.translate.translatedSentence);
-                 }
-                 else{
-                    reject (error || 'Translate request failed: ' + JSON.stringify(response));
-                 }
-             });
-         });
+     
+        request(POST, (error, response, body) => {
+            if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
+                callback(body.data.translate.translatedSentence);
+            }
+            else{
+                callback(undefined, error || 'Translate request failed: ' + JSON.stringify(response));
+            }
+        });
   }
 }

@@ -64,7 +64,7 @@ export const PopularTermsChart = React.createClass({
             if(e.dataItem.dataContext){
                 let entity = {
                     "type": "Term",
-                    "name": e.dataItem.dataContext.name_en
+                    "name": e.dataItem.dataContext.name
                 };
                 self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
             }
