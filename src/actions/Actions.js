@@ -112,32 +112,38 @@ const methods = {
                 if (!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
                     let siteSettings = body.data.siteDefinition.sites[0];
                     let languages = siteSettings.properties.supportedLanguages;
-                    SERVICES.fetchEdges(siteId, languages, "All").then(edges => {
-                        let edgesDictionary = {};
-                        edges.terms.edges.concat(edges.locations.edges).forEach(edgeObject => {
-                            let wordByLanguageMap = {};
-                            languages.forEach(language => {
-                                if(language == 'en'){
-                                    wordByLanguageMap[language] = edgeObject['name'];
-                                }
-                                else{
-                                    wordByLanguageMap[language] = edgeObject['name_' + language] || edgeObject[language+'_name'];
-                                }
+                    SERVICES.fetchEdges(siteId, languages, "All", (edges, error) => {
+                        if (edges){
+                            let edgesDictionary = {};
+                            edges.terms.edges.concat(edges.locations.edges).forEach(edgeObject => {
+                                let wordByLanguageMap = {};
+                                languages.forEach(language => {
+                                    if(language == 'en'){
+                                        wordByLanguageMap[language] = edgeObject['name'];
+                                    }
+                                    else{
+                                        wordByLanguageMap[language] = edgeObject['name_' + language] || edgeObject[language+'_name'];
+                                    }
+                                })
+                                edgesDictionary[edgeObject.name.toLowerCase()] = wordByLanguageMap;
                             })
-                            edgesDictionary[edgeObject.name.toLowerCase()] = wordByLanguageMap;
-                        })
-                        siteSettings.properties.edgesByLanguages = edgesDictionary;
-                        
-                        siteSettings.properties.edges = edges.terms.edges.concat(edges.locations.edges).map(edge => {
-                            languages.forEach(language => {
-                                if (edge[language + '_name']) {
-                                    edge['name_' + language] = edge[language + '_name'];
-                                }
+                            siteSettings.properties.edgesByLanguages = edgesDictionary;
+                            
+                            siteSettings.properties.edges = edges.terms.edges.concat(edges.locations.edges).map(edge => {
+                                languages.forEach(language => {
+                                    if (edge[language + '_name']) {
+                                        edge['name_' + language] = edge[language + '_name'];
+                                    }
+                                });
+                                edge["name_en"] = edge["name"];
+                                return edge;
                             });
-                            edge["name_en"] = edge["name"];
-                            return edge;
-                        });
-                        self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
+                            console.log("siteSettings", siteSettings);
+                            self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
+                        }
+                        else {
+                            console.error(`[${error}] occured while fetching edges`);
+                        }
                     });
 
                 } else {
@@ -309,11 +315,14 @@ const methods = {
             const edgeType = "Term";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.fetchEdges(siteId,languages, edgeType).then(result => {                
-                            let action = false;
-                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {result, action});
-                }, error => {
-                    self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                SERVICES.fetchEdges(siteId,languages, edgeType, (result,error) => {   
+                    if(result){            
+                        let action = false;
+                        self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {result, action});
+                    }
+                    else{
+                        self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                    }
                 })
             }
         },
@@ -347,14 +356,16 @@ const methods = {
             const edgeType = "Location";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.fetchEdges("ocha", languages, edgeType).then( result => {             
-                            const response = result.map(location=>{
-                                  return Object.assign({}, {"name": location.name, "coordinates": location.coordinates.join(",")});
-                            });
-                            self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response});
-                        }, error => {
-                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                SERVICES.fetchEdges("ocha", languages, edgeType, (result, error) => {  
+                    if(result){           
+                        const response = result.map(location=>{
+                                return Object.assign({}, {"name": location.name, "coordinates": location.coordinates.join(",")});
                         });
+                        self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response});
+                    } else {
+                        self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                    }
+                });
             }
         },
 

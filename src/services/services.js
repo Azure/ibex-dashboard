@@ -80,13 +80,13 @@ export const SERVICES = {
                                     }
                                 }`;
 
-
      const locationsQuery = `locations: locations(site: $site, languages: $languages) {
                                 ...FortisDashboardLocationEdges
                             }`;
 
      const termsQuery = `terms: terms(site: $site, languages: $languages) {
-
+                                ...FortisDashboardTermEdges
+                         }`;
 
         const fragments = `${edgeType === "All" || edgeType === "Location" ? locationEdgeFragment : ``}
                         ${edgeType === "All" || edgeType === "Term" ? termsEdgeFragment : ``}`;
@@ -109,20 +109,17 @@ export const SERVICES = {
             body: { query, variables }
         };
 
-
-      return new Promise((resolve, reject) => {
-             request(POST, (error, response, body) => {
-                 if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
-                    resolve(body.data);
-                 }
-                 else {
-                    reject (error || 'Get site definition request failed: ' + JSON.stringify(response));
-                 }
-             });
-         });
+        request(POST, (error, response, body) => {
+            if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
+                callback(body.data);
+            }
+            else {
+                callback (undefined, error || 'Get site definition request failed: ' + JSON.stringify(response));
+            }
+        });
+         
   },
-        request(POST, callback);
-    },
+
 
     getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback) {
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
@@ -234,8 +231,6 @@ export const SERVICES = {
                 withCredentials: false,
                 body: { query, variables }
             };
-
-    getSiteDefintion(siteId, retrieveSiteList, callback){
             request(POST, callback);
         } else {
             throw new Error(`Invalid bbox format for value [${bbox}]`);
@@ -515,38 +510,6 @@ export const SERVICES = {
             callback(new Error(`Invalid bbox format for value [${bbox}]`));
         }
     },
-
-    getAdminFbPages: function () {
-        return Rx.Observable.from([[{
-            url: "BritishCouncilLibya",
-        },
-        {
-            url: "truthlibya",
-        },
-        {
-            url: "ukinlibya",
-        }
-        ]]);
-    },
-    getAdminLanguage: function () {
-        return Rx.Observable.from(["en"]);
-    },
-    getAdminTargetRegion: function () {
-        return Rx.Observable.from(["29.626,16.216"]);
-    },
-
-    getAdminLocalities: function () {
-        return Rx.Observable.from([[{
-            ar_name: "Mudīrīyat أم الرزم",
-            name: "Mudīrīyat Umm ar Rizam"
-        },
-        {
-            ar_name: "زيغان",
-            name: "Bardīyah"
-        }
-        ]]);
-    }
-  },
 
   getAdminFbPages: function(){
        return Rx.Observable.from([[{
