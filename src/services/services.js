@@ -1,7 +1,7 @@
 import Rx from 'rx';
 import 'rx-dom';
-import {Actions} from '../actions/Actions';
-import {momentToggleFormats, momentGetFromToRange} from '../utils/Utils.js';
+import { Actions } from '../actions/Actions';
+import { momentToggleFormats, momentGetFromToRange } from '../utils/Utils.js';
 import request from 'request';
 import Promise from 'promise';
 
@@ -10,27 +10,27 @@ const TIMESERIES_BLOB_CONTAINER_NAME = "processed-timeseries-bysource";
 const MAX_ZOOM = 15;
 
 export const SERVICES = {
- getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback){
-     let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-     let hostname = blobHostnamePattern.format(accountName);
-     let blobContainer = TIMESERIES_BLOB_CONTAINER_NAME;
+    getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback) {
+        let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+        let hostname = blobHostnamePattern.format(accountName);
+        let blobContainer = TIMESERIES_BLOB_CONTAINER_NAME;
 
-     let url = `${hostname}/${blobContainer}/${dataSource}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
-     let GET = {
-            url : url,
+        let url = `${hostname}/${blobContainer}/${dataSource}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
+        let GET = {
+            url: url,
             json: true,
             withCredentials: false
-     };
+        };
 
-     request(GET, callback);
-  },
+        request(GET, callback);
+    },
 
-  getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, sourceFilter, callback){
-      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-      let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
-      let additionalTerms = selectedTerm ? [selectedTerm] : [];
+    getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, sourceFilter, callback) {
+        let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+        let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+        let additionalTerms = selectedTerm ? [selectedTerm] : [];
 
-      let fragment = `fragment FortisDashboardView on EdgeList {
+        let fragment = `fragment FortisDashboardView on EdgeList {
                         runTime
                         edges {
                             name
@@ -38,25 +38,25 @@ export const SERVICES = {
                         }
                       }`;
 
-      let query = `  ${fragment}
+        let query = `  ${fragment}
                       query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!, $sourceFilter: [String]) {
                         whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan, sourceFilter: $sourceFilter) {
                             ...FortisDashboardView
                         }
                       }`;
 
-      let variables = {site, additionalTerms, timespan, sourceFilter};
-      let host = process.env.REACT_APP_SERVICE_HOST;
-      let POST = {
-            url : `${host}/api/terms`,
-            method : "POST",
+        let variables = { site, additionalTerms, timespan, sourceFilter };
+        let host = process.env.REACT_APP_SERVICE_HOST;
+        let POST = {
+            url: `${host}/api/terms`,
+            method: "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
-      };
+        };
 
-      request(POST, callback);
-  },
+        request(POST, callback);
+    },
 
   fetchEdges(site, languages, edgeType, callback){
       const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
@@ -70,7 +70,7 @@ export const SERVICES = {
                                         }
                                     }`;
 
-      const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
+        const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
                                     runTime
                                     edges {
                                         name,
@@ -80,18 +80,18 @@ export const SERVICES = {
                                     }
                                 }`;
 
+
      const locationsQuery = `locations: locations(site: $site, languages: $languages) {
                                 ...FortisDashboardLocationEdges
                             }`;
 
      const termsQuery = `terms: terms(site: $site, languages: $languages) {
-                                ...FortisDashboardTermEdges
-                         }`;
 
-     const fragments = `${edgeType === "All" || edgeType === "Location" ? locationEdgeFragment : ``}
+
+        const fragments = `${edgeType === "All" || edgeType === "Location" ? locationEdgeFragment : ``}
                         ${edgeType === "All" || edgeType === "Term" ? termsEdgeFragment : ``}`;
 
-     const queries = `${edgeType === "All" || edgeType === "Location" ? locationsQuery : ``}
+        const queries = `${edgeType === "All" || edgeType === "Location" ? locationsQuery : ``}
                       ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
 
       let query = `  ${fragments}
@@ -107,7 +107,8 @@ export const SERVICES = {
             json: true,
             withCredentials: false,
             body: { query, variables }
-      };
+        };
+
 
       return new Promise((resolve, reject) => {
              request(POST, (error, response, body) => {
@@ -120,12 +121,14 @@ export const SERVICES = {
              });
          });
   },
+        request(POST, callback);
+    },
 
-  getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback){
-      let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-      let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+    getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback) {
+        let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+        let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
 
-      let fragment = `fragment FortisDashboardView on FeatureCollection {
+        let fragment = `fragment FortisDashboardView on FeatureCollection {
                             type
                             runTime
                             features {
@@ -138,35 +141,35 @@ export const SERVICES = {
                             }
                         }`;
 
-      let query = `  ${fragment}
+        let query = `  ${fragment}
                       query PopularLocations($site: String!, $langCode: String, $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
                             popularLocations(site: $site, langCode: $langCode, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
                             ...FortisDashboardView
                         }
                       }`;
 
-      let variables = {site, timespan, langCode, zoomLevel, sourceFilter};
-      let host = process.env.REACT_APP_SERVICE_HOST;
-      let POST = {
-            url : `${host}/api/places`,
-            method : "POST",
+        let variables = { site, timespan, langCode, zoomLevel, sourceFilter };
+        let host = process.env.REACT_APP_SERVICE_HOST;
+        let POST = {
+            url: `${host}/api/places`,
+            method: "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
-      };
+        };
 
-      request(POST, callback);
-  },
+        request(POST, callback);
+    },
 
-  getHeatmapTiles: function(site, timespanType, zoom, mainEdge, datetimeSelection, bbox, 
-                            filteredEdges, locations, sourceFilter, callback){
-    const formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-    const timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
-    const zoomLevel = MAX_ZOOM;
+    getHeatmapTiles: function (site, timespanType, zoom, mainEdge, datetimeSelection, bbox,
+        filteredEdges, locations, sourceFilter, callback) {
+        const formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+        const timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
+        const zoomLevel = MAX_ZOOM;
 
-    console.log(`processing tile request [${mainEdge}, ${timespan}, ${bbox}, ${filteredEdges.join(",")}]`)
-    if(bbox && Array.isArray(bbox) && bbox.length === 4){
-        const featuresFragmentView = `fragment FortisDashboardViewFeatures on FeatureCollection {
+        console.log(`processing tile request [${mainEdge}, ${timespan}, ${bbox}, ${filteredEdges.join(",")}]`)
+        if (bbox && Array.isArray(bbox) && bbox.length === 4) {
+            const featuresFragmentView = `fragment FortisDashboardViewFeatures on FeatureCollection {
                                         runTime
                                         features {
                                             type
@@ -183,7 +186,7 @@ export const SERVICES = {
                                         }
                                      }`;
 
-        const edgesFragmentView = `fragment FortisDashboardViewEdges on EdgeCollection {
+            const edgesFragmentView = `fragment FortisDashboardViewEdges on EdgeCollection {
                                         runTime
                                         edges {
                                             type
@@ -192,10 +195,10 @@ export const SERVICES = {
                                         }
                                     }`;
 
-        let query, variables;
-        
-        if(locations && locations.length > 0 && locations[0].length > 0){
-            query = `${edgesFragmentView}
+            let query, variables;
+
+            if (locations && locations.length > 0 && locations[0].length > 0) {
+                query = `${edgesFragmentView}
                      ${featuresFragmentView}
                         query FetchAllEdgesAndTilesByLocations($site: String!, $locations: [[Float]]!, $filteredEdges: [String], $timespan: String!, $sourceFilter: [String]) {
                             features: fetchTilesByLocations(site: $site, locations: $locations, filteredEdges: $filteredEdges, timespan: $timespan, sourceFilter: $sourceFilter) {
@@ -206,9 +209,9 @@ export const SERVICES = {
                             }
                         }`;
 
-            variables = {site, locations, filteredEdges, timespan, sourceFilter};
-        }else{
-            query =`${edgesFragmentView}
+                variables = { site, locations, filteredEdges, timespan, sourceFilter };
+            } else {
+                query = `${edgesFragmentView}
                     ${featuresFragmentView}
                       query FetchAllEdgesAndTilesByBBox($site: String!, $bbox: [Float]!, $mainEdge: String!, $filteredEdges: [String], $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
                             features: fetchTilesByBBox(site: $site, bbox: $bbox, mainEdge: $mainEdge, filteredEdges: $filteredEdges, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
@@ -219,26 +222,27 @@ export const SERVICES = {
                             }
                         }`;
 
-            variables = {site, bbox, mainEdge, filteredEdges, timespan, zoomLevel, sourceFilter};
-        }
+                variables = { site, bbox, mainEdge, filteredEdges, timespan, zoomLevel, sourceFilter };
+            }
 
-        let host = process.env.REACT_APP_SERVICE_HOST
-        
-        var POST = {
-            url : `${host}/api/tiles`,
-            method : "POST",
-            json: true,
-            withCredentials: false,
-            body: { query, variables }
-        };
+            let host = process.env.REACT_APP_SERVICE_HOST
 
-        request(POST, callback);
-    }else{
-        throw new Error(`Invalid bbox format for value [${bbox}]`);
-    }
-  },
+            var POST = {
+                url: `${host}/api/tiles`,
+                method: "POST",
+                json: true,
+                withCredentials: false,
+                body: { query, variables }
+            };
 
     getSiteDefintion(siteId, retrieveSiteList, callback){
+            request(POST, callback);
+        } else {
+            throw new Error(`Invalid bbox format for value [${bbox}]`);
+        }
+    },
+
+    getSiteDefintion(siteId, retrieveSiteList, callback) {
         let fragment = `fragment FortisSiteDefinitionView on SiteCollection {
                             sites {
                                 name
@@ -270,22 +274,85 @@ export const SERVICES = {
                                 ...FortisSitesListView
                             }`: ``}
                         }`;
-                        
-        let variables = {siteId};
-        
+
+        let variables = { siteId };
+
+        console.log('getSiteDefintion called');
         let host = process.env.REACT_APP_SERVICE_HOST
         var POST = {
-            url : `${host}/api/settings`,
-            method : "POST",
+            url: `${host}/api/settings`,
+            method: "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
         };
-        
-        request(POST, callback);
-  },
 
-  saveKeywords(site, edges, callback){
+        request(POST, callback);
+    },
+
+    saveTwitterAccounts(site, accounts, mutation, callback) {
+        let fragment = `fragment FortisTwitterAcctView on TwitterAccountCollection {
+                            accounts {
+                                    accountName
+                                    consumerKey
+                                    token
+                                    consumerSecret
+                                    tokenSecret
+                            }
+                        }`;
+        let query = ` ${fragment} 
+                      mutation ModifyTwitterAccounts($input: TwitterAccountDefintion!) {
+                            streams: ${mutation}(input: $input) {
+                                ...FortisTwitterAcctView
+                            }
+                        }`;
+
+        let variables = { input: { accounts, site } };
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url: `${host}/api/settings`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+    },
+
+    getTwitterAccounts(siteId, callback) {
+        let fragment = `fragment FortisTwitterAcctView on TwitterAccountCollection {
+                            accounts {
+                                    accountName
+                                    consumerKey
+                                    token
+                                    consumerSecret
+                                    tokenSecret
+                            }
+                        }`;
+
+        let query = `  ${fragment}
+                        query TwitterAccounts($siteId: String!) {
+                            streams: twitterAccounts(siteId: $siteId) {
+                                ...FortisTwitterAcctView
+                            }
+                        }`;
+
+        let variables = { siteId };
+
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url: `${host}/api/settings`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+    },
+
+    saveKeywords(site, edges, callback) {
         const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
                                     edges {
                                         name
@@ -301,42 +368,42 @@ export const SERVICES = {
                             }
                         }`;
 
-        const variables = {input: {site, edges}};
+        const variables = { input: { site, edges } };
 
         const host = process.env.REACT_APP_SERVICE_HOST
         const POST = {
-            url : `${host}/api/edges`,
-            method : "POST",
+            url: `${host}/api/edges`,
+            method: "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
         };
-        
-        request(POST, callback);
-  },
 
-  createOrReplaceSite(siteName, siteDefinition, callback){
+        request(POST, callback);
+    },
+
+    createOrReplaceSite(siteName, siteDefinition, callback) {
         let query = `  mutation CreateOrReplaceSite($input: SiteDefinition!) {
                             createOrReplaceSite(input: $input) {
                                 name
                             }
                         }`;
-                        
-        let variables = {input: siteDefinition};
+
+        let variables = { input: siteDefinition };
 
         let host = process.env.REACT_APP_SERVICE_HOST
         var POST = {
-            url : `${host}/api/settings`,
-            method : "POST",
+            url: `${host}/api/settings`,
+            method: "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
         };
-        
-        request(POST, callback);
-  },
 
-  removeKeywords(site, edges, callback){
+        request(POST, callback);
+    },
+
+    removeKeywords(site, edges, callback) {
         const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
                                     edges {
                                         name
@@ -351,52 +418,52 @@ export const SERVICES = {
                                 ...FortisDashboardTermEdges
                             }
                         }`;
-                        
-        const variables = {input: {site, edges}};
+
+        const variables = { input: { site, edges } };
 
         let host = process.env.REACT_APP_SERVICE_HOST
         var POST = {
-            url : `${host}/api/edges`,
-            method : "POST",
+            url: `${host}/api/edges`,
+            method: "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
         };
-        
+
         request(POST, callback);
-  },
+    },
 
-  getFacts: function (pageSize, skip) {
-      let url = "http://fortisfactsservice.azurewebsites.net/api/facts?pageSize={0}&skip={1}&fullInfo=false".format(pageSize, skip);
-      return Rx.DOM.getJSON(url);
-  },
+    getFacts: function (pageSize, skip) {
+        let url = "http://fortisfactsservice.azurewebsites.net/api/facts?pageSize={0}&skip={1}&fullInfo=false".format(pageSize, skip);
+        return Rx.DOM.getJSON(url);
+    },
 
-  getFactsWithFilter: function (pageSize, skip, tagFilterArray=[]) {
-      let tagFilterQuery = "";
-      if (tagFilterArray.length > 0) {
-        tagFilterQuery = "&tagFilter=" + tagFilterArray.map(encodeURI).join(":");
-      }
-      let url = "http://fortisfactsservice-staging.azurewebsites.net/api/facts/?pageSize={0}&skip={1}&fullInfo=false{2}".format(pageSize, skip, tagFilterQuery);
-      return Rx.DOM.getJSON(url);
-  },
+    getFactsWithFilter: function (pageSize, skip, tagFilterArray = []) {
+        let tagFilterQuery = "";
+        if (tagFilterArray.length > 0) {
+            tagFilterQuery = "&tagFilter=" + tagFilterArray.map(encodeURI).join(":");
+        }
+        let url = "http://fortisfactsservice-staging.azurewebsites.net/api/facts/?pageSize={0}&skip={1}&fullInfo=false{2}".format(pageSize, skip, tagFilterQuery);
+        return Rx.DOM.getJSON(url);
+    },
 
-  getFactTags: function () {
-      return Rx.DOM.getJSON("http://fortisfactsservice-staging.azurewebsites.net/api/facts/?tagsOnly=true");
-  },
+    getFactTags: function () {
+        return Rx.DOM.getJSON("http://fortisfactsservice-staging.azurewebsites.net/api/facts/?tagsOnly=true");
+    },
 
-  getFact: function (id) {
-      let url = "http://fortisfactsservice.azurewebsites.net/api/facts/" + id;
-      return Rx.DOM.getJSON(url);
-  },
+    getFact: function (id) {
+        let url = "http://fortisfactsservice.azurewebsites.net/api/facts/" + id;
+        return Rx.DOM.getJSON(url);
+    },
 
-  FetchMessageSentences: function(site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges, 
-                        langCode, sourceFilter, mainTerm, fulltextTerm, coordinates, callback){
-   let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-   let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
-   let fromDate = dates.fromDate, toDate = dates.toDate;
+    FetchMessageSentences: function (site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges,
+        langCode, sourceFilter, mainTerm, fulltextTerm, coordinates, callback) {
+        let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
+        let dates = momentGetFromToRange(datetimeSelection, formatter.format, formatter.rangeFormat);
+        let fromDate = dates.fromDate, toDate = dates.toDate;
 
-   if(bbox && Array.isArray(bbox) && bbox.length === 4){
-        let fragmentView = `fragment FortisDashboardView on FeatureCollection {
+        if (bbox && Array.isArray(bbox) && bbox.length === 4) {
+            let fragmentView = `fragment FortisDashboardView on FeatureCollection {
                                 type
                                 runTime
                                     features {
@@ -414,38 +481,70 @@ export const SERVICES = {
                                     }
                                 }`;
 
-        let query, variables;
+            let query, variables;
 
-        if(coordinates && coordinates.length === 2){
-            query = `  ${fragmentView}
+            if (coordinates && coordinates.length === 2) {
+                query = `  ${fragmentView}
                        query ByLocation($site: String!, $coordinates: [Float]!, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
                              byLocation(site: $site, coordinates: $coordinates, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
                                 ...FortisDashboardView 
                             }
                         }`;
-            variables = {site, coordinates, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
-        }else{
-            query = `  ${fragmentView}
+                variables = { site, coordinates, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm };
+            } else {
+                query = `  ${fragmentView}
                        query ByBbox($site: String!, $bbox: [Float]!, $mainTerm: String, $filteredEdges: [String]!, $langCode: String!, $limit: Int!, $offset: Int!, $fromDate: String!, $toDate: String!, $sourceFilter: [String], $fulltextTerm: String) { 
                              byBbox(site: $site, bbox: $bbox, mainTerm: $mainTerm, filteredEdges: $filteredEdges, langCode: $langCode, limit: $limit, offset: $offset, fromDate: $fromDate, toDate: $toDate, sourceFilter: $sourceFilter, fulltextTerm: $fulltextTerm) {
                                 ...FortisDashboardView 
                             }
                         }`;
-            variables = {site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm};
-        }
+                variables = { site, bbox, mainTerm, filteredEdges, langCode, limit, offset, fromDate, toDate, sourceFilter, fulltextTerm };
+            }
 
-        let host = process.env.REACT_APP_SERVICE_HOST
-        var POST = {
-            url : `${host}/api/Messages`,
-            method : "POST",
-            json: true,
-            withCredentials: false,
-            body: { query, variables }
-        };
-        
-        request(POST, callback);
-    }else{
-        callback(new Error(`Invalid bbox format for value [${bbox}]`));
+            let host = process.env.REACT_APP_SERVICE_HOST
+            var POST = {
+                url: `${host}/api/Messages`,
+                method: "POST",
+                json: true,
+                withCredentials: false,
+                body: { query, variables }
+            };
+
+            request(POST, callback);
+        } else {
+            callback(new Error(`Invalid bbox format for value [${bbox}]`));
+        }
+    },
+
+    getAdminFbPages: function () {
+        return Rx.Observable.from([[{
+            url: "BritishCouncilLibya",
+        },
+        {
+            url: "truthlibya",
+        },
+        {
+            url: "ukinlibya",
+        }
+        ]]);
+    },
+    getAdminLanguage: function () {
+        return Rx.Observable.from(["en"]);
+    },
+    getAdminTargetRegion: function () {
+        return Rx.Observable.from(["29.626,16.216"]);
+    },
+
+    getAdminLocalities: function () {
+        return Rx.Observable.from([[{
+            ar_name: "Mudīrīyat أم الرزم",
+            name: "Mudīrīyat Umm ar Rizam"
+        },
+        {
+            ar_name: "زيغان",
+            name: "Bardīyah"
+        }
+        ]]);
     }
   },
 

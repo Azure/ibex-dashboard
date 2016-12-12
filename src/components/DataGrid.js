@@ -9,7 +9,6 @@ import {guid} from '../utils/Utils.js';
 
 const Toolbar             = window.ReactDataGridPlugins.Toolbar;
 //const AutoCompleteEditor  = window.ReactDataGridPlugins.Editors.AutoComplete;
-const RowKeyField = "RowKey";
 const FluxMixin = Fluxxor.FluxMixin(React), StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
 
 const styles = {
@@ -43,11 +42,7 @@ export const DataGrid = React.createClass({
       this.setState({rows: nextProps.rows, localAction: false});
   },
   onCellSelected(coordinates) {
-        this.clickedCell = {
-            row: coordinates.rowIdx,
-            column: coordinates.idx - 1
-            // because there is a checkbox column makes this 1 indexed, convert it to 0 indexed here
-        };
+        this.setState({selectedRow: coordinates.rowIdx, selectedColumn: coordinates.idx - 1});
   },
   getSize() {
       return this.state.rows.length;
@@ -111,18 +106,19 @@ export const DataGrid = React.createClass({
   },
   handlePaste(e){
       const pastedText = e.clipboardData.getData('text/plain');
-      const activeCell = this.clickedCell;
-      let currentRow = activeCell.row;
+      let currentRow = this.state.selectedRow;
+      let currentColumn = this.state.selectedColumn;
       let rows = this.state.rows, localAction = 'changed';
+      const activeColumn = currentColumn > -1 ? this.props.columns[currentColumn] : undefined;
 
-      if(pastedText && activeCell && activeCell.column > 0){
+      if(pastedText && currentColumn  > -1 && activeColumn.key !== (this.props.guidAutofillColumn || "")){
           const pastedRows = pastedText.split("\n");
           pastedRows.forEach(pastedRow => {
-              let currentColumn = activeCell.column;
               const columnData = pastedRow.split("\t");
+              currentColumn = this.state.selectedColumn;
               let rowData = currentRow < rows.length ? rows[currentRow] : {};
-              if(!rowData[RowKeyField]){
-                  rowData[RowKeyField] = guid();
+              if(this.props.guidAutofillColumn && !rowData[this.props.guidAutofillColumn]){
+                  rowData[this.props.guidAutofillColumn] = guid();
               }
 
               if(pastedRow !== ""){
@@ -146,19 +142,34 @@ export const DataGrid = React.createClass({
           });
 
           this.setState({rows, localAction});
-      }else if(activeCell.column === 0){
+      }else if(this.props.guidAutofillColumn && activeColumn && activeColumn.key === this.props.guidAutofillColumn){
           alert("Not allowed to paste into the RowId column.");
       }
+    },
+    requiredDataCheck(row){
+        let validRow = true;
+
+        this.props.columns.forEach(column => {
+            if(validRow && column.required && row[column.key] === ""){
+                alert(`required column [${column.key}] is missing values.`);
+
+                validRow = false;
+            }
+        });
+
+        return validRow;
     },
     handleSave(){
         let keySet = new Set();
         let invalidData = false;
 
         this.state.rows.forEach(row => {
-            let key = row[this.props.rowKey].toLowerCase();
+            let key = row[this.props.uniqueKey].toLowerCase();
             if(keySet.has(key)){
                 invalidData = true;
                 alert(`Duplicate unique key error for item [${key}]`);
+            }else if(!this.requiredDataCheck(row)){
+                invalidData = true;
             }else{
                 keySet.add(key);
             }
