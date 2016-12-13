@@ -441,6 +441,40 @@ export const SERVICES = {
         return Rx.DOM.getJSON(url);
     },
 
+    FetchMessageDetail: function(site, messageId, dataSources, callback) {
+        let fragmentView = `fragment FortisDashboardView on Feature { 
+                                type 
+                                coordinates 
+                                properties { 
+                                    messageid 
+                                    sentence 
+                                    edges 
+                                    createdtime 
+                                    sentiment 
+                                    orig_language 
+                                    source 
+                                } 
+                            }`;
+         let query = `  ${fragmentView} 
+                        query FetchEvent($site: String!, $messageId: String!, $dataSources: [String]!) { 
+                            event(site: $site, messageId: $messageId, dataSources: $dataSources) {
+                                ...FortisDashboardView 
+                            }
+                        }`;
+         let variables = { site, messageId, dataSources };
+         console.log("site:", site, "messageId", messageId, "dataSources", dataSources);
+
+         let host = process.env.REACT_APP_SERVICE_HOST;
+         var POST = {
+                url: `${host}/api/Messages`,
+                method: "POST",
+                json: true,
+                withCredentials: false,
+                body: { query, variables }
+            };
+         request(POST, callback);
+    },
+
     FetchMessageSentences: function (site, bbox, datetimeSelection, timespanType, limit, offset, filteredEdges,
         langCode, sourceFilter, mainTerm, fulltextTerm, coordinates, callback) {
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
