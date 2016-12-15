@@ -53,8 +53,8 @@ export const Header = React.createClass({
                      <SelectField underlineStyle={{ borderColor: '#337ab7', borderBottom: 'solid 3px' }}
                                 labelStyle={{ fontWeight: 600, color: '#2ebd59' }}
                                 value={this.state.language}
-                                autoWidth ={true}
-                                style = {{width:'45px'}}
+                                autoWidth={true}
+                                style={{width:'45px'}}
                                 onChange={this.changeLanguage}>
                                 {this.props.siteSettings.properties.supportedLanguages.map(function (lang) {
                                         return <MenuItem key={lang} value={lang} primaryText={lang} />                                

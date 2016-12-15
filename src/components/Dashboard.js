@@ -136,7 +136,7 @@ export const Dashboard = React.createClass({
                                                           categoryValue={this.state.categoryValue}
                                                           dataSource={this.state.dataSource}
                                                           categoryType={this.state.categoryType}
-                                                          language = {this.state.language}
+                                                          language={this.state.language}
                                                           edges={this.selectedTerms()} 
                                                           {...this.props}  /> : undefined}
                          </div>
@@ -157,7 +157,7 @@ export const Dashboard = React.createClass({
                                               categoryValue={this.state.categoryValue}
                                               categoryType={this.state.categoryType}
                                               edges={this.selectedTerms()} {...this.props} 
-                                              language = {this.state.language} />
+                                              language={this.state.language} />
                         </Dialog>
                       : undefined
                 }

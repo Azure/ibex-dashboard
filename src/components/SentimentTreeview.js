@@ -363,8 +363,8 @@ export const SentimentTreeview = React.createClass({
                 <TypeaheadSearch data={this.state.categoryValue["name_"+this.props.language]}
                                 type={this.state.categoryType}
                                 siteKey={this.props.siteKey}
-                                language = {this.state.language} 
-                                edges = {this.state.allEdges}/>
+                                language={this.state.language} 
+                                edges={this.state.allEdges}/>
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">

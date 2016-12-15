@@ -1,6 +1,5 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
-import {SERVICES} from '../services/services';
 import Autosuggest from 'react-autosuggest';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
@@ -8,9 +7,7 @@ import '../styles/TypeaheadSearch.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React);
 //const maxDefaultResult = 12;
-const ENGLISH_LANGUAGE = "en";
-const ALL_EDGE_TYPES = "All";
-const getSuggestionValue = (suggestion, lang) => {return suggestion[lang =='en'? 'name': 'name_'+lang].trim();}
+const getSuggestionValue = (suggestion, lang) => {return suggestion[lang === 'en'? 'name': 'name_'+lang].trim();}
 const getSuggestions = (value, edgeMap) => {
 
   const inputValue = value.trim().toLowerCase();
@@ -48,7 +45,7 @@ export const TypeaheadSearch = React.createClass({
            this.setState({value});
        }
 
-       if(nextProps.edges != this.state.defaultResults){
+       if(nextProps.edges !== this.state.defaultResults){
           this.setState({edgeMap: this.props.edges.get(nextProps.language)});
        }
   },
@@ -71,7 +68,7 @@ export const TypeaheadSearch = React.createClass({
   },
   
   renderSuggestion(element, {query}) { 
-    const suggestionText = element[this.props.language == 'en'? 'name': 'name_'+this.props.language];
+    const suggestionText = element[this.props.language === 'en'? 'name': 'name_'+this.props.language];
     const matches = match(suggestionText, query);
     const parts = parse(suggestionText, matches);
     const iconMap = new Map([["Location", "fa fa-map-marker fa-2x"], ["Term", "fa fa-tag fa-2x"]]);

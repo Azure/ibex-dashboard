@@ -165,7 +165,7 @@ export const FactsList = React.createClass({
       <div className="cell" style={style}>
         <div className="card">
           <p className="date">{dateString}
-           {this.state.language!=item.language ?<button className="btn btn-primary btn-sm"  style={styles.button} 
+           {this.state.language!==item.language ?<button className="btn btn-primary btn-sm"  style={styles.button} 
            onClick={() => this.translate(item.title, item.language, this.state.language, item.id)}>Translate</button>: ''}
           </p>
           <h3 className="title truncate-2"><Link to={`/site/${this.props.siteKey}/facts/detail/${item.id}`}>{item.title}</Link></h3>

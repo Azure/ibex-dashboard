@@ -179,7 +179,6 @@ const methods = {
         },
         load_settings: function(siteName){
             let self = this;
-            const LOAD_SITE_LIST = true;
 
             SERVICES.getSiteDefintion(siteName, false, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
                 console.log(constants.FACTS.INITIALIZE);

@@ -3,7 +3,6 @@ import 'rx-dom';
 import { Actions } from '../actions/Actions';
 import { momentToggleFormats, momentGetFromToRange } from '../utils/Utils.js';
 import request from 'request';
-import Promise from 'promise';
 
 const blobHostnamePattern = "https://{0}.blob.core.windows.net";
 const TIMESERIES_BLOB_CONTAINER_NAME = "processed-timeseries-bysource";

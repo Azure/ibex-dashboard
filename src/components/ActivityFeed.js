@@ -123,7 +123,7 @@ const FortisEvent = React.createClass({
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
                 {commonTermsFromFilterTranslated.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
-                {this.props.pageLanguage!=this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={ev => {ev.stopPropagation(); this.props.translate(this.props);}}>Translate</button> : ''}
+                {this.props.pageLanguage!==this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={ev => {ev.stopPropagation(); this.props.translate(this.props);}}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter
@@ -236,7 +236,7 @@ export const ActivityFeed = React.createClass({
     SERVICES.translateSentence(event.sentence, event.language, this.props.language, (translatedSentence, error) => {
         if(translatedSentence){
             let updatedElements = self.state.elements.map(element => {
-                if (element.key == event.id) {
+                if (element.key === event.id) {
                     return <FortisEvent key={event.id}
                         id={event.id}
                         sentence={translatedSentence}
