@@ -23,6 +23,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 const PARELLEL_TILE_LAYER_RENDER_LIMIT = 200;
 const SENTIMENT_FIELD = 'neg_sentiment';
 const defaultClusterSize = 40;
+const DEFAULT_LANGUAGE = 'en';
 
 export const HeatMap = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
@@ -343,10 +344,8 @@ export const HeatMap = React.createClass({
           filters.forEach(edge => {
              let enableFilter = self.edgeSelected(edge.name, edge.type);
              let value = {"mentions": edge.mentionCount, "enabled": enableFilter}
-             self.state.settings.properties.supportedLanguages.forEach(lang => {
-                 value["name_"+lang] = self.state.settings.properties.edgesByLanguages[edge.name.toLowerCase()][lang]
-             });
-             value['name']=self.state.settings.properties.edgesByLanguages[edge.name.toLowerCase()]['en'];
+             let languageEdgeMap = self.state.allEdges.get(DEFAULT_LANGUAGE);
+             value = Object.assign({}, value, languageEdgeMap.get(edge.name.toLowerCase()));
              aggregatedAssociatedTermMentions.set(edge.name.toLowerCase(), value);
           });
       }

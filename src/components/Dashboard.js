@@ -76,7 +76,6 @@ export const Dashboard = React.createClass({
 
     return (
         <div>
-          <form>
             <div className="app-container">
               <div className="container-fluid">
                 <DataSelector {...this.props} />
@@ -164,7 +163,6 @@ export const Dashboard = React.createClass({
                 }
             </div>
           </div>
-          </form>
         </div>
       );
     }

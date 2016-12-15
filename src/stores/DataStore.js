@@ -1,6 +1,8 @@
 import Fluxxor from 'fluxxor';
 import {Actions} from '../actions/Actions';
 
+const LANGUAGE_CODE_ENG='en';
+
 export const DataStore = Fluxxor.createStore({
     initialize(profile) {
       
@@ -25,7 +27,7 @@ export const DataStore = Fluxxor.createStore({
       this.bindActions(
             Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
             Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
-            Actions.constants.DASHBOARD.INITIALIZE, this.intializeDashboard,
+            Actions.constants.DASHBOARD.INITIALIZE, this.intializeSettings,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
             Actions.constants.DASHBOARD.CHANGE_COLOR_MAP, this.handleChangeColorMap,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters,
@@ -40,11 +42,6 @@ export const DataStore = Fluxxor.createStore({
     
     handleLoadActivites(activities){
         this.dataStore.activities = activities.response;
-        this.emit("change");
-    },
-
-    intializeDashboard(siteSettings){
-        this.dataStore.settings = siteSettings;
         this.emit("change");
     },
 
@@ -63,6 +60,39 @@ export const DataStore = Fluxxor.createStore({
     handleChangeColorMap(changedMap){
         this.dataStore.colorMap = changedMap.colorMap;
         this.emit("change");
+    },
+
+    intializeSettings(graphqlResponse){
+            if(graphqlResponse.settings.siteDefinition.sites && graphqlResponse.edges){
+                this.dataStore.allEdges = new Map();
+                const {locations, terms} = graphqlResponse.edges;
+                const fullEdgeList = locations.edges.concat(terms.edges);
+                const settings = graphqlResponse.settings.siteDefinition.sites[0];
+
+                fullEdgeList.forEach(edge=>{
+                    settings.properties.supportedLanguages.forEach(language=>{
+                        let languageMap = this.dataStore.allEdges.get(language);
+                        if(!languageMap){
+                            languageMap = new Map();
+                        }
+                        
+                        const objectKey = language === LANGUAGE_CODE_ENG ? 'name' : `name_${language}`;
+                        const defaultEdgeDefintion = Object.assign({}, edge, {name_en: edge.name.toLowerCase(), name: edge.name.toLowerCase()});
+                        const edgeTranslations = Object.assign({}, (languageMap.get(edge[objectKey].toLowerCase()) || defaultEdgeDefintion));
+
+                        languageMap.set(edge[objectKey].toLowerCase(), edgeTranslations);
+
+                        this.dataStore.allEdges.set(language, languageMap);
+                    });
+                });
+
+                this.dataStore.settings = settings;
+                console.log(this.dataStore);
+            }else{
+                console.error('Required data is not available');
+            }
+
+            this.emit("change");
     },
     
     handleChangeTermFilters(newFilters){
@@ -90,11 +120,10 @@ export const DataStore = Fluxxor.createStore({
     handleChangeSearchTerm(changedData){
         this.dataStore.associatedKeywords = new Map();
         this.dataStore.categoryValue = changedData.selectedEntity;
-        let settings = this.dataStore.settings.properties;
-        settings.supportedLanguages.forEach(lang => {
-            let name = (changedData.selectedEntity.name_en||changedData.selectedEntity.name).toLowerCase();
-            this.dataStore.categoryValue["name_"+lang]=settings.edgesByLanguages[name][lang];
-        })
+        let edgeMap = this.dataStore.allEdges.get(this.dataStore.language);
+        let selectedName = (changedData.selectedEntity.name_en||changedData.selectedEntity.name).toLowerCase();
+        this.dataStore.categoryValue = edgeMap.get(selectedName);
+
         this.dataStore.selectedLocationCoordinates = changedData.selectedEntity.coordinates || [];
         this.dataStore.categoryType = changedData.selectedEntity.type;
         this.dataStore.renderMap = true;

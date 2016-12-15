@@ -93,12 +93,12 @@ export const SERVICES = {
         request(POST, callback);
     },
 
-    fetchEdges(site, languages, edgeType, callback){
+    fetchEdges(site, edgeType, callback){
       const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
                                         runTime
                                         edges {
                                             name,
-                                            ar_name,
+                                            name_ar,
                                             type
                                             coordinates
                                             population
@@ -115,11 +115,11 @@ export const SERVICES = {
                                     }
                                 }`;
 
-     const locationsQuery = `locations: locations(site: $site, languages: $languages) {
+     const locationsQuery = `locations: locations(site: $site) {
                                 ...FortisDashboardLocationEdges
                             }`;
 
-     const termsQuery = `terms: terms(site: $site, languages: $languages) {
+     const termsQuery = `terms: terms(site: $site) {
                                 ...FortisDashboardTermEdges
                          }`;
 
@@ -130,11 +130,11 @@ export const SERVICES = {
                       ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
 
       let query = `  ${fragments}
-                      query FetchAllEdge($site: String!, $languages: [String]) {
+                      query FetchAllEdge($site: String!) {
                             ${queries}
                         }`;
 
-      let variables = {site, languages};
+      let variables = {site};
       let host = process.env.REACT_APP_SERVICE_HOST;
       let POST = {
             url : `${host}/api/edges`,
@@ -144,14 +144,16 @@ export const SERVICES = {
             body: { query, variables }
         };
 
-        request(POST, (error, response, body) => {
-            if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
-                callback(body.data);
-            }
-            else {
-                callback (undefined, error || 'Fetch edges request failed: ' + JSON.stringify(response));
-            }
-        });
+        request(POST, callback);
+
+        // request(POST, (error, response, body) => {
+        //     if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
+        //         callback(body.data);
+        //     }
+        //     else {
+        //         callback (undefined, error || 'Fetch edges request failed: ' + JSON.stringify(response));
+        //     }
+        // });
          
   },
 
@@ -317,14 +319,7 @@ export const SERVICES = {
             body: { query, variables }
         };
 
-        request(POST, (error, response, body) => {
-            if(!error && response.statusCode === 200 && body.data && body.data.siteDefinition.sites) {
-                callback(body.data);
-            }
-            else {
-                callback (undefined, error || 'Get site definition request failed: ' + JSON.stringify(response));
-            }
-        });
+        request(POST, callback);
     },
 
     saveTwitterAccounts(site, accounts, mutation, callback) {

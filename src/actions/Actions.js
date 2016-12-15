@@ -1,4 +1,5 @@
 import {SERVICES} from '../services/services';
+import parallelAsync from 'async/parallel'
 
 const constants = {
            SENTIMENT_JSON_MAPPING : {
@@ -56,7 +57,7 @@ const constants = {
            DASHBOARD : {
                CHANGE_SEARCH: "SEARCH:CHANGE",
                CHANGE_DATE: "DATE:CHANGE",
-               INITIALIZE: "INIT",
+               INITIALIZE: "DASHBOARD:INIT",
                CHANGE_SOURCE: "UPDATE:DATA_SOURCE",
                CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
@@ -66,7 +67,7 @@ const constants = {
            FACTS : {
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
                LOAD_FACTS_FAIL: "LOAD:FACTS_FAIL",
-               INITIALIZE: "INIT",
+               INITIALIZE: "FACTS:INIT",
                SAVE_PAGE_STATE: "SAVE:PAGE_STATE",
                LOAD_FACT: "LOAD:FACT",
                CHANGE_LANGUAGE: "FACTS:CHANGE_LANGUAGE",
@@ -87,6 +88,17 @@ const constants = {
            },
 };
 
+const EDGE_TYPE_ALL = "All";
+
+const ResponseHandler = (error, response, body, callback) => {
+    if(!error && response.statusCode === 200 && body.data) {
+        callback(undefined, body.data);
+    }else{
+        const errMsg = `[${error}] occured while processing graphql request`;
+        callback(errMsg, undefined);
+    }
+};
+
 const DataSources = source => constants.DATA_SOURCES.has(source) ? constants.DATA_SOURCES.get(source).sourceValues : undefined;
 const DataSourceLookup = requestedSource => {
     // eslint-disable-next-line
@@ -105,50 +117,26 @@ const methods = {
            let self = this;
            self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity, colorMap});
         },
+
         initializeDashboard(siteId) {
             let self = this;
 
-            SERVICES.getSiteDefintion(siteId, false, (response, error) => {
-                if (response) {
-                    let siteSettings = response.siteDefinition.sites[0];
-                    let languages = siteSettings.properties.supportedLanguages;
-                    SERVICES.fetchEdges(siteId, languages, "All", (edges, error) => {
-                        if (edges){
-                            let edgesDictionary = {};
-                            edges.terms.edges.concat(edges.locations.edges).forEach(edgeObject => {
-                                let wordByLanguageMap = {};
-                                languages.forEach(language => {
-                                    if(language == 'en'){
-                                        wordByLanguageMap[language] = edgeObject['name'];
-                                    }
-                                    else{
-                                        wordByLanguageMap[language] = edgeObject['name_' + language] || edgeObject[language+'_name'];
-                                    }
-                                })
-                                edgesDictionary[edgeObject.name.toLowerCase()] = wordByLanguageMap;
-                            })
-                            siteSettings.properties.edgesByLanguages = edgesDictionary;
-                            
-                            siteSettings.properties.edges = edges.terms.edges.concat(edges.locations.edges).map(edge => {
-                                languages.forEach(language => {
-                                    if (edge[language + '_name']) {
-                                        edge['name_' + language] = edge[language + '_name'];
-                                    }
-                                });
-                                edge["name_en"] = edge["name"];
-                                return edge;
-                            });
-                            console.log("siteSettings", siteSettings);
-                            self.dispatch(constants.DASHBOARD.INITIALIZE, siteSettings);
-                        }
-                        else {
-                            console.error(`[${error}] occured while fetching edges`);
-                        }
-                    });
-
-                } else {
-                    console.error(`[${error}] occured while processing message request`);
+            parallelAsync({
+                settings: callback => {
+                        SERVICES.getSiteDefintion(siteId, false, (error, response, body) => ResponseHandler(error, response, body, callback))
+                },
+                edges: callback => {
+                        SERVICES.fetchEdges(siteId, EDGE_TYPE_ALL, (error, response, body) => ResponseHandler(error, response, body, callback))
                 }
+            }, (error, results) => {
+                    if(!error && Object.keys(results).length === 2 
+                              && results.settings.siteDefinition.sites.length > 0){
+                        const { settings, edges } = results;
+
+                        self.dispatch(constants.DASHBOARD.INITIALIZE, {settings, edges});
+                    }else {
+                        console.error(`[${error}] occured while fetching edges or site defintion for site [${siteId}]`);
+                    }
             });
         },
    
@@ -193,13 +181,14 @@ const methods = {
             let self = this;
             const LOAD_SITE_LIST = true;
 
-            SERVICES.getSiteDefintion(siteName, false, (response, error) => {
-                if (response) {
-                    self.dispatch(constants.FACTS.INITIALIZE, response.siteDefinition.sites[0]);
+            SERVICES.getSiteDefintion(siteName, false, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+                console.log(constants.FACTS.INITIALIZE);
+                if (graphqlResponse && !error) {
+                    self.dispatch(constants.FACTS.INITIALIZE, graphqlResponse.siteDefinition.sites[0]);
                 }else{
                     console.error(`[${error}] occured while processing message request`);
                 }
-            });
+            }));
         },
         save_page_state: function (pageState) {
             this.dispatch(constants.FACTS.SAVE_PAGE_STATE, pageState);
@@ -219,21 +208,21 @@ const methods = {
             let self = this;
             const LOAD_SITE_LIST = true;
 
-            SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (response, error) => {
-                    if(response) {
-                        if(response.siteDefinition.sites.length > 0){
+           SERVICES.getSiteDefintion(siteName, LOAD_SITE_LIST, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+                    if(graphqlResponse) {
+                        if(graphqlResponse.siteDefinition.sites.length > 0){
                             const action = false;
-                            self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: response.siteDefinition.sites[0], 
+                            self.dispatch(constants.ADMIN.LOAD_SETTINGS, {settings: graphqlResponse.siteDefinition.sites[0], 
                                                                           action: action, 
                                                                           originalSiteName: siteName, 
-                                                                          siteList: response.siteList.sites});
+                                                                          siteList: graphqlResponse.siteList.sites});
                         }else{
-                            console.error(`site [${siteName}] does not exist.`);
+                            console.error(`error [${error}] occured. site [${siteName}] does not exist.`);
                         }
                     }else{
                         console.error(`[${error}] occured while processing message request`);
                     }
-            });
+            }));
         },
         save_settings: function(siteName, modifiedSettings){
             let self = this;
@@ -369,10 +358,10 @@ const methods = {
                 }
             });
         },
-        load_localities: function (siteId) {
+       load_localities: function (siteId) {
             let self = this;
             const edgeType = "Location";
-            SERVICES.fetchEdges(siteId, "en", edgeType, (error, response, body) => {
+            SERVICES.fetchEdges(siteId, edgeType, (error, response, body) => {
                         if (!error && response.statusCode === 200) {
                             const action = false;
                             const response = body.data.locations.edges;

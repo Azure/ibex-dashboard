@@ -14,6 +14,8 @@ const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
       chartDivReference = "popularTermsPieDiv";
 
+const DEFAULT_LANGUAGE = "en";
+
 export const PopularTermsChart = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
@@ -140,13 +142,13 @@ export const PopularTermsChart = React.createClass({
      SERVICES.getPopularTerms(this.props.siteKey, timespan, timespanType, mainEdge, Actions.DataSources(dataSource), 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
+                    let edgeMap = self.state.allEdges.get(DEFAULT_LANGUAGE);
                     let popularTerms =  body.data[Object.keys(body.data)[0]].edges.map(term =>{
-                         self.state.settings.properties.supportedLanguages.forEach(lang => {
-                            term['name_'+lang] = self.state.settings.properties.edgesByLanguages[term.name.toLowerCase()][lang];
-                        });
-                        return term;
-                    });                
-                    self.refreshChart(popularTerms);
+                         term = Object.assign({}, term, edgeMap.get(term.name.toLowerCase()));
+                         
+                         return term;
+                    });
+                    self.refreshChart(popularTerms);           
                 }else{
                     console.error(`[${error}] occured while processing popular terms graphql request`);
                 }

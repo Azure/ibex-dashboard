@@ -94,13 +94,11 @@ export const PopularLocationsChart = React.createClass({
      SERVICES.getMostPopularPlaces(this.props.siteKey, period, timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, Actions.DataSources(dataSource), (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     if(body && body.data && body.data.popularLocations && body.data.popularLocations.features){
-                        let popularLocations =  body.data.popularLocations.features.map(location =>{
-                            self.state.settings.properties.supportedLanguages.forEach(lang => {
-                                location.properties['name_'+lang] = self.state.settings.properties.edgesByLanguages[location.properties.location.toLowerCase()][lang];
-                            });
-                            location.properties['name'] = self.state.settings.properties.edgesByLanguages[location.properties.location.toLowerCase()]['en'];
+                        let edgeMap = self.state.allEdges.get(DEFAULT_LANGUAGE);
+                        let popularLocations = body.data.popularLocations.features.map(location => {
+                            location.properties = Object.assign({}, location.properties,edgeMap.get(location.properties.location.toLowerCase()));
                             return location;
-                        });             
+                        });           
                         self.refreshChart(popularLocations, self.props.language);
                     }
 

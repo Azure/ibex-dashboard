@@ -100,15 +100,16 @@ const FortisEvent = React.createClass({
     render: function() {
         let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
         let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
+        const languageEdgeMap = this.props.edgesByLanguages.get(DEFAULT_LANGUAGE);
         
         let commonTermsFromFilterTranslated = commonTermsFromFilter.map(term =>{
-            return this.props.edgesByLanguages[term.toLowerCase()][this.props.pageLanguage];
+            return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`]
         });
 
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
 
         let searchWordsTranslated = searchWords.map(term => {
-            return this.props.edgesByLanguages[term.toLowerCase()][this.props.pageLanguage];
+            return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`];
         });
 
         let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
@@ -122,7 +123,7 @@ const FortisEvent = React.createClass({
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
                 {commonTermsFromFilterTranslated.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
-                {this.props.pageLanguage!=this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={() => this.props.translate(this.props)}>Translate</button> : ''}
+                {this.props.pageLanguage!=this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={ev => {ev.stopPropagation(); this.props.translate(this.props);}}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter
@@ -246,7 +247,7 @@ export const ActivityFeed = React.createClass({
                         filters={element.props.edges}
                         searchFilter={element.props.searchFilter}
                         mainSearchTerm={element.props.mainSearchTerm}
-                        edgesByLanguages={this.state.settings.properties.edgesByLanguages}  
+                        edgesByLanguages={self.state.allEdges}  
                         language={self.props.language}
                         pageLanguage={element.props.pageLanguage}
                         translate={self.translateEvent} />;
@@ -288,7 +289,7 @@ export const ActivityFeed = React.createClass({
                                                         searchFilter={requestPayload.searchValue}
                                                         mainSearchTerm={this.props.categoryValue.name} 
                                                         language={feature.properties.language}  
-                                                        edgesByLanguages={this.state.settings.properties.edgesByLanguages}   
+                                                        edgesByLanguages={self.state.allEdges}   
                                                         pageLanguage={this.props.language}
                                                         translate={this.translateEvent}/>)                               
                             }

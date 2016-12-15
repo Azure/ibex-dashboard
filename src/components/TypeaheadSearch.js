@@ -11,15 +11,23 @@ const FluxMixin = Fluxxor.FluxMixin(React);
 const ENGLISH_LANGUAGE = "en";
 const ALL_EDGE_TYPES = "All";
 const getSuggestionValue = (suggestion, lang) => {return suggestion[lang =='en'? 'name': 'name_'+lang].trim();}
-const getSuggestions = (value, defaultSuggestions, lang) => {
+const getSuggestions = (value, edgeMap) => {
 
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
-  return inputLength === 0 || defaultSuggestions.length === 0 ? [] 
-      : defaultSuggestions.filter(edge => {
-          let fieldName = lang =='en'? 'name': 'name_'+lang;
-          return edge[fieldName] && (edge[fieldName].toLowerCase().indexOf(inputValue) > -1)
-      });
+  let filteredTerms = [];
+
+  if(inputLength === 0){
+      return [];
+  } else{
+      for (let key of edgeMap.keys()) {
+          if(key.indexOf(inputValue) > -1){
+                filteredTerms.push(edgeMap.get(key));
+          }
+      }
+  }
+
+  return filteredTerms;
 };
 
 export const TypeaheadSearch = React.createClass({
@@ -41,7 +49,7 @@ export const TypeaheadSearch = React.createClass({
        }
 
        if(nextProps.edges != this.state.defaultResults){
-          this.setState({defaultResults: this.props.edges});
+          this.setState({edgeMap: this.props.edges.get(nextProps.language)});
        }
   },
 
@@ -58,7 +66,7 @@ export const TypeaheadSearch = React.createClass({
 
   onSuggestionsFetchRequested({ value }){
     this.setState({
-      suggestions: getSuggestions(value, this.state.defaultResults, this.props.language)
+      suggestions: getSuggestions(value, this.state.edgeMap)
     });
   },
   
