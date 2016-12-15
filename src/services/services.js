@@ -93,8 +93,7 @@ export const SERVICES = {
         request(POST, callback);
     },
 
-<<<<<<< HEAD
-  fetchEdges(site, languages, edgeType, callback){
+    fetchEdges(site, languages, edgeType, callback){
       const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
                                         runTime
                                         edges {
@@ -117,10 +116,6 @@ export const SERVICES = {
                                 }`;
 
      const locationsQuery = `locations: locations(site: $site, languages: $languages) {
-=======
-    fetchEdges(site, langCode, edgeType, callback) {
-        const locationsQuery = `locations: locations(site: $site, langCode: $langCode) {
->>>>>>> CatalystCode/Fortis-Client/master
                                 ...FortisDashboardLocationEdges
                             }`;
 
