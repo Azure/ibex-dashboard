@@ -5,7 +5,7 @@ import FlatButton from 'material-ui/FlatButton';
 import Tweet from './dialogs/Tweet.js';
 import Facebook from './dialogs/Facebook.js';
 import {Fact} from './dialogs/Fact.js';
-import {Acled} from './dialogs/Acled.js';
+import Acled from './dialogs/Acled.js';
 
 const dialogContentStyle = {
   width: '80%',
@@ -41,10 +41,11 @@ export default class DialogBox extends React.Component {
                 />,
         ];
         const content = this.renderType();
+        const title = (this.state.data && this.state.data.title) ? this.state.data.title : "";
         
         return (
             <Dialog
-                    title={this.state.title}
+                    title={title}
                     actions={actions}
                     modal={false}
                     open={this.state.open}
@@ -74,8 +75,8 @@ export default class DialogBox extends React.Component {
             case "fact":
             case "tadaweb":
                 return ( <Fact {...this.props} content={this.state.data}></Fact> );
-            //case "acled":
-            //    return ( <Acled {...this.props} content={this.state.data}></Acled> );
+            case "acled":
+                return ( <Acled {...this.props} content={this.state.data}></Acled> );
             default:
                 return this.renderText("Unknown data type");
         }

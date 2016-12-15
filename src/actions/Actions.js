@@ -134,9 +134,9 @@ const methods = {
         changeDate(siteKey, datetimeSelection, timespanType){
            this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
         },
-        loadDetail(siteKey, messageId, dataSources){
+        loadDetail(siteKey, messageId, dataSources, fields=["messageid","sentence","edges","createdtime","sentiment","orig_language","source"]){
             let self = this;
-            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, (error, response, body) => {
+            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, fields, (error, response, body) => {
                 if (!error && response.statusCode === 200 && body.data) {
                     const data = body.data;
                     self.dispatch(constants.DASHBOARD.LOAD_DETAIL, data);
@@ -145,7 +145,6 @@ const methods = {
                     self.dispatch(constants.DASHBOARD.LOAD_DETAIL_ERROR, error);
                 }
             });
-            
         },
     },
     FACTS: {

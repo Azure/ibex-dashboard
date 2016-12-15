@@ -441,18 +441,13 @@ export const SERVICES = {
         return Rx.DOM.getJSON(url);
     },
 
-    FetchMessageDetail: function(site, messageId, dataSources, callback) {
+    FetchMessageDetail: function(site, messageId, dataSources, fields, callback) {
+        let properties = fields.join(' ');
         let fragmentView = `fragment FortisDashboardView on Feature { 
                                 type 
                                 coordinates 
                                 properties { 
-                                    messageid 
-                                    sentence 
-                                    edges 
-                                    createdtime 
-                                    sentiment 
-                                    orig_language 
-                                    source 
+                                    ${properties}
                                 } 
                             }`;
          let query = `  ${fragmentView} 
@@ -462,7 +457,7 @@ export const SERVICES = {
                             }
                         }`;
          let variables = { site, messageId, dataSources };
-         console.log("site:", site, "messageId", messageId, "dataSources", dataSources);
+         console.log("fetch -> site:", site, "messageId", messageId, "dataSources", dataSources, "fields:", properties);
 
          let host = process.env.REACT_APP_SERVICE_HOST;
          var POST = {

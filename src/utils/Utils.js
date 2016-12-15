@@ -72,6 +72,10 @@ export function getHumanDate(dateString, dateFormat="YYYY-MM-DD", newDateFormat=
      return moment(dateStr, dateFormat).format(newDateFormat);
 }
 
+export function getHumanDateFromNow(dateString, dateFormat="ddd MMM DD YYYY HH:mm:ss zZZ") {
+    return moment(dateString, dateFormat).fromNow();
+}
+
 // array helpers
 export function flatten(arr){
 	return [].concat(...arr);

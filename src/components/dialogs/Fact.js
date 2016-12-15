@@ -1,7 +1,7 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
 import { Link } from 'react-router';
-import { getHumanDate } from '../../utils/Utils.js';
+import { getHumanDateFromNow } from '../../utils/Utils.js';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
   StoreWatchMixin = Fluxxor.StoreWatchMixin("FactDetailStore");
@@ -10,8 +10,8 @@ export const Fact = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
   _loadFactDetail: function (id) {
-    console.log("load id:", id, "props:", this.props);
-    this.getFlux().actions.DASHBOARD.loadDetail(this.props.siteKey, id, ["tadaweb"]);//FACTS.load_fact(id);
+    let fields = ["messageid","sentence","edges","createdtime","sentiment","orig_language","source","fullText"];
+    this.getFlux().actions.DASHBOARD.loadDetail(this.props.siteKey, id, ["tadaweb"], fields);
   },
 
   getInitialState: function () {
@@ -21,7 +21,6 @@ export const Fact = React.createClass({
   getStateFromFlux: function () {
     let state = this.getFlux().store("FactDetailStore").getState();
     // prevent FOC
-    console.log("state:", state, " props:", this.props);
     if (state.factDetail && state.factDetail.properties.messageid !== this.props.content.id) {
         state.factDetail = null;
     }
@@ -43,7 +42,6 @@ export const Fact = React.createClass({
 
     // error
     if (!this.state.factDetail.properties) {
-      console.log("fact detail:", this.state.factDetail);
       return (
         <div className="fact">
           <div className="container-fluid">
@@ -59,8 +57,10 @@ export const Fact = React.createClass({
 
     let factDetail = this.state.factDetail;
     let fact = factDetail.properties;
-    let dateCreated = getHumanDate(fact.createdtime, "ddd MMM DD YYYY HH:mm:ss zZZ");
-    let text = fact.sentence;
+    let dateCreated = getHumanDateFromNow(fact.createdtime);
+    let text = fact.fullText || fact.sentence;
+    let sources = fact.sources || [];
+    let tags = fact.tags || [];
 
     return (
       <div className="fact">
@@ -81,14 +81,14 @@ export const Fact = React.createClass({
 
                 <p className="subheading">Sources</p>
                 <ul className="drop">
-                  {fact.sources && fact.sources.map(function (url) {
+                  {sources && sources.map(function (url) {
                     return <li key={url}><a href={url} className="truncate" target="_blank">{url}</a></li>;
                   })}
                 </ul>
 
                 <p className="subheading">Tags</p>
                 <ul className="drop">
-                  {fact.tags && fact.tags.map(function (tag) {
+                  {tags && tags.map(function (tag) {
                     return <li key={tag}><Link to={`/site/${this.props.siteKey}/facts/tags/${tag}`}>{tag}</Link></li>;
                   },this)}
                 </ul>
