@@ -345,22 +345,43 @@ const methods = {
                 }
             });
         },
-        load_localities: function (languages) {
+        save_locations: function(siteId, modifiedKeywords){
+            let self = this;
+            SERVICES.saveLocations(siteId, modifiedKeywords, (error, response, body) => {
+                if(!error && response.statusCode === 200) {
+                    const action = 'saved';
+                    const response = body.data.saveLocations.edges;
+                    self.dispatch(constants.ADMIN.LOAD_LOCALITIES, {response, action});
+                }else{
+                    console.error(`[${error}] occured while processing save locations request`);
+                }
+            });
+        },
+        remove_locations: function(siteId, modifiedLocations){
+            let self = this;
+            SERVICES.removeLocations(siteId, modifiedLocations, (error, response, body) => {
+                if(!error && response.statusCode === 200) {
+                    const action = 'saved';
+                    const response = body.data.removeLocations.edges;
+                    self.dispatch(constants.ADMIN.LOAD_LOCALITIES, {response, action});
+                }else{
+                    console.error(`[${error}] occured while processing save locations request`);
+                }
+            });
+        },
+        load_localities: function (siteId) {
             let self = this;
             const edgeType = "Location";
-            let dataStore = this.flux.stores.AdminStore.dataStore;
-            if (!dataStore.loading) {
-                SERVICES.fetchEdges("ocha", languages, edgeType, (result, error) => {  
-                    if(result){           
-                        const response = result.map(location=>{
-                                return Object.assign({}, {"name": location.name, "coordinates": location.coordinates.join(",")});
-                        });
-                        self.dispatch(constants.ADMIN.LOAD_LOCALITIES, { localities: response});
-                    } else {
-                        self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
-                    }
-                });
-            }
+            SERVICES.fetchEdges(siteId, "en", edgeType, (error, response, body) => {
+                        if (!error && response.statusCode === 200) {
+                            const action = false;
+                            const response = body.data.locations.edges;
+                            self.dispatch(constants.ADMIN.LOAD_LOCALITIES, {response, action});
+                        }else{
+                            let error = 'Error, could not load keywords for admin page';
+                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                        }
+            });
         },
 
         load_fb_pages: function () {
