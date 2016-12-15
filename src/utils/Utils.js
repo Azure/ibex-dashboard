@@ -109,3 +109,20 @@ export function getCheckedLabel(e) {
     let matches = label.match(/\$([a-zA-Z0-9\s\-_]+)/);
     return matches
 }
+
+// Sentiment descriptions for detail dialog box
+export function getSentimentDescription(float){
+	if (float < 0.3) {
+        return "Negative";
+    }
+    if (float < 0.5) {
+        return "Moderately negative";
+    }
+    if (float > 0.7) {
+        return "Positive";
+    }
+    if (float > 0.5) {
+        return "Moderately positive";
+    }
+    return "Neutral";
+}

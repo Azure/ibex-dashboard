@@ -441,7 +441,7 @@ export const SERVICES = {
         return Rx.DOM.getJSON(url);
     },
 
-    FetchMessageDetail: function(site, messageId, dataSources, fields, callback) {
+    FetchMessageDetail: function(site, messageId, dataSources, fields, additionalVars, callback) {
         let properties = fields.join(' ');
         let fragmentView = `fragment FortisDashboardView on Feature { 
                                 type 
@@ -451,14 +451,12 @@ export const SERVICES = {
                                 } 
                             }`;
          let query = `  ${fragmentView} 
-                        query FetchEvent($site: String!, $messageId: String!, $dataSources: [String]!) { 
-                            event(site: $site, messageId: $messageId, dataSources: $dataSources) {
+                        query FetchEvent($site: String!, $messageId: String!, $dataSources: [String]!, $langCode: String) { 
+                            event(site: $site, messageId: $messageId, dataSources: $dataSources, langCode: $langCode) {
                                 ...FortisDashboardView 
                             }
                         }`;
-         let variables = { site, messageId, dataSources };
-         console.log("fetch -> site:", site, "messageId", messageId, "dataSources", dataSources, "fields:", properties);
-
+         let variables = { site, messageId, dataSources, ...additionalVars };
          let host = process.env.REACT_APP_SERVICE_HOST;
          var POST = {
                 url: `${host}/api/Messages`,

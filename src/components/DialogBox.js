@@ -4,15 +4,21 @@ import FlatButton from 'material-ui/FlatButton';
 // view components
 import Tweet from './dialogs/Tweet.js';
 import Facebook from './dialogs/Facebook.js';
-import {Fact} from './dialogs/Fact.js';
 import Acled from './dialogs/Acled.js';
+import {Fact} from './dialogs/Fact.js';
+import '../styles/DialogBox.css';
 
-const dialogContentStyle = {
+const dialogWideStyle = {
   width: '80%',
   maxWidth: 'none'
 };
 
-const innerContentStyle = {
+const dialogCompactStyle = {
+  width: '50%',
+  maxWidth: 'none'
+};
+
+const contentLoadingStyle = {
     height: '400px'
 };
 
@@ -41,19 +47,18 @@ export default class DialogBox extends React.Component {
                 />,
         ];
         const content = this.renderType();
-        const title = (this.state.data && this.state.data.title) ? this.state.data.title : "";
-        
+        const dialogStyle = this.renderDialogStyle();
+        const contentStyle = this.renderContentStyle();
         return (
             <Dialog
-                    title={title}
                     actions={actions}
                     modal={false}
                     open={this.state.open}
                     onRequestClose={this.close}
                     autoScrollBodyContent={true}
-                    contentStyle={dialogContentStyle}
+                    contentStyle={dialogStyle}
                     >
-                    <div className="content" style={innerContentStyle}>{content}</div>
+                    <div className="content" style={contentStyle}>{content}</div>
                 </Dialog>
         );
     }
@@ -62,17 +67,15 @@ export default class DialogBox extends React.Component {
         if (!this.state.data) {
             return;
         }
-        let type = this.state.data.source || this.state.data.type;
+        let type = this.state.data.source;
         if (!type) {
             return this.renderText("Unknown data source");
         }
         switch(type) {
             case "twitter":
                 return ( <Tweet {...this.props} content={this.state.data}></Tweet> );
-            case "facebook":
             case "facebook-messages":
                 return ( <Facebook {...this.props} content={this.state.data}></Facebook> );
-            case "fact":
             case "tadaweb":
                 return ( <Fact {...this.props} content={this.state.data}></Fact> );
             case "acled":
@@ -80,6 +83,28 @@ export default class DialogBox extends React.Component {
             default:
                 return this.renderText("Unknown data type");
         }
+    }
+
+    renderDialogStyle() {
+        if (!this.state || !this.state.data) {
+            return dialogCompactStyle;
+        }
+        let type = this.state.data.source;
+        if (type === "tadaweb") {
+            return dialogWideStyle;
+        }
+        return dialogCompactStyle;
+    }
+
+    renderContentStyle() {
+        if (!this.state || !this.state.data) {
+            return {};
+        }
+        let type = this.state.data.source;
+        if (type === "tadaweb" || type === "facebook-messages") {
+            return contentLoadingStyle;
+        }
+        return {};
     }
 
     renderText(title) {

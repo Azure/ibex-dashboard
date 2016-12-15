@@ -136,7 +136,7 @@ const methods = {
         },
         loadDetail(siteKey, messageId, dataSources, fields=["messageid","sentence","edges","createdtime","sentiment","orig_language","source"]){
             let self = this;
-            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, fields, (error, response, body) => {
+            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, fields, {}, (error, response, body) => {
                 if (!error && response.statusCode === 200 && body.data) {
                     const data = body.data;
                     self.dispatch(constants.DASHBOARD.LOAD_DETAIL, data);

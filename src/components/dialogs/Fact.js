@@ -1,7 +1,8 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
 import { Link } from 'react-router';
-import { getHumanDateFromNow } from '../../utils/Utils.js';
+import { getHumanDateFromNow, getSentimentDescription } from '../../utils/Utils.js';
+import { getSentimentStyle } from '../../utils/Style.js';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
   StoreWatchMixin = Fluxxor.StoreWatchMixin("FactDetailStore");
@@ -61,6 +62,9 @@ export const Fact = React.createClass({
     let text = fact.fullText || fact.sentence;
     let sources = fact.sources || [];
     let tags = fact.tags || [];
+    let sentiment = fact.sentiment;
+    let sentimentStyle = getSentimentStyle(sentiment);
+    let sentimentDescription = getSentimentDescription(sentiment);
 
     return (
       <div className="fact">
@@ -92,6 +96,8 @@ export const Fact = React.createClass({
                     return <li key={tag}><Link to={`/site/${this.props.siteKey}/facts/tags/${tag}`}>{tag}</Link></li>;
                   },this)}
                 </ul>
+
+                <p className="subheading sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
               </div>
             </div>
           </div>

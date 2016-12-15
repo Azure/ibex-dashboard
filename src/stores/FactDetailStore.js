@@ -9,7 +9,7 @@ export const FactDetailStore = Fluxxor.createStore({
     };
 
     this.bindActions(
-      Actions.constants.DASHBOARD.LOAD_DETAIL, this.handleLoadFact, // Actions.constants.FACTS.LOAD_FACT
+      Actions.constants.DASHBOARD.LOAD_DETAIL, this.handleLoadFact, 
       Actions.constants.DASHBOARD.LOAD_DETAIL_ERROR, this.handleLoadFactError 
     );
   },
@@ -19,7 +19,7 @@ export const FactDetailStore = Fluxxor.createStore({
   },
 
   handleLoadFact(payload) {
-    this.dataStore.factDetail = payload.event; //payload.response;
+    this.dataStore.factDetail = payload.event;
     this.emit("change");
   },
 

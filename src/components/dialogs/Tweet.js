@@ -1,5 +1,6 @@
 import React from 'react';
-import { getHumanDateFromNow } from '../../utils/Utils.js';
+import { getHumanDateFromNow, getSentimentDescription } from '../../utils/Utils.js';
+import { getSentimentStyle } from '../../utils/Style.js';
 
 export default class Tweet extends React.Component {
 
@@ -7,11 +8,14 @@ export default class Tweet extends React.Component {
         const text = this.props.content.sentence;
         const dateText = getHumanDateFromNow(this.props.content.postedTime, "MM/DD HH:mm:ss");
         const sentiment = this.props.content.sentiment;
+        const sentimentStyle = getSentimentStyle(sentiment);
+        const sentimentDescription = getSentimentDescription(sentiment);
+
         return (
             <div className="tweet">
-                <p>{dateText}</p>
-                <p>{text}</p>   
-                <p>Sentiment: {sentiment}</p>
+                <p className="date">{dateText}</p>
+                <p className="title">{text}</p>   
+                <p className="sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
             </div>
         );
     }
@@ -23,5 +27,5 @@ Tweet.defaultProps = {
 };
 
 Tweet.propTypes = {
-    content: React.PropTypes.object,
+    content: React.PropTypes.object.isRequired,
 };
