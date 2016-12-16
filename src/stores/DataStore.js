@@ -16,7 +16,6 @@ export const DataStore = Fluxxor.createStore({
           renderMap: true,
           siteKey: '',
           associatedKeywords: new Map(),
-          locations: new Map(),
           bbox: [],
           colorMap: new Map(),
           selectedLocationCoordinates: [],
@@ -137,7 +136,6 @@ export const DataStore = Fluxxor.createStore({
     mapDataUpdate(heatmapData){
         this.dataStore.associatedKeywords = heatmapData.associatedKeywords;
         this.dataStore.bbox = heatmapData.bbox;
-        this.dataStore.locations = heatmapData.locations;
         this.dataStore.renderMap = false;
         this.emit("change");
     }

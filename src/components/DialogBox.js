@@ -76,6 +76,8 @@ export default class DialogBox extends React.Component {
                 return ( <Tweet {...this.props} content={this.state.data}></Tweet> );
             case "facebook-messages":
                 return ( <Facebook {...this.props} content={this.state.data}></Facebook> );
+            case "facebook-comments":
+                return ( <Facebook {...this.props} content={this.state.data}></Facebook> );
             case "tadaweb":
                 return ( <Fact {...this.props} content={this.state.data}></Fact> );
             case "acled":

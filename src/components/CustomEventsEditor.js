@@ -20,7 +20,7 @@ const columns = [
         sortable : true,
         filterable: true,
         resizable: true,
-        name: "Location Coordinates",
+        name: "Location",
         key: "geo"
     },
     {
@@ -28,7 +28,7 @@ const columns = [
         sortable : true,
         filterable: true,
         resizable: true,
-        name: "Event Source",
+        name: "Source",
         key: "source"
     },
     {
@@ -36,7 +36,15 @@ const columns = [
         sortable : true,
         filterable: true,
         resizable: true,
-        name: "Event Content",
+        name: "Title",
+        key: "title"
+    },
+    {
+        editable:true,
+        sortable : true,
+        filterable: true,
+        resizable: true,
+        name: "Event Text",
         key: "message"
     }
 ];

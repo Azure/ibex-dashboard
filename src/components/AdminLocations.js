@@ -2,6 +2,8 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
 import {DataGrid} from './DataGrid';
+import turfInside from 'turf-inside';
+import turfBbox from 'turf-bbox-polygon';
 import 'leaflet-area-select';
 import L from 'leaflet';
 import 'leaflet-geocoder-mapzen';
@@ -120,14 +122,19 @@ export const AdminLocations = React.createClass({
     },
     addGeocoder(bbox){
         if(this.map && bbox && bbox.length === 4){
+          if(this.geocoder){
+              this.geocoder.removeFrom(this.map);
+          }
+
           let self = this;
            const options = {
                bounds: L.latLngBounds(L.latLng(bbox[1], bbox[0]),  L.latLng(bbox[3], bbox[2])),
                position: 'topright',
+               sources: 'gn',
                layers: 'coarse'
             };
 
-            const geocoder = L.control.geocoder('mapzen-PcNq9SJ', options);
+            const geocoder = L.control.geocoder(this.state.settings.properties.mapzenApiKey, options);
             geocoder.on('select', e => {
                let localities = self.state.localities;
                const selectedLocation = {
@@ -151,7 +158,8 @@ export const AdminLocations = React.createClass({
                 geocoder.reset();
             });
 
-            geocoder.addTo(this.map)
+            geocoder.addTo(this.map);
+            this.geocoder = geocoder;
         }
     },
     setView(latitude, longitude, zoom){
@@ -166,6 +174,23 @@ export const AdminLocations = React.createClass({
           });
         }
     },
+    locationsOutsideofBbox(bboxPolygon){
+        const pointGeoJsonBase = {
+            "type": "Feature",
+            "geometry": {
+                   "type": "Point"
+            }
+        };
+
+        return this.state.localities.filter(location=>!turfInside( Object.assign({}, pointGeoJsonBase, 
+                                                                    {
+                                                                        geometry: {
+                                                                            coordinates: location.coordinates.split(",").map(point=>parseFloat(point))
+                                                                        }
+                                                                    }), 
+                                                                  bboxPolygon)
+                                            );
+    },
     drawBBox(bbox){
         if(this.bbox) {
             this.map.removeLayer(this.bbox);
@@ -177,6 +202,8 @@ export const AdminLocations = React.createClass({
             this.bbox = L.rectangle(bounds, {weight: 2, color: '#0ff', fillOpacity: 0, clickable: false}).addTo(this.map);
             // zoom the map to the rectangle bounds
             this.map.fitBounds(bounds);
+            this.addGeocoder(bbox);
+            //const locationsToRemove = this.locationsOutsideofBbox(turfBbox(bbox));
             this.setState({targetBbox: bbox});
         }
     },

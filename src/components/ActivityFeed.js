@@ -17,7 +17,8 @@ const DEFAULT_LANGUAGE = "en";
 const ELEMENT_ITEM_HEIGHT = 85;
 const TOP_SECTION_HEIGHT=358;
 const INFINITE_LOAD_DELAY_MS = 2000;
-const MOMENT_FORMAT = "MM/DD HH:MM:s";
+const MOMENT_FORMAT = "MM/DD HH:mm:s";
+const SERVICE_DATETIME_FORMAT = "MM/DD/YYYY HH:mm:s A";
 const activeHeaderClass = "feed-source-label active", inactiveClass = "feed-source-label";
 const styles ={
     sourceLogo: {
@@ -290,7 +291,7 @@ export const ActivityFeed = React.createClass({
                                                         id={feature.properties.messageid}
                                                         sentence={feature.properties.sentence}
                                                         source={feature.properties.source}
-                                                        postedTime={moment(feature.properties.createdtime).format(MOMENT_FORMAT)}
+                                                        postedTime={moment(feature.properties.createdtime, SERVICE_DATETIME_FORMAT).format(MOMENT_FORMAT)}
                                                         sentiment={feature.properties.sentiment}
                                                         edges={feature.properties.edges}
                                                         filters={requestPayload.edges}

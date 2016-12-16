@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { getHumanDateFromNow, getSentimentDescription } from '../../utils/Utils.js';
 import { getSentimentStyle } from '../../utils/Style.js';
 
+const sourcesBlackList = ["http://www.alchemyapi.com/","http://www.bing.com/","http://www.tadaweb.com/"];
 const FluxMixin = Fluxxor.FluxMixin(React),
   StoreWatchMixin = Fluxxor.StoreWatchMixin("FactDetailStore");
 
@@ -11,8 +12,7 @@ export const Fact = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
   _loadFactDetail: function (id) {
-    let fields = ["messageid","sentence","edges","createdtime","sentiment","language","source","fullText"];
-    this.getFlux().actions.DASHBOARD.loadDetail(this.props.siteKey, id, ["tadaweb"], fields);
+    this.getFlux().actions.DASHBOARD.loadDetail(this.props.siteKey, id, ["tadaweb"], []);
   },
 
   getInitialState: function () {
@@ -56,13 +56,14 @@ export const Fact = React.createClass({
       );
     }
 
-    let factDetail = this.state.factDetail;
-    let fact = factDetail.properties;
-    let dateCreated = getHumanDateFromNow(fact.createdtime);
-    let text = fact.fullText || fact.sentence;
-    let sources = fact.sources || [];
-    let tags = fact.tags || [];
-    let sentiment = fact.sentiment;
+    let factDetail = this.state.factDetail.properties || {};
+    let fact = factDetail.properties || {};
+    let dateCreated = getHumanDateFromNow(factDetail.createdtime);
+    let text = factDetail.fullText || factDetail.sentence;
+    let sources = fact.originalSources || [];
+    let tags = factDetail.edges || [];
+    let title = fact.title;
+    let sentiment = factDetail.sentiment;
     let sentimentStyle = getSentimentStyle(sentiment);
     let sentimentDescription = getSentimentDescription(sentiment);
 
@@ -71,6 +72,14 @@ export const Fact = React.createClass({
         <div className="container-fluid">
 
           <div className="row whitespace">
+            <div className="caption">
+              <h3>{}</h3>
+            </div>
+            <div className="col-md-9">
+              <div className="article">
+                <p className="text">{title}</p>
+              </div>
+            </div>
             <div className="col-md-9">
               <div className="article">
                 <p className="text">{text}</p>
@@ -85,14 +94,14 @@ export const Fact = React.createClass({
 
                 <p className="subheading">Sources</p>
                 <ul className="drop">
-                  {sources && sources.map(function (url) {
+                  {sources && sources.filter(source=>sourcesBlackList.indexOf(source)===-1).map(url => {
                     return <li key={url}><a href={url} className="truncate" target="_blank">{url}</a></li>;
                   })}
                 </ul>
 
                 <p className="subheading">Tags</p>
                 <ul className="drop">
-                  {tags && tags.map(function (tag) {
+                  {tags && tags.map(tag => {
                     return <li key={tag}><Link to={`/site/${this.props.siteKey}/facts/tags/${tag}`}>{tag}</Link></li>;
                   },this)}
                 </ul>

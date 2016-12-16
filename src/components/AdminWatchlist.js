@@ -9,7 +9,7 @@ export const AdminWatchlist = React.createClass({
     mixins: [FluxMixin, StoreWatchMixin],
 
     componentDidMount(){
-        this.getFlux().actions.ADMIN.load_keywords(this.props.siteKey,this.state.settings.properties.supportedLanguages || []);
+        this.getFlux().actions.ADMIN.load_keywords(this.props.siteKey);
     },
     getStateFromFlux() {
         return this.getFlux().store("AdminStore").getState();
