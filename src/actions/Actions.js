@@ -157,9 +157,9 @@ const methods = {
         changeDate(siteKey, datetimeSelection, timespanType){
            this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
         },
-        loadDetail(siteKey, messageId, dataSources, fields=["messageid","sentence","edges","createdtime","sentiment","orig_language","source"]){
+        loadDetail(siteKey, messageId, dataSources, sourcePropeties){
             let self = this;
-            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, fields, {}, (error, response, body) => {
+            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, sourcePropeties, (error, response, body) => {
                 if (!error && response.statusCode === 200 && body.data) {
                     const data = body.data;
                     self.dispatch(constants.DASHBOARD.LOAD_DETAIL, data);
@@ -306,19 +306,21 @@ const methods = {
                         }
             });
         },
-        load_keywords: function (siteId, languages) {
+        load_keywords: function (siteId) {
             let self = this;
             const edgeType = "Term";
             let dataStore = this.flux.stores.AdminStore.dataStore;
             if (!dataStore.loading) {
-                SERVICES.fetchEdges(siteId,languages, edgeType, (result,error) => {   
-                    if(result){            
-                        let action = false;
-                        self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {result, action});
-                    }
-                    else{
-                        self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
-                    }
+                SERVICES.fetchEdges(siteId, edgeType, (error, response, body) => {
+                        if (!error && response.statusCode === 200) {
+                            let response = body.data.terms.edges;
+                            
+                            let action = false;
+                            self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
+                        }else{
+                            let error = 'Error, could not load keywords for admin page';
+                            self.dispatch(constants.ADMIN.LOAD_FAIL, { error });
+                        }
                 })
             }
         },

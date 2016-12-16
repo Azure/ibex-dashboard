@@ -82,7 +82,8 @@ export const HeatMap = React.createClass({
 
 		  info.update = props => {
             let selectionType = this.state.categoryType;
-            let mainSearchEntity = this.state.categoryValue["name_"+this.state.language];
+            let selectedLanguage = this.state.language;
+            let mainSearchEntity = this.state.categoryValue[`name_${selectedLanguage}`];
             let numberOfDisplayedTerms = 0;
             let filters = 0;
             let maxTerms = 4;
@@ -103,7 +104,7 @@ export const HeatMap = React.createClass({
                          filters++;
                          infoBoxInnerHtml += `${numberOfDisplayedTerms > 1 ? '<span class="filterSeperation">+</span>' : ''}
                                               <span class="label filterLabel">
-                                                ${term}
+                                                ${value[`name_${selectedLanguage}`]}
                                               </span>`;
                     }
             }
@@ -339,7 +340,7 @@ export const HeatMap = React.createClass({
       this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
       this.sentimentIndicatorGraph.dataProvider[0].bullet = weightedSentiment;
       this.sentimentIndicatorGraph.validateData();
-
+            
       if(filters){
           filters.forEach(edge => {
              let enableFilter = self.edgeSelected(edge.name, edge.type);
@@ -350,7 +351,6 @@ export const HeatMap = React.createClass({
           });
       }
       
-
       this.viewPortChanged = false;
       this.status = 'loaded';
       //sort the associated terms by mention count.

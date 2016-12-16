@@ -6,9 +6,7 @@ import {SERVICES} from '../../services/services';
 export default class Facebook extends React.Component {
 
     _loadDetail(id){
-        let fields = ["messageid", "sentence", "edges", "createdtime", "sentiment", "language", "source"];
-        let additionalVars = {}; // NB: need to figure out how to pass langCode dynamically? eg. {"langCode": "ar"};
-        SERVICES.FetchMessageDetail(this.props.siteKey, id, ["facebook-messages"], fields, additionalVars, (error, response, body) => {
+        SERVICES.FetchMessageDetail(this.props.siteKey, id, ["facebook-messages", "facebook-comments"], [], (error, response, body) => {
             if (error || response.statusCode !== 200 || !body.data || !body.data.event ) {
                 console.error("Failed to fetch details for id:", id, error);
                 return;
@@ -37,12 +35,23 @@ export default class Facebook extends React.Component {
         const dateText = getHumanDateFromNow(this.state.properties.createdtime);
         const sentiment = this.state.properties.sentiment;
         const sentimentStyle = getSentimentStyle(sentiment);
+        const link = this.state.properties.properties.link;
+        const tags = this.state.properties.edges || [];
         const sentimentDescription = getSentimentDescription(sentiment);
         return (
             <div className="facebook">
+                {
+                    link && link !== "" ? <p className="drop"><a href={link} target="_blank">Read Original</a></p> : undefined 
+                }
                 <p className="date">{dateText}</p>
                 <p className="title">{text}</p>
                 <p className="sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
+                <p className="subheading">Tags</p>
+                <ul className="drop">
+                  {tags && tags.map(tag => {
+                    return <li key={tag}><span className="label label-primary">{tag}</span></li>
+                  },this)}
+                </ul>
             </div>
         );
     }

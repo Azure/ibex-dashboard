@@ -43,6 +43,32 @@ const twitterFragment = `fragment FortisTwitterAcctView on TwitterAccountCollect
                             }
                         }`;
 
+const siteSettingsFragment = `fragment FortisSiteDefinitionView on SiteCollection {
+                            sites {
+                                name
+                                properties {
+                                    targetBbox
+                                    defaultZoomLevel
+                                    logo
+                                    title
+                                    fbToken
+                                    mapzenApiKey
+                                    defaultLocation
+                                    storageConnectionString
+                                    featuresConnectionString
+                                    supportedLanguages
+                                }
+                            }
+                        }`;
+
+const edgeListFragment = `fragment FortisDashboardView on EdgeList {
+                        runTime
+                        edges {
+                            name
+                            mentions
+                        }
+                      }`;
+
 export const SERVICES = {
     getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback) {
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
@@ -63,16 +89,7 @@ export const SERVICES = {
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
         let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
         let additionalTerms = selectedTerm ? [selectedTerm] : [];
-
-        let fragment = `fragment FortisDashboardView on EdgeList {
-                        runTime
-                        edges {
-                            name
-                            mentions
-                        }
-                      }`;
-
-        let query = `  ${fragment}
+        let query = `  ${edgeListFragment}
                       query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!, $sourceFilter: [String]) {
                         whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan, sourceFilter: $sourceFilter) {
                             ...FortisDashboardView
@@ -93,32 +110,11 @@ export const SERVICES = {
     },
 
     fetchEdges(site, edgeType, callback){
-      const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
-                                        runTime
-                                        edges {
-                                            name,
-                                            name_ar,
-                                            type
-                                            coordinates
-                                            population
-                                        }
-                                    }`;
-
-        const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
-                                    runTime
-                                    edges {
-                                        name,
-                                        name_ar,
-                                        type
-                                        RowKey
-                                    }
-                                }`;
-
-     const locationsQuery = `locations: locations(site: $site) {
+        const locationsQuery = `locations: locations(site: $site) {
                                 ...FortisDashboardLocationEdges
                             }`;
 
-     const termsQuery = `terms: terms(site: $site) {
+        const termsQuery = `terms: terms(site: $site) {
                                 ...FortisDashboardTermEdges
                          }`;
 
@@ -128,32 +124,22 @@ export const SERVICES = {
         const queries = `${edgeType === "All" || edgeType === "Location" ? locationsQuery : ``}
                       ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
 
-      let query = `  ${fragments}
+        const query = `  ${fragments}
                       query FetchAllEdge($site: String!) {
                             ${queries}
                         }`;
 
-      let variables = {site};
-      let host = process.env.REACT_APP_SERVICE_HOST;
-      let POST = {
-            url : `${host}/api/edges`,
-            method : "POST",
-            json: true,
-            withCredentials: false,
-            body: { query, variables }
-        };
+        const variables = {site};
+        const host = process.env.REACT_APP_SERVICE_HOST;
+        const POST = {
+                url : `${host}/api/edges`,
+                method : "POST",
+                json: true,
+                withCredentials: false,
+                body: { query, variables }
+            };
 
         request(POST, callback);
-
-        // request(POST, (error, response, body) => {
-        //     if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
-        //         callback(body.data);
-        //     }
-        //     else {
-        //         callback (undefined, error || 'Fetch edges request failed: ' + JSON.stringify(response));
-        //     }
-        // });
-         
   },
 
 
@@ -274,29 +260,14 @@ export const SERVICES = {
     },
 
     getSiteDefintion(siteId, retrieveSiteList, callback) {
-        let fragment = `fragment FortisSiteDefinitionView on SiteCollection {
-                            sites {
-                                name
-                                properties {
-                                    targetBbox
-                                    defaultZoomLevel
-                                    logo
-                                    title
-                                    fbToken
-                                    defaultLocation
-                                    storageConnectionString
-                                    featuresConnectionString
-                                    supportedLanguages
-                                }
-                            }
-                        }
+        const fragment = `${siteSettingsFragment}
                         ${retrieveSiteList ? `fragment FortisSitesListView on SiteCollection {
                             sites {
                                 name
                             }
                         }`: ``}`;
 
-        let query = `  ${fragment}
+        const query = `  ${fragment}
                         query Sites($siteId: String) {
                             siteDefinition: sites(siteId: $siteId) {
                                 ...FortisSiteDefinitionView
@@ -306,11 +277,9 @@ export const SERVICES = {
                             }`: ``}
                         }`;
 
-        let variables = { siteId };
-
-        console.log('getSiteDefintion called');
-        let host = process.env.REACT_APP_SERVICE_HOST
-        var POST = {
+        const variables = { siteId };
+        const host = process.env.REACT_APP_SERVICE_HOST
+        const POST = {
             url: `${host}/api/settings`,
             method: "POST",
             json: true,
@@ -496,24 +465,38 @@ export const SERVICES = {
         return Rx.DOM.getJSON(url);
     },
 
-    FetchMessageDetail: function(site, messageId, dataSources, fields, additionalVars, callback) {
-        let properties = fields.join(' ');
-        let fragmentView = `fragment FortisDashboardView on Feature { 
-                                type 
-                                coordinates 
-                                properties { 
-                                    ${properties}
-                                } 
-                            }`;
-         let query = `  ${fragmentView} 
+    FetchMessageDetail: function(site, messageId, dataSources, sourcePropeties, callback) {
+        const properties = sourcePropeties.join(' ');
+        const messageDetailsFragment = `fragment FortisDashboardView on Feature {
+                        coordinates
+                        properties {
+                            edges
+                            messageid
+                            createdtime
+                            sentiment
+                            sentence
+                            language
+                            source
+                            fullText
+                            properties {
+                                title
+                                link
+                                originalSources
+                                ${properties}
+                            }
+                        }
+                    }`;
+
+         const query = `  ${messageDetailsFragment} 
                         query FetchEvent($site: String!, $messageId: String!, $dataSources: [String]!, $langCode: String) { 
                             event(site: $site, messageId: $messageId, dataSources: $dataSources, langCode: $langCode) {
                                 ...FortisDashboardView 
                             }
                         }`;
-         let variables = { site, messageId, dataSources, ...additionalVars };
-         let host = process.env.REACT_APP_SERVICE_HOST;
-         var POST = {
+
+         const variables = { site, messageId, dataSources };
+         const host = process.env.REACT_APP_SERVICE_HOST;
+         const POST = {
                 url: `${host}/api/Messages`,
                 method: "POST",
                 json: true,
