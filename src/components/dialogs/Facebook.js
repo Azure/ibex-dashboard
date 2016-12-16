@@ -6,7 +6,7 @@ import {SERVICES} from '../../services/services';
 export default class Facebook extends React.Component {
 
     _loadDetail(id){
-        let fields = ["messageid", "sentence", "edges", "createdtime", "sentiment", "orig_language", "source"];
+        let fields = ["messageid", "sentence", "edges", "createdtime", "sentiment", "language", "source"];
         let additionalVars = {}; // NB: need to figure out how to pass langCode dynamically? eg. {"langCode": "ar"};
         SERVICES.FetchMessageDetail(this.props.siteKey, id, ["facebook-messages"], fields, additionalVars, (error, response, body) => {
             if (error || response.statusCode !== 200 || !body.data || !body.data.event ) {

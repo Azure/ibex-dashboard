@@ -257,7 +257,8 @@ export const ActivityFeed = React.createClass({
                         edgesByLanguages={self.state.allEdges}  
                         language={self.props.language}
                         pageLanguage={element.props.pageLanguage}
-                        translate={self.translateEvent} />;
+                        translate={self.translateEvent}
+                        handleOpenDialog={self.handleOpenDialog} />;
                 }
                 else {
                     return element;

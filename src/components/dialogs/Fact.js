@@ -11,7 +11,7 @@ export const Fact = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
   _loadFactDetail: function (id) {
-    let fields = ["messageid","sentence","edges","createdtime","sentiment","orig_language","source","fullText"];
+    let fields = ["messageid","sentence","edges","createdtime","sentiment","language","source","fullText"];
     this.getFlux().actions.DASHBOARD.loadDetail(this.props.siteKey, id, ["tadaweb"], fields);
   },
 
