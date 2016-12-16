@@ -64,13 +64,9 @@ export const PopularTermsChart = React.createClass({
 
     this.popularTermsChart.addListener("clickSlice", e => {
             if(e.dataItem.dataContext){
-                let entity = {
-                    "type": "Term",
-                    "name": e.dataItem.dataContext['name_'+this.props.language],
-                };
-                self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
+                self.getFlux().actions.DASHBOARD.changeSearchFilter(e.dataItem.dataContext, this.props.siteKey);
             }
-        });
+    });
  },
 
  refreshChart: function(summaryTerms){

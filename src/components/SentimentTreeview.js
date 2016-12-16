@@ -10,7 +10,8 @@ import numeralLibs from 'numeral';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       parentTermsName = "Term Filters",
-      StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
+      StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
+      DEFAULT_LANGUAGE = "en";
 
 const styles = {
   subHeader: {
@@ -268,7 +269,7 @@ export const SentimentTreeview = React.createClass({
   },
 
   filterNode(filteredNode){
-       let filters = [filteredNode.name];
+       let filters = [filteredNode[`name_${DEFAULT_LANGUAGE}`]];
        this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
   },
 
