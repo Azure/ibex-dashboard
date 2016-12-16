@@ -7,6 +7,7 @@ import moment from 'moment';
 import Infinite from 'react-infinite';
 import CircularProgress from 'material-ui/CircularProgress';
 import Highlighter from 'react-highlight-words';
+import DialogBox from './DialogBox';
 
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
@@ -88,13 +89,13 @@ const FortisEvent = React.createClass({
     },
     innerJoin(arr1, arr2){
         let out = new Set();
-        
+
         arr1.forEach(item=>{
             if(arr2.indexOf(item) > -1){
                 out.add(item);
             }
         });
-        
+
         return Array.from(out);
     },
     render: function() {
@@ -107,18 +108,23 @@ const FortisEvent = React.createClass({
         });
 
         let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
+        let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
+        let content = this.props;
 
         let searchWordsTranslated = searchWords.map(term => {
             return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`];
         });
 
-        let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
         return <div className="infinite-list-item" style={
                         {
                             height: this.props.height,
                             lineHeight: this.props.lineHeight
                         }
-                    }>             
+                    }            
+                    onClick={() => {
+                            this.props.handleOpenDialog(content)
+                        }
+                    }>
             <h6 style={styles.listItemHeader}>
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
@@ -134,10 +140,10 @@ const FortisEvent = React.createClass({
         </div>;
     }
 });
-      
+
 export const ActivityFeed = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
-   
+
   getStateFromFlux: function() {
     return this.getFlux().store("DataStore").getState();
   },
@@ -154,9 +160,9 @@ export const ActivityFeed = React.createClass({
 
   handleInfiniteLoad: function() {
         var self = this;
-        
+
         //if the prevbiosuly loaded enumber of elements is less than the increment count
-        //then we reached the end of the list. 
+        //then we reached the end of the list.
         if(this.state.previousElementLength < OFFSET_INCREMENT){
             this.setState({
                 isInfiniteLoading: false
@@ -166,14 +172,14 @@ export const ActivityFeed = React.createClass({
                 isInfiniteLoading: true
             });
             setTimeout(() => {
-                const params = {...self.props, elementStartList: self.state.elements, offset: self.state.offset, filteredSource: this.state.filteredSource}; 
+                const params = {...self.props, elementStartList: self.state.elements, offset: self.state.offset, filteredSource: this.state.filteredSource};
                 self.processNewsFeed(params);
             }, INFINITE_LOAD_DELAY_MS);
         }
   },
 
   fetchSentences: function(requestPayload, callback){
-      let {categoryValue, timespanType, searchValue, limit, offset, edges, siteKey, 
+      let {categoryValue, timespanType, searchValue, limit, offset, edges, siteKey,
            categoryType, filteredSource, bbox, datetimeSelection} = requestPayload;
       let location = [];
 
@@ -181,6 +187,7 @@ export const ActivityFeed = React.createClass({
           categoryValue = undefined;
           location = this.state.selectedLocationCoordinates;
       }
+
       SERVICES.FetchMessageSentences(siteKey, bbox, datetimeSelection, timespanType, 
                                      limit, offset, edges, DEFAULT_LANGUAGE, Actions.DataSources(filteredSource), 
                                      categoryValue?categoryValue.name.toLowerCase():categoryValue, searchValue, location, callback);
@@ -193,7 +200,7 @@ export const ActivityFeed = React.createClass({
                 tabs.push(<li key={source} role="presentation" className={source === self.state.filteredSource ? activeHeaderClass : inactiveClass}><a onClick={self.sourceOnClickHandler.bind(self, source)}><i style={iconStyle} className={`${value.icon} fa-2x`}></i>{value.label}</a></li>)
         }
     }else{
-        let tabSchema = Actions.constants.DATA_SOURCES.get(this.state.filteredSource); 
+        let tabSchema = Actions.constants.DATA_SOURCES.get(this.state.filteredSource);
         tabs.push(<li key={this.state.filteredSource} role="presentation" className={activeHeaderClass}><a onClick={self.sourceOnClickHandler.bind(self, this.state.filteredSource)}><i style={iconStyle} className={`${tabSchema.icon} fa-2x`}></i>{tabSchema.label}</a></li>)
     }
 
@@ -213,7 +220,7 @@ export const ActivityFeed = React.createClass({
   },
 
   componentWillReceiveProps: function(nextProps){
-      if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") 
+      if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection")
        ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")
        ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")
        ||  this.hasChanged(nextProps, "language") ){
@@ -250,7 +257,8 @@ export const ActivityFeed = React.createClass({
                         edgesByLanguages={self.state.allEdges}  
                         language={self.props.language}
                         pageLanguage={element.props.pageLanguage}
-                        translate={self.translateEvent} />;
+                        translate={self.translateEvent}
+                        handleOpenDialog={self.handleOpenDialog} />;
                 }
                 else {
                     return element;
@@ -271,14 +279,14 @@ export const ActivityFeed = React.createClass({
         let self = this;
         let nextOffset = requestPayload.start + OFFSET_INCREMENT;
 
-        this.fetchSentences(requestPayload, 
+        this.fetchSentences(requestPayload,
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
                     let graphQLResponse = body.data[Object.keys(body.data)[0]];
                     if(graphQLResponse && graphQLResponse.features && Array.isArray(graphQLResponse.features)){
                         graphQLResponse.features.forEach(feature => {
                             if(feature.properties.sentence && feature.properties.sentence.length > 2){
-                                elements.push(<FortisEvent key={feature.properties.messageid} 
+                                elements.push(<FortisEvent key={feature.properties.messageid}
                                                         id={feature.properties.messageid}
                                                         sentence={feature.properties.sentence}
                                                         source={feature.properties.source}
@@ -289,9 +297,10 @@ export const ActivityFeed = React.createClass({
                                                         searchFilter={requestPayload.searchValue}
                                                         mainSearchTerm={this.props.categoryValue.name} 
                                                         language={feature.properties.language}  
-                                                        edgesByLanguages={self.state.allEdges}   
+                                                        edgesByLanguages={this.state.allEdges}   
                                                         pageLanguage={this.props.language}
-                                                        translate={this.translateEvent}/>)                               
+                                                        translate={this.translateEvent}
+                                                        handleOpenDialog={this.handleOpenDialog} />)
                             }
                         });
                         elements = requestPayload.elementStartList.concat(elements);
@@ -299,7 +308,7 @@ export const ActivityFeed = React.createClass({
                 }else{
                     console.error(`[${error}] occured while processing message request`);
                 }
-                
+
                 self.setState({
                      offset: nextOffset,
                      isInfiniteLoading: false,
@@ -315,12 +324,12 @@ export const ActivityFeed = React.createClass({
       this.setState({
           isInfiniteLoading: true
       });
-      
+
       if(params.bbox && params.edges && params.datetimeSelection && params.timespanType){
           this.buildElements(params);
       }
   },
-  
+
   elementInfiniteLoad: function() {
         return <div className="infinite-list-item">
             Loading... <CircularProgress />
@@ -339,7 +348,7 @@ export const ActivityFeed = React.createClass({
       event.preventDefault();
       this.processNewsFeed(params);
   },
-  
+
   render() {
     let iconStyle = {
         color: "#337ab7"
@@ -369,7 +378,12 @@ export const ActivityFeed = React.createClass({
                        </span>
                   </div>
             </div>
+            <DialogBox ref="dialogBox" {...this.props}></DialogBox>
       </div>
      );
+  },
+
+  handleOpenDialog(item) {
+      this.refs.dialogBox.open(item);
   }
 });

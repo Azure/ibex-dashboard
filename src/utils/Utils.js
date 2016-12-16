@@ -66,10 +66,14 @@ export function getEnvPropValue(siteKey, propValueJSONStr){
      return propValue;
  }
 
-// extracts date string using ISO 8601 format
+// converts date string using date format
 export function getHumanDate(dateString, dateFormat="YYYY-MM-DD", newDateFormat="ddd MMM Do YY") {
-     var ymd = dateString.substr(0,10);
-     return moment(ymd, dateFormat).format(newDateFormat);
+     var dateStr = (dateFormat === "YYYY-MM-DD") ? dateString.substr(0,10) : dateString ;
+     return moment(dateStr, dateFormat).format(newDateFormat);
+}
+
+export function getHumanDateFromNow(dateString, dateFormat="ddd MMM DD YYYY HH:mm:ss zZZ") {
+    return moment(dateString, dateFormat).fromNow();
 }
 
 // array helpers
@@ -104,4 +108,21 @@ export function getCheckedLabel(e) {
     let label = e.target.getAttribute('data-reactid');
     let matches = label.match(/\$([a-zA-Z0-9\s\-_]+)/);
     return matches
+}
+
+// Sentiment descriptions for detail dialog box
+export function getSentimentDescription(float){
+	if (float < 0.3) {
+        return "Negative";
+    }
+    if (float < 0.5) {
+        return "Moderately negative";
+    }
+    if (float > 0.7) {
+        return "Positive";
+    }
+    if (float > 0.5) {
+        return "Moderately positive";
+    }
+    return "Neutral";
 }

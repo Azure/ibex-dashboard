@@ -62,7 +62,9 @@ const constants = {
                CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS",
-               CHANGE_LANGUAGE: "DASHBOARD:CHANGE_LANGUAGE"
+               CHANGE_LANGUAGE: "DASHBOARD:CHANGE_LANGUAGE",
+               LOAD_DETAIL: "LOAD:DETAIL",
+               LOAD_DETAIL_ERROR: "LOAD:DETAIL_ERROR"
            },
            FACTS : {
                LOAD_FACTS_SUCCESS: "LOAD:FACTS_SUCCESS",
@@ -154,6 +156,18 @@ const methods = {
         },
         changeDate(siteKey, datetimeSelection, timespanType){
            this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
+        },
+        loadDetail(siteKey, messageId, dataSources, fields=["messageid","sentence","edges","createdtime","sentiment","orig_language","source"]){
+            let self = this;
+            SERVICES.FetchMessageDetail(siteKey, messageId, dataSources, fields, {}, (error, response, body) => {
+                if (!error && response.statusCode === 200 && body.data) {
+                    const data = body.data;
+                    self.dispatch(constants.DASHBOARD.LOAD_DETAIL, data);
+                } else {
+                    console.error(`[${error}] occured while processing message request`);
+                    self.dispatch(constants.DASHBOARD.LOAD_DETAIL_ERROR, error);
+                }
+            });
         },
         changeLanguage(language){
            this.dispatch(constants.DASHBOARD.CHANGE_LANGUAGE, language);
