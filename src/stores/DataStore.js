@@ -87,7 +87,6 @@ export const DataStore = Fluxxor.createStore({
                 });
 
                 this.dataStore.settings = settings;
-                console.log(this.dataStore);
             }else{
                 console.error('Required data is not available');
             }
