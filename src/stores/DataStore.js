@@ -118,10 +118,9 @@ export const DataStore = Fluxxor.createStore({
     handleChangeSearchTerm(changedData){
         this.dataStore.associatedKeywords = new Map();
         this.dataStore.categoryValue = changedData.selectedEntity;
-        let edgeMap = this.dataStore.allEdges.get(this.dataStore.language);
-        let selectedName = (changedData.selectedEntity.name_en||changedData.selectedEntity.name).toLowerCase();
-        this.dataStore.categoryValue = edgeMap.get(selectedName);
-
+        let language = this.dataStore.language;
+        let edgeMap = this.dataStore.allEdges.get(language);
+        this.dataStore.categoryValue = edgeMap.get(changedData.selectedEntity[`name_${language}`]);
         this.dataStore.selectedLocationCoordinates = changedData.selectedEntity.coordinates || [];
         this.dataStore.categoryType = changedData.selectedEntity.type;
         this.dataStore.renderMap = true;

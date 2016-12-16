@@ -58,12 +58,7 @@ export const PopularLocationsChart = React.createClass({
 
     this.popularLocationsChart.addListener("clickSlice", e => {
         if(e.dataItem.dataContext){
-              let entity = {
-                  "type": "Location",
-                  "name": e.dataItem.dataContext['name_'+this.props.language],
-                  "coordinates": e.dataItem.dataContext.coordinates
-              };
-              self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
+              self.getFlux().actions.DASHBOARD.changeSearchFilter(e.dataItem.dataContext, this.props.siteKey);
         }
     });
  },
