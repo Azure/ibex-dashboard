@@ -165,11 +165,11 @@ export const SentimentTreeview = React.createClass({
   },
 
   componentWillReceiveProps(nextProps){
-      let treeData = this.createRelevantTermsTree(this.state.associatedKeywords);
+      let treeData = this.createRelevantTermsTree(this.state.associatedKeywords, nextProps.language);
       this.setState({treeData: treeData, originalTreeData: treeData})
   },
 
-  createRelevantTermsTree(termsMap){
+  createRelevantTermsTree(termsMap, lang){
         let rootItem = {
             name: parentTermsName,
             folderKey: 'associatedKeywords',
@@ -197,13 +197,12 @@ export const SentimentTreeview = React.createClass({
         let popularTermsTotal = 0, otherTotal = 0;
 
         for (var [term, value] of termsMap.entries()) {
-            let newEntry = {
-                    name: term,
+            let newEntry = Object.assign({}, value, {
+                    name: value["name_"+lang],
                     folderKey: term,
                     checked: value.enabled,
                     eventCount: value.mentions
-            };
-
+            });
             if(term !== "none" && itemCount++ < 5){
                 newEntry.parent = popularItemsRoot;
                 popularItemsRoot.children.push(newEntry);
@@ -306,12 +305,8 @@ export const SentimentTreeview = React.createClass({
 
   termSelected(node){
       if(!node.children){
-          let entity = {
-            "type": "Term",
-            "name": node.name
-          };
-
-          this.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
+          node['type']="Term";
+          this.getFlux().actions.DASHBOARD.changeSearchFilter(node, this.props.siteKey);
       }
   },
 
@@ -365,9 +360,11 @@ export const SentimentTreeview = React.createClass({
          <div className="panel panel-selector">
             <Subheader style={styles.subHeader}>Watchlist Terms</Subheader>
             <div style={styles.searchBox}>
-                <TypeaheadSearch data={this.state.categoryValue}
+                <TypeaheadSearch data={this.state.categoryValue["name_"+this.props.language]}
                                 type={this.state.categoryType}
-                                siteKey={this.props.siteKey} />
+                                siteKey={this.props.siteKey}
+                                language={this.state.language} 
+                                edges={this.state.allEdges}/>
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">

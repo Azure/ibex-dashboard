@@ -1,6 +1,5 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
-import {SERVICES} from '../services/services';
 import Autosuggest from 'react-autosuggest';
 import match from 'autosuggest-highlight/match';
 import parse from 'autosuggest-highlight/parse';
@@ -8,15 +7,24 @@ import '../styles/TypeaheadSearch.css';
 
 const FluxMixin = Fluxxor.FluxMixin(React);
 //const maxDefaultResult = 12;
-const ENGLISH_LANGUAGE = "en";
-const ALL_EDGE_TYPES = "All";
-const getSuggestionValue = suggestion => suggestion.name.trim();
-const getSuggestions = (value, defaultSuggestions) => {
+const getSuggestionValue = (suggestion, lang) => {return suggestion[lang === 'en'? 'name': 'name_'+lang].trim();}
+const getSuggestions = (value, edgeMap) => {
+
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
+  let filteredTerms = [];
 
-  return inputLength === 0 || defaultSuggestions.length === 0 ? [] 
-      : defaultSuggestions.filter(edge => edge.name.toLowerCase().indexOf(inputValue) > -1);
+  if(inputLength === 0){
+      return [];
+  } else{
+      for (let key of edgeMap.keys()) {
+          if(key.indexOf(inputValue) > -1){
+                filteredTerms.push(edgeMap.get(key));
+          }
+      }
+  }
+
+  return filteredTerms;
 };
 
 export const TypeaheadSearch = React.createClass({
@@ -30,33 +38,15 @@ export const TypeaheadSearch = React.createClass({
       }
   },
 
-  loadEdgesFromService(siteKey, languageCode, callback){
-    SERVICES.fetchEdges(siteKey, languageCode, ALL_EDGE_TYPES, (error, response, body) => {
-            if (!error && response.statusCode === 200) {
-                 callback(body.data.locations.edges.concat(body.data.terms.edges));
-            }else{
-                 throw new Error(`[${error}] occured while processing entity list request`);
-            }
-     });
-  },
-
-  componentDidMount(){
-      let siteKey = this.props.siteKey;
-      let self = this;
-      let searchCB = defaultResults => {
-                if(defaultResults && defaultResults.length > 0){
-                    self.setState({defaultResults});
-                }
-      };
-
-      this.loadEdgesFromService(siteKey, ENGLISH_LANGUAGE, searchCB);
-  },
-
   componentWillReceiveProps(nextProps) {
        const value = nextProps.data;
 
        if(value !== this.state.value){
            this.setState({value});
+       }
+
+       if(nextProps.edges !== this.state.defaultResults){
+          this.setState({edgeMap: this.props.edges.get(nextProps.language)});
        }
   },
 
@@ -73,12 +63,12 @@ export const TypeaheadSearch = React.createClass({
 
   onSuggestionsFetchRequested({ value }){
     this.setState({
-      suggestions: getSuggestions(value, this.state.defaultResults)
+      suggestions: getSuggestions(value, this.state.edgeMap)
     });
   },
   
   renderSuggestion(element, {query}) { 
-    const suggestionText = `${element.name}`;
+    const suggestionText = element[this.props.language === 'en'? 'name': 'name_'+this.props.language];
     const matches = match(suggestionText, query);
     const parts = parse(suggestionText, matches);
     const iconMap = new Map([["Location", "fa fa-map-marker fa-2x"], ["Term", "fa fa-tag fa-2x"]]);
@@ -131,7 +121,7 @@ export const TypeaheadSearch = React.createClass({
                                 onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
                                 onSuggestionsClearRequested={this.onSuggestionsClearRequested}                               
                                 renderSuggestion={this.renderSuggestion}
-                                getSuggestionValue={getSuggestionValue} />
+                                getSuggestionValue={(value)=>getSuggestionValue(value, this.props.language)} />
                                 : undefined
                   }
         </div>

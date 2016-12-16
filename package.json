@@ -31,6 +31,8 @@
     "fluxxor": "^1.7.3",
     "geotile": "^0.1.6",
     "leaflet": "^0.7.7",
+    "leaflet-area-select": "^0.2.8",
+    "leaflet-geocoder-mapzen": "^1.7.1",
     "leaflet.markercluster": "^0.5.0",
     "material-ui": "^0.16.4",
     "moment": "^2.11.2",

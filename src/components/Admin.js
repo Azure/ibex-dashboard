@@ -7,11 +7,12 @@ import {AdminSettings} from './AdminSettings';
 import {AdminWatchlist} from './AdminWatchlist';
 import {CustomEventsEditor} from './CustomEventsEditor';
 import {AdminTwitterAccounts} from './AdminTwitterAccounts';
+import {AdminLocations} from './AdminLocations';
 import '../styles/Admin.css'
 
 const FluxMixin = Fluxxor.FluxMixin(React),
     StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
-const SETTINGS_TAB = 0, WATCHLIST_TAB = 1, CUSTOM_EVENTS_TAB = 3, TWITTER_ACCOUNTS_TAB = 5;
+const SETTINGS_TAB = 0, WATCHLIST_TAB = 1, LOCATIONS_TAB = 2, CUSTOM_EVENTS_TAB = 3, TWITTER_ACCOUNTS_TAB = 5;
 const styles = {
     container: {
         panel: {
@@ -32,6 +33,10 @@ export const Admin = React.createClass({
         return{
             index: 0
         }
+    },
+
+    componentDidMount(){
+        this.getFlux().actions.ADMIN.load_localities(this.props.siteKey);
     },
 
     getStateFromFlux() {
@@ -87,11 +92,10 @@ export const Admin = React.createClass({
                                     <TabPanel>
                                         <h2>Monitored Locations</h2>
                                         <div className="adminTable">
-                                            <ReactTable
-                                                data={this.state.settings.localities}
-                                                columns={[{  header: 'Location Name', accessor: 'name' }, {  header: 'coordinates', accessor: 'coordinates' }]}
-                                                pageSize='10'
-                                                />
+                                            {
+                                               this.state.settings && this.state.settings.properties && this.state.locations && this.state.index === LOCATIONS_TAB ?
+                                                <AdminLocations {...this.props} rows={this.state.locations}/> : undefined
+                                            }
                                         </div>
                                     </TabPanel>
                                     <TabPanel>

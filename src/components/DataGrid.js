@@ -8,8 +8,25 @@ import 'react-data-grid-r15/dist/react-data-grid.css'
 import {guid} from '../utils/Utils.js';
 
 const Toolbar             = window.ReactDataGridPlugins.Toolbar;
+const Selectors           = window.ReactDataGridPlugins.Data.Selectors;
 //const AutoCompleteEditor  = window.ReactDataGridPlugins.Editors.AutoComplete;
 const FluxMixin = Fluxxor.FluxMixin(React), StoreWatchMixin = Fluxxor.StoreWatchMixin("AdminStore");
+const RowRenderer = React.createClass({
+    getRowStyle: function() {
+        return {
+            color: this.getRowBackground()
+        }
+    },
+    getRowBackground: function() {
+        const rowKeyColumn = this.props.rowKey;
+        const modifiedRows = this.props.modifiedRows;
+
+        return modifiedRows.has(this.props.row[rowKeyColumn]) ? 'green' : '#000'
+    },
+    render: function() {
+        return (<div style={this.getRowStyle()}><ReactDataGrid.Row ref="row" {...this.props}/></div>)
+    }
+});
 
 const styles = {
     rowSelectionLabel: {
@@ -27,6 +44,7 @@ export const DataGrid = React.createClass({
             rows :[],
             filters : {},
             localAction: false,
+            modifiedRows: new Set(),
             selectedIndexes: [],
             selectedRows: []
         }
@@ -39,19 +57,13 @@ export const DataGrid = React.createClass({
       this.setState({rows: this.props.rows});
   },
   componentWillReceiveProps(nextProps){
-      this.setState({rows: nextProps.rows, localAction: false});
+      this.setState({rows: nextProps.rows, localAction: nextProps.localAction || false});
   },
   onCellSelected(coordinates) {
         this.setState({selectedRow: coordinates.rowIdx, selectedColumn: coordinates.idx - 1});
   },
   getSize() {
-      return this.state.rows.length;
-  },
-  getRowAt(index){
-      if (index < 0 || index > this.getSize()){
-        return undefined;
-      }
-      return this.state.rows[index];
+      return Selectors.getRows(this.state).length
   },
   handleAddRow(e){
       let newRow = {}, rows = this.state.rows;
@@ -64,18 +76,19 @@ export const DataGrid = React.createClass({
       this.setState({rows});
   },
   handleGridRowsUpdated(updatedRowData) {
-      var rows = this.state.rows;
-
+      let rows = this.state.rows;
+      let editedRowKeys = this.state.modifiedRows;
       for (var i = updatedRowData.fromRow; i <= updatedRowData.toRow; i++) {
         var rowToUpdate = rows[i];
+        editedRowKeys.add(rowToUpdate[this.props.rowKey]);
         var updatedRow = Object.assign({}, rowToUpdate, updatedRowData.updated);
         rows[i] = updatedRow;
       }
 
       this.setState({rows: rows, localAction: 'changed'});
   },
-  rowGetter(i){
-     return this.state.rows[i];
+  rowGetter(rowIdx){
+     return Selectors.getRows(this.state)[rowIdx];
   },
   onClearFilters(){
     this.setState({filters: {} });
@@ -87,6 +100,7 @@ export const DataGrid = React.createClass({
           return row;
       });
 
+      this.setState({filters: {}});
       this.props.handleRemove(selectedRows);
   },
   handleGridSort(sortColumn, sortDirection) {
@@ -146,7 +160,7 @@ export const DataGrid = React.createClass({
           alert("Not allowed to paste into the RowId column.");
       }
     },
-    requiredDataCheck(row){
+    validDataRow(row, uniqueDataMap){
         let validRow = true;
 
         this.props.columns.forEach(column => {
@@ -154,26 +168,37 @@ export const DataGrid = React.createClass({
                 alert(`required column [${column.key}] is missing values.`);
 
                 validRow = false;
+            }else if(validRow && column.compositeKey){
+                let valueSet = uniqueDataMap.get(column.key);
+
+                if(!valueSet){
+                    valueSet = new Set();
+                }
+
+                if(valueSet.has(row[column.key])){
+                    alert(`Duplicate unique key error for column [${column.name}] item [${row[column.key]}] rowId: [${row[this.props.rowKey]}].`);
+
+                    validRow = false;
+                }else{
+                    valueSet.add(row[column.key]);
+                    uniqueDataMap.set(column.key, valueSet);
+                }
             }
         });
 
         return validRow;
     },
     handleSave(){
-        let keySet = new Set();
+        let uniqueDataMap = new Map();
         let invalidData = false;
 
         this.state.rows.forEach(row => {
-            let key = row[this.props.uniqueKey].toLowerCase();
-            if(keySet.has(key)){
+            if(!this.validDataRow(row, uniqueDataMap)){
                 invalidData = true;
-                alert(`Duplicate unique key error for item [${key}]`);
-            }else if(!this.requiredDataCheck(row)){
-                invalidData = true;
-            }else{
-                keySet.add(key);
             }
         });
+
+        this.setState({localAction: "saving", filters: {}});
 
         if(!invalidData){
             this.props.handleSave(this.state.rows, this.state.columns);
@@ -184,15 +209,18 @@ export const DataGrid = React.createClass({
     },
     handleFilterChange(filter){
         let newFilters = Object.assign({}, this.state.filters);
-        let rows = this.state.rows;
-
+        
         if (filter.filterTerm) {
-            rows = rows.filter(row=>row[filter.column.key].indexOf(filter.filterTerm) > -1);
             newFilters[filter.column.key] = filter;
         } else {
             delete newFilters[filter.column.key];
         }
-        this.setState({filters: newFilters, rows: rows});
+
+        this.setState({filters: newFilters});
+    },
+    getValidFilterValues(columnId) {
+        let values = this.state.rows.map(r => r[columnId]);
+        return values.filter((item, i, a) => { return i === a.indexOf(item); });
     },
     render() {
         let rowText = this.state.selectedRows.length === 1 ? 'row' : 'rows';
@@ -201,8 +229,12 @@ export const DataGrid = React.createClass({
           <div>
             {
                 this.state.action || this.state.localAction ? 
-                       <button style={styles.actionButton} onClick={this.handleSave} type="button" className={this.state.action !== 'saved' ? `btn btn-primary btn-sm` : `btn btn-success btn-sm`}>
-                             <i className="fa fa-cloud-upload" aria-hidden="true"></i> {this.state.localAction === 'changed' ? "Upload Changes" : "Saved Changes"}
+                       <button style={styles.actionButton} 
+                                onClick={this.handleSave} 
+                                type="button" 
+                                className={this.state.action !== 'saved' || this.state.localAction === 'changed' ? `btn btn-primary btn-sm` : `btn btn-success btn-sm`}
+                                disabled={this.state.localAction === "saving"}>
+                             <i className="fa fa-cloud-upload" aria-hidden="true"></i> {this.state.localAction === 'changed' ? "Upload Changes" : this.state.localAction === 'saving' ? "Saving..." : "Saved Changes"}
                        </button>
                    : undefined
             }
@@ -215,17 +247,20 @@ export const DataGrid = React.createClass({
             }
             <span style={styles.rowSelectionLabel}>{this.state.selectedRows.length} {rowText} selected</span>
             <ReactDataGrid
-                  ref="grid"
                   onGridSort={this.handleGridSort}
                   enableCellSelect={true}
                   onCellCopyPaste={null}
                   onCellSelected={this.onCellSelected}
                   rowGetter={this.rowGetter}
+                  rowRenderer={<RowRenderer rowKey={this.props.rowKey} 
+                                            modifiedRows={this.state.modifiedRows}/>}
                   onAddFilter={this.handleFilterChange}
                   onGridRowsUpdated={this.handleGridRowsUpdated}
                   toolbar={<Toolbar enableFilter={true} 
                   onAddRow={this.handleAddRow}/>}
+                  getValidFilterValues={this.getValidFilterValues}
                   rowsCount={this.getSize()}
+                  onClearFilters={this.onClearFilters}
                   enableRowSelect='multi'
                   onRowSelect={this.onRowSelect}
                   {...this.props} />
