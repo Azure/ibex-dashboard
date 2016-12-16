@@ -23,6 +23,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 const PARELLEL_TILE_LAYER_RENDER_LIMIT = 200;
 const SENTIMENT_FIELD = 'neg_sentiment';
 const defaultClusterSize = 40;
+const DEFAULT_LANGUAGE = 'en';
 
 export const HeatMap = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
@@ -81,7 +82,7 @@ export const HeatMap = React.createClass({
 
 		  info.update = props => {
             let selectionType = this.state.categoryType;
-            let mainSearchEntity = this.state.categoryValue;
+            let mainSearchEntity = this.state.categoryValue["name_"+this.state.language];
             let numberOfDisplayedTerms = 0;
             let filters = 0;
             let maxTerms = 4;
@@ -138,7 +139,7 @@ export const HeatMap = React.createClass({
           return "xl";
       }
   },
-  
+
   componentDidMount(){
     if(this.state.settings.properties.defaultLocation && this.state.settings.properties.defaultZoomLevel){
         const defaultLocation = this.state.settings.properties.defaultLocation;
@@ -160,7 +161,7 @@ export const HeatMap = React.createClass({
             accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
         }).addTo(this.map);
         
-        this.map.selectedTerm = this.state.categoryValue;
+        this.map.selectedTerm = this.state.categoryValue["name_"+this.props.language];
         this.map.datetimeSelection = this.state.datetimeSelection;
         this.map.dataSource = this.state.dataSource;
         this.map.on('moveend',() => {
@@ -291,13 +292,13 @@ export const HeatMap = React.createClass({
    },
 
   mapMarkerFlushCheck(){
-      if(this.map.selectedTerm !== this.state.categoryValue || 
+      if(this.map.selectedTerm !== this.state.categoryValue["name_"+this.props.language] || 
          this.map.datetimeSelection !== this.state.datetimeSelection || 
          this.map.dataSource !== this.state.dataSource || 
          this.state.renderMap || this.viewportChanged){
 
           this.map.datetimeSelection =  this.state.datetimeSelection;
-          this.map.selectedTerm = this.state.categoryValue;
+          this.map.selectedTerm = this.state.categoryValue["name_"+this.props.language];
           this.map.dataSource = this.state.dataSource;
 
           this.clearMap();
@@ -342,7 +343,10 @@ export const HeatMap = React.createClass({
       if(filters){
           filters.forEach(edge => {
              let enableFilter = self.edgeSelected(edge.name, edge.type);
-             aggregatedAssociatedTermMentions.set(edge.name.toLowerCase(), {"mentions": edge.mentionCount, "enabled": enableFilter});
+             let value = {"mentions": edge.mentionCount, "enabled": enableFilter}
+             let languageEdgeMap = self.state.allEdges.get(DEFAULT_LANGUAGE);
+             value = Object.assign({}, value, languageEdgeMap.get(edge.name.toLowerCase()));
+             aggregatedAssociatedTermMentions.set(edge.name.toLowerCase(), value);
           });
       }
       
@@ -376,7 +380,7 @@ export const HeatMap = React.createClass({
       } 
   },
   
-  updateHeatmap() {    
+  updateHeatmap() {   
     if(!this.dataStoreValidated()){
         return false;
     }
@@ -394,14 +398,14 @@ export const HeatMap = React.createClass({
     let self = this;
     this.weightedMeanValues = [];
 
-    SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue, this.state.datetimeSelection, 
+    SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue.name, this.state.datetimeSelection, 
                              bbox, this.filterSelectedAssociatedTerms(), [this.state.selectedLocationCoordinates], Actions.DataSources(this.state.dataSource), 
             (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     self.createLayers(body, bbox)
                 }else{
                     this.status = 'failed';
-                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue}, ${this.state.datetimeSelection}, ${bbox}]`);
+                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue.name}, ${this.state.datetimeSelection}, ${bbox}]`);
                 }
             });
   },

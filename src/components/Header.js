@@ -1,13 +1,32 @@
 import React from 'react';
 import '../styles/Header.css';
 import { Link } from 'react-router';
+import Fluxxor from 'fluxxor';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
 
-export const Header = React.createClass({  
+const FluxMixin = Fluxxor.FluxMixin(React),
+      StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore");
+
+export const Header = React.createClass({
+  mixins: [FluxMixin, StoreWatchMixin],
+  
+  getStateFromFlux() {
+    return this.getFlux().store("DataStore").getState();
+  },
+
+  componentWillReceiveProps(nextProps) {
+       this.setState(this.getStateFromFlux());
+  },
+
+  changeLanguage(event, index, value){
+      this.getFlux().actions.DASHBOARD.changeLanguage(value);
+  },
+
   render() {
     const title = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.title : "";
     const nav = (this.props.siteKey==="dengue") ? this.renderNav() : false ;
     const logo = this.props.siteSettings && this.props.siteSettings.properties ? this.props.siteSettings.properties.logo : false;
-
     return (
       <nav className="navbar navbar-trans" role="navigation">
           <div>
@@ -30,15 +49,17 @@ export const Header = React.createClass({
                   <ul className="nav navbar-nav navbar-left">
                       {nav}
                   </ul>
-                  <ul className="nav navbar-nav navbar-right">
-                      <li className="userProfile">
-                        <span className="fa-stack fa-lg">
-                          <i className="fa fa-square fa-stack-2x"></i>
-                          <i className="fa fa-stack-1x fa-inverse" style={{color: '#222931', fontWeight: '600', fontFamily: 'Helvetica Neue,Helvetica,Arial,sans-serif'}}>
-                            
-                          </i>
-                        </span>
-                      </li>
+                 <ul className="nav navbar-nav navbar-right">
+                     <SelectField underlineStyle={{ borderColor: '#337ab7', borderBottom: 'solid 3px' }}
+                                labelStyle={{ fontWeight: 600, color: '#2ebd59' }}
+                                value={this.state.language}
+                                autoWidth={true}
+                                style={{width:'45px'}}
+                                onChange={this.changeLanguage}>
+                                {this.props.siteSettings.properties.supportedLanguages.map(function (lang) {
+                                        return <MenuItem key={lang} value={lang} primaryText={lang} />                                
+                                })}
+                    </SelectField>
                   </ul>
               </div>
           </div>

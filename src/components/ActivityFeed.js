@@ -50,6 +50,11 @@ const styles ={
     highlight: {
         backgroundColor: '#ffd54f',
         fontWeight: '600'
+    },
+    translateButton: {
+        height: "20px",
+        marginLeft: "3px",
+        lineHeight: '1'
     }
 };
 
@@ -95,23 +100,34 @@ const FortisEvent = React.createClass({
     render: function() {
         let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
         let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
-        let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
-        let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
+        const languageEdgeMap = this.props.edgesByLanguages.get(DEFAULT_LANGUAGE);
+        
+        let commonTermsFromFilterTranslated = commonTermsFromFilter.map(term =>{
+            return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`]
+        });
 
+        let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
+
+        let searchWordsTranslated = searchWords.map(term => {
+            return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`];
+        });
+
+        let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
         return <div className="infinite-list-item" style={
                         {
                             height: this.props.height,
                             lineHeight: this.props.lineHeight
                         }
-                    }>
+                    }>             
             <h6 style={styles.listItemHeader}>
                 <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
                 {this.props.postedTime}
-                {commonTermsFromFilter.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
+                {commonTermsFromFilterTranslated.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
+                {this.props.pageLanguage!==this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={ev => {ev.stopPropagation(); this.props.translate(this.props);}}>Translate</button> : ''}
             </h6>
             <div>
                 <Highlighter
-                    searchWords={searchWords}
+                    searchWords={searchWordsTranslated}
                     highlightStyle={styles.highlight}
                     textToHighlight={this.props.sentence} />
             </div>
@@ -165,10 +181,9 @@ export const ActivityFeed = React.createClass({
           categoryValue = undefined;
           location = this.state.selectedLocationCoordinates;
       }
-      
       SERVICES.FetchMessageSentences(siteKey, bbox, datetimeSelection, timespanType, 
                                      limit, offset, edges, DEFAULT_LANGUAGE, Actions.DataSources(filteredSource), 
-                                     categoryValue, searchValue, location, callback);
+                                     categoryValue?categoryValue.name.toLowerCase():categoryValue, searchValue, location, callback);
   },
 
   renderDataSourceTabs: function(iconStyle){
@@ -200,11 +215,13 @@ export const ActivityFeed = React.createClass({
   componentWillReceiveProps: function(nextProps){
       if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection") 
        ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")
-       ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")){
+       ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")
+       ||  this.hasChanged(nextProps, "language") ){
 
           const params = {...nextProps, elementStartList: [], offset: 0, filteredSource: nextProps.dataSource};
 
           this.setState({filteredSource: params.filteredSource});
+
           this.processNewsFeed(params);
       }
   },
@@ -213,6 +230,41 @@ export const ActivityFeed = React.createClass({
       const params = {...this.props, elementStartList: [], offset: 0, filteredSource: this.props.dataSource};
       this.processNewsFeed(params);
   },
+
+  translateEvent(event){   
+    let self = this;
+    SERVICES.translateSentence(event.sentence, event.language, this.props.language, (translatedSentence, error) => {
+        if(translatedSentence){
+            let updatedElements = self.state.elements.map(element => {
+                if (element.key === event.id) {
+                    return <FortisEvent key={event.id}
+                        id={event.id}
+                        sentence={translatedSentence}
+                        source={element.props.source}
+                        postedTime={element.props.postedTime}
+                        sentiment={element.props.sentiment}
+                        edges={element.props.edges}
+                        filters={element.props.edges}
+                        searchFilter={element.props.searchFilter}
+                        mainSearchTerm={element.props.mainSearchTerm}
+                        edgesByLanguages={self.state.allEdges}  
+                        language={self.props.language}
+                        pageLanguage={element.props.pageLanguage}
+                        translate={self.translateEvent} />;
+                }
+                else {
+                    return element;
+                }
+            });
+            self.setState({
+                elements: updatedElements
+            });
+        }
+    else {
+        console.error(`[${error}] occured while translating sentense`);
+    }
+    });
+ },
 
   buildElements: function(requestPayload) {
         let elements = [];
@@ -235,10 +287,13 @@ export const ActivityFeed = React.createClass({
                                                         edges={feature.properties.edges}
                                                         filters={requestPayload.edges}
                                                         searchFilter={requestPayload.searchValue}
-                                                        mainSearchTerm={this.props.categoryValue} />)                               
+                                                        mainSearchTerm={this.props.categoryValue.name} 
+                                                        language={feature.properties.language}  
+                                                        edgesByLanguages={self.state.allEdges}   
+                                                        pageLanguage={this.props.language}
+                                                        translate={this.translateEvent}/>)                               
                             }
                         });
-
                         elements = requestPayload.elementStartList.concat(elements);
                     }
                 }else{

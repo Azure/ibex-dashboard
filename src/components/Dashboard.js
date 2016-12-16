@@ -76,7 +76,6 @@ export const Dashboard = React.createClass({
 
     return (
         <div>
-          <form>
             <div className="app-container">
               <div className="container-fluid">
                 <DataSelector {...this.props} />
@@ -86,22 +85,24 @@ export const Dashboard = React.createClass({
                        <PopularLocationsChart {...this.props} 
                              datetimeSelection={this.state.datetimeSelection}
                              timespanType={this.state.timespanType}
+                             language={this.state.language}
                              dataSource={this.state.dataSource} />
                     </div>
                     <div className="col-lg-2 summaryPieContainer">
                        <div id="popularTermsPieDiv" style={{width: '100%', height: '230px'}}></div>
                        <PopularTermsChart {...this.props} 
-                                          mainEdge={this.state.categoryValue}
+                                          mainEdge={this.state.categoryValue["name_"+this.props.language]}
                                           edgeType={this.state.categoryType}
                                           timespanType={this.state.timespanType}
                                           timespan={this.state.datetimeSelection}
+                                          language={this.state.language}
                                           dataSource={this.state.dataSource} />
                     </div>
                     <div className="col-lg-7 timeSeriesContainer">
                        <div id="graphdiv" style={{width: '100%', height: '230px', marginBottom: '0px', paddingBottom: '0px'}}></div>
                         { this.state.settings.properties ? 
                             <TimeSeriesGraph {...this.props}
-                                                mainEdge={this.state.categoryValue}
+                                                mainEdge={this.state.categoryValue["name_"+this.props.language]}
                                                 edgeType={this.state.categoryType}
                                                 timespanType={this.state.timespanType}
                                                 storageConnection={this.state.settings.properties.storageConnectionString}
@@ -114,7 +115,8 @@ export const Dashboard = React.createClass({
                 <div className="row">
                     <div className="col-md-3 termBrowserContainer">
                         <SentimentTreeview {...this.props} 
-                                           enabledTerms={this.FilterEnabledTerms()} />
+                                           enabledTerms={this.FilterEnabledTerms()}
+                                           language={this.state.language} />
                     </div>
                     <div className="col-md-6 heatmapContainer">
                       <div className="row">
@@ -134,6 +136,7 @@ export const Dashboard = React.createClass({
                                                           categoryValue={this.state.categoryValue}
                                                           dataSource={this.state.dataSource}
                                                           categoryType={this.state.categoryType}
+                                                          language={this.state.language}
                                                           edges={this.selectedTerms()} 
                                                           {...this.props}  /> : undefined}
                          </div>
@@ -153,13 +156,13 @@ export const Dashboard = React.createClass({
                                               datetimeSelection={this.state.datetimeSelection}
                                               categoryValue={this.state.categoryValue}
                                               categoryType={this.state.categoryType}
-                                              edges={this.selectedTerms()} {...this.props}  />
+                                              edges={this.selectedTerms()} {...this.props} 
+                                              language={this.state.language} />
                         </Dialog>
                       : undefined
                 }
             </div>
           </div>
-          </form>
         </div>
       );
     }

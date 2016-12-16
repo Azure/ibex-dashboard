@@ -14,6 +14,8 @@ const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
       chartDivReference = "popularTermsPieDiv";
 
+const DEFAULT_LANGUAGE = "en";
+
 export const PopularTermsChart = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
@@ -64,7 +66,7 @@ export const PopularTermsChart = React.createClass({
             if(e.dataItem.dataContext){
                 let entity = {
                     "type": "Term",
-                    "name": e.dataItem.dataContext.term
+                    "name": e.dataItem.dataContext['name_'+this.props.language],
                 };
                 self.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey);
             }
@@ -79,11 +81,12 @@ export const PopularTermsChart = React.createClass({
     
     if(summaryTerms && summaryTerms.length > 0){
         this.popularTermsChart.dataProvider = summaryTerms.map(term => {
+            let termName = term['name_'+this.props.language];
             let color = sliceColors.pop();
-            let displayLabel = term.name.length > maxAxesDisplayLabelChars ? term.name.substring(0, maxAxesDisplayLabelChars) : term.name;
+            let displayLabel = termName.length > maxAxesDisplayLabelChars ? termName.substring(0, maxAxesDisplayLabelChars) : termName;
             let mentionFmt = numeralLibs(term.mentions).format(term.mentions > 1000 ? '+0.0a' : '0a');
-            colorMap.set(term.name, color);
-            return {displayLabel: displayLabel, term: term.name, mentions: term.mentions, mentionFmt: mentionFmt, color: color};
+            colorMap.set(termName, color);
+            return Object.assign({}, term, {displayLabel: displayLabel, term: termName, mentions: term.mentions, mentionFmt: mentionFmt, color: color});
         });
 
         if(this.popularTermsChart.valueAxes && this.popularTermsChart.valueAxes.length > 0){
@@ -95,20 +98,16 @@ export const PopularTermsChart = React.createClass({
 
     //Set the default term to the most popular
     if(!this.state.selectedEdge){
-        this.changeMainTermToMostPopular(summaryTerms[0].name, colorMap);
+        this.changeMainTermToMostPopular(summaryTerms[0], colorMap);
     }else{
         this.getFlux().actions.DASHBOARD.termsColorMap(colorMap);
     }
  },
 
  changeMainTermToMostPopular: function(term, colorMap){
-        let entity = {
-            "type": "Term",
-            "name": term
-        };
-
-    this.setState({selectedEdge: entity.name});
-    this.getFlux().actions.DASHBOARD.changeSearchFilter(entity, this.props.siteKey, colorMap);
+    term['type'] = "Term"
+    this.setState({selectedEdge: term});
+    this.getFlux().actions.DASHBOARD.changeSearchFilter(term, this.props.siteKey, colorMap);
  },
 
  hasChanged: function(nextProps, propertyName){
@@ -132,7 +131,7 @@ export const PopularTermsChart = React.createClass({
 
  componentWillReceiveProps: function(nextProps){
     let hasTimeSpanChanged = this.hasChanged(nextProps, "timespan");
-    if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged || this.hasChanged(nextProps, "dataSource")){
+    if((this.hasChanged(nextProps, "mainEdge") && this.props.edgeType === "Term") || hasTimeSpanChanged || this.hasChanged(nextProps, "dataSource") || this.hasChanged(nextProps, "language")){
         this.updateChart(!hasTimeSpanChanged ? nextProps.mainEdge : undefined, nextProps.timespan, nextProps.timespanType, nextProps.dataSource);
     }
  },
@@ -143,9 +142,13 @@ export const PopularTermsChart = React.createClass({
      SERVICES.getPopularTerms(this.props.siteKey, timespan, timespanType, mainEdge, Actions.DataSources(dataSource), 
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
-                    let graphQLResponse = body.data[Object.keys(body.data)[0]];
-
-                    self.refreshChart(graphQLResponse.edges);
+                    let edgeMap = self.state.allEdges.get(DEFAULT_LANGUAGE);
+                    let popularTerms =  body.data[Object.keys(body.data)[0]].edges.map(term =>{
+                         term = Object.assign({}, term, edgeMap.get(term.name.toLowerCase()));
+                         
+                         return term;
+                    });
+                    self.refreshChart(popularTerms);           
                 }else{
                     console.error(`[${error}] occured while processing popular terms graphql request`);
                 }

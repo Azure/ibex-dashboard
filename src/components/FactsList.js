@@ -2,6 +2,7 @@ import React from 'react';
 import Fluxxor from 'fluxxor';
 import ListView from './ListView';
 import { Link } from 'react-router';
+import {SERVICES} from '../services/services';
 import { getHumanDate, containsEqualValues, contains } from '../utils/Utils.js';
 import Checkbox from 'material-ui/Checkbox';
 import FlatButton from 'material-ui/FlatButton';
@@ -21,6 +22,9 @@ const styles = {
     marginRight: "4px"
   },
   button: {
+    marginLeft:"5px",
+    height:"20px",
+    lineHeight:'1',
     textAlign: "center",
   },
 };
@@ -134,12 +138,36 @@ export const FactsList = React.createClass({
     );
   },
 
+  translate(sentence, fromLanguage, toLanguage, factId) {
+      let self = this;
+      SERVICES.translateSentence(sentence, fromLanguage, toLanguage, (translatedSentence, error) => {
+        if(translatedSentence){
+          self.state.facts.forEach(fact => {
+              if (fact.id === factId) {
+                fact.language = toLanguage;
+                fact.title = translatedSentence
+              }
+          });
+          self.setState({
+              elements: self.state
+          });
+        }
+        else{
+          console.error(`[${error}] occured while translating sentense`);
+        }
+      }
+      );
+  },
+
   renderCardItem(item, style) {
     const dateString = getHumanDate(item.id);
     return (
       <div className="cell" style={style}>
         <div className="card">
-          <p className="date">{dateString}</p>
+          <p className="date">{dateString}
+           {this.state.language!==item.language ?<button className="btn btn-primary btn-sm"  style={styles.button} 
+           onClick={() => this.translate(item.title, item.language, this.state.language, item.id)}>Translate</button>: ''}
+          </p>
           <h3 className="title truncate-2"><Link to={`/site/${this.props.siteKey}/facts/detail/${item.id}`}>{item.title}</Link></h3>
           <ul className="tags">
             {item.tags.sort().map(function (tag) {

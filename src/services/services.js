@@ -92,12 +92,33 @@ export const SERVICES = {
         request(POST, callback);
     },
 
-    fetchEdges(site, langCode, edgeType, callback) {
-        const locationsQuery = `locations: locations(site: $site, langCode: $langCode) {
+    fetchEdges(site, edgeType, callback){
+      const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
+                                        runTime
+                                        edges {
+                                            name,
+                                            name_ar,
+                                            type
+                                            coordinates
+                                            population
+                                        }
+                                    }`;
+
+        const termsEdgeFragment = ` fragment FortisDashboardTermEdges on TermCollection {
+                                    runTime
+                                    edges {
+                                        name,
+                                        name_ar,
+                                        type
+                                        RowKey
+                                    }
+                                }`;
+
+     const locationsQuery = `locations: locations(site: $site) {
                                 ...FortisDashboardLocationEdges
                             }`;
 
-        const termsQuery = `terms: terms(site: $site, langCode: $langCode) {
+     const termsQuery = `terms: terms(site: $site) {
                                 ...FortisDashboardTermEdges
                          }`;
 
@@ -107,23 +128,34 @@ export const SERVICES = {
         const queries = `${edgeType === "All" || edgeType === "Location" ? locationsQuery : ``}
                       ${edgeType === "All" || edgeType === "Term" ? termsQuery : ``}`;
 
-        let query = `  ${fragments}
-                      query FetchAllEdge($site: String!, $langCode: String) {
+      let query = `  ${fragments}
+                      query FetchAllEdge($site: String!) {
                             ${queries}
                         }`;
 
-        let variables = { site, langCode };
-        let host = process.env.REACT_APP_SERVICE_HOST;
-        let POST = {
-            url: `${host}/api/edges`,
-            method: "POST",
+      let variables = {site};
+      let host = process.env.REACT_APP_SERVICE_HOST;
+      let POST = {
+            url : `${host}/api/edges`,
+            method : "POST",
             json: true,
             withCredentials: false,
             body: { query, variables }
         };
 
         request(POST, callback);
-    },
+
+        // request(POST, (error, response, body) => {
+        //     if(!error && response.statusCode === 200 && body.data && body.data.terms && body.data.terms.edges) {
+        //         callback(body.data);
+        //     }
+        //     else {
+        //         callback (undefined, error || 'Fetch edges request failed: ' + JSON.stringify(response));
+        //     }
+        // });
+         
+  },
+
 
     getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback) {
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
@@ -235,7 +267,6 @@ export const SERVICES = {
                 withCredentials: false,
                 body: { query, variables }
             };
-
             request(POST, callback);
         } else {
             throw new Error(`Invalid bbox format for value [${bbox}]`);
@@ -484,7 +515,7 @@ export const SERVICES = {
                                             edges,
                                             createdtime,
                                             sentiment,
-                                            orig_language,
+                                            language,
                                             source
                                         }
                                     }
@@ -525,34 +556,66 @@ export const SERVICES = {
         }
     },
 
-    getAdminFbPages: function () {
-        return Rx.Observable.from([[{
-            url: "BritishCouncilLibya",
-        },
-        {
-            url: "truthlibya",
-        },
-        {
-            url: "ukinlibya",
-        }
-        ]]);
-    },
-    getAdminLanguage: function () {
-        return Rx.Observable.from(["en"]);
-    },
-    getAdminTargetRegion: function () {
-        return Rx.Observable.from(["29.626,16.216"]);
-    },
+  getAdminFbPages: function(){
+       return Rx.Observable.from([[{
+           url:"BritishCouncilLibya",
+       },
+       {
+           url:"truthlibya",
+       },
+       {
+           url:"ukinlibya",
+       }
+       ]]);
+  },
+  getAdminLanguage:function(){
+      return Rx.Observable.from(["en"]);
+  },
+  getAdminTargetRegion :function(){
+      return Rx.Observable.from(["29.626,16.216"]);
+  },
 
-    getAdminLocalities: function () {
-        return Rx.Observable.from([[{
-            ar_name: "Mudīrīyat أم الرزم",
-            name: "Mudīrīyat Umm ar Rizam"
-        },
-        {
-            ar_name: "زيغان",
-            name: "Bardīyah"
-        }
-        ]]);
-    }
+  getAdminLocalities: function(){
+       return Rx.Observable.from([[{
+           ar_name:"Mudīrīyat أم الرزم",
+           name: "Mudīrīyat Umm ar Rizam"
+       },
+       {
+           ar_name: "زيغان",
+           name: "Bardīyah"
+       }
+       ]]);
+  },
+
+  translateSentence: function (sentence, fromLanguage, toLanguage, callback) {
+      let query = `
+        fragment TranslationView on TranslationResult{
+            translatedSentence
+            } 
+
+            query FetchEvent($sentence: String!, $fromLanguage: String!, $toLanguage: String!) {
+
+            translate(sentence: $sentence, fromLanguage: $fromLanguage, toLanguage: $toLanguage){
+                ...TranslationView
+            }
+        }`
+      let variables = {sentence, fromLanguage, toLanguage};
+      let host = process.env.REACT_APP_SERVICE_HOST;
+      var POST = {
+           url : `${host}/api/Messages`,
+            method : "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+     
+        request(POST, (error, response, body) => {
+            if(!error && body && body.data && body.data.translate && body.data.translate.translatedSentence){
+                callback(body.data.translate.translatedSentence);
+            }
+            else{
+                callback(undefined, error || 'Translate request failed: ' + JSON.stringify(response));
+            }
+        });
+  }
 }
