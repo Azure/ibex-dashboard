@@ -69,6 +69,23 @@ const edgeListFragment = `fragment FortisDashboardView on EdgeList {
                         }
                       }`;
 
+const fbPageFragment = `fragment FortisDashboardView on FacebookPageCollection {
+                        runTime
+                        pages {
+                            RowKey
+                            pageUrl
+                        }
+                      }`;
+
+const blacklistFragment = `fragment FortisDashboardView on BlacklistCollection {
+                        runTime
+                        filters {
+                            filteredTerms
+                            lang
+                            RowKey
+                        }
+                      }`;
+
 export const SERVICES = {
     getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback) {
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
@@ -460,12 +477,12 @@ export const SERVICES = {
         request(POST, callback);
     },
 
-    getFacts: function (pageSize, skip) {
+    getFacts(pageSize, skip) {
         let url = "http://fortisfactsservice.azurewebsites.net/api/facts?pageSize={0}&skip={1}&fullInfo=false".format(pageSize, skip);
         return Rx.DOM.getJSON(url);
     },
 
-    getFactsWithFilter: function (pageSize, skip, tagFilterArray = []) {
+    getFactsWithFilter(pageSize, skip, tagFilterArray = []) {
         let tagFilterQuery = "";
         if (tagFilterArray.length > 0) {
             tagFilterQuery = "&tagFilter=" + tagFilterArray.map(encodeURI).join(":");
@@ -474,16 +491,16 @@ export const SERVICES = {
         return Rx.DOM.getJSON(url);
     },
 
-    getFactTags: function () {
+    getFactTags() {
         return Rx.DOM.getJSON("http://fortisfactsservice-staging.azurewebsites.net/api/facts/?tagsOnly=true");
     },
 
-    getFact: function (id) {
+    getFact(id) {
         let url = "http://fortisfactsservice.azurewebsites.net/api/facts/" + id;
         return Rx.DOM.getJSON(url);
     },
 
-    FetchMessageDetail: function(site, messageId, dataSources, sourcePropeties, callback) {
+    FetchMessageDetail(site, messageId, dataSources, sourcePropeties, callback) {
         const properties = sourcePropeties.join(' ');
         const messageDetailsFragment = `fragment FortisDashboardView on Feature {
                         coordinates
@@ -582,40 +599,92 @@ export const SERVICES = {
         } else {
             callback(new Error(`Invalid bbox format for value [${bbox}]`));
         }
-    },
+  },
+  getAdminFbPages(siteId, callback){
+      let query = `  ${fbPageFragment}
+                        query FacebookPages($siteId: String!) {
+                            pages: facebookPages(siteId: $siteId) {
+                                ...FortisDashboardView
+                            }
+                        }`;
 
-  getAdminFbPages: function(){
-       return Rx.Observable.from([[{
-           url:"BritishCouncilLibya",
-       },
-       {
-           url:"truthlibya",
-       },
-       {
-           url:"ukinlibya",
-       }
-       ]]);
-  },
-  getAdminLanguage:function(){
-      return Rx.Observable.from(["en"]);
-  },
-  getAdminTargetRegion :function(){
-      return Rx.Observable.from(["29.626,16.216"]);
-  },
+        let variables = { siteId };
 
-  getAdminLocalities: function(){
-       return Rx.Observable.from([[{
-           ar_name:"Mudīrīyat أم الرزم",
-           name: "Mudīrīyat Umm ar Rizam"
-       },
-       {
-           ar_name: "زيغان",
-           name: "Bardīyah"
-       }
-       ]]);
-  },
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url: `${host}/api/settings`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
 
-  translateSentence: function (sentence, fromLanguage, toLanguage, callback) {
+        request(POST, callback);
+  },
+  saveFbPages(site, pages, callback) {
+        const query = `${fbPageFragment} 
+                        mutation ModifyFacebookPages($input: FacebookPageListInput!) {
+                            pages: modifyFacebookPages(input: $input) {
+                                ...FortisDashboardView
+                            }
+                        }`;
+
+        const variables = { input: { pages, site } };
+
+        const host = process.env.REACT_APP_SERVICE_HOST
+        const POST = {
+            url: `${host}/api/settings`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+  },
+  removeFbPages(site, pages, callback) {
+        const query = `${fbPageFragment} 
+                        mutation RemoveFacebookPages($input: FacebookPageListInput!) {
+                            pages: removeFacebookPages(input: $input) {
+                                ...FortisDashboardView
+                            }
+                        }`;
+
+        const variables = { input: { pages, site } };
+
+        const host = process.env.REACT_APP_SERVICE_HOST
+        const POST = {
+            url: `${host}/api/settings`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+  },
+  getBlacklistTerms(siteId, callback){
+      let query = `  ${blacklistFragment}
+                        query TermBlacklist($siteId: String!) {
+                            filters: termBlacklist(siteId: $siteId) {
+                                ...FortisDashboardView
+                            }
+                        }`;
+
+        let variables = { siteId };
+
+        let host = process.env.REACT_APP_SERVICE_HOST
+        var POST = {
+            url: `${host}/api/settings`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+  },
+  translateSentence(sentence, fromLanguage, toLanguage, callback) {
       let query = `
         fragment TranslationView on TranslationResult{
             translatedSentence
