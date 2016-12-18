@@ -14,6 +14,8 @@ export const AdminStore = Fluxxor.createStore({
             loading: false,
             twitterAccounts: [],
             termGridColumns: [],
+            facebookPages: [],
+            blacklist: [],
             locationGridColumns: [],
             locations: [],
             watchlist: [],
@@ -23,14 +25,13 @@ export const AdminStore = Fluxxor.createStore({
 
         this.bindActions(
             Actions.constants.ADMIN.LOAD_KEYWORDS, this.handleLoadTerms,
-            Actions.constants.ADMIN.LOAD_FB_PAGES, this.handleLoadPayload,
+            Actions.constants.ADMIN.LOAD_FB_PAGES, this.handleLoadFacebookPages,
             Actions.constants.ADMIN.LOAD_LOCALITIES, this.handleLoadLocalities,
-            Actions.constants.ADMIN.GET_LANGUAGE, this.handleLoadPayload,
-            Actions.constants.ADMIN.GET_TARGET_REGION, this.handleLoadPayload,
             Actions.constants.ADMIN.LOAD_SETTINGS, this.handleLoadSettings,
             Actions.constants.ADMIN.LOAD_TWITTER_ACCTS, this.handleLoadTwitterAccts,
             Actions.constants.ADMIN.LOAD_FAIL, this.handleLoadPayloadFail,
             Actions.constants.ADMIN.CREATE_SITE, this.handleCreateSite,
+            Actions.constants.ADMIN.LOAD_BLACKLIST, this.handleLoadBlacklist,
             Actions.constants.ADMIN.PUBLISHED_EVENTS, this.handlePublishedCustomEvents
         );
     },
@@ -46,6 +47,20 @@ export const AdminStore = Fluxxor.createStore({
 
     handleLoadTwitterAccts(response){
         this.dataStore.twitterAccounts = response.streams.accounts;
+        this.dataStore.action = response.action || false;
+        this.emit("change");
+    },
+
+    handleLoadFacebookPages(response){
+        this.dataStore.facebookPages = response.pages.pages || [];
+        this.dataStore.action = response.action || false;
+        this.emit("change");
+    },
+
+    handleLoadBlacklist(response){
+        if(response.filters.filters){
+            this.dataStore.blacklist = response.filters.filters.map(filter=>Object.assign({}, filter, {filteredTerms: JSON.stringify(filter.filteredTerms)}));
+        }
         this.dataStore.action = response.action || false;
         this.emit("change");
     },
