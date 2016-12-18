@@ -311,6 +311,24 @@ export const SERVICES = {
         request(POST, callback);
     },
 
+    publishCustomEvents(messages, callback) {
+        const query = ` mutation PublishEvents($input: NewMessages!) {
+                            events: publishEvents(input: $input) 
+                        }`;
+
+        const variables = { input: { messages } };
+        const host = process.env.REACT_APP_SERVICE_HOST
+        const POST = {
+            url: `${host}/api/messages`,
+            method: "POST",
+            json: true,
+            withCredentials: false,
+            body: { query, variables }
+        };
+
+        request(POST, callback);
+    },
+
     getTwitterAccounts(siteId, callback) {
         let query = `  ${twitterFragment}
                         query TwitterAccounts($siteId: String!) {

@@ -39,6 +39,10 @@ export const Admin = React.createClass({
         this.getFlux().actions.ADMIN.load_localities(this.props.siteKey);
     },
 
+    componentWillReceiveProps(nextProps) {
+       this.setState(this.getStateFromFlux());
+    },
+
     getStateFromFlux() {
         return this.getFlux().store("AdminStore").getState();
     },
@@ -63,7 +67,7 @@ export const Admin = React.createClass({
                                     <TabList>
                                         <Tab>Site Settings</Tab>
                                         <Tab>Watchlist</Tab>
-                                        <Tab>Monitored Areas</Tab>
+                                        <Tab>Geofence / Monitored places</Tab>
                                         <Tab>Event Import</Tab>
                                         <Tab>Facebook pages</Tab>
                                         <Tab>Twitter API Accounts</Tab>
@@ -90,7 +94,7 @@ export const Admin = React.createClass({
                                           </div>
                                     </TabPanel>
                                     <TabPanel>
-                                        <h2>Monitored Locations</h2>
+                                        <h2>Monitored Places&nbsp;<small>(Hold ctrl to change / select the selected sites geofence.)</small></h2>
                                         <div className="adminTable">
                                             {
                                                this.state.settings && this.state.settings.properties && this.state.locations && this.state.index === LOCATIONS_TAB ?

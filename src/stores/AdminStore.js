@@ -30,7 +30,8 @@ export const AdminStore = Fluxxor.createStore({
             Actions.constants.ADMIN.LOAD_SETTINGS, this.handleLoadSettings,
             Actions.constants.ADMIN.LOAD_TWITTER_ACCTS, this.handleLoadTwitterAccts,
             Actions.constants.ADMIN.LOAD_FAIL, this.handleLoadPayloadFail,
-            Actions.constants.ADMIN.CREATE_SITE, this.handleCreateSite
+            Actions.constants.ADMIN.CREATE_SITE, this.handleCreateSite,
+            Actions.constants.ADMIN.PUBLISHED_EVENTS, this.handlePublishedCustomEvents
         );
     },
 
@@ -59,6 +60,11 @@ export const AdminStore = Fluxxor.createStore({
         this.dataStore.locations = response.response.map(location => {
             return Object.assign({}, location, {coordinates: location.coordinates.join(",")});
         });
+        this.dataStore.action = response.action || false;
+        this.emit("change");
+    },
+
+    handlePublishedCustomEvents(response){
         this.dataStore.action = response.action || false;
         this.emit("change");
     },
