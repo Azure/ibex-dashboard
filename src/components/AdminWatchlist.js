@@ -21,6 +21,8 @@ export const AdminWatchlist = React.createClass({
         this.getFlux().actions.ADMIN.remove_keywords(this.props.siteKey, deletedRows);
     },
     render(){
+        let state = this.getFlux().store("AdminStore").getState();
+        
         return (
          this.state.termGridColumns.length > 0 ? 
             <DataGrid rowHeight={40}
@@ -30,7 +32,7 @@ export const AdminWatchlist = React.createClass({
                       handleSave={this.handleSave}
                       handleRemove={this.handleRemove}
                       columns={this.state.termGridColumns}
-                      rows={this.state.watchlist} />
+                      rows={state.watchlist} />
             : <div />
         );
     }

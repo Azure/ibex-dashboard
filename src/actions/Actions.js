@@ -84,6 +84,7 @@ const constants = {
                LOAD_TWITTER_ACCTS: "LOAD:TWITTER_ACCTS",
                LOAD_FB_PAGES: "LOAD:FB_PAGES",
                LOAD_LOCALITIES: "LOAD:LOCALITIES",
+               PUBLISHED_EVENTS: "SAVE:EVENT_PUBLISH",
                GET_LANGUAGE: "GET:LANGUAGE",
                GET_TARGET_REGION: "GET:TARGET_REGION",
                LOAD_FAIL: "LOAD:FAIL",
@@ -242,7 +243,7 @@ const methods = {
 
             SERVICES.createOrReplaceSite(siteName, modifiedSettings, (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data && body.data.createOrReplaceSite) {
-                    const action = 'Saved';
+                    const action = 'saved';
                     let mutatedSettings = Object.assign({}, {name: modifiedSettings.name}, {properties: modifiedSettings});
                     delete mutatedSettings.properties.name;
 
@@ -259,7 +260,7 @@ const methods = {
 
             SERVICES.createOrReplaceSite(siteName, modifiedSettings, (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data && body.data.createOrReplaceSite) {
-                    const action = 'Saved';
+                    const action = 'saved';
                     self.dispatch(constants.ADMIN.CREATE_SITE, {siteName, action});
                 }else{
                     console.error(`[${error}] occured while processing message request`);
@@ -330,7 +331,7 @@ const methods = {
             SERVICES.removeKeywords(siteId, deletedRows, (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data.removeKeywords) {
                     const response = body.data.removeKeywords.edges;
-                    const action = 'removed';
+                    const action = 'saved';
                     self.dispatch(constants.ADMIN.LOAD_KEYWORDS, {response, action});
                 }else{
                     console.error(`[${error}] occured while processing message request`);
@@ -360,6 +361,20 @@ const methods = {
                     console.error(`[${error}] occured while processing save locations request`);
                 }
             });
+        },
+        publish_events: function(events){
+            SERVICES.publishCustomEvents(events, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+                let action = 'saved';
+                let self = this;
+                
+                if (graphqlResponse && !error) {
+                    self.dispatch(constants.ADMIN.PUBLISHED_EVENTS, {action});
+                }else{
+                    action = 'failed';
+                    console.error(`[${error}] occured while processing message request`);
+                    self.dispatch(constants.ADMIN.PUBLISHED_EVENTS, {action});
+                }
+            }));
         },
         remove_locations: function(siteId, modifiedLocations){
             let self = this;
