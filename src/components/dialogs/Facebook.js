@@ -31,7 +31,7 @@ export default class Facebook extends React.Component {
             );
         }
         // show details
-        const text = this.state.properties.sentence || this.props.content.sentence;
+        const text = this.state.properties.fullText || this.props.content.sentence;
         const dateText = getHumanDateFromNow(this.state.properties.createdtime);
         const sentiment = this.state.properties.sentiment;
         const sentimentStyle = getSentimentStyle(sentiment);
