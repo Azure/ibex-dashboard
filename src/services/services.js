@@ -562,6 +562,11 @@ export const SERVICES = {
                                             sentiment,
                                             language,
                                             source
+                                            properties {
+                                                originalSources
+                                                title
+                                                link
+                                            }
                                         }
                                     }
                                 }`;

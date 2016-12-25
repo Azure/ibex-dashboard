@@ -1,10 +1,12 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import {SERVICES} from '../services/services';
+import { getHumanDateFromNow } from '../utils/Utils.js';
 import {Actions} from '../actions/Actions';
 import '../styles/ActivityFeed.css';
 import moment from 'moment';
 import Infinite from 'react-infinite';
+import {Tabs, Tab} from 'material-ui/Tabs';
 import CircularProgress from 'material-ui/CircularProgress';
 import Highlighter from 'react-highlight-words';
 import DialogBox from './DialogBox';
@@ -14,22 +16,34 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 
 const OFFSET_INCREMENT = 18;
 const DEFAULT_LANGUAGE = "en";
-const ELEMENT_ITEM_HEIGHT = 85;
-const TOP_SECTION_HEIGHT=358;
-const INFINITE_LOAD_DELAY_MS = 2000;
+const ELEMENT_ITEM_HEIGHT = 130;
+const NEWS_FEED_SEARCH_CONTAINER_HEIGHT = 70;
+const INFINITE_LOAD_DELAY_MS = 1000;
 const MOMENT_FORMAT = "MM/DD HH:mm:s";
 const SERVICE_DATETIME_FORMAT = "MM/DD/YYYY HH:mm:s A";
-const activeHeaderClass = "feed-source-label active", inactiveClass = "feed-source-label";
 const styles ={
     sourceLogo: {
         color: "#337ab7"
     },
     listItemHeader: {
-        fontSize: '11px',
+        font: '.777777778em Arial,Helvetica,sans-serif',
         marginBottom: '3px',
-        fontWeight: 800,
+        fontWeight: 700,
+        marginTop: '2px',
         textAlign: 'left',
-        color: 'rgb(146, 168, 204)'
+        color: '#9e9ea6',
+        fontSize: '12px'
+    },
+    newsItemTitle: {
+        color: '#f44d3c',
+        fontSize: '14px',
+        paddingRight: '4px',
+        fontWeight: 600
+    },
+    newsItemAnchor: {
+        fontSize: '14px',
+        paddingRight: '4px',
+        fontWeight: 600
     },
     highlightStyles: {
         positive: {
@@ -45,76 +59,95 @@ const styles ={
             backgroundColor: "#d9534f"
         }
     },
+    tabStyle:{
+        backgroundColor: "#3f3f4f",
+        height: '60px'
+    },
     tagStyle: {
         marginLeft: "4px",
-        fontSize: "12px"
+        marginTop: "6px",
+        fontSize: "11px"
+    },
+    iconStyle: {
+        color: "#337ab7"
+    },
+    labelColumn: {
+        paddingLeft: '2px'
+    },
+    labelRow: {
+        marginRight: '0px',
+        marginLeft: '17px',
+        marginBottom: '4px'
+    },
+    loadingIcon:{
+        textAlign: "center",
+        fontSize: '16px',
+        fontWeight: 700
+    },
+    contentRow: {
+        marginRight: '2px',
+        marginLeft: '3px',
+        marginTop: '4px',
+        paddingRight: '2px',
+        paddingLeft: '2px',
+        marginBottom: '4px'
     },
     highlight: {
         backgroundColor: '#ffd54f',
         fontWeight: '600'
     },
     translateButton: {
-        height: "20px",
+        height: "15px",
         marginLeft: "3px",
+        fontSize: '10px',
         lineHeight: '1'
     }
 };
 
 const FortisEvent = React.createClass({
-    getDefaultProps: function() {
-        return {
-            height: ELEMENT_ITEM_HEIGHT
-        }
+    getDefaultProps() {
+            return {
+                height: ELEMENT_ITEM_HEIGHT
+            }
     },
     getSentimentStyle(sentimentScore){
-        if(sentimentScore >= 0 && sentimentScore < 30){
-            return styles.highlightStyles.positive;
-        }else if(sentimentScore >= 30 && sentimentScore < 55){
-            return styles.highlightStyles.neutral;
-        }else if(sentimentScore >= 55 && sentimentScore < 80){
-            return styles.highlightStyles.negative;
-        }else{
-            return styles.highlightStyles.veryNegative;
-        }
+            if(sentimentScore >= 0 && sentimentScore < 30){
+                return styles.highlightStyles.positive;
+            }else if(sentimentScore >= 30 && sentimentScore < 55){
+                return styles.highlightStyles.neutral;
+            }else if(sentimentScore >= 55 && sentimentScore < 80){
+                return styles.highlightStyles.negative;
+            }else{
+                return styles.highlightStyles.veryNegative;
+            }
     },
     getSentimentLabelStyle(sentimentScore){
-        if(sentimentScore >= 0 && sentimentScore < 30){
-            return "label label-primary label-news-feed";
-        }else if(sentimentScore >= 30 && sentimentScore < 55){
-            return "label label-neutral label-news-feed";
-        }else if(sentimentScore >= 55 && sentimentScore < 80){
-            return "label label-warning label-news-feed";
-        }else{
-            return "label label-danger label-news-feed";
-        }
+            if(sentimentScore >= 0 && sentimentScore < 30){
+                return "label label-primary label-news-feed";
+            }else if(sentimentScore >= 30 && sentimentScore < 55){
+                return "label label-neutral label-news-feed";
+            }else if(sentimentScore >= 55 && sentimentScore < 80){
+                return "label label-warning label-news-feed";
+            }else{
+                return "label label-danger label-news-feed";
+            }
     },
-    innerJoin(arr1, arr2){
-        let out = new Set();
+    translateNewsItem(event, sentence, sourcelanguage, targetLanguage, eventId){   
+        let self = this;
+        event.stopPropagation();
 
-        arr1.forEach(item=>{
-            if(arr2.indexOf(item) > -1){
-                out.add(item);
+        SERVICES.translateSentence(sentence, sourcelanguage, targetLanguage, (translatedSentence, error) => {
+            if(translatedSentence && !error){
+                self.props.updateFeedWithText(eventId, translatedSentence);
+            } else {
+                console.error(`[${error}] occured while translating sentense`);
             }
         });
-
-        return Array.from(out);
     },
-    render: function() {
-        let tagClassName = this.getSentimentLabelStyle(this.props.sentiment * 100);
-        let commonTermsFromFilter = this.innerJoin(this.props.edges.concat([this.props.mainSearchTerm]), this.props.filters.concat([this.props.mainSearchTerm]));
-        const languageEdgeMap = this.props.edgesByLanguages.get(DEFAULT_LANGUAGE);
-        
-        let commonTermsFromFilterTranslated = commonTermsFromFilter.map(term =>{
-            return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`]
-        });
-
-        let searchWords = this.props.searchFilter ? this.props.edges.concat([this.props.searchFilter, this.props.mainSearchTerm]) : this.props.edges.concat([this.props.mainSearchTerm]);
+    render() {
         let dataSourceSchema = Actions.DataSourceLookup(this.props.source);
         let content = this.props;
-
-        let searchWordsTranslated = searchWords.map(term => {
-            return languageEdgeMap.get(term.toLowerCase())[`name_${this.props.pageLanguage}`];
-        });
+        let newsItemTitle = this.props.originalSource.replace(/http:\/\/www./g, '').replace(/.com\//g, '').replace(/http:\/\//g, '');
 
         return <div className="infinite-list-item" style={
                         {
@@ -126,60 +159,78 @@ const FortisEvent = React.createClass({
                             this.props.handleOpenDialog(content)
                         }
                     }>
-            <h6 style={styles.listItemHeader}>
-                <i style={styles.sourceLogo} className={dataSourceSchema.icon}></i>
-                {this.props.postedTime}
-                {commonTermsFromFilterTranslated.map(item=><span key={item} style={styles.tagStyle} className={tagClassName}>{item}</span>)}
-                {this.props.pageLanguage!==this.props.language ? <button className="btn btn-primary btn-sm" style={styles.translateButton}  onClick={ev => {ev.stopPropagation(); this.props.translate(this.props);}}>Translate</button> : ''}
-            </h6>
-            <div>
-                <Highlighter
-                    searchWords={searchWordsTranslated}
-                    highlightStyle={styles.highlight}
-                    textToHighlight={this.props.sentence} />
-            </div>
-        </div>;
+                    <div className="row">
+                        <div className="col-lg-2" style={styles.labelColumn}>
+                            <div className="row" style={styles.labelRow}>
+                                <i style={styles.sourceLogo} className={`${dataSourceSchema.icon} fa-4x`}></i>
+                            </div>
+                            <div className="row" style={styles.labelRow}>
+                                {
+                                    this.props.pageLanguage!==this.props.language ? <button className="btn btn-primary btn-sm" 
+                                                                                            style={styles.translateButton}
+                                                                                            onClick={ev=>{this.translateNewsItem(ev, this.props.sentence, this.props.language, this.props.pageLanguage, this.props.id)} } >
+                                                                                        Translate
+                                                                                    </button> : ''
+                                }
+                            </div>
+                        </div>
+                        <div className="col-lg-10">
+                            <div className="row" style={styles.contentRow}>
+                                <h6 style={styles.listItemHeader}>
+                                 {
+                                       this.props.link && this.props.link !== "" ? <a style={styles.newsItemAnchor} href={this.props.link} onClick={ev=>ev.stopPropagation()} target="_blank">{newsItemTitle}</a>
+                                     :
+                                       <span style={styles.newsItemTitle}>{newsItemTitle}</span>   
+                                 }
+                                    <i className="fa fa-clock-o fa-1"></i>&nbsp;
+                                    {getHumanDateFromNow(this.props.postedTime, MOMENT_FORMAT)}
+                                </h6>
+                            </div>
+                            <div className="row" style={styles.contentRow}>
+                                <Highlighter
+                                    searchWords={this.props.edges}
+                                    highlightStyle={styles.highlight}
+                                    textToHighlight={this.props.sentence} />
+                            </div>
+                            <div className="row" style={styles.contentRow}>
+                                {this.props.edges.map(item=><span key={item} style={Object.assign({}, styles.tagStyle, this.getSentimentStyle(this.props.sentiment * 100))} className="edgeTag">{item}</span>)}
+                            </div>
+                        </div>
+                    </div>
+            </div>;
     }
 });
 
 export const ActivityFeed = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
 
-  getStateFromFlux: function() {
+  getStateFromFlux() {
     return this.getFlux().store("DataStore").getState();
   },
 
-  getInitialState: function() {
+  getInitialState() {
         return {
             elements: [],
-            previousElementLength: 0,
             offset: 0,
             filteredSource: "all",
-            isInfiniteLoading: false
+            isInfiniteLoading: false,
+            newsFeedHeight: 0
         }
   },
 
-  handleInfiniteLoad: function() {
-        var self = this;
-
-        //if the prevbiosuly loaded enumber of elements is less than the increment count
-        //then we reached the end of the list.
-        if(this.state.previousElementLength < OFFSET_INCREMENT){
-            this.setState({
+  handleInfiniteLoad() {
+        let self = this;
+        this.setState({
                 isInfiniteLoading: false
-            });
-        }else{
-            this.setState({
-                isInfiniteLoading: true
-            });
-            setTimeout(() => {
+        });
+        
+        setTimeout(() => {
                 const params = {...self.props, elementStartList: self.state.elements, offset: self.state.offset, filteredSource: this.state.filteredSource};
                 self.processNewsFeed(params);
-            }, INFINITE_LOAD_DELAY_MS);
-        }
+        }, INFINITE_LOAD_DELAY_MS);
   },
 
-  fetchSentences: function(requestPayload, callback){
+  fetchSentences(requestPayload, callback){
       let {categoryValue, timespanType, searchValue, limit, offset, edges, siteKey,
            categoryType, filteredSource, bbox, datetimeSelection} = requestPayload;
       let location = [];
@@ -194,88 +245,72 @@ export const ActivityFeed = React.createClass({
                                      categoryValue?categoryValue.name.toLowerCase():categoryValue, searchValue, location, callback);
   },
 
-  renderDataSourceTabs: function(iconStyle){
-    let tabs  = [], self = this;
+  renderDataSourceTabs(iconStyle){
+    let tabs  = [];
     if(this.props.dataSource === "all"){
         for (let [source, value] of Actions.constants.DATA_SOURCES.entries()) {
-                tabs.push(<li key={source} role="presentation" className={source === self.state.filteredSource ? activeHeaderClass : inactiveClass}><a onClick={self.sourceOnClickHandler.bind(self, source)}><i style={iconStyle} className={`${value.icon} fa-2x`}></i>{value.label}</a></li>)
+                tabs.push(<Tab key={source} 
+                               label={value.label} 
+                               value={source} 
+                               icon={<i style={iconStyle} className={`${value.icon}`}></i>}>
+                          </Tab>)
         }
     }else{
         let tabSchema = Actions.constants.DATA_SOURCES.get(this.state.filteredSource);
-        tabs.push(<li key={this.state.filteredSource} role="presentation" className={activeHeaderClass}><a onClick={self.sourceOnClickHandler.bind(self, this.state.filteredSource)}><i style={iconStyle} className={`${tabSchema.icon} fa-2x`}></i>{tabSchema.label}</a></li>)
+        tabs.push(<Tab label={tabSchema.label} 
+                       value={this.state.filteredSource}
+                       icon={<i style={iconStyle} className={`${tabSchema.icon}`}></i>}>
+                  </Tab>)
     }
 
     return tabs;
   },
 
-  hasChanged: function(nextProps, propertyName){
+  hasChanged(nextProps, currentProps, propertyName){
       if(Array.isArray(nextProps[propertyName])){
-          return nextProps[propertyName].join(",") !== this.props[propertyName].join(",");
+          return nextProps[propertyName].join(",") !== currentProps[propertyName].join(",");
       }
 
-      if(this.props[propertyName] && nextProps[propertyName] && nextProps[propertyName] !== this.props[propertyName]){
+      if(currentProps[propertyName] && nextProps[propertyName] && nextProps[propertyName] !== currentProps[propertyName]){
           return true;
       }
 
       return false;
   },
 
-  componentWillReceiveProps: function(nextProps){
-      if(this.hasChanged(nextProps, "bbox") || this.hasChanged(nextProps, "datetimeSelection")
-       ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, "edges")
-       ||  this.hasChanged(nextProps, "categoryValue") || this.hasChanged(nextProps, "dataSource")
-       ||  this.hasChanged(nextProps, "language") ){
+  componentDidMount(){
+      const newsFeedHeight = document.getElementById('newsFeedContainer').clientHeight;
+      this.lastRenderedElementLength = -1;
+      this.setState({newsFeedHeight});
+  },
 
+  componentWillReceiveProps(nextProps){
+      if((this.hasChanged(nextProps, this.props, "bbox") && this.props.bbox.length > 0) || this.hasChanged(nextProps, this.props, "datetimeSelection")
+       ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, this.props, "edges") ||  this.hasChanged(nextProps, this.props, "language")
+       ||  this.hasChanged(nextProps.categoryValue, this.props.categoryValue, `name_${this.state.language}`) || this.hasChanged(nextProps, this.props, "dataSource")){
           const params = {...nextProps, elementStartList: [], offset: 0, filteredSource: nextProps.dataSource};
-
-          this.setState({filteredSource: params.filteredSource});
-
+          this.setState({filteredSource: params.filteredSource, elements: []});
+          this.lastRenderedElementLength = 0;
+          
           this.processNewsFeed(params);
       }
   },
 
-  componentDidMount: function(){
-      const params = {...this.props, elementStartList: [], offset: 0, filteredSource: this.props.dataSource};
-      this.processNewsFeed(params);
-  },
+  translateEvent(eventId, translatedSentence){
+    const targetElement = this.state.elements.findIndex(feature=>feature.messageid===eventId);
+    let elements = this.state.elements;
+    this.lastRenderedElementLength = 0;
 
-  translateEvent(event){   
-    let self = this;
-    SERVICES.translateSentence(event.sentence, event.language, this.props.language, (translatedSentence, error) => {
-        if(translatedSentence){
-            let updatedElements = self.state.elements.map(element => {
-                if (element.key === event.id) {
-                    return <FortisEvent key={event.id}
-                        id={event.id}
-                        sentence={translatedSentence}
-                        source={element.props.source}
-                        postedTime={element.props.postedTime}
-                        sentiment={element.props.sentiment}
-                        edges={element.props.edges}
-                        filters={element.props.edges}
-                        searchFilter={element.props.searchFilter}
-                        mainSearchTerm={element.props.mainSearchTerm}
-                        edgesByLanguages={self.state.allEdges}  
-                        language={self.props.language}
-                        pageLanguage={element.props.pageLanguage}
-                        translate={self.translateEvent}
-                        handleOpenDialog={self.handleOpenDialog} />;
-                }
-                else {
-                    return element;
-                }
-            });
-            self.setState({
-                elements: updatedElements
-            });
-        }
-    else {
-        console.error(`[${error}] occured while translating sentense`);
+    if(targetElement > -1){
+        elements[targetElement].sentence = translatedSentence;
+    }else{
+        console.error(`Unexpected error occured where the translation request for event ${eventId} failed.`);
     }
-    });
+    
+    this.setState({ elements });
  },
 
-  buildElements: function(requestPayload) {
+  buildElements(requestPayload) {
         let elements = [];
         let self = this;
         let nextOffset = requestPayload.start + OFFSET_INCREMENT;
@@ -283,63 +318,72 @@ export const ActivityFeed = React.createClass({
         this.fetchSentences(requestPayload,
             (error, response, body) => {
                 if(!error && response.statusCode === 200 && body.data) {
-                    let graphQLResponse = body.data[Object.keys(body.data)[0]];
+                    const graphQLResponse = body.data[Object.keys(body.data)[0]];
                     if(graphQLResponse && graphQLResponse.features && Array.isArray(graphQLResponse.features)){
-                        graphQLResponse.features.forEach(feature => {
-                            if(feature.properties.sentence && feature.properties.sentence.length > 2){
-                                elements.push(<FortisEvent key={feature.properties.messageid}
-                                                        id={feature.properties.messageid}
-                                                        sentence={feature.properties.sentence}
-                                                        source={feature.properties.source}
-                                                        postedTime={moment(feature.properties.createdtime, SERVICE_DATETIME_FORMAT).format(MOMENT_FORMAT)}
-                                                        sentiment={feature.properties.sentiment}
-                                                        edges={feature.properties.edges}
-                                                        filters={requestPayload.edges}
-                                                        searchFilter={requestPayload.searchValue}
-                                                        mainSearchTerm={this.props.categoryValue.name} 
-                                                        language={feature.properties.language}  
-                                                        edgesByLanguages={this.state.allEdges}   
-                                                        pageLanguage={this.props.language}
-                                                        translate={this.translateEvent}
-                                                        handleOpenDialog={this.handleOpenDialog} />)
-                            }
-                        });
-                        elements = requestPayload.elementStartList.concat(elements);
+                        elements = requestPayload.elementStartList.concat(graphQLResponse.features.filter(feature=>feature.properties.sentence && feature.properties.sentence.length > 2)
+                                                                                                  .map(feature => {
+                                const { messageid, sentence, source, createdtime, sentiment, edges, language } = feature.properties;
+                                const {title, originalSources, link} = feature.properties.properties;
+                                const { searchValue } = requestPayload;
+
+                                return Object.assign({}, {messageid, sentence, searchValue, source, createdtime, link, sentiment, edges, language, title, originalSources }, {eventEdges: requestPayload.edges});
+                        }));                        
                     }
                 }else{
                     console.error(`[${error}] occured while processing message request`);
+                }
+
+                //if there are no elements returned set the lastRenderedElementLength to -1 to foorce render an empty list.
+                if(elements.length === 0){
+                    this.lastRenderedElementLength = -1;
+                }else{
+                    this.lastRenderedElementLength = 0;
                 }
 
                 self.setState({
                      offset: nextOffset,
                      isInfiniteLoading: false,
                      filteredSource: requestPayload.filteredSource,
-                     previousElementLength: elements.length,
                      elements: elements
                 });
         });
   },
 
-  processNewsFeed: function(filteredSources){
+  processNewsFeed(filteredSources){
       const params = {...filteredSources, limit: OFFSET_INCREMENT, start: filteredSources.offset};
-      this.setState({
-          isInfiniteLoading: true
-      });
+      const elements = this.state.elements;
 
-      if(params.bbox && params.edges && params.datetimeSelection && params.timespanType){
-          this.buildElements(params);
+      //if the rendered items are less than the increment count then avoid unnecessary service calls.
+      if(this.lastRenderedElementLength === 0 || (elements.length > 0 && elements.length % OFFSET_INCREMENT === 0)){
+        this.setState({
+            isInfiniteLoading: true
+        });
+
+        if(params.bbox && params.edges && params.datetimeSelection && params.timespanType){
+            this.buildElements(params);
+        }
+      }else{
+          this.lastRenderedElementLength = 0;
+          this.setState({
+            isInfiniteLoading: false
+          });
       }
   },
 
-  elementInfiniteLoad: function() {
+  elementInfiniteLoad() {
         return <div className="infinite-list-item">
-            Loading... <CircularProgress />
-        </div>;
+                  <div className="row">
+                        <div className="col-lg-12" style={styles.loadingIcon}>
+                             Loading... <CircularProgress />
+                        </div>
+                  </div>
+                </div>;
   },
 
-  sourceOnClickHandler: function(filteredSource){
+  sourceOnClickHandler(filteredSource){
       const params = {...this.props, elementStartList: [], offset: 0, filteredSource: filteredSource};
-
+      
+      this.lastRenderedElementLength = 0;
       this.processNewsFeed(params);
   },
 
@@ -349,26 +393,81 @@ export const ActivityFeed = React.createClass({
       event.preventDefault();
       this.processNewsFeed(params);
   },
+  innerJoin(arr1, arr2){
+        let out = new Set();
+
+        arr1.forEach(item=>{
+            if(arr2.indexOf(item) > -1){
+                out.add(item);
+            }
+        });
+
+        return Array.from(out);
+  },
+  translatedTerms(baseLanguage, englishTerms){
+      const languageEdgeMap = this.state.allEdges.get(baseLanguage);
+      let translatedSelectedEdges = [];
+    
+      englishTerms.forEach(term => {
+          const mapKey = term.toLowerCase();
+          const translation = languageEdgeMap.get(mapKey)
+          if(translation){
+              translatedSelectedEdges.push(translation[`name_${this.state.language}`]);
+          }
+      });
+
+      return translatedSelectedEdges;
+  },
+
+  shouldComponentUpdate(nextProps, nextState){
+      let lastRenderedElementLength = this.lastRenderedElementLength;
+
+      if(lastRenderedElementLength < nextState.elements.length){
+          this.lastRenderedElementLength = nextState.elements.length;
+          return true;
+      }else{
+          return false;
+      }
+  },
 
   render() {
-    let iconStyle = {
-        color: "#337ab7"
-    };
-
+    const state = this.getStateFromFlux();
+    const translatedDashboardEdges = this.translatedTerms(DEFAULT_LANGUAGE, this.props.edges);
+    const mainTerm = state.categoryValue[`name_${this.props.language}`];
+    const otherTags = this.refs && this.refs.filterTextInput && this.refs.filterTextInput.value !== "" ? [this.refs.filterTextInput.value, mainTerm] : [mainTerm];
+    
     return (
      <div className="col-lg-12 news-feed-column">
-            <ul className="nav nav-tabs feed-source-header">
-                { this.renderDataSourceTabs(iconStyle) }
-            </ul>
+            <Tabs tabItemContainerStyle={styles.tabStyle} 
+                  value={this.state.filteredSource}
+                  id="newsFeedContainer"
+                  onChange={this.sourceOnClickHandler}>
+                { this.renderDataSourceTabs(styles.iconStyle) }
+            </Tabs>
             <Infinite elementHeight={ELEMENT_ITEM_HEIGHT}
-                      containerHeight={window.innerHeight-TOP_SECTION_HEIGHT}
+                      containerHeight={this.props.infiniteScrollHeight - this.state.newsFeedHeight - NEWS_FEED_SEARCH_CONTAINER_HEIGHT}
                       infiniteLoadBeginEdgeOffset={300}
                       className="infite-scroll-container"
                       onInfiniteLoad={this.handleInfiniteLoad}
                       loadingSpinnerDelegate={this.elementInfiniteLoad()}
-                      isInfiniteLoading={this.state.isInfiniteLoading}
-                      timeScrollStateLastsForAfterUserScrolls={1000} >
-                    {this.state.elements}
+                      isInfiniteLoading={this.state.isInfiniteLoading} >
+                    {
+                     this.state.elements ? this.state.elements.map(feature => 
+                        <FortisEvent key={feature.messageid}
+                                     id={feature.messageid}
+                                     sentence={feature.sentence}
+                                     source={feature.source}
+                                     originalSource={feature.originalSources && feature.originalSources.length > 0 ? feature.originalSources[0] : ""}
+                                     postedTime={moment(feature.createdtime, SERVICE_DATETIME_FORMAT).format(MOMENT_FORMAT)}
+                                     sentiment={feature.sentiment}
+                                     link={feature.link}
+                                     edges={this.innerJoin(translatedDashboardEdges, this.translatedTerms(DEFAULT_LANGUAGE, feature.edges)).concat(otherTags)}
+                                     language={feature.language}  
+                                     pageLanguage={this.props.language}
+                                     updateFeedWithText={this.translateEvent}
+                                     handleOpenDialog={this.handleOpenDialog} />
+                    ) : undefined 
+                 }
             </Infinite>
             <div className="panel-footer clearfix">
                   <div className="input-group">

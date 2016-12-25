@@ -37,7 +37,7 @@ export const HeatMap = React.createClass({
       };
   },
   
-  getStateFromFlux: function() {
+  getStateFromFlux() {
     return this.getFlux().store("DataStore").getState();
   },
   
@@ -67,6 +67,7 @@ export const HeatMap = React.createClass({
   },
 
   addBreadCrumbControl(){
+      const state = this.getStateFromFlux();
       let info = L.control();
 
       if(this.map){
@@ -81,9 +82,9 @@ export const HeatMap = React.createClass({
           };
 
 		  info.update = props => {
-            let selectionType = this.state.categoryType;
-            let selectedLanguage = this.state.language;
-            let mainSearchEntity = this.state.categoryValue[`name_${selectedLanguage}`];
+            let selectionType = state.categoryType;
+            let selectedLanguage = state.language;
+            let mainSearchEntity = state.categoryValue[`name_${selectedLanguage}`];
             let numberOfDisplayedTerms = 0;
             let filters = 0;
             let maxTerms = 4;
@@ -128,6 +129,26 @@ export const HeatMap = React.createClass({
   getSentimentColor(sentiment){
       return Actions.constants.SENTIMENT_COLOR_MAPPING[sentiment];
   },
+
+  componentWillReceiveProps(nextProps){
+      if((this.hasChanged(nextProps, this.props, "bbox") && this.props.bbox.length > 0) || this.hasChanged(nextProps, this.props, "datetimeSelection")
+       ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, this.props, "edges") || (!this.status && nextProps.categoryValue)
+       ||  this.hasChanged(nextProps.categoryValue, this.props.categoryValue, `name_${this.state.language}`) || this.hasChanged(nextProps, this.props, "dataSource")){
+           this.updateHeatmap();
+      }
+  },
+
+  hasChanged(nextProps, currentProps, propertyName){
+      if(Array.isArray(nextProps[propertyName])){
+          return nextProps[propertyName].join(",") !== currentProps[propertyName].join(",");
+      }
+
+      if(currentProps[propertyName] && nextProps[propertyName] && nextProps[propertyName] !== currentProps[propertyName]){
+          return true;
+      }
+
+      return false;
+  },
   
   getSentimentCategory(level){
       if(level >= 0 && level < 30){
@@ -142,13 +163,14 @@ export const HeatMap = React.createClass({
   },
 
   componentDidMount(){
-    if(this.state.settings.properties.defaultLocation && this.state.settings.properties.defaultZoomLevel){
-        const defaultLocation = this.state.settings.properties.defaultLocation;
+    const state = this.getStateFromFlux();
+
+    if(state.settings.properties.defaultLocation && state.settings.properties.defaultZoomLevel){
+        const defaultLocation = state.settings.properties.defaultLocation;
         const latitude = defaultLocation[1];
         const longitude = defaultLocation[0];
         this.tilemap = new Map();
-        this.status = "ready";
-        const defaultZoom = this.state.settings.properties.defaultZoomLevel;
+        const defaultZoom = state.settings.properties.defaultZoomLevel;
         L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7.3/images";
         this.map = L.map('leafletMap', {zoomControl: false});
         this.map.addControl(L.control.zoom({position: 'topright'}));
@@ -162,11 +184,11 @@ export const HeatMap = React.createClass({
             accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
         }).addTo(this.map);
         
-        this.map.selectedTerm = this.state.categoryValue["name_"+this.props.language];
-        this.map.datetimeSelection = this.state.datetimeSelection;
-        this.map.dataSource = this.state.dataSource;
+        this.map.selectedTerm = state.categoryValue["name_"+this.props.language];
+        this.map.datetimeSelection = state.datetimeSelection;
+        this.map.dataSource = state.dataSource;
         this.map.on('moveend',() => {
-        this.viewportChanged();
+            this.getFlux().actions.DASHBOARD.updateAssociatedTerms(this.getStateFromFlux().associatedKeywords, this.getLeafletBbox());
         });
 
         this.addClusterGroup();
@@ -278,33 +300,6 @@ export const HeatMap = React.createClass({
                                                          className: cssClass,
                                                          iconSize: L.point(clusterSize, clusterSize) });
   },
-  
-  viewportChanged() {
-    if (this.map) {
-        this.viewPortChanged = true;
-        this.updateHeatmap();
-    }
-  },  
-  
-  dataStoreValidated(){
-      return this.state && this.state.datetimeSelection
-                        && this.state.timespanType
-                        && this.state.categoryValue
-   },
-
-  mapMarkerFlushCheck(){
-      if(this.map.selectedTerm !== this.state.categoryValue["name_"+this.props.language] || 
-         this.map.datetimeSelection !== this.state.datetimeSelection || 
-         this.map.dataSource !== this.state.dataSource || 
-         this.state.renderMap || this.viewportChanged){
-
-          this.map.datetimeSelection =  this.state.datetimeSelection;
-          this.map.selectedTerm = this.state.categoryValue["name_"+this.props.language];
-          this.map.dataSource = this.state.dataSource;
-
-          this.clearMap();
-      }
-  },
 
   sortTerms(locationA, locationB){
       if(locationB[1].mentions > locationA[1].mentions){ 
@@ -323,8 +318,10 @@ export const HeatMap = React.createClass({
   },
 
   edgeSelected(name, type){
-      if(this.state.associatedKeywords && this.state.associatedKeywords.size > 0 && name){
-          let edge = this.state.associatedKeywords.get(name);
+      const state = this.getStateFromFlux();
+
+      if(state.associatedKeywords && state.associatedKeywords.size > 0 && name){
+          let edge = state.associatedKeywords.get(name);
 
           return edge && edge.enabled ? true : false;
       }else{
@@ -351,7 +348,6 @@ export const HeatMap = React.createClass({
           });
       }
       
-      this.viewPortChanged = false;
       this.status = 'loaded';
       //sort the associated terms by mention count.
       let sortedEdgeMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort(this.sortTerms));
@@ -361,8 +357,9 @@ export const HeatMap = React.createClass({
 
   filterSelectedAssociatedTerms(){
       let filteredTerms = [];
+      const state = this.getStateFromFlux();
 
-      for (var [term, value] of this.state.associatedKeywords.entries()) {
+      for (var [term, value] of state.associatedKeywords.entries()) {
             if(value.enabled){
                 filteredTerms.push(term);
             }
@@ -372,40 +369,47 @@ export const HeatMap = React.createClass({
   },
 
   moveMapToNewLocation(location, zoom){
-      let originalLocation = this.map.coordinates;
+      const originalLocation = this.map.coordinates;
 
       if(location && location.length > 0 && location[0] !== originalLocation[0] && location[1] !== originalLocation[1]){
           this.map.setView([location[1], location[0]], zoom);
           this.map.coordinates = [location[0], location[1]];
       } 
   },
+
+  getLeafletBbox(){
+      if(this.map){
+        const bounds = this.map.getBounds();
+        const northEast = bounds.getNorthEast();
+        const southWest = bounds.getSouthWest();
+
+        return [southWest.lng, southWest.lat, northEast.lng, northEast.lat];
+      }else{
+          return undefined;
+      }
+  },
   
-  updateHeatmap() {   
-    if(!this.dataStoreValidated()){
-        return false;
-    }
+  updateHeatmap() {
+    const state = this.getStateFromFlux();
     
     this.createSentimentDistributionGraph();
-    this.mapMarkerFlushCheck();
+    this.clearMap();
     this.status = "loading";
-    let siteKey = this.props.siteKey;
-    this.moveMapToNewLocation(this.state.selectedLocationCoordinates, this.map.getZoom());
-    let bounds = this.map.getBounds();
-    let zoom = this.map.getZoom();
-    let northWest = bounds.getNorthWest();
-    let southEast = bounds.getSouthEast();
-    let bbox = [northWest.lng, southEast.lat, southEast.lng, northWest.lat];
+    const siteKey = this.props.siteKey;
+    this.moveMapToNewLocation(state.selectedLocationCoordinates, this.map.getZoom());
+    const zoom = this.map.getZoom();
+    const bbox = this.getLeafletBbox();
     let self = this;
     this.weightedMeanValues = [];
 
-    SERVICES.getHeatmapTiles(siteKey, this.state.timespanType, zoom, this.state.categoryValue.name, this.state.datetimeSelection, 
-                             bbox, this.filterSelectedAssociatedTerms(), [this.state.selectedLocationCoordinates], Actions.DataSources(this.state.dataSource), 
+    SERVICES.getHeatmapTiles(siteKey, state.timespanType, zoom, state.categoryValue.name, state.datetimeSelection, 
+                             bbox, this.filterSelectedAssociatedTerms(), [state.selectedLocationCoordinates], Actions.DataSources(state.dataSource), 
             (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     self.createLayers(body, bbox)
                 }else{
                     this.status = 'failed';
-                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue.name}, ${this.state.datetimeSelection}, ${bbox}]`);
+                    console.error(`[${error}] occured while processing tile request [${state.categoryValue.name}, ${state.datetimeSelection}, ${bbox}]`);
                 }
             });
   },
@@ -462,7 +466,7 @@ export const HeatMap = React.createClass({
       }
  },
    
- clearMap(){
+  clearMap(){
        if(this.markers){
          this.markers.clearLayers();
        }
@@ -471,21 +475,23 @@ export const HeatMap = React.createClass({
   },
    
   renderMap(){
-     return this.map && this.state.renderMap && this.status !== "loading";
+     const state = this.getStateFromFlux();
+
+     return this.map && state.renderMap && this.status !== "loading";
   },
 
   render() {
     let progressPercentage = this.status === "loaded" ? 100 : -1;
+    const state = this.getStateFromFlux();
 
     if(this.renderMap()){
-        this.updateHeatmap();
         progressPercentage = 0;
     }
 
     return (
         <div>
           <ProgressBar  percent={progressPercentage} 
-                        intervalTime={this.state.intervalTime}
+                        intervalTime={state.intervalTime}
                         autoIncrement={true}
                         className="react-progress-bar-percent-override"
                         spinner="right" />

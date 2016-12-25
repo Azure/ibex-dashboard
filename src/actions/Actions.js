@@ -171,7 +171,6 @@ const methods = {
         },
         changeLanguage(language){
            this.dispatch(constants.DASHBOARD.CHANGE_LANGUAGE, language);
-           this.dispatch(constants.FACTS.CHANGE_LANGUAGE, language);
         }
     },
     FACTS: {
@@ -214,6 +213,9 @@ const methods = {
                     }, error => {
                         console.warning('Error, could not load fact id: ' + id, error);
                     });
+        },
+        changeLanguage(language){
+           this.dispatch(constants.FACTS.CHANGE_LANGUAGE, language);
         }
     },
     ADMIN: {

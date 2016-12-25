@@ -16,6 +16,8 @@ export const DataStore = Fluxxor.createStore({
           renderMap: true,
           siteKey: '',
           associatedKeywords: new Map(),
+          termFilters: [],
+          allEdges: new Map(),
           bbox: [],
           colorMap: new Map(),
           selectedLocationCoordinates: [],
@@ -52,7 +54,6 @@ export const DataStore = Fluxxor.createStore({
 
     handleLanguageChange(language){
         this.dataStore.language = language;
-        this.dataStore.renderMap = true;
         this.emit("change");
     },
 
@@ -102,6 +103,7 @@ export const DataStore = Fluxxor.createStore({
             }
         }
 
+        this.dataStore.termFilters = newFilters;
         this.dataStore.renderMap = true;
         this.emit("change");
     },

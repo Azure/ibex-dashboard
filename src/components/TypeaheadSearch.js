@@ -44,10 +44,6 @@ export const TypeaheadSearch = React.createClass({
        if(value !== this.state.value){
            this.setState({value});
        }
-
-       if(nextProps.edges !== this.state.defaultResults){
-          this.setState({edgeMap: this.props.edges.get(nextProps.language)});
-       }
   },
 
   onSuggestionSelected(event, { suggestion }){
@@ -61,9 +57,15 @@ export const TypeaheadSearch = React.createClass({
     this.setState({value});
   },
 
+  getStateFromFlux() {
+    return this.getFlux().store("DataStore").getState();
+  },
+
   onSuggestionsFetchRequested({ value }){
+    const state = this.getStateFromFlux();
+
     this.setState({
-      suggestions: getSuggestions(value, this.state.edgeMap)
+      suggestions: getSuggestions(value, state.allEdges.get(this.props.language))
     });
   },
   

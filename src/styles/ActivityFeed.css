@@ -160,16 +160,28 @@ a.keyword-link.pull-left {
 }
 
 .infinite-list-item {
-        text-align: center;
-        margin: auto;
-        vertical-align: bottom;
-        font-weight: 700;
-        font-size: 12px;
-        color: #dfe0e6;;
+    vertical-align: bottom;
+    font-size: 12px;
+    background: #e6e7e9;
+    color: #2f3338;
 }
 
 .infinite-list-item {
-        border-bottom: 4px solid #191919;
+    border-bottom: 1px solid #445467;
+    border-radius: 5px 0px 0px 5px;
+    border-left: 8px solid #337ab7;
+    border-bottom-style: dashed;
+}
+
+.edgeTag{
+    display: inline-block;
+    top: 12px;
+    text-transform: uppercase;
+    padding: 1px 10px 3px;
+    font-size: 14px;
+    color: #FFF;
+    background: #444;
+    border-radius: 3px;
 }
 
 .infinite-list-item:last-child span {

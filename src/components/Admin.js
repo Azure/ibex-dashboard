@@ -95,7 +95,7 @@ export const Admin = React.createClass({
                                           </div>
                                     </TabPanel>
                                     <TabPanel>
-                                        <h2>Monitored Places&nbsp;<small>(Hold ctrl to change / select the selected sites geofence.)</small></h2>
+                                        <h2>Monitored Places&nbsp;<small>(Hold ctrl to change the sites geofence=.)</small></h2>
                                         <div className="adminTable">
                                             {
                                                this.state.settings && this.state.settings.properties && this.state.locations && this.state.index === LOCATIONS_TAB ?
