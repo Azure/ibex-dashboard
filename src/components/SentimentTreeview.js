@@ -190,7 +190,7 @@ export const SentimentTreeview = React.createClass({
             name: 'Other Terms',
             folderKey: 'otherKeywords',
             checked: true,
-            toggled: false,
+            toggled: true,
             children: []
         };
 
@@ -314,7 +314,7 @@ export const SentimentTreeview = React.createClass({
   Header(props) {
         const style = props.style;
         let self = this;
-        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '12px', color: '#337ab7',  width: '100%' };
+        const termStyle = { paddingLeft: '3px', fontWeight: 800, fontSize: '14px', color: '#337ab7',  width: '100%' };
         const categoryStyle = { paddingLeft: '3px', fontSize: '14px', color: '#fff', display: 'inline-table', fontWeight: 600}; 
         let badgeClass = (props.node.checked || props.node.children) && props.node.eventCount > 0 ? "badge" : "badge badge-disabled";
         let isNodeTypeCategory = props.node.children && props.node.children.length > 0;
@@ -364,8 +364,7 @@ export const SentimentTreeview = React.createClass({
                 <TypeaheadSearch data={this.state.categoryValue["name_"+this.props.language]}
                                 type={this.state.categoryType}
                                 siteKey={this.props.siteKey}
-                                language={this.state.language} 
-                                edges={this.state.allEdges}/>
+                                language={this.state.language}/>
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">
