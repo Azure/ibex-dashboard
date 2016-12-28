@@ -132,7 +132,7 @@ export const HeatMap = React.createClass({
 
   componentWillReceiveProps(nextProps){
       if((this.hasChanged(nextProps, this.props, "bbox") && this.props.bbox.length > 0) || this.hasChanged(nextProps, this.props, "datetimeSelection")
-       ||  this.hasChanged(nextProps, "timespanType") || this.hasChanged(nextProps, this.props, "edges") || (!this.status && nextProps.categoryValue)
+       ||  this.hasChanged(nextProps, this.props, "timespanType") || this.hasChanged(nextProps, this.props, "edges") || (!this.status && nextProps.categoryValue) || this.hasChanged(nextProps, this.props, "language")
        ||  this.hasChanged(nextProps.categoryValue, this.props.categoryValue, `name_${this.state.language}`) || this.hasChanged(nextProps, this.props, "dataSource")){
            this.updateHeatmap();
       }
@@ -337,7 +337,7 @@ export const HeatMap = React.createClass({
       this.sentimentIndicatorGraph.dataProvider[0].limit = weightedSentiment;
       this.sentimentIndicatorGraph.dataProvider[0].bullet = weightedSentiment;
       this.sentimentIndicatorGraph.validateData();
-            
+
       if(filters){
           filters.forEach(edge => {
              let enableFilter = self.edgeSelected(edge.name, edge.type);

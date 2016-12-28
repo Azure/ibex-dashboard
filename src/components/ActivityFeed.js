@@ -257,7 +257,8 @@ export const ActivityFeed = React.createClass({
         }
     }else{
         let tabSchema = Actions.constants.DATA_SOURCES.get(this.state.filteredSource);
-        tabs.push(<Tab label={tabSchema.label} 
+        tabs.push(<Tab key={tabSchema.label}
+                       label={tabSchema.label} 
                        value={this.state.filteredSource}
                        icon={<i style={iconStyle} className={`${tabSchema.icon}`}></i>}>
                   </Tab>)

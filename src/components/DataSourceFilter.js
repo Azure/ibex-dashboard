@@ -40,7 +40,8 @@ export const DataSourceFilter = React.createClass({
   },
 
   radioButtonChanged(e, value){
-      this.getFlux().actions.DASHBOARD.filterDataSource(value);
+      this.getFlux().actions.DASHBOARD.reloadVisualizationState(this.props.siteKey, this.state.datetimeSelection, 
+                                                                this.state.timespanType, value, this.state.categoryValue);
   },
 
   renderDataSourceRadioOpts(iconStyle){

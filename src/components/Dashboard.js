@@ -34,18 +34,6 @@ export const Dashboard = React.createClass({
       this.setState({contentRowHeight});
   },
 
-  FilterEnabledTerms(){
-      let filteredTerms = [];
-
-      for (var [term, value] of this.state.associatedKeywords.entries()) {
-          if(value.enabled){
-              filteredTerms.push(term);
-          }
-      }
-
-      return filteredTerms;
-  },
-
   render() {
     return (
         <div>
@@ -89,8 +77,12 @@ export const Dashboard = React.createClass({
                   <div>
                             <div className="col-md-3 termBrowserContainer">
                                 <SentimentTreeview {...this.props} 
-                                                enabledTerms={this.FilterEnabledTerms()}
-                                                language={this.state.language} />
+                                                enabledTerms={Array.from(this.state.termFilters)}
+                                                mainEdge={this.state.categoryValue.name}
+                                                language={this.state.language}
+                                                timespan={this.state.datetimeSelection}
+                                                dataSource={this.state.dataSource}
+                                                bbox={this.state.bbox} />
                             </div>
                             <div className="col-md-6 heatmapContainer">
                             <div className="row">
@@ -100,8 +92,9 @@ export const Dashboard = React.createClass({
                                             timespanType={this.state.timespanType}
                                             datetimeSelection={this.state.datetimeSelection}
                                             categoryValue={this.state.categoryValue}
+                                            language={this.state.language}
                                             categoryType={this.state.categoryType}
-                                            edges={this.state.termFilters} 
+                                            edges={Array.from(this.state.termFilters)} 
                                             {...this.props} />
                             </div>
                             </div>
@@ -116,7 +109,7 @@ export const Dashboard = React.createClass({
                                                                 dataSource={this.state.dataSource}
                                                                 categoryType={this.state.categoryType}
                                                                 language={this.state.language}
-                                                                edges={this.state.termFilters} 
+                                                                edges={Array.from(this.state.termFilters)} 
                                                                 {...this.props}  /> : undefined}
                                 </div>
                             </div>

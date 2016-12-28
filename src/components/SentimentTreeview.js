@@ -15,32 +15,35 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 
 const styles = {
   subHeader: {
-    color:'rgb(46, 189, 89)',
+    color:'#fff',
     paddingLeft: '11px',
-    fontSize: '14px',
-    fontWeight: 800
+    fontSize: '18px',
+    fontWeight: 700
   },
   component: {
      display: 'block',
      verticalAlign: 'top',
      width: '100%'
- },
- searchBox: {
-        padding: '0px 20px 10px 20px'
- },
- subHeaderDescription: {
-    color: '#a3a3b3',
-    fontSize: '8px',
-    fontWeight: 800,
-    paddingLeft: '4px'
- }
+  },
+  searchBox: {
+     padding: '0px 20px 10px 20px'
+  },
+  subHeaderDescription: {
+      color: '#a3a3b3',
+      fontSize: '8px',
+      fontWeight: 800,
+      paddingLeft: '4px'
+  },
+  titleSpan: {
+      paddingRight: '8px'
+  }
 };
  
 const treeDataStyle = {
      tree: {
         base: {
                 listStyle: 'none',
-                backgroundColor: '#21252B',
+                backgroundColor: 'rgb(63, 63, 79)',
                 margin: 0,
                 padding: 0,
                 color: '#9DA5AB',
@@ -159,15 +162,33 @@ export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
+      this.enabledTerms = [];
+
       return {
           treeData: {},
           originalTreeData: {}
       }
   },
 
+  hasChanged(nextProps, currentProps, propertyName){
+      if(Array.isArray(nextProps[propertyName])){
+          return nextProps[propertyName].join(",") !== currentProps[propertyName].join(",");
+      }
+
+      if(currentProps[propertyName] && nextProps[propertyName] && nextProps[propertyName] !== currentProps[propertyName]){
+          return true;
+      }
+
+      return false;
+  },
+
   componentWillReceiveProps(nextProps){
-      let treeData = this.createRelevantTermsTree(this.state.associatedKeywords, nextProps.language);
-      this.setState({treeData: treeData, originalTreeData: treeData})
+      if(this.hasChanged(nextProps, this.props, "mainEdge") || this.hasChanged(nextProps, this.props, "timespan") || this.hasChanged(nextProps, this.props, "dataSource") || this.hasChanged(nextProps, this.props, "bbox") || this.hasChanged(nextProps, this.props, "language") || this.hasChanged(nextProps, this, "enabledTerms")
+        || (this.state.treeData.children && this.state.treeData.children[0].children.length === 0 && this.state.associatedKeywords.size > 0)){
+            this.enabledTerms = nextProps.enabledTerms;
+            let treeData = this.createRelevantTermsTree(this.state.associatedKeywords, nextProps.language);
+            this.setState({treeData: treeData, originalTreeData: treeData})
+      }
   },
 
   createRelevantTermsTree(termsMap, lang){
@@ -307,7 +328,8 @@ export const SentimentTreeview = React.createClass({
   termSelected(node){
       if(!node.children){
           node['type']="Term";
-          this.getFlux().actions.DASHBOARD.changeSearchFilter(node, this.props.siteKey);
+          this.getFlux().actions.DASHBOARD.reloadVisualizationState(this.props.siteKey, this.state.datetimeSelection, 
+                                                                    this.state.timespanType, this.state.dataSource, node);
       }
   },
 
@@ -359,12 +381,22 @@ export const SentimentTreeview = React.createClass({
 
      return (
          <div className="panel panel-selector">
-            <Subheader style={styles.subHeader}>Watchlist Terms</Subheader>
+            <Subheader style={styles.subHeader}>
+               <span style={styles.titleSpan}>WATCHLIST TERMS</span>
+               {
+                  this.props.enabledTerms.length > 0 ? 
+                   <button type="button" onClick={this.getFlux().actions.DASHBOARD.clearWatchlistFilters()} className="btn btn-primary btn-sm">Clear Selections</button>
+                  : undefined
+               }                
+            </Subheader>
             <div style={styles.searchBox}>
                 <TypeaheadSearch data={this.state.categoryValue["name_"+this.props.language]}
                                 type={this.state.categoryType}
                                 siteKey={this.props.siteKey}
-                                language={this.state.language}/>
+                                dataSource={this.state.dataSource}
+                                language={this.state.language}
+                                datetimeSelection={this.state.datetimeSelection}
+                                timespanType={this.state.timespanType}/>
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">
