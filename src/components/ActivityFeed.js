@@ -47,16 +47,24 @@ const styles ={
     },
     highlightStyles: {
         positive: {
-            backgroundColor: "#337ab7"
+            borderColor: "#337ab7",
+            border: '1px solid',
+            color: "#337ab7"
         },
         neutral: {
-            backgroundColor: "#caaa00"
+            borderColor: "#caaa00",
+            border: '1px solid',
+            color: "#caaa00"
         },
         negative: {
-            backgroundColor: "#f48342"
+            borderColor: "#f48342",
+            border: '1px solid',
+            color: "#f48342"
         },
         veryNegative: {
-            backgroundColor: "#d9534f"
+            borderColor: "#d9534f",
+            border: '1px solid',
+            color: "#d9534f"
         }
     },
     tabStyle:{

@@ -81,12 +81,12 @@ export const HeatMap = React.createClass({
             position: 'topleft'  
           };
 
-		  info.update = props => {
+		  info.update = filters => {
             let selectionType = state.categoryType;
             let selectedLanguage = state.language;
+            let translations = state.allEdges.get(DEFAULT_LANGUAGE);
             let mainSearchEntity = state.categoryValue[`name_${selectedLanguage}`];
             let numberOfDisplayedTerms = 0;
-            let filters = 0;
             let maxTerms = 4;
             let infoBoxInnerHtml = '';
             let infoHeaderText = "<h5>Review your selection below</h5>";
@@ -96,18 +96,18 @@ export const HeatMap = React.createClass({
                                     <span class="label filterLabel">
                                         ${mainSearchEntity}
                                     </span>`;
-   
-            for (var [term, value] of props.entries()) {
-                    if(value.enabled && term !== "none" && ++numberOfDisplayedTerms > maxTerms){
-                        infoBoxInnerHtml += `<span class="filterLast">and ${props.size - numberOfDisplayedTerms} Others</span>`;
-                        break;
-                    }else if(value.enabled && term !== "none"){
-                         filters++;
-                         infoBoxInnerHtml += `${numberOfDisplayedTerms > 1 ? '<span class="filterSeperation">+</span>' : ''}
-                                              <span class="label filterLabel">
-                                                ${value[`name_${selectedLanguage}`]}
-                                              </span>`;
-                    }
+            
+            if(filters.length > 0){
+                filters.forEach(filter => {
+                        if(++numberOfDisplayedTerms === maxTerms){
+                            infoBoxInnerHtml += `<span class="filterLast">&nbsp;and ${(filters.length + 1) - maxTerms} Others</span>`;
+                        }else if(numberOfDisplayedTerms < maxTerms){
+                            infoBoxInnerHtml += `${numberOfDisplayedTerms > 0 ? '<span class="filterSeperation">+</span>' : ''}
+                                                <span class="label filterLabel">
+                                                    ${translations.get(filter)[`name_${selectedLanguage}`]}
+                                                </span>`;
+                        }
+                });
             }
 
             if(filters > 0){
@@ -352,20 +352,7 @@ export const HeatMap = React.createClass({
       //sort the associated terms by mention count.
       let sortedEdgeMap = new Map([...aggregatedAssociatedTermMentions.entries()].sort(this.sortTerms));
       this.getFlux().actions.DASHBOARD.updateAssociatedTerms(sortedEdgeMap, bbox);
-      this.breadCrumbControl.update(sortedEdgeMap);
-  },
-
-  filterSelectedAssociatedTerms(){
-      let filteredTerms = [];
-      const state = this.getStateFromFlux();
-
-      for (var [term, value] of state.associatedKeywords.entries()) {
-            if(value.enabled){
-                filteredTerms.push(term);
-            }
-        }
-      
-      return filteredTerms;
+      this.breadCrumbControl.update(Array.from(this.state.termFilters));
   },
 
   moveMapToNewLocation(location, zoom){
@@ -403,7 +390,7 @@ export const HeatMap = React.createClass({
     this.weightedMeanValues = [];
 
     SERVICES.getHeatmapTiles(siteKey, state.timespanType, zoom, state.categoryValue.name, state.datetimeSelection, 
-                             bbox, this.filterSelectedAssociatedTerms(), [state.selectedLocationCoordinates], Actions.DataSources(state.dataSource), 
+                             bbox, Array.from(state.termFilters), [state.selectedLocationCoordinates], Actions.DataSources(state.dataSource), 
             (error, response, body) => {
                 if (!error && response.statusCode === 200) {
                     self.createLayers(body, bbox)

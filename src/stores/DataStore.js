@@ -33,6 +33,7 @@ export const DataStore = Fluxxor.createStore({
             Actions.constants.DASHBOARD.RELOAD_CHARTS, this.handleReloadChartData,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters,
+            Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS_TO_ONLY, this.handleChangeTermFiltersToOnly,
             Actions.constants.DASHBOARD.CHANGE_LANGUAGE, this.handleLanguageChange,
             Actions.constants.DASHBOARD.CLEAR_FILTERS, this.handleClearFilters
       );
@@ -87,18 +88,26 @@ export const DataStore = Fluxxor.createStore({
 
             this.emit("change");
     },
+
+    syncAssociatedTermsSelections(filterSet){
+        for (let [term, value] of this.dataStore.associatedKeywords.entries()) {
+                value.enabled = filterSet.has(term);
+        }
+    },
     
     handleChangeTermFilters(newFilters){
-        let self = this;
-
-        if(Array.isArray(newFilters)){
-            for (var [term, value] of self.dataStore.associatedKeywords.entries()) {
-                    value.enabled = newFilters.indexOf(term) > -1;
-            }
-        }
-        const newFilterSet = new Set(newFilters);
+        const filtersToRemove = newFilters.filter(filter=>filter.action === 'remove').map(filter=>filter.term);
+        const newFilterSet = new Set(newFilters.map(filter=>filter.term));
         //merge the earlier filters with the newly added selections
-        this.dataStore.termFilters = new Set([...this.dataStore.termFilters, ...newFilterSet]);
+        this.dataStore.termFilters = new Set([...this.dataStore.termFilters, ...newFilterSet].filter(filter=>filtersToRemove.indexOf(filter) === -1));
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
+        this.dataStore.renderMap = true;
+        this.emit("change");
+    },
+
+    handleChangeTermFiltersToOnly(newFilter){
+        this.dataStore.termFilters = new Set(newFilter);
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
         this.dataStore.renderMap = true;
         this.emit("change");
     },
@@ -111,7 +120,6 @@ export const DataStore = Fluxxor.createStore({
     },
 
     syncDatetimeState(datetimeSelection, timespanType){
-        this.dataStore.associatedKeywords = new Map();
         this.dataStore.datetimeSelection = datetimeSelection;
         this.dataStore.timespanType = timespanType;
     },
@@ -143,6 +151,7 @@ export const DataStore = Fluxxor.createStore({
 
     handleClearFilters(){
         this.dataStore.termFilters.clear();
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
         this.emit("change");
     },
 
@@ -161,7 +170,9 @@ export const DataStore = Fluxxor.createStore({
     },
     
     mapDataUpdate(heatmapData){
+        this.dataStore.associatedKeywords = new Map();
         this.dataStore.associatedKeywords = heatmapData.associatedKeywords;
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
         this.dataStore.bbox = heatmapData.bbox;
         this.dataStore.renderMap = false;
         this.emit("change");

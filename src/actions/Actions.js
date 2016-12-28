@@ -62,6 +62,7 @@ const constants = {
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS",
                CHANGE_LANGUAGE: "DASHBOARD:CHANGE_LANGUAGE",
                LOAD_DETAIL: "LOAD:DETAIL",
+               CHANGE_TERM_FILTERS_TO_ONLY: "UPDATE:CHANGE_TERM_FILTERS_TO_ONLY",
                CLEAR_FILTERS: "UPDATE:CLEAR_FILTERS",
                LOAD_DETAIL_ERROR: "LOAD:DETAIL_ERROR"
            },
@@ -142,7 +143,7 @@ const methods = {
             });
         },
         clearWatchlistFilters(){
-            self.dispatch(constants.DASHBOARD.CLEAR_FILTERS, {});
+            this.dispatch(constants.DASHBOARD.CLEAR_FILTERS, {});
         },
         reloadVisualizationState(siteKey, datetimeSelection, timespanType, dataSource, selectedEntity){
             let self = this;
@@ -164,6 +165,9 @@ const methods = {
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
+        },
+        changeTermsFilterToOnly(newFilter){
+           this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS_TO_ONLY, newFilter);
         },
         updateAssociatedTerms(associatedKeywords, bbox){
             this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords, bbox});
