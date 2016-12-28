@@ -29,10 +29,10 @@ export const PopularLocationsChart = React.createClass({
         "startDuration": 1,
         "balloonText": "[[term]]: <b>[[mentionFmt]]</b>  mentions<br>Est Pop: <b>[[population]]</b> people",
         "labelColor": "#fff",
-        "radius": 70,
         "pullOutRadius": 0,
+        "radius": 100,
         "labelRadius": 1,
-        "innerRadius": 22,
+        "innerRadius": 50,
         "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
         "outlineAlpha": 0,
         "valueField": "mentions",
@@ -42,13 +42,29 @@ export const PopularLocationsChart = React.createClass({
             "enabled": true
         },
         "allLabels": [{
-            "text": "Top 5 Locations",
+            "text": "TOP 5",
             "bold": true,
-            "size": 12,
-            "color": "#fff",
+            "size": 16,
+            "color": "#e6e7e9",
             "x": 0,
             "align": "center",
-            "y": 200
+            "y": "35%"
+        },
+        {
+            "y": "47%",
+            "align": "center",
+            "size": 16,
+            "bold": true,
+            "text": "PLACES",
+            "color": "#e6e7e9"
+        },
+        {
+            "y": "57%",
+            "align": "center",
+            "size": 10,
+            "bold": false,
+            "text": "BY MENTIONS",
+            "color": "#e6e7e9"
         }]
     });
 

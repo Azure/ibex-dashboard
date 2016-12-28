@@ -3,6 +3,24 @@ import { getHumanDateFromNow, getSentimentDescription } from '../../utils/Utils.
 import { getSentimentStyle } from '../../utils/Style.js';
 import {SERVICES} from '../../services/services';
 
+const styles = {
+    listItemHeader: {
+        font: '.777777778em Arial,Helvetica,sans-serif',
+        marginBottom: '3px',
+        fontWeight: 500,
+        marginTop: '2px',
+        textAlign: 'left',
+        color: '#f44d3c',
+        fontSize: '22px'
+    },
+    title: {
+        font: '.777777778em Arial,Helvetica,sans-serif',
+        fontWeight: 700,
+        fontSize: '16px',
+        color: 'rgb(51, 122, 183)'
+    }
+};
+
 export default class Facebook extends React.Component {
 
     _loadDetail(id){
@@ -37,13 +55,23 @@ export default class Facebook extends React.Component {
         const sentimentStyle = getSentimentStyle(sentiment);
         const link = this.state.properties.properties.link;
         const tags = this.state.properties.edges || [];
+        const originalSource = this.state.properties.properties.originalSources && this.state.properties.properties.originalSources.length > 0 ? this.state.properties.properties.originalSources[0] : "";
+        const title = this.state.properties.properties.title || "";
         const sentimentDescription = getSentimentDescription(sentiment);
         return (
             <div className="facebook">
+                <h6 style={styles.listItemHeader}>
+                    {
+                        originalSource !== "" && !originalSource.startsWith("facebook-") ? <span>{originalSource}</span> : undefined
+                    }
+                </h6>
                 {
                     link && link !== "" ? <p className="drop"><a href={link} target="_blank">Read Original</a></p> : undefined 
                 }
-                <p className="date">{dateText}</p>
+                <p className="date"><i className="fa fa-clock-o fa-1"></i>&nbsp;{dateText}</p>
+                {
+                    title !== "" ? <p style={styles.title}>{title}</p> : undefined
+                }
                 <p className="title">{text}</p>
                 <p className="sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
                 <p className="subheading">Tags</p>
