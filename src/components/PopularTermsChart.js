@@ -36,10 +36,9 @@ export const PopularTermsChart = React.createClass({
         "startDuration": 1,
         "balloonText": "[[term]]: <b>[[mentionFmt]]</b>  mentions",
         "labelColor": "#fff",
-        "radius": 70,
+        "radius": 100,
         "labelRadius": 1,
-        "marginLeft": 20,
-        "innerRadius": 22,
+        "innerRadius": 50,
         "colorField": "color",
         "gradientRatio": [-0.4, -0.4, -0.4, -0.4, -0.4, -0.4, 0, 0.1, 0.2, 0.1, 0, -0.2, -0.5],
         "outlineAlpha": 0,
@@ -50,13 +49,29 @@ export const PopularTermsChart = React.createClass({
             "enabled": true
         },
         "allLabels": [{
-            "text": "Top 5 Terms",
+            "text": "TOP 5",
             "bold": true,
-            "size": 12,
-            "color": "#fff",
+            "size": 16,
+            "color": "#e6e7e9",
             "x": 0,
             "align": "center",
-            "y": 200
+            "y": "35%"
+        },
+        {
+            "y": "47%",
+            "align": "center",
+            "size": 16,
+            "bold": true,
+            "text": "TERMS",
+            "color": "#e6e7e9"
+        },
+        {
+            "y": "57%",
+            "align": "center",
+            "size": 10,
+            "bold": false,
+            "text": "BY MENTIONS",
+            "color": "#e6e7e9"
         }]
     });
 

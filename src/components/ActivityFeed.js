@@ -19,7 +19,7 @@ const DEFAULT_LANGUAGE = "en";
 const ELEMENT_ITEM_HEIGHT = 80;
 const NEWS_FEED_SEARCH_CONTAINER_HEIGHT = 70;
 const INFINITE_LOAD_DELAY_MS = 1000;
-const MOMENT_FORMAT = "MM/DD HH:mm:s";
+const MOMENT_FORMAT = "MM/DD HH:mm:ss";
 const SERVICE_DATETIME_FORMAT = "MM/DD/YYYY HH:mm:s A";
 const styles ={
     sourceLogo: {
@@ -185,7 +185,7 @@ const FortisEvent = React.createClass({
                                        <span style={styles.newsItemTitle}>{newsItemTitle}</span>   
                                  }
                                     <i className="fa fa-clock-o fa-1"></i>&nbsp;
-                                    {getHumanDateFromNow(this.props.postedTime, MOMENT_FORMAT)}
+                                    {getHumanDateFromNow(this.props.postedTime, SERVICE_DATETIME_FORMAT)}
                                 </h6>
                             </div>
                             <div className="row" style={styles.contentRow}>
@@ -461,7 +461,7 @@ export const ActivityFeed = React.createClass({
                                      sentence={feature.sentence}
                                      source={feature.source}
                                      originalSource={feature.originalSources && feature.originalSources.length > 0 ? feature.originalSources[0] : ""}
-                                     postedTime={moment(feature.createdtime, SERVICE_DATETIME_FORMAT).format(MOMENT_FORMAT)}
+                                     postedTime={feature.createdtime}
                                      sentiment={feature.sentiment}
                                      link={feature.link}
                                      edges={this.innerJoin(translatedDashboardEdges, this.translatedTerms(DEFAULT_LANGUAGE, feature.edges)).concat(otherTags)}
