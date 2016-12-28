@@ -16,7 +16,7 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 
 const OFFSET_INCREMENT = 18;
 const DEFAULT_LANGUAGE = "en";
-const ELEMENT_ITEM_HEIGHT = 130;
+const ELEMENT_ITEM_HEIGHT = 80;
 const NEWS_FEED_SEARCH_CONTAINER_HEIGHT = 70;
 const INFINITE_LOAD_DELAY_MS = 1000;
 const MOMENT_FORMAT = "MM/DD HH:mm:s";
@@ -157,13 +157,7 @@ const FortisEvent = React.createClass({
         let content = this.props;
         let newsItemTitle = this.props.originalSource.replace(/http:\/\/www./g, '').replace(/.com\//g, '').replace(/http:\/\//g, '');
 
-        return <div className="infinite-list-item" style={
-                        {
-                            height: this.props.height,
-                            lineHeight: this.props.lineHeight
-                        }
-                    }            
-                    onClick={() => {
+        return <div className="infinite-list-item" onClick={() => {
                             this.props.handleOpenDialog(content)
                         }
                     }>
