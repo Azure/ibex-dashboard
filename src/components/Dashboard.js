@@ -76,7 +76,9 @@ export const Dashboard = React.createClass({
                 <div className="row" id="contentRow">
                   <div>
                             <div className="col-md-3 termBrowserContainer">
-                                <SentimentTreeview {...this.props} language={this.state.language} />
+                                <SentimentTreeview {...this.props} 
+                                                enabledTerms={Array.from(this.state.termFilters)}
+                                                language={this.state.language} />
                             </div>
                             <div className="col-md-6 heatmapContainer">
                             <div className="row">
