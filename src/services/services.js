@@ -4,8 +4,6 @@ import { Actions } from '../actions/Actions';
 import { momentToggleFormats, momentGetFromToRange } from '../utils/Utils.js';
 import request from 'request';
 
-const blobHostnamePattern = "https://{0}.blob.core.windows.net";
-const TIMESERIES_BLOB_CONTAINER_NAME = "processed-timeseries-bysource";
 const MAX_ZOOM = 15;
 const locationEdgeFragment = `fragment FortisDashboardLocationEdges on LocationCollection {
                                         runTime
@@ -61,14 +59,6 @@ const siteSettingsFragment = `fragment FortisSiteDefinitionView on SiteCollectio
                             }
                         }`;
 
-const edgeListFragment = `fragment FortisDashboardView on EdgeList {
-                        runTime
-                        edges {
-                            name
-                            mentions
-                        }
-                      }`;
-
 const fbPageFragment = `fragment FortisDashboardView on FacebookPageCollection {
                         runTime
                         pages {
@@ -86,37 +76,57 @@ const blacklistFragment = `fragment FortisDashboardView on BlacklistCollection {
                         }
                       }`;
 
+const visualizationChartFragments = `fragment FortisDashboardTimeSeriesView on EdgeTimeSeriesCollection {
+                                        labels
+                                        graphData {
+                                            edges
+                                            mentions
+                                            date
+                                        }
+                                        }
+
+                                        fragment FortisDashboardTermView on TopNTermCollection {
+                                        runTime
+                                        edges {
+                                                name
+                                            mentions
+                                        }
+                                        }
+
+                                        fragment FortisDashboardLocationView on TopNLocationCollection {
+                                        runTime
+                                        edges {
+                                                name
+                                            mentions
+                                                coordinates
+                                                population
+                                        }
+}`;
+
 export const SERVICES = {
-    getPopularTermsTimeSeries(siteKey, accountName, datetimeSelection, timespanType, selectedTerm, dataSource, callback) {
-        let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-        let hostname = blobHostnamePattern.format(accountName);
-        let blobContainer = TIMESERIES_BLOB_CONTAINER_NAME;
-
-        let url = `${hostname}/${blobContainer}/${dataSource}/${momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat)}/${selectedTerm}.json`;
-        let GET = {
-            url: url,
-            json: true,
-            withCredentials: false
-        };
-
-        request(GET, callback);
-    },
-
-    getPopularTerms(site, datetimeSelection, timespanType, selectedTerm, sourceFilter, callback) {
+    getChartVisualizationData(site, datetimeSelection, timespanType, selectedEntity, dataSource, callback){
         let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
         let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
-        let additionalTerms = selectedTerm ? [selectedTerm] : [];
-        let query = `  ${edgeListFragment}
-                      query WhatsBuzzing($site: String!, $additionalTerms: [String], $timespan: String!, $sourceFilter: [String]) {
-                        whatsBuzzing(site: $site, additionalTerms: $additionalTerms, timespan: $timespan, sourceFilter: $sourceFilter) {
-                            ...FortisDashboardView
-                        }
-                      }`;
+        let sourceFilter = Actions.DataSources(dataSource);
+        let additionalTerms = selectedEntity && selectedEntity.type === "Term" ? [selectedEntity.name] : [];
 
-        let variables = { site, additionalTerms, timespan, sourceFilter };
+        let query = `  ${visualizationChartFragments}
+                      query PopularEdges($site: String!, $additionalTerms: [String], $timespan: String!, $sourceFilter: [String], $dataSource: String!) {
+                            timeSeries:timeSeries(site: $site, timespan: $timespan, dataSource: $dataSource){
+                                                            ...FortisDashboardTimeSeriesView
+                            },
+                            terms: popularTerms(site: $site, additionalTerms: $additionalTerms, timespan: $timespan, sourceFilter: $sourceFilter) {
+                                            ...FortisDashboardTermView
+                            },
+                            locations: popularLocations(site: $site, timespan: $timespan, sourceFilter: $sourceFilter) {
+                                            ...FortisDashboardLocationView
+                            },
+                            }`;
+
+        let variables = { site, additionalTerms, timespan, sourceFilter, dataSource };
         let host = process.env.REACT_APP_SERVICE_HOST;
         let POST = {
-            url: `${host}/api/terms`,
+            url: `${host}/api/edges`,
             method: "POST",
             json: true,
             withCredentials: false,
@@ -159,45 +169,7 @@ export const SERVICES = {
         request(POST, callback);
   },
 
-
-    getMostPopularPlaces(site, datetimeSelection, timespanType, langCode, zoomLevel, sourceFilter, callback) {
-        let formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
-        let timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);
-
-        let fragment = `fragment FortisDashboardView on FeatureCollection {
-                            type
-                            runTime
-                            features {
-                                coordinates
-                                properties {
-                                    location
-                                    population
-                                    mentions
-                                }
-                            }
-                        }`;
-
-        let query = `  ${fragment}
-                      query PopularLocations($site: String!, $langCode: String, $timespan: String!, $zoomLevel: Int, $sourceFilter: [String]) {
-                            popularLocations(site: $site, langCode: $langCode, timespan: $timespan, zoomLevel: $zoomLevel, sourceFilter: $sourceFilter) {
-                            ...FortisDashboardView
-                        }
-                      }`;
-
-        let variables = { site, timespan, langCode, zoomLevel, sourceFilter };
-        let host = process.env.REACT_APP_SERVICE_HOST;
-        let POST = {
-            url: `${host}/api/places`,
-            method: "POST",
-            json: true,
-            withCredentials: false,
-            body: { query, variables }
-        };
-
-        request(POST, callback);
-    },
-
-    getHeatmapTiles: function (site, timespanType, zoom, mainEdge, datetimeSelection, bbox,
+  getHeatmapTiles: function (site, timespanType, zoom, mainEdge, datetimeSelection, bbox,
         filteredEdges, locations, sourceFilter, callback) {
         const formatter = Actions.constants.TIMESPAN_TYPES[timespanType];
         const timespan = momentToggleFormats(datetimeSelection, formatter.format, formatter.blobFormat);

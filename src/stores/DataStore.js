@@ -16,7 +16,10 @@ export const DataStore = Fluxxor.createStore({
           renderMap: true,
           siteKey: '',
           associatedKeywords: new Map(),
-          termFilters: [],
+          timeSeriesGraphData: {},
+          popularLocations: [],
+          popularTerms: [],
+          termFilters: new Set(),
           allEdges: new Map(),
           bbox: [],
           colorMap: new Map(),
@@ -26,39 +29,22 @@ export const DataStore = Fluxxor.createStore({
       }
       
       this.bindActions(
-            Actions.constants.DASHBOARD.CHANGE_SEARCH, this.handleChangeSearchTerm,
-            Actions.constants.DASHBOARD.CHANGE_DATE, this.handleChangeDate,
             Actions.constants.DASHBOARD.INITIALIZE, this.intializeSettings,
+            Actions.constants.DASHBOARD.RELOAD_CHARTS, this.handleReloadChartData,
             Actions.constants.DASHBOARD.ASSOCIATED_TERMS, this.mapDataUpdate,
-            Actions.constants.DASHBOARD.CHANGE_COLOR_MAP, this.handleChangeColorMap,
             Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS, this.handleChangeTermFilters,
-            Actions.constants.DASHBOARD.CHANGE_SOURCE, this.handleDataSourceChange,
-            Actions.constants.DASHBOARD.CHANGE_LANGUAGE, this.handleLanguageChange
+            Actions.constants.DASHBOARD.CHANGE_TERM_FILTERS_TO_ONLY, this.handleChangeTermFiltersToOnly,
+            Actions.constants.DASHBOARD.CHANGE_LANGUAGE, this.handleLanguageChange,
+            Actions.constants.DASHBOARD.CLEAR_FILTERS, this.handleClearFilters
       );
     },
 
     getState() {
         return this.dataStore;
     },
-    
-    handleLoadActivites(activities){
-        this.dataStore.activities = activities.response;
-        this.emit("change");
-    },
-
-    handleDataSourceChange(dataSource){
-        this.dataStore.dataSource = dataSource;
-        this.dataStore.renderMap = true;
-        this.emit("change");
-    },
 
     handleLanguageChange(language){
         this.dataStore.language = language;
-        this.emit("change");
-    },
-
-    handleChangeColorMap(changedMap){
-        this.dataStore.colorMap = changedMap.colorMap;
         this.emit("change");
     },
 
@@ -87,55 +73,106 @@ export const DataStore = Fluxxor.createStore({
                 });
 
                 this.dataStore.settings = settings;
+                this.dataStore.dataSource = graphqlResponse.dataSource;
+                this.syncTimeSeriesData(graphqlResponse.timeSeries);
+                //set the initial primary term to the most popular.
+                if(graphqlResponse.terms.edges && graphqlResponse.terms.edges.length > 0){
+                    this.syncPrimaryEdgeData(this.dataStore.allEdges.get(LANGUAGE_CODE_ENG).get(graphqlResponse.terms.edges[0].name), LANGUAGE_CODE_ENG);
+                }
+                
+                this.syncPopularTerms(graphqlResponse.terms.edges || []);
+                this.dataStore.popularLocations = graphqlResponse.locations.edges;
             }else{
                 console.error('Required data is not available');
             }
 
             this.emit("change");
     },
+
+    syncAssociatedTermsSelections(filterSet){
+        for (let [term, value] of this.dataStore.associatedKeywords.entries()) {
+                value.enabled = filterSet.has(term);
+        }
+    },
     
     handleChangeTermFilters(newFilters){
-        let self = this;
-
-        if(Array.isArray(newFilters)){
-            for (var [term, value] of self.dataStore.associatedKeywords.entries()) {
-                    value.enabled = newFilters.indexOf(term) > -1;
-            }
-        }
-
-        this.dataStore.termFilters = newFilters;
+        const filtersToRemove = newFilters.filter(filter=>filter.action === 'remove').map(filter=>filter.term);
+        const newFilterSet = new Set(newFilters.map(filter=>filter.term));
+        //merge the earlier filters with the newly added selections
+        this.dataStore.termFilters = new Set([...this.dataStore.termFilters, ...newFilterSet].filter(filter=>filtersToRemove.indexOf(filter) === -1));
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
         this.dataStore.renderMap = true;
         this.emit("change");
     },
-        
-    handleChangeDate(changedData){
-        this.dataStore.associatedKeywords = new Map();
-        this.dataStore.datetimeSelection = changedData.datetimeSelection;
-        this.dataStore.timespanType = changedData.timespanType;
+
+    handleChangeTermFiltersToOnly(newFilter){
+        this.dataStore.termFilters = new Set(newFilter);
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
         this.dataStore.renderMap = true;
-        
         this.emit("change");
     },
-    
-    handleChangeSearchTerm(changedData){
-        this.dataStore.associatedKeywords = new Map();
-        this.dataStore.categoryValue = changedData.selectedEntity;
-        let language = this.dataStore.language;
+
+    syncPrimaryEdgeData(selectedEntity, language){
         let edgeMap = this.dataStore.allEdges.get(language);
-        this.dataStore.categoryValue = edgeMap.get(changedData.selectedEntity[`name_${language}`]);
-        this.dataStore.selectedLocationCoordinates = changedData.selectedEntity.coordinates || [];
-        this.dataStore.categoryType = changedData.selectedEntity.type;
-        this.dataStore.renderMap = true;
-        
-        if(changedData.colorMap){
-            this.dataStore.colorMap = changedData.colorMap;
+        this.dataStore.categoryValue = edgeMap.get(selectedEntity[`name_${language}`]);
+        this.dataStore.selectedLocationCoordinates = selectedEntity.coordinates || [];
+        this.dataStore.categoryType = selectedEntity.type;
+    },
+
+    syncDatetimeState(datetimeSelection, timespanType){
+        this.dataStore.datetimeSelection = datetimeSelection;
+        this.dataStore.timespanType = timespanType;
+    },
+
+    syncTimeSeriesData(mutatedTimeSeries){
+        this.dataStore.timeSeriesGraphData = {labels: [], graphData: []};
+
+        if(mutatedTimeSeries && mutatedTimeSeries.graphData && mutatedTimeSeries.labels && mutatedTimeSeries.graphData.length > 0){
+            this.dataStore.timeSeriesGraphData = Object.assign({}, {labels: mutatedTimeSeries.labels});
+            this.dataStore.timeSeriesGraphData.graphData = mutatedTimeSeries.graphData.map(hourlyAggregate => {
+                let graphEntry = Object.assign({}, {date: hourlyAggregate.date});
+                hourlyAggregate.edges.forEach((edge, index) => {
+                    graphEntry[edge] = hourlyAggregate.mentions[index];
+                });
+
+                return graphEntry;
+            });
         }
+    },
+
+    syncPopularTerms(popularTerms){
+        let colorSlices = ['#fdd400', '#84b761', '#b6d2ff', '#CD0D74', '#2f4074', '#7e6596'];
+        this.dataStore.colorMap.clear();
+        this.dataStore.popularTerms = popularTerms;
+        this.dataStore.popularTerms.forEach(term=>{
+            this.dataStore.colorMap.set(term.name, colorSlices.pop());
+        });
+    },
+
+    handleClearFilters(){
+        this.dataStore.termFilters.clear();
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
+        this.emit("change");
+    },
+
+    handleReloadChartData(changedData){
+        const {selectedEntity, datetimeSelection, timespanType, 
+               mutatedTimeSeries, popularLocations, popularTerms, dataSource} = changedData;
+        this.syncPrimaryEdgeData(selectedEntity, this.dataStore.language);
+        this.syncDatetimeState(datetimeSelection, timespanType);
+        this.syncTimeSeriesData(mutatedTimeSeries);
+        this.dataStore.dataSource = dataSource;
+        this.syncPopularTerms(popularTerms.edges || []);
+        this.dataStore.popularLocations = popularLocations.edges || [];
         
+        this.dataStore.renderMap = true;
         this.emit("change");
     },
     
     mapDataUpdate(heatmapData){
+        this.dataStore.associatedKeywords = new Map();
         this.dataStore.associatedKeywords = heatmapData.associatedKeywords;
+        this.syncAssociatedTermsSelections(this.dataStore.termFilters);
         this.dataStore.bbox = heatmapData.bbox;
         this.dataStore.renderMap = false;
         this.emit("change");

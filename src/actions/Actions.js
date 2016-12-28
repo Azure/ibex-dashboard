@@ -56,14 +56,14 @@ const constants = {
            },
            DASHBOARD : {
                CHANGE_SEARCH: "SEARCH:CHANGE",
-               CHANGE_DATE: "DATE:CHANGE",
                INITIALIZE: "DASHBOARD:INIT",
-               CHANGE_SOURCE: "UPDATE:DATA_SOURCE",
-               CHANGE_COLOR_MAP: "UPDATE:COLOR_MAP",               
+               RELOAD_CHARTS: "RELOAD:RELOAD_CHARTS",
                ASSOCIATED_TERMS: "UPDATE:ASSOCIATED_TERMS",
                CHANGE_TERM_FILTERS: "UPDATE:CHANGE_TERM_FILTERS",
                CHANGE_LANGUAGE: "DASHBOARD:CHANGE_LANGUAGE",
                LOAD_DETAIL: "LOAD:DETAIL",
+               CHANGE_TERM_FILTERS_TO_ONLY: "UPDATE:CHANGE_TERM_FILTERS_TO_ONLY",
+               CLEAR_FILTERS: "UPDATE:CLEAR_FILTERS",
                LOAD_DETAIL_ERROR: "LOAD:DETAIL_ERROR"
            },
            FACTS : {
@@ -115,13 +115,10 @@ const DataSourceLookup = requestedSource => {
 
 const methods = {
     DASHBOARD: {
-        changeSearchFilter(selectedEntity, siteKey, colorMap){
-           let self = this;
-           self.dispatch(constants.DASHBOARD.CHANGE_SEARCH, {selectedEntity, colorMap});
-        },
-
         initializeDashboard(siteId) {
             let self = this;
+            let dataStore = this.flux.stores.DataStore.dataStore;
+            let dataSource = "all";
 
             parallelAsync({
                 settings: callback => {
@@ -129,33 +126,51 @@ const methods = {
                 },
                 edges: callback => {
                         SERVICES.fetchEdges(siteId, EDGE_TYPE_ALL, (error, response, body) => ResponseHandler(error, response, body, callback))
+                },
+                chartData: callback => {
+                        SERVICES.getChartVisualizationData(siteId, dataStore.datetimeSelection, dataStore.timespanType, undefined, dataSource, (error, response, body) => ResponseHandler(error, response, body, callback))
                 }
             }, (error, results) => {
-                    if(!error && Object.keys(results).length === 2 
+                    if(!error && Object.keys(results).length === 3
                               && results.settings.siteDefinition.sites.length > 0){
-                        const { settings, edges } = results;
+                        const { settings, edges, chartData } = results;
+                        const { timeSeries, terms, locations } = chartData;
 
-                        self.dispatch(constants.DASHBOARD.INITIALIZE, {settings, edges});
+                        self.dispatch(constants.DASHBOARD.INITIALIZE, { settings, edges, timeSeries, terms, locations, dataSource });
                     }else {
                         console.error(`[${error}] occured while fetching edges or site defintion for site [${siteId}]`);
                     }
             });
         },
-   
-        termsColorMap(colorMap){
-            this.dispatch(constants.DASHBOARD.CHANGE_COLOR_MAP, {colorMap})
+        clearWatchlistFilters(){
+            this.dispatch(constants.DASHBOARD.CLEAR_FILTERS, {});
+        },
+        reloadVisualizationState(siteKey, datetimeSelection, timespanType, dataSource, selectedEntity){
+            let self = this;
+
+            SERVICES.getChartVisualizationData(siteKey, datetimeSelection, timespanType, selectedEntity, dataSource, (err, response, body) => ResponseHandler(err, response, body, (error, graphqlResponse) => {
+                    if(graphqlResponse) {
+                        const {timeSeries, terms, locations} = graphqlResponse;
+                        self.dispatch(constants.DASHBOARD.RELOAD_CHARTS, { selectedEntity: selectedEntity, 
+                                                                           mutatedTimeSeries: timeSeries, 
+                                                                           popularLocations: locations, 
+                                                                           popularTerms: terms,
+                                                                           dataSource: dataSource,
+                                                                           timespanType: timespanType,
+                                                                           datetimeSelection: datetimeSelection });
+                    }else{
+                        console.error(`[${error}] occured while processing tile visualization re-sync request`);
+                    }
+            }));
         },
         changeTermsFilter(newFilters){
            this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS, newFilters);
         },
-        filterDataSource(dataSource){
-           this.dispatch(constants.DASHBOARD.CHANGE_SOURCE, dataSource);
+        changeTermsFilterToOnly(newFilter){
+           this.dispatch(constants.DASHBOARD.CHANGE_TERM_FILTERS_TO_ONLY, newFilter);
         },
         updateAssociatedTerms(associatedKeywords, bbox){
             this.dispatch(constants.DASHBOARD.ASSOCIATED_TERMS, {associatedKeywords, bbox});
-        },
-        changeDate(siteKey, datetimeSelection, timespanType){
-           this.dispatch(constants.DASHBOARD.CHANGE_DATE, {datetimeSelection: datetimeSelection, timespanType: timespanType});
         },
         loadDetail(siteKey, messageId, dataSources, sourcePropeties){
             let self = this;

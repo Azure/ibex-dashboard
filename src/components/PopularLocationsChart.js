@@ -1,8 +1,6 @@
 import Fluxxor from 'fluxxor';
 import React from 'react';
 import numeralLibs from 'numeral';
-import {SERVICES} from '../services/services';
-import {Actions} from '../actions/Actions';
 import 'amcharts3/amcharts/amcharts';
 import 'amcharts3/amcharts/serial';
 import 'amcharts3/amcharts/pie';
@@ -10,8 +8,6 @@ import 'amcharts3-export';
 import 'amcharts3-export/export.css';
 import 'amcharts3/amcharts/themes/dark';
 
-
-const MAX_ZOOM = 15;
 const DEFAULT_LANGUAGE = "en";
 const FluxMixin = Fluxxor.FluxMixin(React),
       StoreWatchMixin = Fluxxor.StoreWatchMixin("DataStore"),
@@ -58,7 +54,9 @@ export const PopularLocationsChart = React.createClass({
 
     this.popularLocationsChart.addListener("clickSlice", e => {
         if(e.dataItem.dataContext){
-              self.getFlux().actions.DASHBOARD.changeSearchFilter(e.dataItem.dataContext, this.props.siteKey);
+              self.getFlux().actions.DASHBOARD.reloadVisualizationState(this.props.siteKey, self.state.datetimeSelection, 
+                                                                        self.state.timespanType, self.state.dataSource, 
+                                                                        e.dataItem.dataContext);
         }
     });
  },
@@ -66,50 +64,33 @@ export const PopularLocationsChart = React.createClass({
  refreshChart(locations, lang){
     let maxAxesDisplayLabelChars = 16;
     let dataProvider = [];
+    const state = this.getStateFromFlux();
+    const edgeMap = state.allEdges.get(DEFAULT_LANGUAGE);
 
     locations.forEach(location => {
-              let label = location.properties['name_'+lang];
-              let mentions = location.properties.mentions;
-              let coordinates = location.coordinates;
-              let population = numeralLibs(location.properties.population).format(location.properties.population > 1000 ? '+0.0a' : '0a');
+              const edge = edgeMap.get(location.name.toLowerCase());
+              const label = edge['name_'+lang];
+              let mentions = location.mentions;
+              let population = numeralLibs(location.population).format(location.population > 1000 ? '+0.0a' : '0a');
               let displayLabel = label.length > maxAxesDisplayLabelChars ? label.substring(0, maxAxesDisplayLabelChars) : label;
               let mentionFmt = numeralLibs(mentions).format(mentions > 1000 ? '+0.0a' : '0a');
-              dataProvider.push(Object.assign({}, location.properties, {coordinates: coordinates, population: population,
-                                 displayLabel: displayLabel, term: label, category: "Location",
-                                 mentions: mentions, mentionFmt: mentionFmt, color: '#ccc'}));
+              dataProvider.push(Object.assign({}, edge, {displayLabel: displayLabel, term: label, mentions: mentions, category: "Location",
+                                 mentionFmt: mentionFmt, color: '#ccc', population: population}));
     });
 
     this.popularLocationsChart.dataProvider = dataProvider;
     this.popularLocationsChart.validateData();
  },
 
- updateChart(period, timespanType, dataSource){
-     let self = this;
-
-     SERVICES.getMostPopularPlaces(this.props.siteKey, period, timespanType, DEFAULT_LANGUAGE, MAX_ZOOM, Actions.DataSources(dataSource), (error, response, body) => {
-                if (!error && response.statusCode === 200) {
-                    if(body && body.data && body.data.popularLocations && body.data.popularLocations.features){
-                        let edgeMap = self.state.allEdges.get(DEFAULT_LANGUAGE);
-                        let popularLocations = body.data.popularLocations.features.map(location => {
-                            location.properties = Object.assign({}, location.properties,edgeMap.get(location.properties.location.toLowerCase()));
-                            return location;
-                        });           
-                        self.refreshChart(popularLocations, self.props.language);
-                    }
-
-                }else{
-                    console.error(`[${error}] occured while processing tile request [${this.state.categoryValue.name}, ${this.state.datetimeSelection}`);
-                }
-      });
-  },
-
   componentWillReceiveProps(nextProps){
+      const {popularLocations} = this.getStateFromFlux();
+
       if(!this.popularLocationsChart){
           this.initializeGraph();
-          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType, nextProps.dataSource);
+          this.refreshChart(popularLocations, nextProps.language);
       }else if(this.props.datetimeSelection !== nextProps.datetimeSelection || this.props.dataSource !== nextProps.dataSource 
             || this.props.language !== nextProps.language){
-          this.updateChart(nextProps.datetimeSelection, nextProps.timespanType, nextProps.dataSource);
+          this.refreshChart(popularLocations, nextProps.language);
       }
   },
   

@@ -48,7 +48,8 @@ export const TypeaheadSearch = React.createClass({
 
   onSuggestionSelected(event, { suggestion }){
     event.preventDefault();
-    this.getFlux().actions.DASHBOARD.changeSearchFilter(suggestion, this.props.siteKey);
+    this.getFlux().actions.DASHBOARD.reloadVisualizationState(this.props.siteKey, this.props.datetimeSelection, 
+                                                              this.props.timespanType, this.props.dataSource, suggestion);
   },
 
   onChange(event, { newValue }){

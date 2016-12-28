@@ -22,7 +22,6 @@ const TimeSelectionOptions = [
     {label: 'This Month', timeType: 'months', subtractFromNow: 0},
     {label: 'Last Month', timeType: 'months', subtractFromNow: 1},
     {label: 'Select Date', timeType: 'customDate', subtractFromNow: 0},
-    {label: 'Select Date+Hour', timeType: 'customDateTime', subtractFromNow: 0},
     {label: 'Select Month', timeType: 'customMonth', subtractFromNow: 0}
 ];
 
@@ -62,15 +61,14 @@ export const DataSelector = React.createClass({
       if(selectionOption.timeType.startsWith("custom")){
           this.setState({timeType: value});
       }else{
-          this.getFlux().actions.DASHBOARD.changeDate(siteKey, value, selectionOption.timeType);
+          this.getFlux().actions.DASHBOARD.reloadVisualizationState(siteKey, value, selectionOption.timeType, this.state.dataSource, this.state.categoryValue);
       }
   },
   
   handleDatePickerChange(dateObject, dateStr){
       let formatter = Actions.constants.TIMESPAN_TYPES[this.state.timeType];
       let siteKey = this.props.siteKey;
-      
-      this.getFlux().actions.DASHBOARD.changeDate(siteKey, momentToggleFormats(dateStr, formatter.reactWidgetFormat, formatter.format), this.state.timeType);
+      this.getFlux().actions.DASHBOARD.reloadVisualizationState(siteKey, momentToggleFormats(dateStr, formatter.reactWidgetFormat, formatter.format), this.state.timeType, this.state.dataSource, this.state.categoryValue);
       this.setState({timeType: ''});
   },
   
@@ -103,7 +101,7 @@ export const DataSelector = React.createClass({
                                   timeValue = timeOption.timeType;
                               }
                               
-                              menuItems.push(<MenuItem key={label.toString()} value={timeValue} primaryText={label}/>);
+                              menuItems.push(<MenuItem key={timeValue} value={timeValue} primaryText={label}/>);
      });
      
      return menuItems;
@@ -121,7 +119,7 @@ export const DataSelector = React.createClass({
          <div className="col-sm-12 dateFilterColumn">
              <div className="input-group dateFilter">
                 {!showDatePicker && !showTimePicker && !showMonthSelector ?
-                    <SelectField underlineStyle={{borderColor: '#337ab7', borderBottom: 'solid 3px'}} 
+                    <SelectField key="dateSelection" underlineStyle={{borderColor: '#337ab7', borderBottom: 'solid 3px'}} 
                                  labelStyle={{fontWeight: 600, color:'#2ebd59'}} 
                                  value={this.state.datetimeSelection} 
                                  onChange={this.handleChange}>
@@ -148,7 +146,7 @@ export const DataSelector = React.createClass({
             }
             </div>
             <div>
-                <DataSourceFilter />
+                <DataSourceFilter {...this.props}/>
             </div>
          </div>
      </div>

@@ -15,32 +15,35 @@ const FluxMixin = Fluxxor.FluxMixin(React),
 
 const styles = {
   subHeader: {
-    color:'rgb(46, 189, 89)',
+    color:'#fff',
     paddingLeft: '11px',
-    fontSize: '14px',
-    fontWeight: 800
+    fontSize: '18px',
+    fontWeight: 700
   },
   component: {
      display: 'block',
      verticalAlign: 'top',
      width: '100%'
- },
- searchBox: {
-        padding: '0px 20px 10px 20px'
- },
- subHeaderDescription: {
-    color: '#a3a3b3',
-    fontSize: '8px',
-    fontWeight: 800,
-    paddingLeft: '4px'
- }
+  },
+  searchBox: {
+     padding: '0px 20px 10px 20px'
+  },
+  subHeaderDescription: {
+      color: '#a3a3b3',
+      fontSize: '8px',
+      fontWeight: 800,
+      paddingLeft: '4px'
+  },
+  titleSpan: {
+      paddingRight: '8px'
+  }
 };
  
 const treeDataStyle = {
      tree: {
         base: {
                 listStyle: 'none',
-                backgroundColor: '#21252B',
+                backgroundColor: 'rgb(63, 63, 79)',
                 margin: 0,
                 padding: 0,
                 color: '#9DA5AB',
@@ -159,15 +162,42 @@ export const SentimentTreeview = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
   
   getInitialState(){
+      this.totalMentionCount = 0;
+      this.visibleMentionCount = 0;
+
       return {
           treeData: {},
           originalTreeData: {}
       }
   },
 
+  hasChanged(){
+      const {associatedKeywords} = this.getStateFromFlux();
+      let totalMentionCount = 0, visibleMentionCount = 0;
+
+      for (let [term, value] of associatedKeywords.entries()) {
+          if(value.enabled){
+                visibleMentionCount += value.mentions;
+          }
+          totalMentionCount += value.mentions;
+      }
+
+      if(this.totalMentionCount !== totalMentionCount || this.visibleMentionCount !== visibleMentionCount){
+          this.totalMentionCount = totalMentionCount;
+          this.visibleMentionCount = visibleMentionCount;
+
+          return true;
+      }else{
+          return false;   
+      }
+  },
+
   componentWillReceiveProps(nextProps){
-      let treeData = this.createRelevantTermsTree(this.state.associatedKeywords, nextProps.language);
-      this.setState({treeData: treeData, originalTreeData: treeData})
+      if(this.hasChanged() || this.props.language !== nextProps.language){
+            const {associatedKeywords} = this.getStateFromFlux();
+            let treeData = this.createRelevantTermsTree(associatedKeywords, nextProps.language);
+            this.setState({treeData: treeData, originalTreeData: treeData})
+      }
   },
 
   createRelevantTermsTree(termsMap, lang){
@@ -252,15 +282,17 @@ export const SentimentTreeview = React.createClass({
   },
 
   onChange(node){
-      let filters = this.props.enabledTerms;
+      let filters = this.props.enabledTerms.map(filter=>Object.assign({}, {term: filter, action: 'add'}));
       let checkboxActionCB = (nodeElement, filterList) => {
           let addTerm = !nodeElement.checked;
-          let termIndex = filterList.indexOf(nodeElement.folderKey);
+          let termIndex = filterList.findIndex(filter=>filter.term === nodeElement.folderKey);
 
+          //you're selecting to remove the enabled filter
           if(!addTerm && termIndex > -1){
-              filterList.splice(termIndex, 1);
+              let mutatedFilter = Object.assign({}, filterList[termIndex], {action: 'remove'});
+              filterList[termIndex] = mutatedFilter;
           }else{
-              filterList.push(nodeElement.folderKey);
+              filterList.push({term: nodeElement.folderKey, action: 'add'});
           }
       }
 
@@ -270,7 +302,7 @@ export const SentimentTreeview = React.createClass({
 
   filterNode(filteredNode){
        let filters = [filteredNode[`name_${DEFAULT_LANGUAGE}`]];
-       this.getFlux().actions.DASHBOARD.changeTermsFilter(filters);
+       this.getFlux().actions.DASHBOARD.changeTermsFilterToOnly(filters);
   },
 
   onFilterMouseUp(e){
@@ -307,7 +339,8 @@ export const SentimentTreeview = React.createClass({
   termSelected(node){
       if(!node.children){
           node['type']="Term";
-          this.getFlux().actions.DASHBOARD.changeSearchFilter(node, this.props.siteKey);
+          this.getFlux().actions.DASHBOARD.reloadVisualizationState(this.props.siteKey, this.state.datetimeSelection, 
+                                                                    this.state.timespanType, this.state.dataSource, node);
       }
   },
 
@@ -359,12 +392,22 @@ export const SentimentTreeview = React.createClass({
 
      return (
          <div className="panel panel-selector">
-            <Subheader style={styles.subHeader}>Watchlist Terms</Subheader>
+            <Subheader style={styles.subHeader}>
+               <span style={styles.titleSpan}>WATCHLIST TERMS</span>
+               {
+                  this.props.enabledTerms.length > 0 ? 
+                   <button type="button" onClick={()=>this.getFlux().actions.DASHBOARD.clearWatchlistFilters()} className="btn btn-primary btn-sm">Clear Selections</button>
+                  : undefined
+               }                
+            </Subheader>
             <div style={styles.searchBox}>
                 <TypeaheadSearch data={this.state.categoryValue["name_"+this.props.language]}
                                 type={this.state.categoryType}
                                 siteKey={this.props.siteKey}
-                                language={this.state.language}/>
+                                dataSource={this.state.dataSource}
+                                language={this.state.language}
+                                datetimeSelection={this.state.datetimeSelection}
+                                timespanType={this.state.timespanType}/>
             </div>
             <div style={styles.searchBox}>
                     <div className="input-group">
