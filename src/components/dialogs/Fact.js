@@ -130,25 +130,25 @@ export const Fact = React.createClass({
                 <p className="subheading">Date created</p>
                 <p className="drop"><i className="fa fa-clock-o fa-1"></i><span className="date">{dateCreated}</span></p>
                 <p className="subheading">Sources</p>
-                <p className="drop">
+                <div className="drop">
                   {originalSource && originalSource.filter(source=>sourcesBlackList.indexOf(source)===-1).map(source => {
                       let sourceFormatted = source.replace(/http:\/\/www./g, '').replace(/.com\//g, '').replace(/http:\/\//g, '').replace(/https:\/\//g, '');
                       
-                      return <Chip style={styles.chip}>
+                      return <Chip key={sourceFormatted} style={styles.chip}>
                                               <Avatar icon={<FontIcon className="material-icons">share</FontIcon>} />
                                             {sourceFormatted}
                              </Chip>;
                    })}
-                </p>
+                </div>
                 <p className="subheading">Tags</p>
-                <p className="drop">
-                  {tags && tags.map(tag => <Chip backgroundColor={blue300} style={styles.chip}>
+                <div className="drop">
+                  {tags && tags.map(tag => <Chip key={tag} backgroundColor={blue300} style={styles.chip}>
                                               <Avatar size={32} color={blue300} backgroundColor={indigo900}>
                                                 {tag.substring(0, 2)}
                                               </Avatar>
                                             {tag}
                                            </Chip>)}
-                </p>
+                </div>
               </div>
             </div>
           </div>

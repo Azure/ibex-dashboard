@@ -6,6 +6,7 @@ import Avatar from 'material-ui/Avatar';
 import FontIcon from 'material-ui/FontIcon';
 import Highlighter from 'react-highlight-words';
 import Chip from 'material-ui/Chip';
+import MapViewPort from './MapViewPort';
 import {blue300, indigo900} from 'material-ui/styles/colors';
 
 const DATETIME_FORMAT = "MM/DD HH:mm:ss";
@@ -80,7 +81,12 @@ export default class Acled extends React.Component {
                                     }
                             </h6>
                         </div>
-                        <div className="col-md-9">
+                      <div className="col-md-3 viewport">
+                        <p className="drop">
+                            <MapViewPort coordinates={this.state.coordinates} mapSize={[375, 400]}/>
+                        </p>
+                      </div>
+                        <div className="col-md-7">
                             <div className="article">
                                 <p className="text">
                                 <Highlighter searchWords={tags}
@@ -89,30 +95,30 @@ export default class Acled extends React.Component {
                                 </p>
                             </div>
                         </div>
-                        <div className="col-md-3">
+                        <div className="col-md-2">
                             <div className="details">
                                 <p className="subheading sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
                                 <p className="subheading">Date created</p>
                                 <p className="drop"><i className="fa fa-clock-o fa-1"></i><span className="date">{dateText}</span></p>
                                 <p className="subheading">Sources</p>
-                                <p className="drop">
+                                <div className="drop">
                                 {
-                                    originalSource && originalSource !== "" && !originalSource.startsWith("facebook-") ? 
-                                        <Chip style={styles.chip}>
+                                    originalSource && originalSource !== "" && !originalSource.startsWith("acled") ? 
+                                        <Chip key={originalSource} style={styles.chip}>
                                                                 <Avatar icon={<FontIcon className="material-icons">share</FontIcon>} />
                                                                 {originalSource}
                                         </Chip> : undefined
                                 }
-                                </p>
+                                </div>
                                 <p className="subheading">Tags</p>
-                                <p className="drop">
-                                {tags && tags.map(tag => <Chip backgroundColor={blue300} style={styles.chip}>
+                                <div className="drop">
+                                {tags && tags.map(tag => <Chip key={tag} backgroundColor={blue300} style={styles.chip}>
                                                             <Avatar size={32} color={blue300} backgroundColor={indigo900}>
                                                                 {tag.substring(0, 2)}
                                                             </Avatar>
                                                             {tag}
                                                         </Chip>)}
-                                </p>
+                                </div>
                             </div>
                         </div>
                     </div>

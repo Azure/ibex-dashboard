@@ -86,7 +86,7 @@ export default class Facebook extends React.Component {
                       </div>
                       <div className="col-md-3 viewport">
                         <p className="drop">
-                            <MapViewPort coordinates={this.state.factDetail.coordinates} mapSize={[375, 400]}/>
+                            <MapViewPort coordinates={this.state.coordinates} mapSize={[375, 400]}/>
                         </p>
                       </div>
                       <div className="col-md-7">
@@ -104,24 +104,24 @@ export default class Facebook extends React.Component {
                             <p className="subheading">Date created</p>
                             <p className="drop"><i className="fa fa-clock-o fa-1"></i><span className="date">{dateText}</span></p>
                             <p className="subheading">Sources</p>
-                            <p className="drop">
+                            <div className="drop">
                             {
                               originalSource && originalSource !== "" && !originalSource.startsWith("facebook-") ? 
-                                <Chip style={styles.chip}>
+                                <Chip key={originalSource} style={styles.chip}>
                                                         <Avatar icon={<FontIcon className="material-icons">share</FontIcon>} />
                                                         {originalSource}
                                 </Chip> : undefined
                             }
-                            </p>
+                            </div>
                             <p className="subheading">Tags</p>
-                            <p className="drop">
-                                {tags && tags.map(tag => <Chip backgroundColor={blue300} style={styles.chip}>
+                            <div className="drop">
+                                {tags && tags.map(tag => <Chip key={tag} backgroundColor={blue300} style={styles.chip}>
                                                             <Avatar size={32} color={blue300} backgroundColor={indigo900}>
                                                                 {tag.substring(0, 2)}
                                                             </Avatar>
                                                             {tag}
                                                         </Chip>)}
-                            </p>
+                            </div>
                         </div>
                       </div>
                     </div>

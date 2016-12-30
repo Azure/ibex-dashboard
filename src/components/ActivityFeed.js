@@ -324,10 +324,11 @@ export const ActivityFeed = React.createClass({
                         elements = requestPayload.elementStartList.concat(graphQLResponse.features.filter(feature=>feature.properties.sentence && feature.properties.sentence.length > 2)
                                                                                                   .map(feature => {
                                 const { messageid, sentence, source, createdtime, sentiment, edges, language } = feature.properties;
-                                const {title, originalSources, link} = feature.properties.properties;
+                                const { title, originalSources, link } = feature.properties.properties;
                                 const { searchValue } = requestPayload;
+                                const { coordinates } = feature;
 
-                                return Object.assign({}, {messageid, sentence, searchValue, source, createdtime, link, sentiment, edges, language, title, originalSources }, {eventEdges: requestPayload.edges});
+                                return Object.assign({}, {coordinates, messageid, sentence, searchValue, source, createdtime, link, sentiment, edges, language, title, originalSources }, {eventEdges: requestPayload.edges});
                         }));                        
                     }
                 }else{
@@ -461,6 +462,7 @@ export const ActivityFeed = React.createClass({
                                      originalSource={feature.originalSources && feature.originalSources.length > 0 ? feature.originalSources[0] : ""}
                                      postedTime={feature.createdtime}
                                      sentiment={feature.sentiment}
+                                     coordinates ={feature.coordinates}
                                      link={feature.link}
                                      featureEdges={this.translatedTerms(DEFAULT_LANGUAGE, feature.language, feature.edges)}
                                      edges={this.innerJoin(translatedDashboardEdges, this.translatedTerms(DEFAULT_LANGUAGE, this.state.language, feature.edges)).concat(otherTags)}
