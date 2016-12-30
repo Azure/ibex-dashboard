@@ -2,6 +2,12 @@ import React from 'react';
 import { getHumanDateFromNow, getSentimentDescription } from '../../utils/Utils.js';
 import { getSentimentStyle } from '../../utils/Style.js';
 import {SERVICES} from '../../services/services';
+import Avatar from 'material-ui/Avatar';
+import FontIcon from 'material-ui/FontIcon';
+import Highlighter from 'react-highlight-words';
+import Chip from 'material-ui/Chip';
+import MapViewPort from './MapViewPort';
+import {blue300, indigo900} from 'material-ui/styles/colors';
 
 const DATETIME_FORMAT = "MM/DD HH:mm:ss";
 const styles = {
@@ -19,6 +25,13 @@ const styles = {
         fontWeight: 700,
         fontSize: '16px',
         color: 'rgb(51, 122, 183)'
+    },
+    chip: {
+      margin: 4,
+    },
+    highlight: {
+        backgroundColor: '#ffd54f',
+        fontWeight: '600'
     }
 };
 
@@ -41,8 +54,10 @@ export default class Acled extends React.Component {
     render() {
         if (!this.state){
             return (
-                <div className="facebook">
-                    <p>Loading details&hellip;</p>
+                <div className="fact">
+                    <div className="container-fluid">
+                        <p>Loading fact&hellip;</p>
+                    </div>
                 </div>
             );
         }
@@ -51,20 +66,63 @@ export default class Acled extends React.Component {
         const sentiment = this.state.properties.sentiment;
         const originalSource = this.state.properties.properties.originalSources && this.state.properties.properties.originalSources.length > 0 ? this.state.properties.properties.originalSources[0] : "";
         const title = this.state.properties.properties.title;
+        const tags = this.props.content.featureEdges || [];
         const sentimentStyle = getSentimentStyle(sentiment);
         const sentimentDescription = getSentimentDescription(sentiment);
 
         return (
-            <div className="acled">
-                <h6 style={styles.listItemHeader}>
-                    {
-                        originalSource !== "" ? <span>{originalSource}</span> : undefined
-                    }
-                </h6>
-                <p style={styles.title}>{title}</p>
-                <p className="title"><i className="fa fa-clock-o fa-1"></i>&nbsp;{dateText}</p>  
-                <p className="title">{text}</p>   
-                <p className="sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
+            <div id="fact">
+                <div className="container-fluid">
+                    <div className="row whitespace">
+                        <div className="caption">
+                            <h6 style={styles.listItemHeader}>
+                                    {
+                                        title !== "" ? <span>{title}</span> : undefined
+                                    }
+                            </h6>
+                        </div>
+                      <div className="col-md-3 viewport">
+                        <p className="drop">
+                            <MapViewPort coordinates={this.state.coordinates} mapSize={[375, 400]}/>
+                        </p>
+                      </div>
+                        <div className="col-md-7">
+                            <div className="article">
+                                <p className="text">
+                                <Highlighter searchWords={tags}
+                                            highlightStyle={styles.highlight}
+                                            textToHighlight={text} />
+                                </p>
+                            </div>
+                        </div>
+                        <div className="col-md-2">
+                            <div className="details">
+                                <p className="subheading sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
+                                <p className="subheading">Date created</p>
+                                <p className="drop"><i className="fa fa-clock-o fa-1"></i><span className="date">{dateText}</span></p>
+                                <p className="subheading">Sources</p>
+                                <div className="drop">
+                                {
+                                    originalSource && originalSource !== "" && !originalSource.startsWith("acled") ? 
+                                        <Chip key={originalSource} style={styles.chip}>
+                                                                <Avatar icon={<FontIcon className="material-icons">share</FontIcon>} />
+                                                                {originalSource}
+                                        </Chip> : undefined
+                                }
+                                </div>
+                                <p className="subheading">Tags</p>
+                                <div className="drop">
+                                {tags && tags.map(tag => <Chip key={tag} backgroundColor={blue300} style={styles.chip}>
+                                                            <Avatar size={32} color={blue300} backgroundColor={indigo900}>
+                                                                {tag.substring(0, 2)}
+                                                            </Avatar>
+                                                            {tag}
+                                                        </Chip>)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }

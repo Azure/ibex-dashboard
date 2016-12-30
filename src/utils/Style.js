@@ -1,21 +1,18 @@
 // Style helpers
 export function getSentimentStyle(float){
     // negative
-	if (float < 0.3) {
-        return { color: 'red' };
+	if (float < 0.2) {
+        return { color: 'green' };
     }
     // moderately negative
     if (float < 0.5) {
-        return { color: 'orange' };
+        return { color: 'yellow' };
     }
     // positive
-    if (float > 0.7) {
-        return { color: 'royalblue' };
+    if (float <= 0.7) {
+        return { color: 'orange' };
     }
-    // moderately positive
-    if (float > 0.5) {
-        return { color: 'green' };
-    }
+
     // neutral (exactly 0.5)
-    return { color: 'yellow' };
+    return { color: 'red' };
 }

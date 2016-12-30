@@ -99,7 +99,7 @@ export const HeatMap = React.createClass({
             
             if(filters.length > 0){
                 filters.forEach(filter => {
-                        if(++numberOfDisplayedTerms === maxTerms){
+                        if(++numberOfDisplayedTerms >= maxTerms){
                             infoBoxInnerHtml += `<span class="filterLast">&nbsp;and ${(filters.length + 1) - maxTerms} Others</span>`;
                         }else if(numberOfDisplayedTerms < maxTerms){
                             infoBoxInnerHtml += `${numberOfDisplayedTerms > 0 ? '<span class="filterSeperation">+</span>' : ''}
@@ -176,12 +176,10 @@ export const HeatMap = React.createClass({
         this.map.addControl(L.control.zoom({position: 'topright'}));
         this.map.setView([latitude, longitude], defaultZoom);
         this.map.coordinates = [longitude, latitude];
-        L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/{id}/tiles/256/{z}/{x}/{y}?access_token={accessToken}', {
+        L.tileLayer('https://api.mapbox.com/styles/v1/erikschlegel/cikjqc1k900809vm0prcdlpyv/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg', {
             attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
             maxZoom: 17,
-            minZoom: 5,
-            id: 'dark-v9',
-            accessToken: 'pk.eyJ1IjoiZXJpa3NjaGxlZ2VsIiwiYSI6ImNpaHAyeTZpNjAxYzd0c200dWp4NHA2d3AifQ.5bnQcI_rqBNH0rBO0pT2yg'
+            minZoom: 5
         }).addTo(this.map);
         
         this.map.selectedTerm = state.categoryValue["name_"+this.props.language];
@@ -285,13 +283,13 @@ export const HeatMap = React.createClass({
   customClusterIcon(mentions, cssClass){
       let clusterSize = defaultClusterSize;
 
-      if(mentions > 1000 && mentions < 10000){
+      if(mentions > 20 && mentions < 100){
           clusterSize = 50;
           cssClass += " cluster-size-medium";
-      }else if(mentions > 10000 && mentions < 50000){
+      }else if(mentions > 100 && mentions < 200){
           clusterSize = 60;
           cssClass += " cluster-size-large";
-      }else if(mentions > 50000){
+      }else if(mentions > 200){
           clusterSize = 70;
           cssClass += " cluster-size-xl";
       }

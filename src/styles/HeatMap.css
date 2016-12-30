@@ -54,12 +54,12 @@
 
 .cluster-size-medium div{
   border-radius: 30px;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
 }
 
 .cluster-size-medium span{
-  line-height: 40px;
+  line-height: 42px;
 }
 
 .cluster-size-large{
@@ -94,6 +94,11 @@
   line-height: 60px;
 }
 
+.marker-cluster span{
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .marker-cluster-xl{
   background-color: #b74e4f;
 }
@@ -114,7 +119,7 @@
 
 #leafletMap{
   margin-top: 0px;
-    height: 600px;
+  height: 600px;
   background-color: #333;
 }
 

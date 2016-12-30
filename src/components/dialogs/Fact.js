@@ -1,12 +1,41 @@
 import React from 'react';
 import Fluxxor from 'fluxxor';
-import { Link } from 'react-router';
 import { getHumanDateFromNow, getSentimentDescription } from '../../utils/Utils.js';
 import { getSentimentStyle } from '../../utils/Style.js';
+import MapViewPort from './MapViewPort';
+import Avatar from 'material-ui/Avatar';
+import FontIcon from 'material-ui/FontIcon';
+import Highlighter from 'react-highlight-words';
+import Chip from 'material-ui/Chip';
+import {blue300, indigo900} from 'material-ui/styles/colors';
 
 const sourcesBlackList = ["http://www.alchemyapi.com/","http://www.bing.com/","http://www.tadaweb.com/"];
 const FluxMixin = Fluxxor.FluxMixin(React),
   StoreWatchMixin = Fluxxor.StoreWatchMixin("FactDetailStore");
+const styles = {
+    listItemHeader: {
+        font: '.777777778em Arial,Helvetica,sans-serif',
+        marginBottom: '3px',
+        fontWeight: 500,
+        marginTop: '2px',
+        textAlign: 'left',
+        color: '#f44d3c',
+        fontSize: '22px'
+    },
+    title: {
+        font: '.777777778em Arial,Helvetica,sans-serif',
+        fontWeight: 700,
+        fontSize: '16px',
+        color: 'rgb(51, 122, 183)'
+    },
+    chip: {
+      margin: 4,
+    },
+    highlight: {
+        backgroundColor: '#ffd54f',
+        fontWeight: '600'
+    }
+};
 
 export const Fact = React.createClass({
   mixins: [FluxMixin, StoreWatchMixin],
@@ -46,67 +75,80 @@ export const Fact = React.createClass({
       return (
         <div className="fact">
           <div className="container-fluid">
-
             <div className="row">
               <div className="col-md-12"><h1>Error, unexpected fact data.</h1></div>
             </div>
-
           </div>
         </div>
       );
     }
 
-    let factDetail = this.state.factDetail.properties || {};
-    let fact = factDetail.properties || {};
-    let dateCreated = getHumanDateFromNow(factDetail.createdtime);
-    let text = factDetail.fullText || factDetail.sentence;
-    let sources = fact.originalSources || [];
-    let tags = factDetail.edges || [];
-    let title = fact.title;
-    let sentiment = factDetail.sentiment;
-    let sentimentStyle = getSentimentStyle(sentiment);
-    let sentimentDescription = getSentimentDescription(sentiment);
+    const factDetail = this.state.factDetail.properties || {};
+    const dateCreated = getHumanDateFromNow(factDetail.createdtime);
+    const text = factDetail.fullText || factDetail.sentence;
+    const originalSource = factDetail.properties.originalSources && factDetail.properties.originalSources.length > 0 ? factDetail.properties.originalSources : "";
+    const title = factDetail.properties.title || "";
+    const tags = this.props.content.featureEdges || [];
+    const link = factDetail.properties.link || "";
+    const sentiment = factDetail.sentiment;
+    const sentimentStyle = getSentimentStyle(sentiment);
+    const sentimentDescription = getSentimentDescription(sentiment);
 
     return (
-      <div className="fact">
+      <div id="fact">
         <div className="container-fluid">
-
           <div className="row whitespace">
             <div className="caption">
+              <h6 style={styles.listItemHeader}>
+                    {
+                        title !== "" ? <span>{title}</span> : undefined
+                    }
+                    {  
+                        link !== "" ? <span className="link"><a href={link} target="_blank">Read Original</a></span>
+                          : undefined
+                    }
+              </h6>
               <h3>{}</h3>
             </div>
-            <div className="col-md-9">
+            <div className="col-md-3 viewport">
+              <p className="drop">
+                   <MapViewPort coordinates={this.state.factDetail.coordinates} mapSize={[375, 400]}/>
+              </p>
+            </div>
+            <div className="col-md-7">
               <div className="article">
-                <p className="text">{title}</p>
+                <p className="text">
+                   <Highlighter searchWords={tags}
+                                highlightStyle={styles.highlight}
+                                textToHighlight={text} />
+                </p>
               </div>
             </div>
-            <div className="col-md-9">
-              <div className="article">
-                <p className="text">{text}</p>
-              </div>
-            </div>
-            <div className="col-md-3">
+            <div className="col-md-2">
               <div className="details">
-                <p className="drop"><a href={fact.link} target="_blank">Read Original</a></p>
-
-                <p className="subheading">Date created</p>
-                <p className="drop">{dateCreated}</p>
-
-                <p className="subheading">Sources</p>
-                <ul className="drop">
-                  {sources && sources.filter(source=>sourcesBlackList.indexOf(source)===-1).map(url => {
-                    return <li key={url}><a href={url} className="truncate" target="_blank">{url}</a></li>;
-                  })}
-                </ul>
-
-                <p className="subheading">Tags</p>
-                <ul className="drop">
-                  {tags && tags.map(tag => {
-                    return <li key={tag}><Link to={`/site/${this.props.siteKey}/facts/tags/${tag}`}>{tag}</Link></li>;
-                  },this)}
-                </ul>
-
                 <p className="subheading sentiment" style={sentimentStyle} title={sentiment}>{sentimentDescription}</p>
+                <p className="subheading">Date created</p>
+                <p className="drop"><i className="fa fa-clock-o fa-1"></i><span className="date">{dateCreated}</span></p>
+                <p className="subheading">Sources</p>
+                <div className="drop">
+                  {originalSource && originalSource.filter(source=>sourcesBlackList.indexOf(source)===-1).map(source => {
+                      let sourceFormatted = source.replace(/http:\/\/www./g, '').replace(/.com\//g, '').replace(/http:\/\//g, '').replace(/https:\/\//g, '');
+                      
+                      return <Chip key={sourceFormatted} style={styles.chip}>
+                                              <Avatar icon={<FontIcon className="material-icons">share</FontIcon>} />
+                                            {sourceFormatted}
+                             </Chip>;
+                   })}
+                </div>
+                <p className="subheading">Tags</p>
+                <div className="drop">
+                  {tags && tags.map(tag => <Chip key={tag} backgroundColor={blue300} style={styles.chip}>
+                                              <Avatar size={32} color={blue300} backgroundColor={indigo900}>
+                                                {tag.substring(0, 2)}
+                                              </Avatar>
+                                            {tag}
+                                           </Chip>)}
+                </div>
               </div>
             </div>
           </div>

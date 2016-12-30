@@ -159,10 +159,6 @@
     padding-bottom: 20px;
 }
 
-#fact p {
-
-}
-
 #fact .text {
     line-height: 2;
 }
@@ -173,8 +169,25 @@
 
 #fact .subheading {
     color: gray;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
 }
 
 #fact .drop {
     padding-bottom: 20px;
+}
+
+#fact .link {
+    padding-left: 10px;
+    font-size: 16px;
+}
+
+#fact .date {
+    padding-left: 10px;
+}
+
+#fact .viewport{
+    padding-left: 0px!important;
+    margin-left: 0px!important;
 }
