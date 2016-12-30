@@ -4,7 +4,6 @@ import {SERVICES} from '../services/services';
 import { getHumanDateFromNow } from '../utils/Utils.js';
 import {Actions} from '../actions/Actions';
 import '../styles/ActivityFeed.css';
-import moment from 'moment';
 import Infinite from 'react-infinite';
 import {Tabs, Tab} from 'material-ui/Tabs';
 import CircularProgress from 'material-ui/CircularProgress';
@@ -19,7 +18,6 @@ const DEFAULT_LANGUAGE = "en";
 const ELEMENT_ITEM_HEIGHT = 80;
 const NEWS_FEED_SEARCH_CONTAINER_HEIGHT = 70;
 const INFINITE_LOAD_DELAY_MS = 1000;
-const MOMENT_FORMAT = "MM/DD HH:mm:ss";
 const SERVICE_DATETIME_FORMAT = "MM/DD/YYYY HH:mm:s A";
 const styles ={
     sourceLogo: {
@@ -190,7 +188,7 @@ const FortisEvent = React.createClass({
                             </div>
                             <div className="row" style={styles.contentRow}>
                                 <Highlighter
-                                    searchWords={this.props.edges}
+                                    searchWords={this.props.featureEdges}
                                     highlightStyle={styles.highlight}
                                     textToHighlight={this.props.sentence} />
                             </div>
@@ -407,7 +405,7 @@ export const ActivityFeed = React.createClass({
 
         return Array.from(out);
   },
-  translatedTerms(baseLanguage, englishTerms){
+  translatedTerms(baseLanguage, targetLanguage, englishTerms){
       const languageEdgeMap = this.state.allEdges.get(baseLanguage);
       let translatedSelectedEdges = [];
     
@@ -415,7 +413,7 @@ export const ActivityFeed = React.createClass({
           const mapKey = term.toLowerCase();
           const translation = languageEdgeMap.get(mapKey)
           if(translation){
-              translatedSelectedEdges.push(translation[`name_${this.state.language}`]);
+              translatedSelectedEdges.push(translation[`name_${targetLanguage}`]);
           }
       });
 
@@ -435,7 +433,7 @@ export const ActivityFeed = React.createClass({
 
   render() {
     const state = this.getStateFromFlux();
-    const translatedDashboardEdges = this.translatedTerms(DEFAULT_LANGUAGE, this.props.edges);
+    const translatedDashboardEdges = this.translatedTerms(DEFAULT_LANGUAGE, this.state.language, this.props.edges);
     const mainTerm = state.categoryValue[`name_${this.props.language}`];
     const otherTags = this.refs && this.refs.filterTextInput && this.refs.filterTextInput.value !== "" ? [this.refs.filterTextInput.value, mainTerm] : [mainTerm];
     
@@ -464,7 +462,8 @@ export const ActivityFeed = React.createClass({
                                      postedTime={feature.createdtime}
                                      sentiment={feature.sentiment}
                                      link={feature.link}
-                                     edges={this.innerJoin(translatedDashboardEdges, this.translatedTerms(DEFAULT_LANGUAGE, feature.edges)).concat(otherTags)}
+                                     featureEdges={this.translatedTerms(DEFAULT_LANGUAGE, feature.language, feature.edges)}
+                                     edges={this.innerJoin(translatedDashboardEdges, this.translatedTerms(DEFAULT_LANGUAGE, this.state.language, feature.edges)).concat(otherTags)}
                                      language={feature.language}  
                                      pageLanguage={this.props.language}
                                      updateFeedWithText={this.translateEvent}

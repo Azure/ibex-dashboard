@@ -112,17 +112,13 @@ export function getCheckedLabel(e) {
 
 // Sentiment descriptions for detail dialog box
 export function getSentimentDescription(float){
-	if (float < 0.3) {
-        return "Negative";
-    }
-    if (float < 0.5) {
+	if (float < 0.2) {
+        return "Positive";
+    }else if (float < 0.5) {
+        return "Neutral";
+    }else if (float <= 0.7) {
         return "Moderately negative";
     }
-    if (float > 0.7) {
-        return "Positive";
-    }
-    if (float > 0.5) {
-        return "Moderately positive";
-    }
-    return "Neutral";
+
+    return "Negative";
 }

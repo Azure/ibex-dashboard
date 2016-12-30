@@ -9,7 +9,7 @@ export const DataStore = Fluxxor.createStore({
       this.dataStore = {
           userProfile: profile,
           timespanType: 'customMonth',
-          datetimeSelection: 'November 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
+          datetimeSelection: 'December 2016',//moment().format(Actions.constants.TIMESPAN_TYPES.days.format),
           categoryType: '',
           dataSource: 'all',
           settings: {},
@@ -77,7 +77,7 @@ export const DataStore = Fluxxor.createStore({
                 this.syncTimeSeriesData(graphqlResponse.timeSeries);
                 //set the initial primary term to the most popular.
                 if(graphqlResponse.terms.edges && graphqlResponse.terms.edges.length > 0){
-                    this.syncPrimaryEdgeData(this.dataStore.allEdges.get(LANGUAGE_CODE_ENG).get(graphqlResponse.terms.edges[0].name), LANGUAGE_CODE_ENG);
+                    this.syncPrimaryEdgeData(this.dataStore.allEdges.get(LANGUAGE_CODE_ENG).get(graphqlResponse.terms.edges[graphqlResponse.terms.edges.length - 1].name), LANGUAGE_CODE_ENG);
                 }
                 
                 this.syncPopularTerms(graphqlResponse.terms.edges || []);
@@ -114,6 +114,11 @@ export const DataStore = Fluxxor.createStore({
 
     syncPrimaryEdgeData(selectedEntity, language){
         let edgeMap = this.dataStore.allEdges.get(language);
+        //If the primary edge has changed then clear the filtered terms. 
+        if(this.dataStore.categoryValue.name && this.dataStore.categoryValue.name !== selectedEntity.name){
+            this.dataStore.termFilters.clear();
+        }
+
         this.dataStore.categoryValue = edgeMap.get(selectedEntity[`name_${language}`]);
         this.dataStore.selectedLocationCoordinates = selectedEntity.coordinates || [];
         this.dataStore.categoryType = selectedEntity.type;

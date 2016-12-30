@@ -175,6 +175,7 @@ export const SentimentTreeview = React.createClass({
       const {associatedKeywords} = this.getStateFromFlux();
       let totalMentionCount = 0, visibleMentionCount = 0;
 
+      // eslint-disable-next-line
       for (let [term, value] of associatedKeywords.entries()) {
           if(value.enabled){
                 visibleMentionCount += value.mentions;

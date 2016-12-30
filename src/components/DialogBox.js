@@ -92,10 +92,10 @@ export default class DialogBox extends React.Component {
             return dialogCompactStyle;
         }
         let type = this.state.data.source;
-        if (type === "tadaweb") {
-            return dialogWideStyle;
+        if (type === "twitter") {
+            return dialogCompactStyle;
         }
-        return dialogCompactStyle;
+        return dialogWideStyle;
     }
 
     renderContentStyle() {
