@@ -88,7 +88,7 @@
             "REACT_APP_SITE_LOGO": "[concat('{\"', parameters('uniqueId'), '\" : \"', parameters('logoURl'), '\"}')]",
             "REACT_APP_SITES": "[concat(parameters('uniqueId') ,' : ',parameters('uniqueId'))]",
             "REACT_APP_SITE_TITLE ": "[concat('{\"', parameters('uniqueId'), '\" : \"', parameters('siteTitle'), '\"}')]",
-            "REACT_APP_SERVICE_HOSTS": "[concat('https://',parameters('webSiteName') , '.azurewebsites.net')]",
+            "REACT_APP_SERVICE_HOST": "[concat('https://',parameters('webSiteName') , '.azurewebsites.net')]",
             "REACT_APP_STORAGE_ACCT_NAME": "[concat('{\"', parameters('uniqueId'), '\" : \"', parameters('dataStorageAccountName'), '\"}')]",
             "REACT_APP_TBL_CLASSIFICATION": "[concat('{\"', parameters('uniqueId'), '\" : \"https://', parameters('dataStorageAccountName'), '.table.core.windows.net:443/supercategorymappings\"}')]",
             "REACT_APP_TBL_KEYWORDS": "[concat('{\"', parameters('uniqueId'), '\" : \"https://', parameters('dataStorageAccountName'), '.table.core.windows.net:443/searchkeywords\"}')]",
