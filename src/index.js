@@ -1,33 +1,18 @@
-import {DataStore} from './stores/DataStore';
-import {FactsStore} from './stores/FactsStore';
-import {FactDetailStore} from './stores/FactDetailStore';
-import {AdminStore} from './stores/AdminStore';
-import {Actions} from './actions/Actions';
-import Fluxxor from 'fluxxor';
 import React from 'react';
-import {default as ReactDOM} from "react-dom";
-import { Router, hashHistory } from 'react-router';
-import {routes} from './routes/routes';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/css/bootstrap-theme.css';
+import { Router, browserHistory } from 'react-router';
+import ReactDOM from 'react-dom';
+import routes from './routes';
 
-let userProfile = Actions.constants.USER_PROFILE;
+import './index.css';
 
-let stores = {
-  DataStore: new DataStore(userProfile),
-  FactsStore: new FactsStore(),
-  FactDetailStore: new FactDetailStore(),
-  AdminStore: new AdminStore(),
-};
+import injectTapEventPlugin from 'react-tap-event-plugin';
 
-let flux = new Fluxxor.Flux(stores, Actions.methods);
+// Needed for onTouchTap
+// http://stackoverflow.com/a/34015469/988941
+injectTapEventPlugin();
 
-const createElement = (Component, props) => {
-    props.flux = flux;
-    return <Component {...props} />
-};
-
-ReactDOM.render((<Router history={hashHistory}
-                         createElement={createElement} 
-                         routes={routes} />), 
-                  document.getElementById('app'));
+ReactDOM.render(
+  <Router history={browserHistory}>
+    {routes}
+  </Router>, 
+  document.getElementById('app'));
