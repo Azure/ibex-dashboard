@@ -102,7 +102,6 @@ export default class Dashboard extends Component {
 
     return (
       <div className={classnames('Dashboard', className)}>
-        <b>{process.env.REACT_APP_APP_INSIGHTS_APPID}</b>
         <Timespan />
         <ResponsiveReactGridLayout
           {...this.props.grid}
