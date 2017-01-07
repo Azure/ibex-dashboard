@@ -1,23 +1,59 @@
-[![Build Status](https://travis-ci.org/CatalystCode/azure-web-starter-template-reactjs.svg?branch=master)](https://travis-ci.org/CatalystCode/azure-web-starter-template-reactjs)
+# Bot Framedash
+This is an application insights based project that displays a bots analytics dashboard.
 
-# OCHA Current State of Libya Monitoring Dashboard
-The portal for the FORTIS humanitarian insight tool. This site currently contains two sites.
-- [fortis-dashboard.azurewebsites.net/#/site/ocha](fortis-dashboard.azurewebsites.net/#/site/ocha)
-- [fortis-dashboard.azurewebsites.net/#/site/dengue](fortis-dashboard.azurewebsites.net/#/site/dengue)
+# Preview
+
+[![Preview](/docs/bot-framedash.png)](/docs/bot-framedash.png)
+[![Preview](/docs/bot-framedash-msgs.png)](/docs/bot-framedash-msgs.png)
+
+### Show With Your Own Data
+
+1. Clone
+2. Get an Application Insights App ID and Api Key
+3. Create the following `.env` file:
+
+```bash
+REACT_APP_APP_INSIGHTS_APPID={APP ID}
+REACT_APP_APP_INSIGHTS_APIKEY={API KEY}
+```
+
+4. Run `npm start`
+5. Open **http://localhost:3000/**
+
+### Used Repos Technologies
+
+* http://recharts.org/
+* http://www.material-ui.com/
+
+### Resources
+This project is built using:
+
+* https://github.com/facebookincubator/create-react-app
+
+The server approach was added using:
+
+* https://www.fullstackreact.com/articles/using-create-react-app-with-a-server/
+* https://github.com/fullstackreact/food-lookup-demo
+* https://medium.com/@patriciolpezjuri/using-create-react-app-with-react-router-express-js-8fa658bf892d#.14dex6478
+
+Thinking about integrating with:
+
+* https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md
+
 
 ### Assumptions
  1. Running node version 4.5 or above. 
 
 ### Installation
-```
-git clone https://github.com/CatalystCode/Fortis-Client.git
-cd Fortis-Client
+```bash
+git clone https://github.com/CatalystCode/bot-fmk-dashboard.git
+cd bot-fmk-dashboard
 npm install -g create-react-app
 npm install
 ```
 
 ### Dev
-```
+```bash
 npm start
 ```
 
@@ -25,12 +61,12 @@ npm start
 Runs the test watcher in an interactive mode.
 By default, runs tests related to files changes since the last commit.
 
-```
+```bash
 npm test
 ```
 
 ### Build for Production
-```
+```bash
 npm run build
 ```
 

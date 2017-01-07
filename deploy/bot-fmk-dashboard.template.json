@@ -12,7 +12,7 @@
     "siteName": { "type" : "string" }
   },
   "variables": {
-    "applicationInsightName": "[concat('FortisDashboardAppInsight-', parameters('uniqueId'))]"
+    "applicationInsightName": "[concat('BotDashboardAppInsight-', parameters('uniqueId'))]"
   },
   "resources": [
     {
