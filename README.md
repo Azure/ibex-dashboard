@@ -8,13 +8,17 @@ This is an application insights based project that displays a bots analytics das
 
 ### Show With Your Own Data
 
-1. Clone and run `npm start`
+1. Clone
 2. Get an Application Insights App ID and Api Key
-3. Use with the following url: http://localhost:3000?appId={appId}&apiKey={apiKey}
+3. Create the following `.env` file:
 
-You can also navigate to the online preview with your oun appId\apiKey:
+```bash
+REACT_APP_APP_INSIGHTS_APPID={APP ID}
+REACT_APP_APP_INSIGHTS_APIKEY={API KEY}
+```
 
-http://bot-fmk-dashboard.azurewebsites.net?appId={appId}&apiKey={apiKey}
+4. Run `npm start`
+5. Open **http://localhost:3000/**
 
 ### Used Repos Technologies
 
