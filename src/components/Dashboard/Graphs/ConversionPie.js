@@ -1,16 +1,13 @@
 import connectToStores from 'alt-utils/lib/connectToStores';
 import React, { Component } from 'react';
-import moment from 'moment';
 import _ from 'lodash';
-import { PieChart, Pie, Sector, Cell, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Sector, Cell, Legend } from 'recharts';
 import {Card, CardHeader, CardMedia} from 'material-ui/Card';
 
 import colors from '../colors';
 import styles from '../styles';
-var {ThemeColors} = colors;
 
 import ConversionStore from '../../../stores/ConversionStore';
-import ConversionActions from '../../../actions/ConversionActions';
 
 class ConversionsPie extends Component {
 
@@ -25,7 +22,7 @@ class ConversionsPie extends Component {
   
   renderActiveShape = (props) => {
     const { mode } = this.props;
-    var type = mode == 'users' ? 'Users' : 'Messages';
+    var type = mode === 'users' ? 'Users' : 'Messages';
 
     const RADIAN = Math.PI / 180;
     const { name, cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle,

@@ -79,17 +79,21 @@ class Timeline extends Component {
       })
     }
 
-    var titleControls = [
-      <span>Channel Usage</span>,
-      <IconButton
-          Tooltip='Show data by messages'
-          className={classnames(mode == 'messages' && 'active')} 
-          onClick={this.changeMode.bind(this, 'messages')}><ActionQuestionAnswer /></IconButton>,
-      <IconButton 
-          Tooltip='Show data by users'
-          className={classnames(mode == 'users' && 'active')}
-          onClick={this.changeMode.bind(this, 'users')}><PersonIcon /></IconButton>
-    ];
+    var titleControls = (
+      <div>
+        <span key={0}>Channel Usage</span>,
+        <IconButton
+            key={1}
+            tooltip='Show data by messages'
+            className={classnames(mode == 'messages' && 'active')} 
+            onClick={this.changeMode.bind(this, 'messages')}><ActionQuestionAnswer /></IconButton>,
+        <IconButton 
+            key={2}
+            tooltip='Show data by users'
+            className={classnames(mode == 'users' && 'active')}
+            onClick={this.changeMode.bind(this, 'users')}><PersonIcon /></IconButton>
+      </div>
+    );
 
     return (
       <Card className='dash-card'>

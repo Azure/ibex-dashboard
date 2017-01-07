@@ -9,27 +9,6 @@ import FlatButton from 'material-ui/FlatButton';
 import ErrorsStore from '../../stores/ErrorsStore';
 import ErrorsActions from '../../actions/ErrorsActions';
 
-var styles = {
-  item: {
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
-  },
-  timestamp: {
-    width: '30%'
-  },
-  count: {
-    width: '10%',
-  },
-  message: {
-    width: '50%',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
-  },
-  action: {
-    width: '10%'
-  }
-}
-
 class ErrorDetails extends Component {
   // static propTypes = {}
   // static defaultProps = {}
@@ -69,7 +48,7 @@ class ErrorDetails extends Component {
         <List>
         {Object.keys(selectedError || {}).map( (key, index) => (
           <ListItem key={index}>
-            {key}:{!selectedError[key] && '' || typeof selectedError[key] == 'string' && selectedError[key] || JSON.stringify(selectedError[key])}
+            {key}:{(!selectedError[key] && '') || (typeof selectedError[key] == 'string' && selectedError[key]) || JSON.stringify(selectedError[key])}
           </ListItem>
           ))}
         </List>

@@ -1,4 +1,3 @@
-import moment from 'moment';
 import alt from '../alt';
 
 import common from './actions-common';

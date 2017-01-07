@@ -50,11 +50,11 @@ export default class ActionsCommon {
   static appInsightsApiKey = apiKey;//appInsights.apps[app].apiKey;
 
   static timespanToQueryspan(timespan) {
-    return timespan == '24 hours' ? 'PT24H' : timespan == '1 week' ? 'P7D' : 'P30D';
+    return timespan === '24 hours' ? 'PT24H' : timespan === '1 week' ? 'P7D' : 'P30D';
   }
 
   static timespanToGranularity(timespan) {
-    return timespan == '24 hours' ? '1h' : timespan == '1 week' ? '1d' : '1d';
+    return timespan === '24 hours' ? '1h' : timespan === '1 week' ? '1d' : '1d';
   }
 
   /**
@@ -64,7 +64,7 @@ export default class ActionsCommon {
    */
   static timespanStartDate(timespan) {
     var date = new Date();
-    var days = timespan == '24 hours' ? 1 : timespan == '1 week' ? 7 : 30;
+    var days = timespan === '24 hours' ? 1 : timespan === '1 week' ? 7 : 30;
     date.setDate(date.getDate() - days);
     return date;
   }
@@ -95,14 +95,14 @@ export default class ActionsCommon {
       .then(json => {
 
         var resultRows = json.Tables[0].Rows;
-        if (!mappings || mappings.length == 0) {
+        if (!mappings || mappings.length === 0) {
           return callback(null, resultRows);
         }
 
         var rows = resultRows.map(row => {
           var item = {};
           mappings.forEach((mapping, index) => {
-            var key = typeof mapping == 'string' ? mapping : mapping.key;
+            var key = typeof mapping === 'string' ? mapping : mapping.key;
             var idx = mapping.idx ? mapping.idx : index;
             var def = mapping.def ? mapping.def : null;
             item[key] = mapping.val && row[idx] && mapping.val(row[index]) || row[idx] || def;
@@ -131,7 +131,7 @@ export default class ActionsCommon {
       skip
     } = config || new EventsQueryConfig();
 
-    var queryspan = timespan == '24 hours' ? 'PT24H' : timespan == '1 week' ? 'P7D' : 'P30D';
+    var queryspan = ActionsCommon.timespanToQueryspan(timespan);
     var url = `${appInsights.uri}/${ActionsCommon.appInsightsAppId}/events/exceptions?timespan=${queryspan}` +
       search ? `&$search=${encodeURIComponent(search)}` : '' +
       `&&$orderby=timestamp` +

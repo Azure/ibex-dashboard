@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import _ from 'lodash';
-import moment from 'moment';
 import alt from '../alt';
 
 import common from './actions-common';
@@ -20,7 +19,7 @@ class IntentActions {
 
   refresh (timespan) {
 
-    var queryspan = timespan == '24 hours' ? 'PT24H' : timespan == '1 week' ? 'P7D' : 'P30D';
+    var queryspan = common.timespanToQueryspan(timespan);
     var query = ` customEvents` + 
                    ` | extend cslen = customDimensions.callstack_length, intent=customDimensions.intent` +
                    ` | where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0` +
