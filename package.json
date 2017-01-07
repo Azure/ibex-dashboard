@@ -1,18 +1,17 @@
 {
-  "name": "Fortis-Client",
+  "name": "bot-fmk-dashboard",
   "description": "This repository holds all client / front-end related code for the Microsoft/OCHA Hackfest. .",
   "version": "0.0.1",
   "license": "MIT",
   "main": "./dist/js/index.min.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OICT-innovation/Project-Minerva-Client.git"
+    "url": "https://github.com/CatalystCode/bot-fmk-dashboard.git"
   },
   "maintainers": [
     {
-      "name": "Erik Schlegel",
-      "email": "erik.schlegel@gmail.com",
-      "web": "erikschlegel.com"
+      "name": "mor shemesh",
+      "email": "mor.shemesh@gmail.com"
     }
   ],
   "devDependencies": {
