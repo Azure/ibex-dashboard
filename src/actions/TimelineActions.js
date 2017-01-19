@@ -58,7 +58,7 @@ class TimelineActions {
           var time = (new Date(row[0])).getTime();
           var count = row[3];
           
-          if (!_timeline[time]) _timeline[time] = { time };
+          if (!_timeline[time]) _timeline[time] = { time: (new Date(row[0])).toUTCString() };
           if (!_channels[channel]) _channels[channel] = { name: channel, value: 0 };
 
           _timeline[time][channel] = count;
