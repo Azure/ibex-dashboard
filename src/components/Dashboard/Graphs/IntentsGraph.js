@@ -1,7 +1,7 @@
 import connectToStores from 'alt-utils/lib/connectToStores';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import {Card, CardHeader, CardMedia} from 'material-ui/Card';
 
 import colors from '../colors';
@@ -46,14 +46,16 @@ class IntentsGraph extends Component {
             title="Intents"
             subtitle="Which intents are used" />
         <CardMedia style={styles.cardMediaStyle}>
-          <BarChart width={520} height={240} data={intents}
-            margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-            <XAxis dataKey="intent"/>
-            <YAxis/>
-            <CartesianGrid strokeDasharray="3 3"/>
-            <Tooltip/>
-            <Bar dataKey="count" fill={colors.IntentsColor} onClick={this.handleClick}/>
-          </BarChart>
+          <ResponsiveContainer>
+            <BarChart width={520} height={240} data={intents}
+              margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+              <XAxis dataKey="intent"/>
+              <YAxis/>
+              <CartesianGrid strokeDasharray="3 3"/>
+              <Tooltip/>
+              <Bar dataKey="count" fill={colors.IntentsColor} onClick={this.handleClick}/>
+            </BarChart>
+          </ResponsiveContainer>
         </CardMedia>
         <IntentConversations/>
         <ConversationMessages />

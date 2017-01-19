@@ -58,7 +58,7 @@ class Timeline extends Component {
   changeMode(mode) {
     TimelineActions.updateMode(mode);
   }
-  
+
   render() {
     const { data, timespan, channels, excluded, mode } = this.props;
 
@@ -106,9 +106,9 @@ class Timeline extends Component {
             <LineChart data={data} margin={{top: 5, right: 30, left: 20, bottom: 5}}
                        onClick={this.handleClick}>
               <XAxis dataKey="time" tickFormatter={format} minTickGap={20}/>
-              <YAxis/>
+              <YAxis type="number" domain={['dataMin', 'dataMax']}/>
               <CartesianGrid strokeDasharray="3 3"/>
-              <Tooltip/>
+              <Tooltip />
               <Legend/>
               {lines}
             </LineChart>
