@@ -39,54 +39,75 @@ class ApplicationInsightsDataOptions {
 
 export class ApplicationInsightsData {
 
-  query = '';
-  type = 'generic';
-  dependencies = [Constants.DefaultDimentions.Timespan];
-  output = null;
-  mappings = [];
+  _props = {
+    type: 'generic',
+    dependencies: [Constants.DefaultDimentions.Timespan],
+    output: null,
+    mappings: [],
+    actions: [],
+    listeners: [],
+    params: {
+      query: ''
+    }
+  }
 
   /**
    * @param {ApplicationInsightsDataOptions} options - Options object
    */
   constructor(options) {
 
-    if (!options.query || !options.dependencies || !options.dependencies.length) {
+    if (!options.params.query || !options.dependencies || !options.dependencies.length) {
       throw new Error('AIAnalyticsEvents requires a query to run and dependencies that trigger updates.');
     }
     
-    this.query = options.query;
-    this.dependencies = this.dependencies.concat(options.dependencies);
-    this.mappings = options.mappings;
-    this.type = options.type === 'table' ? 'table' : 'generic';
-    this.output = options.outputResultsName;
+    var props = this._props;
+    props.params.query = options.params.query;
+    props.dependencies = props.dependencies.concat(options.dependencies);
+    props.mappings = options.mappings;
+    props.type = options.type === 'table' ? 'table' : 'generic';
+    props.output = options.outputResultsName;
   }
 
   /**
    * @returns {string[]} Array of dependencies
    */
   getDependencies() {
-    return this.dependencies;
+    return this._props.dependencies;
   }
 
-  exposeDependables() {
-    return this.outputParameter;
+  getDependables() {
+    return this._props.outputParameter;
+  }
+
+  getActions() {
+    return this._props.actions;
+  }
+
+  getParams() {
+    return Object.keys(this._props);
+  }
+
+  listen(listener) {
+    if (!this._props.listeners.find(func => func === listener)) {
+      this._props.listeners.push(listener);
+    }
   }
 
   /**
    * update - called when dependencies are created
-   * @param {object} dimentions
+   * @param {object} dependencies
    * @param {function} callback
    */
-  update(dimentions, callback) {
+  updateDependencies(dependencies, callback) {
 
-    var { timespan } = dimentions;
+    var { timespan } = dependencies;
 
     // TODO: insert dependencies into query [format]or[function]
 
-    if (this.type == 'generic') {
+    if (this._props.type == 'generic') {
       this._fetchQuery({timespan}, callback);
     } else {
-      this._fetchEvents(dimentions, callback);
+      this._fetchEvents(dependencies, callback);
     }
   }
 
@@ -101,7 +122,7 @@ export class ApplicationInsightsData {
    */
   _prepareResult(results) {
     var obj = {};
-    obj[this.output] = results;
+    obj[this._props.output] = results;
     return obj;
   }
 
@@ -112,9 +133,9 @@ export class ApplicationInsightsData {
    */
   _fetchQuery(config, callback) {
 
-    var mappings = this.mappings;
+    var mappings = this._props.mappings;
     var queryspan = this._timespanToQueryspan(timespan);
-    var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${this.query}`;
+    var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${this._props.params.query}`;
     
     $.ajax({
         url,

@@ -57,6 +57,18 @@ export default class ActionsCommon {
     return timespan === '24 hours' ? '1h' : timespan === '1 week' ? '1d' : '1d';
   }
 
+    /**
+   * Prepare results to ship via callback
+   * @param {string} property Property name to set
+   * @param {object} val value to put in property
+   * @returns {object} object to be returned
+   */
+  static prepareResult(property, val) {
+    var obj = {};
+    obj[property] = val;
+    return obj;
+  }
+
   /**
    * Translates timespan into its start date
    * @param {string} timespan - Configuration for the query

@@ -1,5 +1,6 @@
 import { ApplicationInsightsData } from './application-insights-data';
 
+// Example of using with conversion rate graph
 var a = new ApplicationInsightsData({
   query: ` customEvents` +
         ` | extend successful=customDimensions.successful` +
@@ -12,3 +13,4 @@ var a = new ApplicationInsightsData({
     { key: 'event_count', def: 0 }
   ]
 })
+
