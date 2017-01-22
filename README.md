@@ -20,6 +20,30 @@ REACT_APP_APP_INSIGHTS_APIKEY={API KEY}
 4. Run `npm start`
 5. Open **http://localhost:3000/**
 
+## Deploy To Azure
+
+To deploy to azure fork this repo (to be able to automatically create github deployment key).
+from you new repo run:
+
+```sh 
+clone https://github.com/[your-user-name/group]/bot-fmk-dashboard
+cd bot-fmk-dashboard
+cd deploy
+cp dashboard.parameters.json dashboard.parameters.private.json
+```
+
+Edit `dashboard.parameters.private.json` and change the repo url to your own, and fix the other parameters as well.
+
+```sh
+azure login
+azure account list
+azure account set "{account id}"
+azure group create "new-resource-group" -l "West Europe" -f dashboard.template.json -e dashboard.parameters.private.json
+```
+
+Since application insights API doesn't support ARM yet, we need to manually [create an API Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID) for the application insights service.
+Once you created the api key, copy and paste it into the **Web App ==> Application Settings ==> REACT_APP_APP_INSIGHTS_APIKEY**.
+
 ### Used Repos Technologies
 
 * http://recharts.org/
