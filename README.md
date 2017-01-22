@@ -41,6 +41,9 @@ azure account set "{account id}"
 azure group create "new-resource-group" -l "West Europe" -f dashboard.template.json -e dashboard.parameters.private.json
 ```
 
+Since application insights API doesn't support ARM yet, we need to manually [create an API Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID) for the application insights service.
+Once you created the api key, copy and paste it into the **Web App ==> Application Settings ==> REACT_APP_APP_INSIGHTS_APIKEY**.
+
 ### Used Repos Technologies
 
 * http://recharts.org/
