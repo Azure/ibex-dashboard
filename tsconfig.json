@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "sourceMap": false,
+    "rootDir": "src",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"],
+    "jsx": "react",
+    "allowJs": true,
+    "noImplicitUseStrict": true
+  }
+}

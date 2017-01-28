@@ -15,18 +15,18 @@
     }
   ],
   "devDependencies": {
+    "@types/alt": "^0.16.31",
+    "@types/lodash": "^4.14.48",
+    "@types/react-dom": "^0.14.20",
     "mocha": "^3.1.2",
     "react-scripts": "^0.6.0"
   },
   "dependencies": {
     "alt": "^0.18.6",
     "alt-utils": "^1.0.0",
-    "chart.js": "^1.1.1",
     "classnames": "^2.2.5",
     "jquery": "^3.1.1",
     "lodash": "^4.17.2",
-    "amcharts3": "amcharts/amcharts3",
-    "amcharts3-export": "amcharts/export",
     "async": "^2.0.1",
     "autosuggest-highlight": "^3.1.0",
     "bootstrap": "^3.3.7",
