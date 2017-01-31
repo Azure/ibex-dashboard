@@ -1,18 +1,18 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-import {DataSourcePlugin, DataSourceOptions} from '../DataSourcePlugin';
+import {DataSourcePlugin, IDataSourceOptions} from '../DataSourcePlugin';
 import ActionsCommon from '../../../actions/actions-common';
 import { appInsightsUri, appId, apiKey } from './common';
 
 declare var process : any;
 
-class QueryConfig {
+interface IEventsConfig {
   /** @type {string} */
   timespan;
 }
 
-class ApplicationInsightsDataOptions extends DataSourceOptions {
+interface IEventsOptions extends IDataSourceOptions {
   /** @type {string} */
   query;
   /** @type {(string|object)[]} mappings */
@@ -21,8 +21,8 @@ class ApplicationInsightsDataOptions extends DataSourceOptions {
 
 export default class ApplicationInsightsEvents extends DataSourcePlugin {
 
-  constructor(options: ApplicationInsightsDataOptions) {
-    super('ApplicationInsights-Events', options);
+  constructor(options: IEventsOptions) {
+    super('ApplicationInsights-Events', 'values', options);
 
     var props = this._props;
     var params: any = props.params;

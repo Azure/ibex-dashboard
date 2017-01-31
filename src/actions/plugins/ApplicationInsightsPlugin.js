@@ -2,7 +2,7 @@
 import $ from 'jquery';
 import _ from 'lodash';
 import Constants from '../constants';
-import {DataSourcePlugin, DataSourceOptions} from './DataSourcePlugin';
+import {DataSourcePlugin, IDataSourceOptions} from './DataSourcePlugin';
 
 var appInsightsUri = 'https://api.applicationinsights.io/beta/apps';
 var appId = process.env.REACT_APP_APP_INSIGHTS_APPID;
@@ -96,7 +96,7 @@ class QueryConfig {
   timespan;
 }
 
-class ApplicationInsightsDataOptions extends DataSourceOptions {
+interface IApplicationInsightsOptions extends IDataSourceOptions {
   /** @type {string} */
   query;
   /** @type {(string|object)[]} mappings */

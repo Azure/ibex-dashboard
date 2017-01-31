@@ -5,33 +5,24 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var $ = require("jquery");
 var DataSourcePlugin_1 = require("../DataSourcePlugin");
-var actions_common_1 = require("../../../actions/actions-common");
 var common_1 = require("./common");
-var ApplicationInsightsDataOptions = (function (_super) {
-    __extends(ApplicationInsightsDataOptions, _super);
-    function ApplicationInsightsDataOptions() {
-        return _super.apply(this, arguments) || this;
-    }
-    return ApplicationInsightsDataOptions;
-}(DataSourcePlugin_1.DataSourceOptions));
 var ApplicationInsightsQuery = (function (_super) {
     __extends(ApplicationInsightsQuery, _super);
     /**
      * @param options - Options object
      */
     function ApplicationInsightsQuery(options) {
-        var _this = _super.call(this, 'ApplicationInsights-Query', options) || this;
+        var _this = _super.call(this, 'ApplicationInsights-Query', 'values', options) || this;
         var props = _this._props;
         var params = props.params;
-        if (!params.query || !props.dependencies || !props.dependencies.length) {
+        if (!params.query) {
             throw new Error('AIAnalyticsEvents requires a query to run and dependencies that trigger updates.');
+        }
+        if (!props.dependencies.timespan || !props.dependencies.queryTimespan) {
+            throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
         }
         return _this;
     }
-    ApplicationInsightsQuery.prototype.bind = function (actionClass) {
-        _super.prototype.bind.call(this, actionClass);
-        actionClass.a = "try";
-    };
     /**
      * update - called when dependencies are created
      * @param {object} dependencies
@@ -39,11 +30,12 @@ var ApplicationInsightsQuery = (function (_super) {
      */
     ApplicationInsightsQuery.prototype.updateDependencies = function (dependencies) {
         var _this = this;
-        var timespan = dependencies.timespan;
+        var timespan = dependencies.timespan, queryTimespan = dependencies.queryTimespan;
         var params = this._props.params;
         var mappings = params.mappings;
-        var queryspan = actions_common_1.default.timespanToQueryspan(timespan);
+        var queryspan = queryTimespan;
         var url = common_1.appInsightsUri + "/" + common_1.appId + "/query?timespan=" + queryspan + "&query=" + encodeURIComponent(params.query);
+        return { "values": [{ "name": "message.convert.start", "successful": null, "event_count": 10 }, { "name": "message.convert.end", "successful": true, "event_count": 10 }] };
         return function (dispatch) {
             $.ajax({
                 url: url,
@@ -55,7 +47,7 @@ var ApplicationInsightsQuery = (function (_super) {
                 .then(function (json) {
                 var resultRows = json.Tables[0].Rows;
                 if (!mappings || mappings.length === 0) {
-                    return dispatch(actions_common_1.default.prepareResult(_this._props.id, resultRows));
+                    return dispatch({ values: resultRows });
                 }
                 var rows = resultRows.map(function (row) {
                     var item = {};
@@ -67,7 +59,7 @@ var ApplicationInsightsQuery = (function (_super) {
                     });
                     return item;
                 });
-                return dispatch(actions_common_1.default.prepareResult(_this._props.id, rows));
+                return dispatch({ values: rows });
             })
                 .fail(function (err) {
                 return _this.failure(err);

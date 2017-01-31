@@ -4,29 +4,29 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var DataSourcePlugin_1 = require("./DataSourcePlugin");
-var Constant = (function (_super) {
-    __extends(Constant, _super);
-    function Constant(options) {
-        var _this = _super.call(this, 'Constant', 'selectedValue', options) || this;
+var Calculated = (function (_super) {
+    __extends(Calculated, _super);
+    function Calculated(options) {
+        var _this = _super.call(this, 'Calculated', 'value', options) || this;
         var props = _this._props;
         var params = options.params;
         props.actions.push.apply(props.actions, ['initialize', 'updateSelectedValue']);
         return _this;
     }
-    Constant.prototype.initialize = function () {
+    Calculated.prototype.initialize = function () {
         var _a = this._props.params, selectedValue = _a.selectedValue, values = _a.values;
         return { selectedValue: selectedValue, values: values };
     };
     /**
      * updateDependencies - called when dependencies are created
      */
-    Constant.prototype.updateDependencies = function (dependencies) {
+    Calculated.prototype.updateDependencies = function (dependencies) {
         return dependencies;
     };
-    Constant.prototype.updateSelectedValue = function (dependencies, selectedValue) {
+    Calculated.prototype.updateSelectedValue = function (selectedValue) {
         return { selectedValue: selectedValue };
     };
-    return Constant;
+    return Calculated;
 }(DataSourcePlugin_1.DataSourcePlugin));
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = Constant;
+exports.default = Calculated;

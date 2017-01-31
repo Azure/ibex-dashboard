@@ -4,6 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var React = require("react");
+var GenericComponent_1 = require("./GenericComponent");
 var Card_1 = require("material-ui/Card");
 var recharts_1 = require("recharts");
 var _ = require("lodash");
@@ -52,27 +53,16 @@ var PieData = (function (_super) {
                 React.createElement("text", { x: c.ex + (c.cos >= 0 ? 1 : -1) * 12, y: c.ey, textAnchor: c.textAnchor, fill: "#333" }, value + " " + type.toLowerCase()),
                 React.createElement("text", { x: c.ex + (c.cos >= 0 ? 1 : -1) * 12, y: c.ey, dy: 18, textAnchor: c.textAnchor, fill: "#999" }, "(Rate " + (percent * 100).toFixed(2) + "%)")));
         };
-        _this.onChange = _this.onChange.bind(_this);
-        _this.state = props.store.getState();
         return _this;
     }
-    PieData.prototype.componentDidMount = function () {
-        this.props.store.listen(this.onChange);
-    };
-    PieData.prototype.componentWillUnmount = function () {
-        this.props.store.unlisten(this.onChange);
-    };
-    PieData.prototype.onChange = function (state) {
-        this.setState(state);
-    };
     PieData.prototype.render = function () {
-        var conversions = this.state.conversions;
-        var total = _.find(conversions, { name: 'message.convert.start' });
-        var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+        var values = this.state.values;
+        var total = _.find(values, { name: 'message.convert.start' });
+        var successful = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
         if (!total) {
             return null;
         }
-        var values = [
+        var dispValues = [
             { name: 'Successful', value: successful.event_count },
             { name: 'Failed', value: total.event_count - successful.event_count },
         ];
@@ -81,12 +71,12 @@ var PieData = (function (_super) {
             React.createElement(Card_1.CardHeader, { className: 'card-header', title: "Conversion Usage", subtitle: "Conversion Rate" }),
             React.createElement(Card_1.CardMedia, { style: styles_1.default.cardMediaStyle },
                 React.createElement(recharts_1.PieChart, { width: 500, height: 240 },
-                    React.createElement(recharts_1.Pie, { data: values, cx: 270, cy: 120, innerRadius: 60, outerRadius: 80, fill: "#8884d8", activeIndex: 0, activeShape: this.renderActiveShape.bind(this), paddingAngle: 0 },
+                    React.createElement(recharts_1.Pie, { data: dispValues, cx: 270, cy: 120, innerRadius: 60, outerRadius: 80, fill: "#8884d8", activeIndex: 0, activeShape: this.renderActiveShape.bind(this), paddingAngle: 0 },
                         React.createElement(recharts_1.Cell, { key: 0, fill: colors_1.default.GoodColor }),
                         React.createElement(recharts_1.Cell, { key: 1, fill: colors_1.default.BadColor })),
                     React.createElement(recharts_1.Legend, { wrapperStyle: { marginLeft: 70 } })))));
     };
     return PieData;
-}(React.Component));
+}(GenericComponent_1.GenericComponent));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = PieData;

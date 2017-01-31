@@ -1,13 +1,12 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-import {DataSourcePlugin, DataSourceOptions} from '../DataSourcePlugin';
-import ActionsCommon from '../../../actions/actions-common';
+import {DataSourcePlugin, IDataSourceOptions} from '../DataSourcePlugin';
 import { appInsightsUri, appId, apiKey } from './common';
 
 declare var process : any;
 
-class ApplicationInsightsDataOptions extends DataSourceOptions {
+interface IQueryOptions extends IDataSourceOptions {
   /** @type {string} */
   query;
   /** @type {(string|object)[]} mappings */
@@ -19,19 +18,18 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
   /**
    * @param options - Options object
    */
-  constructor(options: ApplicationInsightsDataOptions) {
-    super('ApplicationInsights-Query', options);
+  constructor(options: IQueryOptions) {
+    super('ApplicationInsights-Query', 'values', options);
 
     var props = this._props;
     var params: any = props.params;
-    if (!params.query || !props.dependencies || !props.dependencies.length) {
+    if (!params.query) {
       throw new Error('AIAnalyticsEvents requires a query to run and dependencies that trigger updates.');
     }
-  }
 
-  bind (actionClass) {
-    super.bind(actionClass);
-    actionClass.a = "try";
+    if (!props.dependencies.timespan || !props.dependencies.queryTimespan) {
+      throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
+    }
   }
 
   /**
@@ -41,14 +39,16 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
    */
   updateDependencies(dependencies) {
 
-    var { timespan } = dependencies;
+    var { timespan, queryTimespan } = dependencies;
 
     var params: any = this._props.params;
     var mappings = params.mappings;
-    var queryspan = ActionsCommon.timespanToQueryspan(timespan);
+    var queryspan = queryTimespan;
     var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${encodeURIComponent(params.query)}`;
-    
+
+    return {"values":[{"name":"message.convert.start","successful":null,"event_count":10},{"name":"message.convert.end","successful":true,"event_count":10}]};
     return (dispatch) => {
+
       $.ajax({
           url,
           method: "GET",
@@ -60,7 +60,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
           var resultRows = json.Tables[0].Rows;
           if (!mappings || mappings.length === 0) {
-            return dispatch(ActionsCommon.prepareResult(this._props.id, resultRows));
+            return dispatch({ values: resultRows });
           }
 
           var rows = resultRows.map(row => {
@@ -74,7 +74,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
             return item;
           });
 
-          return dispatch(ActionsCommon.prepareResult(this._props.id, rows));
+          return dispatch({ values: rows });
         })
         .fail((err) => {
           return this.failure(err);

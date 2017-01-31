@@ -1,5 +1,6 @@
 import * as React from 'react';
-import {Card, CardHeader, CardMedia} from 'material-ui/Card';
+import { GenericComponent } from './GenericComponent';
+import { Card, CardHeader, CardMedia } from 'material-ui/Card';
 import { PieChart, Pie, Sector, Cell, Legend } from 'recharts';
 
 import * as _ from 'lodash';
@@ -13,25 +14,10 @@ interface IGraphProps {};
 
 interface IGraphState {};
 
-export default class PieData extends React.Component<any, any> {
+export default class PieData extends GenericComponent<any> {
 
   constructor(props) {
     super(props);
-
-    this.onChange = this.onChange.bind(this);
-    this.state = props.store.getState();
-  }
-
-  componentDidMount() {
-    this.props.store.listen(this.onChange);
-  }
-
-  componentWillUnmount() {
-    this.props.store.unlisten(this.onChange);
-  }
-
-  onChange(state) {
-    this.setState(state);
   }
 
   renderActiveShape = (props) => {
@@ -97,16 +83,16 @@ export default class PieData extends React.Component<any, any> {
   };
   
   render() {
-    const { conversions } = this.state;
+    const { values } = this.state;
 
-    var total : any = _.find(conversions, { name: 'message.convert.start' });
-    var successful: any = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+    var total : any = _.find(values, { name: 'message.convert.start' });
+    var successful: any = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
 
     if (!total) {
       return null;
     }
 
-    var values = [
+    var dispValues = [
       { name: 'Successful', value: successful.event_count },
       { name: 'Failed', value: total.event_count - successful.event_count },
     ];
@@ -121,7 +107,7 @@ export default class PieData extends React.Component<any, any> {
         <CardMedia style={styles.cardMediaStyle}>
           <PieChart width={500} height={240}>
             <Pie
-              data={values} 
+              data={dispValues} 
               cx={270} 
               cy={120} 
               innerRadius={60}

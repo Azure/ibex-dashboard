@@ -7,22 +7,10 @@ var $ = require("jquery");
 var DataSourcePlugin_1 = require("../DataSourcePlugin");
 var actions_common_1 = require("../../../actions/actions-common");
 var common_1 = require("./common");
-var QueryConfig = (function () {
-    function QueryConfig() {
-    }
-    return QueryConfig;
-}());
-var ApplicationInsightsDataOptions = (function (_super) {
-    __extends(ApplicationInsightsDataOptions, _super);
-    function ApplicationInsightsDataOptions() {
-        return _super.apply(this, arguments) || this;
-    }
-    return ApplicationInsightsDataOptions;
-}(DataSourcePlugin_1.DataSourceOptions));
 var ApplicationInsightsEvents = (function (_super) {
     __extends(ApplicationInsightsEvents, _super);
     function ApplicationInsightsEvents(options) {
-        var _this = _super.call(this, 'ApplicationInsights-Events', options) || this;
+        var _this = _super.call(this, 'ApplicationInsights-Events', 'values', options) || this;
         var props = _this._props;
         var params = props.params;
         if (!params.query || !props.dependencies || !props.dependencies.length) {
