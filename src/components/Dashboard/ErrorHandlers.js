@@ -3,9 +3,8 @@ import connectToStores from 'alt-utils/lib/connectToStores';
 
 import TextField from 'material-ui/TextField';
 import {Tabs, Tab} from 'material-ui'
-import {Table, TableBody, TableFooter, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 
-import ReportProblem from 'material-ui/svg-icons/action/report-problem';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import IconButton from 'material-ui/IconButton';

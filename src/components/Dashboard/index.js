@@ -92,13 +92,11 @@ export default class Dashboard extends Component {
   };
 
   onLayoutChange = (layout, layouts) => {
-    var a = 0;
     //this.props.onLayoutChange(layout, layouts);
   };
 
   render() {
-    const { className, ...props } = this.props;
-    const { activeItem } = this.state;
+    const { className } = this.props;
 
     return (
       <div className={classnames('Dashboard', className)}>

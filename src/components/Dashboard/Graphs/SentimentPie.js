@@ -1,16 +1,13 @@
 import connectToStores from 'alt-utils/lib/connectToStores';
 import React, { Component } from 'react';
-import moment from 'moment';
 import _ from 'lodash';
-import { PieChart, Pie, Sector, Cell, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Sector, Cell, Legend } from 'recharts';
 import {Card, CardHeader, CardMedia} from 'material-ui/Card';
 
 import colors from '../colors';
 import styles from '../styles';
-var {ThemeColors} = colors;
 
 import SentimentStore from '../../../stores/SentimentStore';
-import SentimentActions from '../../../actions/SentimentActions';
 
 class SentimentPie extends Component {
 

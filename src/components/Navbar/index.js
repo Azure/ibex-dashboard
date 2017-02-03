@@ -32,7 +32,6 @@ class Navbar extends React.Component {
       <AppBar title="Bots Dashboard" className="nav-appBar">
         <Tabs className="nav-tabs" value={window.location.pathname}>
           <Tab label="Home" value="/" containerElement={<Link to="/" />} />
-          <Tab label="Generic" value="/generic" containerElement={<Link to="/generic" />} />
         </Tabs>
       </AppBar>
     );

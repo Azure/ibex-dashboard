@@ -1,6 +1,5 @@
 import connectToStores from 'alt-utils/lib/connectToStores';
 import React, { Component } from 'react';
-import moment from 'moment';
 import _ from 'lodash';
 import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
 import {Card, CardHeader, CardMedia} from 'material-ui/Card';

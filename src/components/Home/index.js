@@ -14,9 +14,9 @@ class Home extends Component {
   }
   
   render() {
-    const { className, ...props } = this.props;
+    const { className } = this.props;
     return (
-      <div className={classnames('Home', className)} {...props}>
+      <div className={classnames('Home', className)} >
         <div className='Home-header ui text container'>
           <h1>Bots Dashboard</h1>
           <p>Move to the <b>Dashboard</b> tab to see bot analytics</p>

@@ -5,7 +5,8 @@ import GeneralActions from '../actions/GeneralActions';
 class GeneralStore {
   constructor() {
     this.bindListeners({
-      refresh: ConversionActions.refresh,
+      initialize: GeneralActions.initialize,
+      refresh: GeneralActions.refresh,
     });
 
     this.state = {

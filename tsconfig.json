@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "sourceMap": false,
+    "outDir": "src",
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "jsx": "react",
+    "allowJs": true,
+    "noImplicitUseStrict": true
+  },
+  "include": [
+    "ts-src/**/*"
+  ]
+}

@@ -69,7 +69,7 @@ class TimelineActions {
         var channelUsage = _.values(_channels);
         var timeline = _.map(_timeline, value => {
           channels.forEach(channel => {
-            if (!value[channel.name]) value[channel.name] = 0;
+            if (!value[channel]) value[channel] = 0;
           });
           return value;
         });

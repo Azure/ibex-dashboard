@@ -62,7 +62,7 @@ class ErrorsActions {
     top = top || 100;
     skip = skip || 0;
 
-    var queryspan = timespan == '24 hours' ? 'PT24H' : timespan == '1 week' ? 'P7D' : 'P30D';
+    var queryspan = timespan === '24 hours' ? 'PT24H' : timespan === '1 week' ? 'P7D' : 'P30D';
     var search = searchQuery ? `&$search=${encodeURIComponent(searchQuery)}` : '';
     var url = `${common.appInsights.uri}/${appInsightsAppId}/events/exceptions?timespan=${queryspan}` +
       search +
