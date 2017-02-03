@@ -18,7 +18,7 @@ var ApplicationInsightsQuery = (function (_super) {
         if (!params.query) {
             throw new Error('AIAnalyticsEvents requires a query to run and dependencies that trigger updates.');
         }
-        if (!props.dependencies.timespan || !props.dependencies.queryTimespan) {
+        if (!props.dependencies.queryTimespan) {
             throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
         }
         return _this;
@@ -30,12 +30,12 @@ var ApplicationInsightsQuery = (function (_super) {
      */
     ApplicationInsightsQuery.prototype.updateDependencies = function (dependencies) {
         var _this = this;
-        var timespan = dependencies.timespan, queryTimespan = dependencies.queryTimespan;
+        var queryTimespan = dependencies.queryTimespan;
         var params = this._props.params;
+        var query = typeof params.query === 'function' ? params.query(dependencies) : params.query;
         var mappings = params.mappings;
         var queryspan = queryTimespan;
-        var url = common_1.appInsightsUri + "/" + common_1.appId + "/query?timespan=" + queryspan + "&query=" + encodeURIComponent(params.query);
-        return { "values": [{ "name": "message.convert.start", "successful": null, "event_count": 10 }, { "name": "message.convert.end", "successful": true, "event_count": 10 }] };
+        var url = common_1.appInsightsUri + "/" + common_1.appId + "/query?timespan=" + queryspan + "&query=" + encodeURIComponent(query);
         return function (dispatch) {
             $.ajax({
                 url: url,

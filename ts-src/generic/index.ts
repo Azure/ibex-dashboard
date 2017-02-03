@@ -175,7 +175,7 @@ export class PipeComponent {
     state = _.extend(state, result);
 
     if (typeof calculated === 'function') {
-      var additionalValues = calculated(state);
+      var additionalValues = calculated(state) || {};
       Object.keys(additionalValues).forEach(key => {
         result[key] = additionalValues[key];
       });

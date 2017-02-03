@@ -8,6 +8,7 @@ var GenericComponent_1 = require("./GenericComponent");
 var moment = require("moment");
 var recharts_1 = require("recharts");
 var Card_1 = require("material-ui/Card");
+var styles_1 = require("../styles");
 var Timeline = (function (_super) {
     __extends(Timeline, _super);
     function Timeline() {
@@ -32,14 +33,15 @@ var Timeline = (function (_super) {
         }
         return (React.createElement(Card_1.Card, { className: 'dash-card' },
             React.createElement(Card_1.CardHeader, { className: 'card-header', title: 'Channel Usage', subtitle: "How many messages were send in each channel" }),
-            React.createElement(Card_1.CardMedia, null,
-                React.createElement(recharts_1.LineChart, { data: values, margin: { top: 5, right: 30, left: 20, bottom: 5 }, height: 300, width: 600 },
-                    React.createElement(recharts_1.XAxis, { dataKey: "time", tickFormatter: format, minTickGap: 20 }),
-                    React.createElement(recharts_1.YAxis, { type: "number", domain: ['dataMin', 'dataMax'] }),
-                    React.createElement(recharts_1.CartesianGrid, { strokeDasharray: "3 3" }),
-                    React.createElement(recharts_1.Tooltip, null),
-                    React.createElement(recharts_1.Legend, null),
-                    React.createElement(recharts_1.Line, { key: 0, type: "monotone", dataKey: "webchat", dot: false, ticksCount: 5 })))));
+            React.createElement(Card_1.CardMedia, { style: styles_1.default.cards.cardMediaStyle },
+                React.createElement(recharts_1.ResponsiveContainer, null,
+                    React.createElement(recharts_1.LineChart, { data: values, margin: { top: 5, right: 30, left: 20, bottom: 5 } },
+                        React.createElement(recharts_1.XAxis, { dataKey: "time", tickFormatter: format, minTickGap: 20 }),
+                        React.createElement(recharts_1.YAxis, { type: "number", domain: ['dataMin', 'dataMax'] }),
+                        React.createElement(recharts_1.CartesianGrid, { strokeDasharray: "3 3" }),
+                        React.createElement(recharts_1.Tooltip, null),
+                        React.createElement(recharts_1.Legend, null),
+                        lineElements)))));
     };
     return Timeline;
 }(GenericComponent_1.GenericComponent));

@@ -133,7 +133,7 @@ var PipeComponent = (function () {
         var state = PipeComponent.dataSources[plugin._props.id].store.getState();
         state = _.extend(state, result);
         if (typeof calculated === 'function') {
-            var additionalValues = calculated(state);
+            var additionalValues = calculated(state) || {};
             Object.keys(additionalValues).forEach(function (key) {
                 result[key] = additionalValues[key];
             });

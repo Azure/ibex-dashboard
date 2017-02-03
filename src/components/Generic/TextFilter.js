@@ -6,7 +6,6 @@ var __extends = (this && this.__extends) || function (d, b) {
 var React = require("react");
 var GenericComponent_1 = require("./GenericComponent");
 var FlatButton_1 = require("material-ui/FlatButton");
-var Toolbar_1 = require("material-ui/Toolbar");
 var TextFilter = (function (_super) {
     __extends(TextFilter, _super);
     // static propTypes = {}
@@ -26,8 +25,7 @@ var TextFilter = (function (_super) {
         var buttons = values.map(function (value, idx) {
             return React.createElement(FlatButton_1.default, { key: idx, label: value, primary: value === selectedValue, onClick: _this.changeSelected.bind(null, value) });
         });
-        return (React.createElement(Toolbar_1.Toolbar, null,
-            React.createElement(Toolbar_1.ToolbarGroup, { firstChild: true }, buttons)));
+        return (React.createElement("div", null, buttons));
     };
     return TextFilter;
 }(GenericComponent_1.GenericComponent));

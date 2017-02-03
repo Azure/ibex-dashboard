@@ -31,11 +31,9 @@ export default class TextFilter extends GenericComponent<any> {
     })
 
     return (
-      <Toolbar>
-        <ToolbarGroup firstChild={true}>
-          {buttons}
-        </ToolbarGroup>
-      </Toolbar>
+      <div>
+        {buttons}
+      </div>    
     );
   }
 }

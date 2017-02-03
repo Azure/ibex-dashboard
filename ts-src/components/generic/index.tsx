@@ -2,84 +2,14 @@ import * as React from 'react';
 import * as _ from 'lodash';
 import Graph from './Graph';
 import PieData from './PieData';
+import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
+
+import * as ReactGridLayout from 'react-grid-layout';
+var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+var WidthProvider = ReactGridLayout.WidthProvider;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 import { PipeComponent, IDataSourceDictionary } from '../../generic';
-
-
-// var queries = [{
-//     id: 'timespan',
-//     type: 'calculated',
-//     values: ['24 hours', '1 week', '1 month'],
-//     selectedValue: '24 hours'
-//   },
-
-//   {
-//     id: 'conversionRate',
-//     type: 'app-insights',
-//     dependencies: ['timespan'],
-//     query: ` customEvents` +
-//       ` | extend successful=customDimensions.successful` +
-//       ` | where name startswith 'message.convert'` +
-//       ` | summarize event_count=count() by name, tostring(successful)`,
-//     mappings: [{
-//         key: 'name'
-//       },
-//       {
-//         key: 'successful',
-//         val: (val) => val === 'true'
-//       },
-//       {
-//         key: 'event_count',
-//         def: 0
-//       }
-//     ]
-//   },
-
-//   {
-//     id: 'timelineMessages',
-//     type: 'app-insights',
-//     dependencies: ['timespan'],
-//     query: (state, timespan) => {
-
-//       var granularity = common.timespanToGranularity(timespan);
-//       return ` customEvents` +
-//         ` | where name == 'Activity'` +
-//         ` | summarize event_count=count() by bin(timestamp, ${granularity}), name, tostring(customDimensions.channel)` +
-//         ` | order by timestamp asc `
-//     },
-//     mappings: [{
-//         key: 'timestamp'
-//       },
-//       {
-//         key: 'name'
-//       },
-//       {
-//         key: 'channel'
-//       },
-//       {
-//         key: 'event_count',
-//         def: 0
-//       }
-//     ]
-//   },
-
-//   {
-//     id: 'channels',
-//     type: 'calculated',
-//     dependencies: ['timelineMessages'],
-//     values: (state, data) => {
-//       var channels = {};
-//       data.forEach(row => {
-//         if (!channels[row.channel]) channels[row.channel] = {
-//           name: row.channel,
-//           value: 0
-//         };
-//         channels[row.channel].value += row.count;
-//       });
-//       return Object.keys(channels);
-//     }
-//   }
-// ];
 
 var dashboard = {
   dataSources: [{
@@ -91,7 +21,7 @@ var dashboard = {
       },
       calculated: (state, dependencies) => {
         var queryTimespan = state.selectedValue === '24 hours' ? 'PT24H' : state.selectedValue === '1 week' ? 'P7D' : 'P30D';
-        var granularity = state.selectedValue === '24 hours' ? '1h' : state.selectedValue === '1 week' ? '1d' : '1d';
+        var granularity = state.selectedValue === '24 hours' ? '5m' : state.selectedValue === '1 week' ? '1d' : '1d';
 
         return { queryTimespan, granularity };
       }
@@ -110,10 +40,75 @@ var dashboard = {
           { key: 'successful', val: (val) => val === 'true' },
           { key: 'event_count', def: 0 }
         ]
+      },
+      calculated: (state) => {
+        var { values } = state;
+
+        var total : any = _.find(values, { name: 'message.convert.start' });
+        var successful: any = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+
+        if (!total) {
+          return null;
+        }
+
+        var displayValues = [
+          { label: 'Successful', count: successful.event_count },
+          { label: 'Failed', count: total.event_count - successful.event_count + 5 },
+        ];
+
+        return { displayValues };
       }
     },
     {
       id: 'timeline',
+      type: 'ApplicationInsights/Query',
+      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan', granularity: 'timespan:granularity' },
+      params: {
+        query: (dependencies) => {
+          var { granularity } = dependencies;
+          return ` customEvents` +
+                   ` | where name == 'Activity'` + 
+                   ` | summarize event_count=count() by bin(timestamp, ${granularity}), name, tostring(customDimensions.channel)` +
+                   ` | order by timestamp asc `
+        },
+        mappings: [
+          { key: 'time' },
+          { key: '__' },
+          { key: 'channel', def: 'unknown' },
+          { key: 'count', def: 0 }
+        ]
+      },
+      calculated: (state) => {
+        var _timeline = {};
+        var _channels = {};
+        var values = state.values || [];
+        var timespan = state.timespan;
+
+        values.forEach(row => {
+          var { channel, time, count } = row;
+          var timeValue = (new Date(time)).getTime();
+          
+          if (!_timeline[timeValue]) _timeline[timeValue] = { time: (new Date(time)).toUTCString() };
+          if (!_channels[channel]) _channels[channel] = { name: channel, value: 0 };
+
+          _timeline[timeValue][channel] = count;
+          _channels[channel].value += count;
+        });
+
+        var channels = Object.keys(_channels);
+        var channelUsage = _.values(_channels);
+        var timeline = _.map(_timeline, value => {
+          channels.forEach(channel => {
+            if (!value[channel]) value[channel] = 0;
+          });
+          return value;
+        });
+
+        return { graphData: timeline, channelUsage, channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
+      }
+    }/*,
+    {
+      id: 'timeline2',
       type: 'Constant',
       dependencies: { timespan: 'timespan' },
       params: {
@@ -260,27 +255,96 @@ var dashboard = {
 
         return { graphData: timeline, channelUsage, channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
       }
-    }
+    }*/
   ],
-  elements: [{
+  filters: [
+    {
       type: 'TextFilter',
       dependencies: { selectedValue: 'timespan', values: 'timespan:values' },
-      actions: { changeSelected: 'timespan:updateSelectedValue' }
+      actions: { changeSelected: 'timespan:updateSelectedValue' },
+      first: true
+    }
+  ],
+  elements: [
+    {
+      id: 'conversions',
+      type: 'PieData',
+      dependencies: { values: 'conversions:displayValues' },
+      props: { 
+        pieProps: { nameKey: 'label', valueKey: 'count' }
+      },
+      actions: { }
     },
     {
+      id: 'channels',
       type: 'PieData',
-      dependencies: { values: 'conversions' },
+      dependencies: { values: 'timeline:channelUsage' },
+      props: {
+        width: 400,
+        showLegend: false
+      },
       actions: {}
     },
     {
+      id: 'timeline',
       type: 'Timeline',
       dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
-      actions: {}
+      props: { },
+      actions: { }
     }
   ]
 };
 
+function generateLayouts() {
+
+  return { 
+    lg: [
+      { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
+      { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
+      { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
+      { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
+      { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
+      { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
+      { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
+    ],
+    md: [
+      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+    ],
+    sm: [
+      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+    ],
+    xs: [
+      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+    ],
+    xxs: [
+      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+    ]
+  }
+}
+
 export default class Dashboard extends React.Component < any, any > {
+
+  static defaultProps = {
+    grid: {
+      className: "layout",
+      rowHeight: 30,
+      cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
+      breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
+      layouts: generateLayouts()
+    }
+  };
 
   dataSources: IDataSourceDictionary = {};
 
@@ -290,10 +354,18 @@ export default class Dashboard extends React.Component < any, any > {
     dashboard.dataSources.forEach(source => {
       var dataSource = PipeComponent.createDataSource(source);
       this.dataSources[dataSource.id] = dataSource;
-    })
+    });
+
+    this.state = {
+      currentBreakpoint: 'lg',
+      mounted: false,
+      layouts: {lg: this.props.initialLayout},
+    };
   }
 
   componentDidMount() {
+
+    this.setState({mounted: true});
 
     // Connect sources and dependencies
     var sources = Object.keys(this.dataSources);
@@ -321,12 +393,38 @@ export default class Dashboard extends React.Component < any, any > {
     });
   }
 
+  onBreakpointChange = (breakpoint) => {
+    this.setState({
+      currentBreakpoint: breakpoint
+    });
+  };
+
+  onLayoutChange = (layout, layouts) => {
+    //this.props.onLayoutChange(layout, layouts);
+  };
+
   render() {
 
     var elements = [];
     dashboard.elements.forEach((element, idx) => {
       var ReactElement = require('./' + element.type)['default'];
       elements.push(
+        <div key={element.id}>
+          <ReactElement 
+                key={idx} 
+                dependencies={element.dependencies}
+                actions={element.actions}
+                props={element.props}
+          />
+        </div>
+      )
+    });
+
+    var filters = [];
+    var additionalFilters = [];
+    dashboard.filters.forEach((element, idx) => {
+      var ReactElement = require('./' + element.type)['default'];
+      (element.first ? filters : additionalFilters).push(
         <ReactElement 
               key={idx} 
               dependencies={element.dependencies}
@@ -337,7 +435,25 @@ export default class Dashboard extends React.Component < any, any > {
 
     return ( 
       <div>
-        {elements}
+        <Toolbar>
+          <ToolbarGroup firstChild={true}>
+            {filters}
+          </ToolbarGroup>
+          <ToolbarGroup>
+            {additionalFilters}
+          </ToolbarGroup>
+        </Toolbar>
+        <ResponsiveReactGridLayout
+          {...this.props.grid}
+          onBreakpointChange={this.onBreakpointChange}
+          onLayoutChange={this.onLayoutChange}
+          // WidthProvider option
+          measureBeforeMount={false}
+          // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
+          // and set `measureBeforeMount={true}`.
+          useCSSTransforms={this.state.mounted}>
+          {elements}
+        </ResponsiveReactGridLayout>
       </div>
     );
   }

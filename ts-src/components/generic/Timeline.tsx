@@ -12,6 +12,8 @@ import IconButton from 'material-ui/IconButton';
 import PersonIcon from 'material-ui/svg-icons/social/person';
 import ActionQuestionAnswer from 'material-ui/svg-icons/action/question-answer';
 
+import styles from '../styles';
+
 export default class Timeline extends GenericComponent<any> {
   // static propTypes = {}
   // static defaultProps = {}
@@ -42,15 +44,17 @@ export default class Timeline extends GenericComponent<any> {
             className='card-header'
             title='Channel Usage'
             subtitle="How many messages were send in each channel" />
-        <CardMedia>
-          <LineChart data={values} margin={{top: 5, right: 30, left: 20, bottom: 5}} height={300} width={600}>
-            <XAxis dataKey="time" tickFormatter={format} minTickGap={20}/>
-            <YAxis type="number" domain={['dataMin', 'dataMax']}/>
-            <CartesianGrid strokeDasharray="3 3"/>
-            <Tooltip />
-            <Legend/>
-            <Line key={0} type="monotone" dataKey="webchat" dot={false} ticksCount={5}/>
-          </LineChart>
+        <CardMedia style={styles.cards.cardMediaStyle}>
+          <ResponsiveContainer>
+            <LineChart data={values} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+              <XAxis dataKey="time" tickFormatter={format} minTickGap={20}/>
+              <YAxis type="number" domain={['dataMin', 'dataMax']}/>
+              <CartesianGrid strokeDasharray="3 3"/>
+              <Tooltip />
+              <Legend/>
+              {lineElements}
+            </LineChart>
+          </ResponsiveContainer>
         </CardMedia>
       </Card>
     );

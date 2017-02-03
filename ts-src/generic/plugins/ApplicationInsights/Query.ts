@@ -27,7 +27,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
       throw new Error('AIAnalyticsEvents requires a query to run and dependencies that trigger updates.');
     }
 
-    if (!props.dependencies.timespan || !props.dependencies.queryTimespan) {
+    if (!props.dependencies.queryTimespan) {
       throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
     }
   }
@@ -39,14 +39,14 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
    */
   updateDependencies(dependencies) {
 
-    var { timespan, queryTimespan } = dependencies;
+    var { queryTimespan } = dependencies;
 
     var params: any = this._props.params;
+    var query = typeof params.query === 'function' ? params.query(dependencies) : params.query;
     var mappings = params.mappings;
     var queryspan = queryTimespan;
-    var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${encodeURIComponent(params.query)}`;
+    var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${encodeURIComponent(query)}`;
 
-    return {"values":[{"name":"message.convert.start","successful":null,"event_count":10},{"name":"message.convert.end","successful":true,"event_count":10}]};
     return (dispatch) => {
 
       $.ajax({
