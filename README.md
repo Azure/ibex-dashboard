@@ -22,7 +22,9 @@ REACT_APP_APP_INSIGHTS_APIKEY={API KEY}
 
 ## Deploy To Azure
 
-To deploy to azure fork this repo (to be able to automatically create github deployment key).
+1. Fork this repo (to be able to automatically create github deployment key)
+2. Clone & Deploy:
+
 from you new repo run:
 
 ```sh 
@@ -43,6 +45,22 @@ azure group create "new-resource-group" -l "West Europe" -f dashboard.template.j
 
 Since application insights API doesn't support ARM yet, we need to manually [create an API Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID) for the application insights service.
 Once you created the api key, copy and paste it into the **Web App ==> Application Settings ==> REACT_APP_APP_INSIGHTS_APIKEY**.
+
+3. Go to [azure portal](https://portal.azure.com)
+4. Select: **Resource Groups** > **[new resource group]** > **App Insights Service**
+5. Copy **Instrumentation Key** and paste into your bot registration page (on the bottom)
+6. Click: **API Access** > **Create New Key** > **+Read Telemetry**
+7. Copy `Application ID` + `API Key`
+8. Select: **Resource Groups** > **[new resource group]** > **Web App**
+9. Under **Application Settings** > **App Settings** set the following values:
+
+```bash
+REACT_APP_APP_INSIGHTS_APPID: {Application ID}
+REACT_APP_APP_INSIGHTS_APIKEY: {API Key}
+```
+
+10. Save changes, go to **Overview** and restart the web app.
+11. Click on **URL** to see the dashboard
 
 ### Used Repos Technologies
 
