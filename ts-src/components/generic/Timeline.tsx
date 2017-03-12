@@ -13,6 +13,8 @@ import PersonIcon from 'material-ui/svg-icons/social/person';
 import ActionQuestionAnswer from 'material-ui/svg-icons/action/question-answer';
 
 import styles from '../styles';
+var colors = styles.colors;
+var { ThemeColors } = colors;
 
 export default class Timeline extends GenericComponent<any> {
   // static propTypes = {}
@@ -34,7 +36,7 @@ export default class Timeline extends GenericComponent<any> {
     var lineElements = [];
     if (values && values.length && lines) {
       lineElements = lines.map((line, idx) => {
-        return <Line key={idx} type="monotone" dataKey={line} dot={false} ticksCount={5}/>
+        return <Line key={idx} type="monotone" dataKey={line} stroke={ThemeColors[idx]} dot={false} ticksCount={5}/>
       })
     }
 

@@ -9,6 +9,8 @@ var moment = require("moment");
 var recharts_1 = require("recharts");
 var Card_1 = require("material-ui/Card");
 var styles_1 = require("../styles");
+var colors = styles_1.default.colors;
+var ThemeColors = colors.ThemeColors;
 var Timeline = (function (_super) {
     __extends(Timeline, _super);
     function Timeline() {
@@ -28,7 +30,7 @@ var Timeline = (function (_super) {
         var lineElements = [];
         if (values && values.length && lines) {
             lineElements = lines.map(function (line, idx) {
-                return React.createElement(recharts_1.Line, { key: idx, type: "monotone", dataKey: line, dot: false, ticksCount: 5 });
+                return React.createElement(recharts_1.Line, { key: idx, type: "monotone", dataKey: line, stroke: ThemeColors[idx], dot: false, ticksCount: 5 });
             });
         }
         return (React.createElement(Card_1.Card, { className: 'dash-card' },

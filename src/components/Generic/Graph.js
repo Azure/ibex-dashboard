@@ -7,9 +7,9 @@ var React = require("react");
 var Card_1 = require("material-ui/Card");
 var recharts_1 = require("recharts");
 var moment = require("moment");
-var colors_1 = require("../Dashboard/colors");
-var styles_1 = require("../Dashboard/styles");
-var ThemeColors = colors_1.default.ThemeColors;
+var styles_1 = require("../styles");
+var colors = styles_1.default.colors;
+var ThemeColors = colors.ThemeColors;
 ;
 ;
 var Graph = (function (_super) {
@@ -47,7 +47,7 @@ var Graph = (function (_super) {
         }
         return (React.createElement(Card_1.Card, { className: 'dash-card' },
             React.createElement(Card_1.CardHeader, { className: 'card-header', title: 'Users', subtitle: "How many messages were send in each channel" }),
-            React.createElement(Card_1.CardMedia, { style: styles_1.default.cardMediaStyle },
+            React.createElement(Card_1.CardMedia, { style: styles_1.default.cards.cardMediaStyle },
                 React.createElement(recharts_1.ResponsiveContainer, null,
                     React.createElement(recharts_1.LineChart, { data: data, margin: { top: 5, right: 30, left: 20, bottom: 5 } },
                         React.createElement(recharts_1.XAxis, { dataKey: "time", tickFormatter: format, minTickGap: 20 }),

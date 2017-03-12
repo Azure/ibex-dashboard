@@ -292,6 +292,13 @@ var dashboard = {
             dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
             props: {},
             actions: {}
+        },
+        {
+            id: 'intents',
+            type: 'Scatter',
+            dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
+            props: {},
+            actions: {}
         }
     ]
 };

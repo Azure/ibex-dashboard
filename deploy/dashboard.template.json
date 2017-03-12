@@ -153,7 +153,20 @@
       },
       "properties": {
         "applicationId": "[resourceId('Microsoft.Web/sites', parameters('webSiteName'))]"
-      }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-05-01",
+          "name": "dashboard-keys",
+          "type": "apikeys",
+          "dependsOn": [
+            "[concat('Microsoft.Insights/components/', variables('applicationInsightName'))]"
+          ],
+          "properties": {
+            "linkedReadProperties": "[concat(resourceId('Microsoft.insights/components', variables('applicationInsightName'))), '/api']"
+          }
+        }
+      ]
     }
   ],
   "outputs": {

@@ -1,0 +1,79 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "hostingPlanName": { "type": "string" },
+    "webSiteName": { "type": "string" },
+    "siteTitle": { "type": "string" },
+    "logoURl": { "type": "string" },
+    "hostingPlanSKU": {
+      "type": "string",
+      "allowedValues": [
+        "Free",
+        "Shared",
+        "Basic",
+        "Standard"
+      ],
+      "defaultValue": "Basic",
+      "metadata": {
+        "description": "SKU value"
+      }
+    },
+    "hostingPlanWorkerSize": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
+      "defaultValue": "1",
+      "metadata": {
+        "description": "Worker Size( 0=Small, 1=Medium, 2=Large )"
+      }
+    },
+    "repoURL": {
+      "type": "string",
+      "defaultValue": "https://github.com/CatalystCode/bot-fmk-dashboard.git",
+      "metadata": {
+        "description": "Fork that repo than use the new url in [parameters file:repoUrl:value]."
+      }
+    },
+    "branch": {
+      "type": "string",
+      "defaultValue": "master",
+      "metadata": {
+        "description": "The branch of the GitHub repository to use."
+      }
+    }
+  },
+  "variables": {
+    "applicationInsightName": "[concat(parameters('webSiteName'), '-ai')]"
+  },
+  "resources": [
+    {
+      "name": "[variables('applicationInsightName')]",
+      "type": "Microsoft.Insights/components",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01",
+      "resources": [
+        {
+          "apiVersion": "2015-05-01",
+          "name": "dashboard-keys",
+          "type": "apikeys",
+          "dependsOn": [
+            "[concat('Microsoft.Insights/components/', variables('applicationInsightName'))]"
+          ],
+          "properties": {
+            "linkedReadProperties": "[concat(resourceId('Microsoft.insights/components', variables('applicationInsightName')), '/api')]"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "appInsightsInstrumentationKey": { 
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightName')), '2014-04-01').InstrumentationKey]" 
+      }
+  }
+}

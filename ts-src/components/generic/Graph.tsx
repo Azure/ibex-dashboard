@@ -5,8 +5,9 @@ import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsiv
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import colors from '../Dashboard/colors';
-import styles from '../Dashboard/styles';
+import styles from '../styles';
+var colors = styles.colors;
+
 var { ThemeColors } = colors;
 
 interface IGraphProps {};
@@ -61,7 +62,7 @@ export default class Graph extends React.Component<any, any> {
             className='card-header'
             title='Users'
             subtitle="How many messages were send in each channel" />
-        <CardMedia style={styles.cardMediaStyle}>
+        <CardMedia style={styles.cards.cardMediaStyle}>
           <ResponsiveContainer>
             <LineChart data={data} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
               <XAxis dataKey="time" tickFormatter={format} minTickGap={20}/>
