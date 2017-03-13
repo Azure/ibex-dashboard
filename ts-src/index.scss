@@ -1,0 +1,56 @@
+@import '../node_modules/react-md/src/scss/react-md';
+
+$md-primary-color: $md-indigo-500;
+$md-secondary-color: $md-pink-a-200;
+
+@include react-md-everything;
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+/*=============*/
+/* Grid Layout */
+/*=============*/
+
+/* Need this to ensure react-grid-leyout streches on the screen*/
+.layout {
+  width: 100%;
+}
+
+
+/*=============*/
+/* Card Styles */
+/*=============*/
+
+.md-card {
+  position: relative;
+  height: 100%;
+}
+
+.md-card-title {
+  padding: 10px;
+  padding-top: 10px;
+}
+
+.md-card .md-media {
+  padding: 73px 0 0 0;
+  margin-top: -73px;
+  height: 100%;
+}
+
+/*=============*/
+/* Rechards    */
+/*=============*/
+
+.recharts-legend-item .recharts-surface {
+  bottom: auto;
+  top: auto;
+  left: auto;
+  right: auto;
+  height: auto;
+  width: auto;
+  position: static;
+}

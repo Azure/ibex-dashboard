@@ -1,3 +1,4 @@
+Object.defineProperty(exports, "__esModule", { value: true });
 var alt_1 = require("../alt");
 var _ = require("lodash");
 var PipeComponent = (function () {
@@ -68,7 +69,7 @@ var PipeComponent = (function () {
                 NewActionClass.prototype[action] = function () {
                     var args = [];
                     for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i - 0] = arguments[_i];
+                        args[_i] = arguments[_i];
                     }
                     // Collecting depedencies from all relevant stores
                     var extrapolation = PipeComponent.extrapolateDependencies(plugin.getDependencies());
@@ -142,5 +143,5 @@ var PipeComponent = (function () {
     };
     return PipeComponent;
 }());
-exports.PipeComponent = PipeComponent;
 PipeComponent.dataSources = {};
+exports.PipeComponent = PipeComponent;

@@ -1,3 +1,4 @@
+Object.defineProperty(exports, "__esModule", { value: true });
 var DataSourcePlugin = (function () {
     /**
      * @param {DataSourcePlugin} options - Options object

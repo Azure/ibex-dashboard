@@ -4,9 +4,8 @@
     "module": "commonjs",
     "sourceMap": false,
     "outDir": "src",
-    "types": ["node"],
     "typeRoots": ["./node_modules/@types", "./types"],
-    "jsx": "react",
+    "jsx": "preserve",
     "allowJs": true,
     "noImplicitUseStrict": true
   },

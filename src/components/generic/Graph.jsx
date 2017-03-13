@@ -1,8 +1,14 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var Card_1 = require("material-ui/Card");
 var recharts_1 = require("recharts");
@@ -42,22 +48,25 @@ var Graph = (function (_super) {
         var glines = [];
         if (data && data.length) {
             glines = lines.map(function (line, idx) {
-                return React.createElement(recharts_1.Line, { key: idx, type: "monotone", dataKey: line, stroke: ThemeColors[idx], dot: false, ticksCount: 5 });
+                return <recharts_1.Line key={idx} type="monotone" dataKey={line} stroke={ThemeColors[idx]} dot={false} ticksCount={5}/>;
             });
         }
-        return (React.createElement(Card_1.Card, { className: 'dash-card' },
-            React.createElement(Card_1.CardHeader, { className: 'card-header', title: 'Users', subtitle: "How many messages were send in each channel" }),
-            React.createElement(Card_1.CardMedia, { style: styles_1.default.cards.cardMediaStyle },
-                React.createElement(recharts_1.ResponsiveContainer, null,
-                    React.createElement(recharts_1.LineChart, { data: data, margin: { top: 5, right: 30, left: 20, bottom: 5 } },
-                        React.createElement(recharts_1.XAxis, { dataKey: "time", tickFormatter: format, minTickGap: 20 }),
-                        React.createElement(recharts_1.YAxis, null),
-                        React.createElement(recharts_1.CartesianGrid, { strokeDasharray: "3 3" }),
-                        React.createElement(recharts_1.Tooltip, null),
-                        React.createElement(recharts_1.Legend, null),
-                        glines)))));
+        return (<Card_1.Card className='dash-card'>
+        <Card_1.CardHeader className='card-header' title='Users' subtitle="How many messages were send in each channel"/>
+        <Card_1.CardMedia style={styles_1.default.cards.cardMediaStyle}>
+          <recharts_1.ResponsiveContainer>
+            <recharts_1.LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <recharts_1.XAxis dataKey="time" tickFormatter={format} minTickGap={20}/>
+              <recharts_1.YAxis />
+              <recharts_1.CartesianGrid strokeDasharray="3 3"/>
+              <recharts_1.Tooltip />
+              <recharts_1.Legend />
+              {glines}
+            </recharts_1.LineChart>
+          </recharts_1.ResponsiveContainer>
+        </Card_1.CardMedia>
+      </Card_1.Card>);
     };
     return Graph;
 }(React.Component));
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Graph;

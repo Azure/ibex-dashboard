@@ -14,9 +14,15 @@
 
 .dash-card {
   padding-bottom: 5px;
+  height: 100%;
 }
+  .dash-card > div {
+    height: 100%;
+  }
+
   .dash-card > div > div > div {
-    height: inherit;
+    height: 100%;
+    position: relative;
   }
 
   .dash-card .card-header {

@@ -1,3 +1,4 @@
+Object.defineProperty(exports, "__esModule", { value: true });
 var colors = require("material-ui/styles/colors");
 var ThemeColors = [
     colors.pink800,
@@ -10,7 +11,6 @@ var ThemeColors = [
     colors.lime800,
     colors.teal800
 ];
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     ThemeColors: ThemeColors,
     DangerColor: colors.red500,

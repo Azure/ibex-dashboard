@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { GenericComponent } from './GenericComponent';
-import { Card, CardHeader, CardMedia } from 'material-ui/Card';
+import { GenericComponent, IGenericProps } from './GenericComponent';
+import Card from '../Card';
 import { PieChart, Pie, Sector, Cell, Legend, ResponsiveContainer } from 'recharts';
 
 import * as _ from 'lodash';
@@ -10,14 +10,21 @@ import styles from '../styles';
 var colors = styles.colors;
 var { ThemeColors } = colors;
 
-interface IGraphProps {};
+interface IPieProps extends IGenericProps {
+  mode: string; // users/messages
+  props: {
+    pieProps: { [key: string] : Object };
+    showLegend: Boolean
+    width: Object;
+    height: Object;
+  }
+};
 
-interface IGraphState {};
-
-export default class PieData extends GenericComponent<any> {
+export default class PieData extends GenericComponent<IPieProps> {
 
   state = {
-    activeIndex: 0
+    activeIndex: 0,
+    values: null
   }
 
   constructor(props) {
@@ -102,36 +109,31 @@ export default class PieData extends GenericComponent<any> {
 
     // Todo: Receive the width of the SVG component from the container
     return (
-      <Card className='dash-card'>
-        <CardHeader
-            className='card-header'
-            title="Conversion Usage"
-            subtitle={`Conversion Rate`} />
-        <CardMedia style={styles.cards.cardMediaStyle}>
-          <ResponsiveContainer>
-            <PieChart width={width || 500} height={height || 240}>
-              <Pie
-                data={values} 
-                cx={120} 
-                cy={120} 
-                innerRadius={60}
-                outerRadius={80} 
-                fill="#8884d8"
-                onMouseEnter={this.onPieEnter}
-                activeIndex={this.state.activeIndex}
-                activeShape={this.renderActiveShape.bind(this)} 
-                paddingAngle={0}
-                {...pieProps}>
-                {
-                  values.map((entry, index) => <Cell key={index} fill={ThemeColors[index % ThemeColors.length]}/>)
-                }
-                <Cell key={0} fill={colors.GoodColor}/>
-                <Cell key={1} fill={colors.BadColor}/>
-              </Pie>
-              {showLegend !== false && <Legend layout="vertical" align="right" verticalAlign="top" /> }
-            </PieChart>
-          </ResponsiveContainer>
-        </CardMedia>
+      <Card title="Conversion Usage"
+            subtitle={`Conversion Rate`}>
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie
+              data={values} 
+              cx={120} 
+              cy={120} 
+              innerRadius={60}
+              outerRadius={80} 
+              fill="#8884d8"
+              onMouseEnter={this.onPieEnter}
+              activeIndex={this.state.activeIndex}
+              activeShape={this.renderActiveShape.bind(this)} 
+              paddingAngle={0}
+              {...pieProps}>
+              {
+                values.map((entry, index) => <Cell key={index} fill={ThemeColors[index % ThemeColors.length]}/>)
+              }
+              <Cell key={0} fill={colors.GoodColor}/>
+              <Cell key={1} fill={colors.BadColor}/>
+            </Pie>
+            {showLegend !== false && <Legend layout="vertical" align="right" verticalAlign="top" /> }
+          </PieChart>
+        </ResponsiveContainer>
       </Card>
     );
   }

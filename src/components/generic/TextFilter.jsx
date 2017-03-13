@@ -1,11 +1,17 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
 var React = require("react");
 var GenericComponent_1 = require("./GenericComponent");
-var FlatButton_1 = require("material-ui/FlatButton");
+var Button_1 = require("react-md/lib/Buttons/Button");
 var TextFilter = (function (_super) {
     __extends(TextFilter, _super);
     // static propTypes = {}
@@ -23,11 +29,12 @@ var TextFilter = (function (_super) {
         var _a = this.state, selectedValue = _a.selectedValue, values = _a.values;
         values = values || [];
         var buttons = values.map(function (value, idx) {
-            return React.createElement(FlatButton_1.default, { key: idx, label: value, primary: value === selectedValue, onClick: _this.changeSelected.bind(null, value) });
+            return <Button_1.default flat key={idx} label={value} primary={value === selectedValue} onClick={_this.changeSelected.bind(null, value)}/>;
         });
-        return (React.createElement("div", null, buttons));
+        return (<div>
+        {buttons}
+      </div>);
     };
     return TextFilter;
 }(GenericComponent_1.GenericComponent));
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = TextFilter;

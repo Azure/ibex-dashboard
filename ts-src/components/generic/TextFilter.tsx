@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
 import connectToStores from 'alt-utils/lib/connectToStores';
-import FlatButton from 'material-ui/FlatButton';
-import Checkbox from 'material-ui/Checkbox';
-import IconButton from 'material-ui/IconButton';
-import SelectAllIcon from 'material-ui/svg-icons/toggle/check-box';
-import SelectNoneIcon from 'material-ui/svg-icons/toggle/check-box-outline-blank';
-import { Toolbar, ToolbarGroup } from 'material-ui/Toolbar';
+import Button from 'react-md/lib/Buttons/Button';
 
 export default class TextFilter extends GenericComponent<any> {
   // static propTypes = {}
@@ -27,7 +22,7 @@ export default class TextFilter extends GenericComponent<any> {
     values = values || [];
 
     var buttons = values.map((value, idx) => {
-      return <FlatButton key={idx} label={value} primary={value === selectedValue} onClick={this.changeSelected.bind(null, value)} />
+      return <Button flat key={idx} label={value} primary={value === selectedValue} onClick={this.changeSelected.bind(null, value)} />
     })
 
     return (

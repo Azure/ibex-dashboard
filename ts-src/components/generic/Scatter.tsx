@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
-import { Card, CardHeader, CardMedia } from 'material-ui/Card';
+import Card from '../Card';
 import { ScatterChart, Scatter as ScatterLine, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer }  from 'recharts';
 
 import * as _ from 'lodash';
@@ -45,25 +45,20 @@ export default class Scatter extends GenericComponent<any> {
     // }
 
     return (
-      <Card className='dash-card'>
-        <CardHeader
-            className='card-header'
-            title='Scatter'
-            subtitle="Scatter chart bla bla" />
-        <CardMedia style={styles.cards.cardMediaStyle}>
-          <ResponsiveContainer>
-            <ScatterChart margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-              <XAxis dataKey={'x'} tickFormatter={format} minTickGap={20} name='stature'/>
-              <YAxis dataKey={'y'} name='weight' unit='kg'/>
-              <ZAxis dataKey={'z'} range={[60, 600]} name='score' unit='km'/>
-              <CartesianGrid strokeDasharray="3 3"/>
-              <Tooltip cursor={{strokeDasharray: '3 3'}}/>
-              <Legend/>
-              <ScatterLine name='A school' data={data01} fill='#8884d8'/>
-              <ScatterLine name='B school' data={data02} fill='#82ca9d'/>
-            </ScatterChart>
-          </ResponsiveContainer>
-        </CardMedia>
+      <Card title='Scatter'
+            subtitle="Scatter chart bla bla">
+        <ResponsiveContainer>
+          <ScatterChart margin={{top: 5, right: 30, left: 20, bottom: 5}}>
+            <XAxis dataKey={'x'} tickFormatter={format} minTickGap={20} name='stature'/>
+            <YAxis dataKey={'y'} name='weight' unit='kg'/>
+            <ZAxis dataKey={'z'} range={[60, 600]} name='score' unit='km'/>
+            <CartesianGrid strokeDasharray="3 3"/>
+            <Tooltip cursor={{strokeDasharray: '3 3'}}/>
+            <Legend/>
+            <ScatterLine name='A school' data={data01} fill={colors.ThemeColors[0]}/>
+            <ScatterLine name='B school' data={data02} fill={colors.ThemeColors[1]}/>
+          </ScatterChart>
+        </ResponsiveContainer>
       </Card>
     );
   }
