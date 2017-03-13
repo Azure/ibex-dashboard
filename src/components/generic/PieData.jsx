@@ -72,7 +72,8 @@ var PieData = (function (_super) {
     };
     PieData.prototype.render = function () {
         var values = this.state.values;
-        var _a = this.props.props, pieProps = _a.pieProps, showLegend = _a.showLegend, width = _a.width, height = _a.height;
+        var _a = this.props, props = _a.props, layout = _a.layout;
+        var pieProps = props.pieProps, showLegend = props.showLegend, width = props.width, height = props.height;
         if (!values) {
             return null;
         }
@@ -80,7 +81,7 @@ var PieData = (function (_super) {
         return (<Card_1.default title="Conversion Usage" subtitle={"Conversion Rate"}>
         <recharts_1.ResponsiveContainer>
           <recharts_1.PieChart>
-            <recharts_1.Pie data={values} cx={120} cy={120} innerRadius={60} outerRadius={80} fill="#8884d8" onMouseEnter={this.onPieEnter} activeIndex={this.state.activeIndex} activeShape={this.renderActiveShape.bind(this)} paddingAngle={0} {...pieProps}>
+            <recharts_1.Pie data={values} cx={Math.min(layout.h / 4, layout.w) * 60} innerRadius={60} fill="#8884d8" onMouseEnter={this.onPieEnter} activeIndex={this.state.activeIndex} activeShape={this.renderActiveShape.bind(this)} paddingAngle={0} {...pieProps}>
               {values.map(function (entry, index) { return <recharts_1.Cell key={index} fill={ThemeColors[index % ThemeColors.length]}/>; })}
               <recharts_1.Cell key={0} fill={colors.GoodColor}/>
               <recharts_1.Cell key={1} fill={colors.BadColor}/>

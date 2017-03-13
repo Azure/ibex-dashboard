@@ -11,47 +11,44 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 import { PipeComponent, IDataSourceDictionary } from '../generic';
 
-function generateLayouts() {
-
-  return { 
-    lg: [
-      { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
-      { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
-      { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
-      { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
-      { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
-      { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
-      { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
-    ],
-    md: [
-      { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
-      { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
-      { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
-      { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
-      { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
-      { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
-      { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
-    ],
-    sm: [
-      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
-      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
-      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
-      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
-    ],
-    xs: [
-      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
-      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
-      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
-      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
-    ],
-    xxs: [
-      { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
-      { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
-      { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
-      { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
-    ]
-  }
-}
+const defaultLayouts = { 
+  lg: [
+    { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
+    { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
+    { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
+    { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
+    { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
+    { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
+    { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
+  ],
+  md: [
+    { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
+    { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
+    { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
+    { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
+    { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
+    { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
+    { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
+  ],
+  sm: [
+    { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+    { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+    { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+    { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+  ],
+  xs: [
+    { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+    { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+    { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+    { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+  ],
+  xxs: [
+    { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
+    { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
+    { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
+    { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
+  ]
+};
 
 import dashboard from './temp';
 
@@ -64,7 +61,7 @@ export default class Dashboard extends React.Component<any, any> {
       rowHeight: 30,
       cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
       breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
-      layouts: generateLayouts()
+      layouts: defaultLayouts
     }
   };
 
@@ -76,6 +73,12 @@ export default class Dashboard extends React.Component<any, any> {
     layouts: {lg: this.props.initialLayout},
   };
 
+  getCurrentLayout() {
+    var breakpoint = this.state.currentBreakpoint;
+    var layout = this.state.layouts[breakpoint] || defaultLayouts[breakpoint];
+    return layout;
+  }
+
   constructor(props) {
     super(props);
 
@@ -83,6 +86,8 @@ export default class Dashboard extends React.Component<any, any> {
       var dataSource = PipeComponent.createDataSource(source);
       this.dataSources[dataSource.id] = dataSource;
     });
+
+    this.getCurrentLayout = this.getCurrentLayout.bind(this);
   }
   
   componentDidMount() {
@@ -123,15 +128,25 @@ export default class Dashboard extends React.Component<any, any> {
 
   onLayoutChange = (layout, layouts) => {
     //this.props.onLayoutChange(layout, layouts);
+    var breakpoint = this.state.currentBreakpoint;
+    var newLayouts = this.state.layouts;
+    newLayouts[breakpoint] = layout;
+    this.setState({
+      layouts: newLayouts
+    });
   };
 
   render() {
+
+    var { currentBreakpoint } = this.state;
+    var layout = this.state.layouts[currentBreakpoint];
 
     // Creating visual elements
     var elements = [];
     dashboard.elements.forEach((element, idx) => {
       var ReactElement = plugins[element.type];
       var { id, dependencies, actions, props, title, subtitle } = element;
+      var layoutProps = _.find(layout, { "i": id });
       elements.push(
         <div key={id}>
           <ReactElement 
@@ -140,6 +155,7 @@ export default class Dashboard extends React.Component<any, any> {
                 actions={actions}
                 props={props}
                 title={title}
+                layout={layoutProps}
           />
         </div>
       )

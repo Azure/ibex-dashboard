@@ -7,6 +7,12 @@ export interface IGenericProps {
   dependencies: { [key: string] : string };
   actions: { [key: string] : string };
   props: { [key: string] : Object };
+  layout: {
+    "x": number;
+    "y": number;
+    "w": number;
+    "h": number;
+  }
 }
 
 export interface IGenericState { [key: string] : any }

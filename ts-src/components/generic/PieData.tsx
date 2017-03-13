@@ -101,7 +101,8 @@ export default class PieData extends GenericComponent<IPieProps> {
   
   render() {
     var { values } = this.state;
-    var { pieProps, showLegend, width, height } = this.props.props;
+    var { props, layout } = this.props;
+    var { pieProps, showLegend, width, height } = props;
 
     if (!values) {
       return null;
@@ -115,10 +116,8 @@ export default class PieData extends GenericComponent<IPieProps> {
           <PieChart>
             <Pie
               data={values} 
-              cx={120} 
-              cy={120} 
+              cx={Math.min(layout.h / 4, layout.w) * 60}
               innerRadius={60}
-              outerRadius={80} 
               fill="#8884d8"
               onMouseEnter={this.onPieEnter}
               activeIndex={this.state.activeIndex}
