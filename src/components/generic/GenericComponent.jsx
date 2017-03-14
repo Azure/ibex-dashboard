@@ -1,61 +1,46 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var generic_1 = require("../../generic");
-var GenericComponent = (function (_super) {
-    __extends(GenericComponent, _super);
+const React = require("react");
+const generic_1 = require("../../generic");
+class GenericComponent extends React.Component {
     // static propTypes = {}
     // static defaultProps = {}
-    function GenericComponent(props) {
-        var _this = _super.call(this, props) || this;
-        _this.onChange = _this.onChange.bind(_this);
-        _this.trigger = _this.trigger.bind(_this);
-        var result = generic_1.PipeComponent.extrapolateDependencies(_this.props.dependencies);
+    constructor(props) {
+        super(props);
+        this.onChange = this.onChange.bind(this);
+        this.trigger = this.trigger.bind(this);
+        var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
         var initialState = {};
-        Object.keys(result.dependencies).forEach(function (key) {
+        Object.keys(result.dependencies).forEach(key => {
             initialState[key] = result.dependencies[key];
         });
-        _this.state = initialState;
-        return _this;
+        this.state = initialState;
     }
-    GenericComponent.prototype.componentDidMount = function () {
-        var _this = this;
+    componentDidMount() {
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
-        Object.keys(result.dataSources).forEach(function (key) {
-            result.dataSources[key].store.listen(_this.onChange);
+        Object.keys(result.dataSources).forEach(key => {
+            result.dataSources[key].store.listen(this.onChange);
         });
-    };
-    GenericComponent.prototype.componentWillUnmount = function () {
-        var _this = this;
+    }
+    componentWillUnmount() {
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
-        Object.keys(result.dataSources).forEach(function (key) {
-            result.dataSources[key].store.unlisten(_this.onChange);
+        Object.keys(result.dataSources).forEach(key => {
+            result.dataSources[key].store.unlisten(this.onChange);
         });
-    };
-    GenericComponent.prototype.onChange = function (state) {
+    }
+    onChange(state) {
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
         var updatedState = {};
-        Object.keys(result.dependencies).forEach(function (key) {
+        Object.keys(result.dependencies).forEach(key => {
             updatedState[key] = result.dependencies[key];
         });
         this.setState(updatedState);
-    };
-    GenericComponent.prototype.trigger = function (actionName, args) {
+    }
+    trigger(actionName, args) {
         var action = this.props.actions[actionName];
         // if action was not defined, not action needed
         if (!action)
             return;
         generic_1.PipeComponent.triggerAction(action, args);
-    };
-    return GenericComponent;
-}(React.Component));
+    }
+}
 exports.GenericComponent = GenericComponent;

@@ -27,6 +27,8 @@ export default class Scatter extends GenericComponent<any> {
 
   render() {
 
+    var { title, subtitle } = this.props;
+
     var { timeFormat, values, lines } = this.state;
     var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
 
@@ -45,8 +47,8 @@ export default class Scatter extends GenericComponent<any> {
     // }
 
     return (
-      <Card title='Scatter'
-            subtitle="Scatter chart bla bla">
+      <Card title={ title }
+            subtitle={ subtitle }>
         <ResponsiveContainer>
           <ScatterChart margin={{top: 5, right: 30, left: 20, bottom: 5}}>
             <XAxis dataKey={'x'} tickFormatter={format} minTickGap={20} name='stature'/>

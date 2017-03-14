@@ -1,5 +1,5 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var colors = require("material-ui/styles/colors");
+const colors = require("material-ui/styles/colors");
 var ThemeColors = [
     colors.pink800,
     colors.purple800,
@@ -12,7 +12,7 @@ var ThemeColors = [
     colors.teal800
 ];
 exports.default = {
-    ThemeColors: ThemeColors,
+    ThemeColors,
     DangerColor: colors.red500,
     PersonColor: colors.teal700,
     IntentsColor: colors.tealA700,
@@ -20,7 +20,7 @@ exports.default = {
     BadColor: colors.red700,
     PositiveColor: colors.lightBlue700,
     NeutralColor: colors.grey500,
-    getColor: function (idx) {
+    getColor: (idx) => {
         return ThemeColors[idx];
     }
 };

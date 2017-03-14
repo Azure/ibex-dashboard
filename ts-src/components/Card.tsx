@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Media } from 'react-md/lib/Media';
-import { Card, CardTitle, CardMedia} from 'react-md/lib/Cards';
+import { Card, CardTitle } from 'react-md/lib/Cards';
 
 export default ({ children = null, title = '', subtitle = '' }) => 
   <Card>

@@ -1,13 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __rest = (this && this.__rest) || function (s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -18,19 +8,15 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var react_router_1 = require("react-router");
-var NavigationLink = (function (_super) {
-    __extends(NavigationLink, _super);
-    function NavigationLink() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
+const React = require("react");
+const react_router_1 = require("react-router");
+class NavigationLink extends React.PureComponent {
     // NOTE: Don't try using Stateless (function) component here. `ref` is
     // required by React-MD/AccessibleFakeButton, but Stateless components
     // don't have one by design:
     // https://github.com/facebook/react/issues/4936
-    NavigationLink.prototype.render = function () {
-        var _a = this.props, href = _a.href, as = _a.as, children = _a.children, _props = __rest(_a, ["href", "as", "children"]);
+    render() {
+        const _a = this.props, { href, as, children } = _a, _props = __rest(_a, ["href", "as", "children"]);
         return (<div {..._props} style={{ padding: 0 }}>
         <react_router_1.Link href={href} as={as}>
           <a className='md-list-tile md-list-tile--mini' style={{ width: '100%', overflow: 'hidden' }}>
@@ -38,7 +24,6 @@ var NavigationLink = (function (_super) {
           </a>
         </react_router_1.Link>
       </div>);
-    };
-    return NavigationLink;
-}(React.PureComponent));
+    }
+}
 exports.default = NavigationLink;

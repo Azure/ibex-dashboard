@@ -1,6 +1,17 @@
 import * as _ from 'lodash';
 
-export default {
+export default <IDashboardConfig>{
+  config: {
+    layout: {
+      isDraggable: true,
+      isResizable: true,
+      rowHeight: 30,
+      // This turns off compaction so you can place items wherever.
+      verticalCompact: false,
+      cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
+      breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}
+    }
+  },
   dataSources: [{
       id: 'timespan',
       type: 'Constant',
@@ -95,156 +106,48 @@ export default {
 
         return { graphData: timeline, channelUsage, channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
       }
-    }/*,
+    },
     {
-      id: 'timeline2',
-      type: 'Constant',
-      dependencies: { timespan: 'timespan' },
+      id: 'errors',
+      type: 'ApplicationInsights/Query',
+      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
       params: {
-        value: [],
-        selectedValue: {
-          "Tables": [{
-            "TableName": "Table_0",
-            "Columns": [{
-              "ColumnName": "timestamp",
-              "DataType": "DateTime",
-              "ColumnType": "datetime"
-            }, {
-              "ColumnName": "name",
-              "DataType": "String",
-              "ColumnType": "string"
-            }, {
-              "ColumnName": "customDimensions_channel",
-              "DataType": "String",
-              "ColumnType": "string"
-            }, {
-              "ColumnName": "event_count",
-              "DataType": "Int64",
-              "ColumnType": "long"
-            }],
-            "Rows": [
-              ["2017-01-09T00:00:00Z", "Activity", "webchat", 38],
-              ["2017-01-11T00:00:00Z", "Activity", "webchat", 8],
-              ["2017-01-12T00:00:00Z", "Activity", "webchat", 14],
-              ["2017-01-15T00:00:00Z", "Activity", "webchat", 15],
-              ["2017-01-22T00:00:00Z", "Activity", "webchat", 3],
-              ["2017-01-23T00:00:00Z", "Activity", "webchat", 6],
-              ["2017-01-25T00:00:00Z", "Activity", "webchat", 1]
-            ]
-          }, {
-            "TableName": "Table_1",
-            "Columns": [{
-              "ColumnName": "Value",
-              "DataType": "String",
-              "ColumnType": "string"
-            }],
-            "Rows": [
-              ["{\"Visualization\":\"table\",\"Title\":\"\",\"Accumulate\":false,\"IsQuerySorted\":true,\"Kind\":\"\",\"Annotation\":\"\",\"By\":null}"]
-            ]
-          }, {
-            "TableName": "Table_2",
-            "Columns": [{
-              "ColumnName": "Timestamp",
-              "DataType": "DateTime",
-              "ColumnType": "datetime"
-            }, {
-              "ColumnName": "Severity",
-              "DataType": "Int32",
-              "ColumnType": "int"
-            }, {
-              "ColumnName": "SeverityName",
-              "DataType": "String",
-              "ColumnType": "string"
-            }, {
-              "ColumnName": "StatusCode",
-              "DataType": "Int32",
-              "ColumnType": "int"
-            }, {
-              "ColumnName": "StatusDescription",
-              "DataType": "String",
-              "ColumnType": "string"
-            }, {
-              "ColumnName": "Count",
-              "DataType": "Int32",
-              "ColumnType": "int"
-            }, {
-              "ColumnName": "RequestId",
-              "DataType": "Guid",
-              "ColumnType": "guid"
-            }, {
-              "ColumnName": "ActivityId",
-              "DataType": "Guid",
-              "ColumnType": "guid"
-            }, {
-              "ColumnName": "SubActivityId",
-              "DataType": "Guid",
-              "ColumnType": "guid"
-            }, {
-              "ColumnName": "ClientActivityId",
-              "DataType": "String",
-              "ColumnType": "string"
-            }],
-            "Rows": [
-              ["2017-01-29T17:23:02.834179Z", 4, "Info", 0, "Query completed successfully", 1, "f30e2fae-b8e7-4f9c-9d44-bd1e9f4be69d", "f30e2fae-b8e7-4f9c-9d44-bd1e9f4be69d", "a268366a-1c86-4838-9043-620cb33c19d8", "e99b48a2-7377-4570-8841-aa3681bd3da2"],
-              ["2017-01-29T17:23:02.834179Z", 6, "Stats", 0, "{\"ExecutionTime\":0.2187808,\"resource_usage\":{\"cache\":{\"memory\":{\"hits\":38071,\"misses\":30,\"total\":38101},\"disk\":{\"hits\":22,\"misses\":0,\"total\":22}},\"cpu\":{\"user\":\"00:00:08.3593750\",\"kernel\":\"00:00:00.0781250\",\"total cpu\":\"00:00:08.4375000\"},\"memory\":{\"peak_per_node\":268437088}}}", 1, "f30e2fae-b8e7-4f9c-9d44-bd1e9f4be69d", "f30e2fae-b8e7-4f9c-9d44-bd1e9f4be69d", "a268366a-1c86-4838-9043-620cb33c19d8", "e99b48a2-7377-4570-8841-aa3681bd3da2"]
-            ]
-          }, {
-            "TableName": "Table_3",
-            "Columns": [{
-              "ColumnName": "Ordinal",
-              "DataType": "Int64",
-              "ColumnType": "long"
-            }, {
-              "ColumnName": "Kind",
-              "DataType": "String",
-              "ColumnType": "string"
-            }, {
-              "ColumnName": "Name",
-              "DataType": "String",
-              "ColumnType": "string"
-            }, {
-              "ColumnName": "Id",
-              "DataType": "String",
-              "ColumnType": "string"
-            }],
-            "Rows": [
-              [0, "QueryResult", "PrimaryResult", "a3cb2fea-26b6-4bf3-ab0e-9d7e93ce9afe"],
-              [1, "QueryResult", "@ExtendedProperties", "664acaec-2a9f-4501-9d5c-6a60c8acb86d"],
-              [2, "QueryStatus", "QueryStatus", "00000000-0000-0000-0000-000000000000"]
-            ]
-          }]
-        }
+        query: ` exceptions` +
+          ` | summarize count_error=count() by handledAt, innermostMessage` +
+          ` | order by count_error desc `,
+        mappings: [
+          { key: 'handledAt', def: 'Unknown' },
+          { key: 'message', def: '' }, 
+          { key: 'count', def: '' }
+        ]
       },
       calculated: (state) => {
-        var _timeline = {};
-        var _channels = {};
-        var json = state.selectedValue;
-        var timespan = state.timespan;
+        var { values } = state;
 
-        json.Tables[0].Rows.forEach(row => {
-          var channel = row[2] || 'unknown';
-          var time = (new Date(row[0])).getTime();
-          var count = row[3];
-          
-          if (!_timeline[time]) _timeline[time] = { time: (new Date(row[0])).toUTCString() };
-          if (!_channels[channel]) _channels[channel] = { name: channel, value: 0 };
-
-          _timeline[time][channel] = count;
-          _channels[channel].value += count;
+        var errors = values;
+        var handlers = {};
+        var handledAtTotal = 0;
+        var handledAtUncaught = 0;
+        errors.forEach(error => {
+          if (!handlers[error.handledAt]) handlers[error.handledAt] = {
+            name: error.handledAt,
+            count: 0
+          };
+          handlers[error.handledAt].count += error.count;
+          handledAtTotal += error.count;
+          handledAtUncaught += (error.handledAt !== 'UserCode' ? error.count : 0);
         });
 
-        var channels = Object.keys(_channels);
-        var channelUsage = _.values(_channels);
-        var timeline = _.map(_timeline, value => {
-          channels.forEach(channel => {
-            if (!value[channel]) value[channel] = 0;
-          });
-          return value;
-        });
-
-        return { graphData: timeline, channelUsage, channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
+        return {
+          errors,
+          handlers: _.values(handlers),
+          handledAtTotal,
+          handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
+          handledAtTotal_class: handledAtTotal > 0 ? 'dash-error' : 'dash-success',
+          handledAtUncaught
+        };
       }
-    }*/
+    }
   ],
   filters: [
     {
@@ -256,14 +159,13 @@ export default {
   ],
   elements: [
     {
-      id: 'conversions',
-      type: 'PieData',
-      title: 'Conversion Rate',
-      subtitle: 'Total conversion rate',
-      dependencies: { values: 'conversions:displayValues' },
-      props: { 
-        pieProps: { nameKey: 'label', valueKey: 'count' }
-      },
+      id: 'timeline',
+      type: 'Timeline',
+      title: 'Message Rate',
+      subtitle: 'How many messages were sent per timeframe',
+      size: { w: 5, h: 8},
+      dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
+      props: { },
       actions: { }
     },
     {
@@ -271,6 +173,7 @@ export default {
       type: 'PieData',
       title: 'Channel Usage',
       subtitle: 'Total messages sent per channel',
+      size: { w: 3, h: 8},
       dependencies: { values: 'timeline:channelUsage' },
       props: {
         width: 400,
@@ -279,21 +182,32 @@ export default {
       actions: {}
     },
     {
-      id: 'timeline',
-      type: 'Timeline',
-      title: 'Message Rate',
-      subtitle: 'How many messages were sent per timeframe',
-      dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
-      props: { },
-      actions: { }
+      id: 'errors',
+      type: 'Scorecard',
+      title: "Errors",
+      size: { w: 2, h: 2},
+      dependencies: { value: 'errors:handledAtTotal', icon: 'errors:handledAtTotal_icon', className: 'errors:handledAtTotal_class' },
     },
     {
       id: 'intents',
       type: 'Scatter',
       title: 'Intents Graph',
       subtitle: 'Intents usage per time',
+      size: { w: 4, h: 8},
       dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
       props: { },
+      actions: { }
+    },
+    {
+      id: 'conversions',
+      type: 'PieData',
+      title: 'Conversion Rate',
+      subtitle: 'Total conversion rate',
+      size: { w: 4, h: 8},
+      dependencies: { values: 'conversions:displayValues' },
+      props: { 
+        pieProps: { nameKey: 'label', valueKey: 'count' }
+      },
       actions: { }
     }
   ]

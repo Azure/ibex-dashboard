@@ -1,19 +1,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var NavigationDrawers_1 = require("react-md/lib/NavigationDrawers");
-var FontIcons_1 = require("react-md/lib/FontIcons");
-var ListItem_1 = require("react-md/lib/Lists/ListItem");
-var Avatars_1 = require("react-md/lib/Avatars");
-var SelectFields_1 = require("react-md/lib/SelectFields");
-var react_router_1 = require("react-router");
+const React = require("react");
+const NavigationDrawers_1 = require("react-md/lib/NavigationDrawers");
+const FontIcons_1 = require("react-md/lib/FontIcons");
+const ListItem_1 = require("react-md/lib/Lists/ListItem");
+const Avatars_1 = require("react-md/lib/Avatars");
+const SelectFields_1 = require("react-md/lib/SelectFields");
+const react_router_1 = require("react-router");
 require("./style.css");
-var avatarSrc = 'https://cloud.githubusercontent.com/assets/13041/19686250/971bf7f8-9ac0-11e6-975c-188defd82df1.png';
-var drawerHeaderChildren = [
+const avatarSrc = 'https://cloud.githubusercontent.com/assets/13041/19686250/971bf7f8-9ac0-11e6-975c-188defd82df1.png';
+const drawerHeaderChildren = [
     <Avatars_1.default key={avatarSrc} src={avatarSrc} role='presentation' iconSized style={{ alignSelf: 'center', marginLeft: 16, marginRight: 16, flexShrink: 0 }}/>,
     <SelectFields_1.default id='account-switcher' defaultValue='Jonathan' menuItems={['Jonathan', 'Fred']} key='account-switcher' position={SelectFields_1.default.Positions.BELOW} className='md-select-field--toolbar'/>
 ];
-exports.default = function (_a) {
-    var _b = _a.children, children = _b === void 0 ? null : _b, _c = _a.title, title = _c === void 0 ? 'Bot Framework Dashboard' : _c;
+exports.default = ({ children = null, title = 'Bot Framework Dashboard' }) => {
     var pathname = '/';
     try {
         pathname = window.location.pathname;

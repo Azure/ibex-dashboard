@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
-import connectToStores from 'alt-utils/lib/connectToStores';
 import Button from 'react-md/lib/Buttons/Button';
 
 export default class TextFilter extends GenericComponent<any> {

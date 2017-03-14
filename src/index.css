@@ -3493,6 +3493,20 @@ body {
   padding: 73px 0 0 0;
   margin-top: -73px;
   height: 100%; }
+  .md-card .md-media.md-card-scorecard {
+    padding: 0;
+    margin-top: 0; }
+    .md-card .md-media.md-card-scorecard .dash-value {
+      margin-top: 8px;
+      margin-right: 8px; }
+    .md-card .md-media.md-card-scorecard .dash-icon {
+      margin-top: 5px; }
+
+.dash-error {
+  color: #f44336; }
+
+.dash-success {
+  color: #8bc34a; }
 
 /*=============*/
 /* Rechards    */

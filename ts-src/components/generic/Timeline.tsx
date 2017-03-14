@@ -25,6 +25,7 @@ export default class Timeline extends GenericComponent<any> {
 
   render() {
     var { timeFormat, values, lines } = this.state;
+    var { title, subtitle } = this.props;
 
     var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
 
@@ -36,8 +37,8 @@ export default class Timeline extends GenericComponent<any> {
     }
 
     return (
-      <Card title='Channel Usage'
-            subtitle="How many messages were send in each channel 2">
+      <Card title={ title }
+            subtitle={ subtitle }>
         <ResponsiveContainer>
           <LineChart data={values} margin={{top: 5, right: 30, left: 20, bottom: 5}}>
             <XAxis dataKey="time" tickFormatter={format} minTickGap={20}/>

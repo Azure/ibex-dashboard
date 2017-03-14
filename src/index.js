@@ -1,12 +1,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var ReactDOM = require("react-dom");
-var react_router_1 = require("react-router");
-var routes_1 = require("./routes");
+const React = require("react");
+const ReactDOM = require("react-dom");
+const react_router_1 = require("react-router");
+const routes_1 = require("./routes");
 require("./index.css");
 require("react-grid-layout/css/styles.css");
 require("react-resizable/css/styles.css");
-var injectTapEventPlugin = require("react-tap-event-plugin");
+const injectTapEventPlugin = require("react-tap-event-plugin");
 // Needed for onTouchTap
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();

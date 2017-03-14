@@ -1,5 +1,3 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-exports.default = function () {
-    return <div>About us...</div>;
-};
+const React = require("react");
+exports.default = () => <div>About us...</div>;

@@ -1,9 +1,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var DataSourcePlugin = (function () {
+class DataSourcePlugin {
     /**
      * @param {DataSourcePlugin} options - Options object
      */
-    function DataSourcePlugin(type, defaultProperty, options) {
+    constructor(type, defaultProperty, options) {
         this._props = {
             id: '',
             type: 'none',
@@ -23,34 +23,33 @@ var DataSourcePlugin = (function () {
         props.params = options.params || {};
         props.calculated = options.calculated || {};
     }
-    DataSourcePlugin.prototype.bind = function (actionClass) {
+    bind(actionClass) {
         actionClass.type = this.type;
         actionClass._props = this._props;
-    };
+    }
     /**
      * @returns {string[]} Array of dependencies
      */
-    DataSourcePlugin.prototype.getDependencies = function () {
+    getDependencies() {
         return this._props.dependencies;
-    };
-    DataSourcePlugin.prototype.getDependables = function () {
+    }
+    getDependables() {
         return this._props.dependables;
-    };
-    DataSourcePlugin.prototype.getActions = function () {
+    }
+    getActions() {
         return this._props.actions;
-    };
-    DataSourcePlugin.prototype.getParamKeys = function () {
+    }
+    getParamKeys() {
         return Object.keys(this._props.params);
-    };
-    DataSourcePlugin.prototype.getParams = function () {
+    }
+    getParams() {
         return this._props.params;
-    };
-    DataSourcePlugin.prototype.getCalculated = function () {
+    }
+    getCalculated() {
         return this._props.calculated;
-    };
-    DataSourcePlugin.prototype.failure = function (error) {
+    }
+    failure(error) {
         return error;
-    };
-    return DataSourcePlugin;
-}());
+    }
+}
 exports.DataSourcePlugin = DataSourcePlugin;

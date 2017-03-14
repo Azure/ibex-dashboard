@@ -11,60 +11,28 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 import { PipeComponent, IDataSourceDictionary } from '../generic';
 
-const defaultLayouts = { 
-  lg: [
-    { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
-    { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
-    { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
-    { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
-    { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
-    { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
-    { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
-  ],
-  md: [
-    { "i": "timeline",    "x": 0, "y": 8, "w": 5, "h": 8 },
-    { "i": "channels",    "x": 5, "y": 8, "w": 3, "h": 8 },
-    { "i": "errors",      "x": 8, "y": 8, "w": 2, "h": 8 },
-    { "i": "users",       "x": 10, "y": 8, "w": 2, "h": 8 },
-    { "i": "intents",     "x": 0, "y": 16, "w": 4, "h": 8 },
-    { "i": "conversions", "x": 4, "y": 16, "w": 4, "h": 8 },
-    { "i": "sentiments",  "x": 8, "y": 16, "w": 4, "h": 8 }
-  ],
-  sm: [
-    { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
-    { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
-    { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
-    { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
-  ],
-  xs: [
-    { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
-    { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
-    { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
-    { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
-  ],
-  xxs: [
-    { "x": 0, "y": 8, "w": 5, "h": 8, "i": "0" },
-    { "x": 5, "y": 8, "w": 5, "h": 8, "i": "1" },
-    { "x": 10, "y": 8, "w": 2, "h": 8, "i": "2" },
-    { "x": 0, "y": 16, "w": 5, "h": 8, "i": "3" }
-  ]
-};
-
 import dashboard from './temp';
+const layout = dashboard.config.layout;
 
-export default class Dashboard extends React.Component<any, any> {
+interface IDashboardState {
+  mounted?: boolean,
+  currentBreakpoint?: string,
+  layouts?: ILayouts
+}
+
+export default class Dashboard extends React.Component<any, IDashboardState> {
   // static propTypes = {}
 
   static defaultProps = {
     grid: {
       className: "layout",
-      rowHeight: 30,
-      cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
-      breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0},
-      layouts: defaultLayouts
+      rowHeight: layout.rowHeight || 30,
+      cols: layout.cols,
+      breakpoints: layout.breakpoints
     }
   };
 
+  layouts = {};
   dataSources: IDataSourceDictionary = {};
 
   state = {
@@ -72,12 +40,6 @@ export default class Dashboard extends React.Component<any, any> {
     mounted: false,
     layouts: {lg: this.props.initialLayout},
   };
-
-  getCurrentLayout() {
-    var breakpoint = this.state.currentBreakpoint;
-    var layout = this.state.layouts[breakpoint] || defaultLayouts[breakpoint];
-    return layout;
-  }
 
   constructor(props) {
     super(props);
@@ -87,12 +49,44 @@ export default class Dashboard extends React.Component<any, any> {
       this.dataSources[dataSource.id] = dataSource;
     });
 
-    this.getCurrentLayout = this.getCurrentLayout.bind(this);
+    // For each column, create a layout according to number of columns
+    var layouts = {};
+    _.each(dashboard.config.layout.cols, (totalColumns, key) => {
+
+      var curCol = 0;
+      var curRowOffset = 0;
+      var maxRowHeight = 0;
+
+      // Go over all elements in the dashboard and check their size
+      dashboard.elements.forEach(element => {
+        var { id, size } = element;
+
+        if (curCol > 0 && (curCol + size.w) >= totalColumns) {
+          curCol = 0;
+          curRowOffset = maxRowHeight;
+        }
+
+        layouts[key] = layouts[key] || [];
+        layouts[key].push({
+          "i": id,
+          "x": curCol,
+          "y": curRowOffset + size.h,
+          "w": size.w,
+          "h": size.h
+        });
+
+        curCol += size.w;
+        maxRowHeight = Math.max(curRowOffset + size.h, maxRowHeight);
+      });
+    });
+    
+    this.layouts = layouts;
+    this.state.layouts = { lg: layouts['lg'] };
   }
   
   componentDidMount() {
 
-    this.setState({mounted: true});
+    this.setState({ mounted: true });
 
     // Connect sources and dependencies
     var sources = Object.keys(this.dataSources);
@@ -121,8 +115,11 @@ export default class Dashboard extends React.Component<any, any> {
   }
 
   onBreakpointChange = (breakpoint) => {
+    var layouts = this.state.layouts;
+    layouts[breakpoint] = layouts[breakpoint] || this.layouts[breakpoint];
     this.setState({
-      currentBreakpoint: breakpoint
+      currentBreakpoint: breakpoint,
+      layouts: layouts
     });
   };
 
@@ -143,10 +140,13 @@ export default class Dashboard extends React.Component<any, any> {
 
     // Creating visual elements
     var elements = [];
+    var defaultLayout = [];
+
     dashboard.elements.forEach((element, idx) => {
       var ReactElement = plugins[element.type];
-      var { id, dependencies, actions, props, title, subtitle } = element;
+      var { id, dependencies, actions, props, title, subtitle, size } = element;
       var layoutProps = _.find(layout, { "i": id });
+
       elements.push(
         <div key={id}>
           <ReactElement 
@@ -155,6 +155,7 @@ export default class Dashboard extends React.Component<any, any> {
                 actions={actions}
                 props={props}
                 title={title}
+                subtitle={subtitle}
                 layout={layoutProps}
           />
         </div>
@@ -182,6 +183,7 @@ export default class Dashboard extends React.Component<any, any> {
         </Toolbar>
         <ResponsiveReactGridLayout
           {...this.props.grid}
+          layouts={ this.state.layouts }
           onBreakpointChange={this.onBreakpointChange}
           onLayoutChange={this.onLayoutChange}
           // WidthProvider option

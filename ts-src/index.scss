@@ -39,6 +39,28 @@ body {
   padding: 73px 0 0 0;
   margin-top: -73px;
   height: 100%;
+
+  &.md-card-scorecard {
+    padding: 0;
+    margin-top: 0;
+
+    .dash-value {
+      margin-top: 8px;
+      margin-right: 8px;
+    }
+    
+    .dash-icon {
+      margin-top: 5px;
+    }
+  }
+}
+
+.dash-error {
+  color: $md-red-500;
+}
+
+.dash-success {
+  color: $md-light-green-500;
 }
 
 /*=============*/

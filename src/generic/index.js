@@ -1,10 +1,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
-var alt_1 = require("../alt");
-var _ = require("lodash");
-var PipeComponent = (function () {
-    function PipeComponent() {
-    }
-    PipeComponent.createDataSource = function (dataSourceConfig) {
+const alt_1 = require("../alt");
+const _ = require("lodash");
+class PipeComponent {
+    static createDataSource(dataSourceConfig) {
         var config = dataSourceConfig || {};
         if (!config.id || !config.type) {
             throw new Error('Data source configuration must contain id and type');
@@ -19,19 +17,19 @@ var PipeComponent = (function () {
         var StoreClass = PipeComponent.createStoreClass(config, plugin, ActionClass);
         PipeComponent.dataSources[config.id] = {
             id: config.id,
-            config: config,
-            plugin: plugin,
+            config,
+            plugin,
             action: ActionClass,
             store: StoreClass
         };
         return PipeComponent.dataSources[config.id];
-    };
-    PipeComponent.extrapolateDependencies = function (dependencies) {
+    }
+    static extrapolateDependencies(dependencies) {
         var result = {
             dataSources: {},
             dependencies: {}
         };
-        Object.keys(dependencies).forEach(function (key) {
+        Object.keys(dependencies).forEach(key => {
             // Find relevant store
             var dependsUpon = dependencies[key].split(':');
             var dataSourceName = dependsUpon[0];
@@ -45,39 +43,33 @@ var PipeComponent = (function () {
             result.dataSources[dataSource.id] = dataSource;
         });
         return result;
-    };
-    PipeComponent.triggerAction = function (action, args) {
+    }
+    static triggerAction(action, args) {
         var actionLocation = action.split(':');
         if (actionLocation.length !== 2) {
-            throw new Error("Action triggers should be in format of \"dataSource:action\", this is not met by " + action);
+            throw new Error(`Action triggers should be in format of "dataSource:action", this is not met by ${action}`);
         }
         var dataSourceName = actionLocation[0];
         var actionName = actionLocation[1];
         var dataSource = PipeComponent.dataSources[dataSourceName];
         dataSource.action[actionName].apply(dataSource.action, args);
-    };
-    PipeComponent.createActionClass = function (plugin) {
-        var NewActionClass = (function () {
-            function NewActionClass() {
-            }
-            return NewActionClass;
-        }());
+    }
+    static createActionClass(plugin) {
+        class NewActionClass {
+            constructor() { }
+        }
         ;
-        plugin.getActions().forEach(function (action) {
+        plugin.getActions().forEach(action => {
             if (typeof plugin[action] === 'function') {
                 // This method will be called with an action is dispatched
-                NewActionClass.prototype[action] = function () {
-                    var args = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        args[_i] = arguments[_i];
-                    }
+                NewActionClass.prototype[action] = function (...args) {
                     // Collecting depedencies from all relevant stores
                     var extrapolation = PipeComponent.extrapolateDependencies(plugin.getDependencies());
                     // Calling action with arguments
-                    var result = (_a = plugin[action]).call.apply(_a, [this, extrapolation.dependencies].concat(args)) || {};
+                    var result = plugin[action].call(this, extrapolation.dependencies, ...args) || {};
                     // Checking is result is a dispatcher or a direct value
                     if (typeof result === 'function') {
-                        return function (dispatch) {
+                        return (dispatch) => {
                             result(function (obj) {
                                 obj = obj || {};
                                 var fullResult = PipeComponent.callibrateResult(obj, plugin);
@@ -89,7 +81,6 @@ var PipeComponent = (function () {
                         var fullResult = PipeComponent.callibrateResult(result, plugin);
                         return fullResult;
                     }
-                    var _a;
                 };
             }
             else {
@@ -101,27 +92,26 @@ var PipeComponent = (function () {
         var ActionClass = alt_1.default.createActions(NewActionClass);
         plugin.bind(ActionClass);
         return ActionClass;
-    };
-    PipeComponent.createStoreClass = function (config, plugin, ActionClass) {
+    }
+    static createStoreClass(config, plugin, ActionClass) {
         var bindings = [];
-        plugin.getActions().forEach(function (action) {
+        plugin.getActions().forEach(action => {
             bindings.push(ActionClass[action]);
         });
-        var NewStoreClass = (function () {
-            function NewStoreClass() {
+        class NewStoreClass {
+            constructor() {
                 this.bindListeners({ updateState: bindings });
             }
-            NewStoreClass.prototype.updateState = function (newData) {
+            updateState(newData) {
                 this.setState(newData);
-            };
-            return NewStoreClass;
-        }());
+            }
+        }
         ;
         var StoreClass = alt_1.default.createStore(NewStoreClass, config.id + '-Store');
         ;
         return StoreClass;
-    };
-    PipeComponent.callibrateResult = function (result, plugin) {
+    }
+    static callibrateResult(result, plugin) {
         var defaultProperty = plugin.defaultProperty || 'value';
         // In case result is not an object, push result into an object
         if (typeof result !== 'object') {
@@ -135,13 +125,12 @@ var PipeComponent = (function () {
         state = _.extend(state, result);
         if (typeof calculated === 'function') {
             var additionalValues = calculated(state) || {};
-            Object.keys(additionalValues).forEach(function (key) {
+            Object.keys(additionalValues).forEach(key => {
                 result[key] = additionalValues[key];
             });
         }
         return result;
-    };
-    return PipeComponent;
-}());
+    }
+}
 PipeComponent.dataSources = {};
 exports.PipeComponent = PipeComponent;

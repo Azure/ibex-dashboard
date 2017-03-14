@@ -1,22 +1,12 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 Object.defineProperty(exports, "__esModule", { value: true });
-var React = require("react");
-var _ = require("lodash");
-var Toolbar_1 = require("material-ui/Toolbar");
-var ReactGridLayout = require("react-grid-layout");
+const React = require("react");
+const _ = require("lodash");
+const Toolbar_1 = require("material-ui/Toolbar");
+const ReactGridLayout = require("react-grid-layout");
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
-var generic_1 = require("../../generic");
+const generic_1 = require("../../generic");
 var dashboard = {
     dataSources: [{
             id: 'timespan',
@@ -25,10 +15,10 @@ var dashboard = {
                 values: ['24 hours', '1 week', '1 month'],
                 selectedValue: '1 month'
             },
-            calculated: function (state, dependencies) {
+            calculated: (state, dependencies) => {
                 var queryTimespan = state.selectedValue === '24 hours' ? 'PT24H' : state.selectedValue === '1 week' ? 'P7D' : 'P30D';
                 var granularity = state.selectedValue === '24 hours' ? '5m' : state.selectedValue === '1 week' ? '1d' : '1d';
-                return { queryTimespan: queryTimespan, granularity: granularity };
+                return { queryTimespan, granularity };
             }
         },
         {
@@ -36,18 +26,18 @@ var dashboard = {
             type: 'ApplicationInsights/Query',
             dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
             params: {
-                query: " customEvents" +
-                    " | extend successful=customDimensions.successful" +
-                    " | where name startswith 'message.convert'" +
-                    " | summarize event_count=count() by name, tostring(successful)",
+                query: ` customEvents` +
+                    ` | extend successful=customDimensions.successful` +
+                    ` | where name startswith 'message.convert'` +
+                    ` | summarize event_count=count() by name, tostring(successful)`,
                 mappings: [
                     { key: 'name' },
-                    { key: 'successful', val: function (val) { return val === 'true'; } },
+                    { key: 'successful', val: (val) => val === 'true' },
                     { key: 'event_count', def: 0 }
                 ]
             },
-            calculated: function (state) {
-                var values = state.values;
+            calculated: (state) => {
+                var { values } = state;
                 var total = _.find(values, { name: 'message.convert.start' });
                 var successful = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
                 if (!total) {
@@ -57,7 +47,7 @@ var dashboard = {
                     { label: 'Successful', count: successful.event_count },
                     { label: 'Failed', count: total.event_count - successful.event_count + 5 },
                 ];
-                return { displayValues: displayValues };
+                return { displayValues };
             }
         },
         {
@@ -65,12 +55,12 @@ var dashboard = {
             type: 'ApplicationInsights/Query',
             dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan', granularity: 'timespan:granularity' },
             params: {
-                query: function (dependencies) {
-                    var granularity = dependencies.granularity;
-                    return " customEvents" +
-                        " | where name == 'Activity'" +
-                        (" | summarize event_count=count() by bin(timestamp, " + granularity + "), name, tostring(customDimensions.channel)") +
-                        " | order by timestamp asc ";
+                query: (dependencies) => {
+                    var { granularity } = dependencies;
+                    return ` customEvents` +
+                        ` | where name == 'Activity'` +
+                        ` | summarize event_count=count() by bin(timestamp, ${granularity}), name, tostring(customDimensions.channel)` +
+                        ` | order by timestamp asc `;
                 },
                 mappings: [
                     { key: 'time' },
@@ -79,13 +69,13 @@ var dashboard = {
                     { key: 'count', def: 0 }
                 ]
             },
-            calculated: function (state) {
+            calculated: (state) => {
                 var _timeline = {};
                 var _channels = {};
                 var values = state.values || [];
                 var timespan = state.timespan;
-                values.forEach(function (row) {
-                    var channel = row.channel, time = row.time, count = row.count;
+                values.forEach(row => {
+                    var { channel, time, count } = row;
                     var timeValue = (new Date(time)).getTime();
                     if (!_timeline[timeValue])
                         _timeline[timeValue] = { time: (new Date(time)).toUTCString() };
@@ -96,14 +86,14 @@ var dashboard = {
                 });
                 var channels = Object.keys(_channels);
                 var channelUsage = _.values(_channels);
-                var timeline = _.map(_timeline, function (value) {
-                    channels.forEach(function (channel) {
+                var timeline = _.map(_timeline, value => {
+                    channels.forEach(channel => {
                         if (!value[channel])
                             value[channel] = 0;
                     });
                     return value;
                 });
-                return { graphData: timeline, channelUsage: channelUsage, channels: channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
+                return { graphData: timeline, channelUsage, channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
             }
         } /*,
         {
@@ -337,40 +327,37 @@ function generateLayouts() {
         ]
     };
 }
-var Dashboard = (function (_super) {
-    __extends(Dashboard, _super);
-    function Dashboard(props) {
-        var _this = _super.call(this, props) || this;
-        _this.dataSources = {};
-        _this.onBreakpointChange = function (breakpoint) {
-            _this.setState({
+class Dashboard extends React.Component {
+    constructor(props) {
+        super(props);
+        this.dataSources = {};
+        this.onBreakpointChange = (breakpoint) => {
+            this.setState({
                 currentBreakpoint: breakpoint
             });
         };
-        _this.onLayoutChange = function (layout, layouts) {
+        this.onLayoutChange = (layout, layouts) => {
             //this.props.onLayoutChange(layout, layouts);
         };
-        dashboard.dataSources.forEach(function (source) {
+        dashboard.dataSources.forEach(source => {
             var dataSource = generic_1.PipeComponent.createDataSource(source);
-            _this.dataSources[dataSource.id] = dataSource;
+            this.dataSources[dataSource.id] = dataSource;
         });
-        _this.state = {
+        this.state = {
             currentBreakpoint: 'lg',
             mounted: false,
-            layouts: { lg: _this.props.initialLayout },
+            layouts: { lg: this.props.initialLayout },
         };
-        return _this;
     }
-    Dashboard.prototype.componentDidMount = function () {
-        var _this = this;
+    componentDidMount() {
         this.setState({ mounted: true });
         // Connect sources and dependencies
         var sources = Object.keys(this.dataSources);
-        sources.forEach(function (sourceId) {
-            var source = _this.dataSources[sourceId];
-            source.store.listen(function (state) {
-                sources.forEach(function (compId) {
-                    var compSource = _this.dataSources[compId];
+        sources.forEach(sourceId => {
+            var source = this.dataSources[sourceId];
+            source.store.listen((state) => {
+                sources.forEach(compId => {
+                    var compSource = this.dataSources[compId];
                     if (compSource.plugin.getDependencies()[sourceId]) {
                         compSource.action.updateDependencies.defer(state);
                     }
@@ -378,16 +365,16 @@ var Dashboard = (function (_super) {
             });
         });
         // Call initalize methods
-        sources.forEach(function (sourceId) {
-            var source = _this.dataSources[sourceId];
+        sources.forEach(sourceId => {
+            var source = this.dataSources[sourceId];
             if (typeof source.action['initialize'] === 'function') {
                 source.action.initialize();
             }
         });
-    };
-    Dashboard.prototype.render = function () {
+    }
+    render() {
         var elements = [];
-        dashboard.elements.forEach(function (element, idx) {
+        dashboard.elements.forEach((element, idx) => {
             var ReactElement = require('./' + element.type)['default'];
             elements.push(<div key={element.id}>
           <ReactElement key={idx} dependencies={element.dependencies} actions={element.actions} props={element.props}/>
@@ -395,7 +382,7 @@ var Dashboard = (function (_super) {
         });
         var filters = [];
         var additionalFilters = [];
-        dashboard.filters.forEach(function (element, idx) {
+        dashboard.filters.forEach((element, idx) => {
             var ReactElement = require('./' + element.type)['default'];
             (element.first ? filters : additionalFilters).push(<ReactElement key={idx} dependencies={element.dependencies} actions={element.actions}/>);
         });
@@ -417,9 +404,8 @@ var Dashboard = (function (_super) {
           {elements}
         </ResponsiveReactGridLayout>
       </div>);
-    };
-    return Dashboard;
-}(React.Component));
+    }
+}
 Dashboard.defaultProps = {
     grid: {
         className: "layout",
