@@ -1,7 +1,5 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const _ = require("lodash");
-const plugins_1 = require("../components/generic/plugins");
 const Toolbars_1 = require("react-md/lib/Toolbars");
 const ReactGridLayout = require("react-grid-layout");
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
@@ -42,30 +40,7 @@ class Dashboard extends React.Component {
             this.dataSources[dataSource.id] = dataSource;
         });
         // For each column, create a layout according to number of columns
-        var layouts = {};
-        _.each(temp_1.default.config.layout.cols, (totalColumns, key) => {
-            var curCol = 0;
-            var curRowOffset = 0;
-            var maxRowHeight = 0;
-            // Go over all elements in the dashboard and check their size
-            temp_1.default.elements.forEach(element => {
-                var { id, size } = element;
-                if (curCol > 0 && (curCol + size.w) >= totalColumns) {
-                    curCol = 0;
-                    curRowOffset = maxRowHeight;
-                }
-                layouts[key] = layouts[key] || [];
-                layouts[key].push({
-                    "i": id,
-                    "x": curCol,
-                    "y": curRowOffset + size.h,
-                    "w": size.w,
-                    "h": size.h
-                });
-                curCol += size.w;
-                maxRowHeight = Math.max(curRowOffset + size.h, maxRowHeight);
-            });
-        });
+        var layouts = generic_1.Elements.loadLayoutFromDashboard(temp_1.default);
         this.layouts = layouts;
         this.state.layouts = { lg: layouts['lg'] };
     }
@@ -96,23 +71,11 @@ class Dashboard extends React.Component {
         var { currentBreakpoint } = this.state;
         var layout = this.state.layouts[currentBreakpoint];
         // Creating visual elements
-        var elements = [];
-        var defaultLayout = [];
-        temp_1.default.elements.forEach((element, idx) => {
-            var ReactElement = plugins_1.default[element.type];
-            var { id, dependencies, actions, props, title, subtitle, size } = element;
-            var layoutProps = _.find(layout, { "i": id });
-            elements.push(<div key={id}>
-          <ReactElement key={idx} dependencies={dependencies} actions={actions} props={props} title={title} subtitle={subtitle} layout={layoutProps}/>
-        </div>);
-        });
+        var elements = generic_1.Elements.loadElementsFromDashboard(temp_1.default, layout);
         // Creating filter elements
-        var filters = [];
-        var additionalFilters = [];
-        temp_1.default.filters.forEach((element, idx) => {
-            var ReactElement = plugins_1.default[element.type];
-            (element.first ? filters : additionalFilters).push(<ReactElement key={idx} dependencies={element.dependencies} actions={element.actions}/>);
-        });
+        var { filters, additionalFilters } = generic_1.Elements.loadFiltersFromDashboard(temp_1.default);
+        // Loading dialogs
+        var dialogs = generic_1.Elements.loadDialogsFromDashboard(temp_1.default);
         return (<div style={{ width: '100%' }}>
         <Toolbars_1.default>
           {filters}
@@ -125,6 +88,7 @@ class Dashboard extends React.Component {
         useCSSTransforms={this.state.mounted}>
           {elements}
         </ResponsiveReactGridLayout>
+        {dialogs}
       </div>);
     }
 }

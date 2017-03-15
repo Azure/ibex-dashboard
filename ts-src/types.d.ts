@@ -1,3 +1,6 @@
+type IDictionary = { [ id: string ] : Object }
+type IStringDictionary = { [ id: string ] : string }
+
 interface IDashboardConfig {
   config: {
     layout: {
@@ -10,29 +13,10 @@ interface IDashboardConfig {
       breakpoints: { lg?: number, md?: number, sm?: number, xs?: number, xxs?: number }
     }
   },
-  dataSources: Array<{
-    id: string,
-    type: string,
-    dependencies?: { [id: string]: string },
-    params?: { [id: string]: any },
-    calculated?: (state, dependencies) => { [index: string]: any }
-  }>,
-  filters: Array<{
-    type: string,
-    dependencies?: { [id: string]: string },
-    actions?: { [id: string]: string },
-    first: boolean
-  }>,
-  elements: Array<{
-    id: string,
-    type: string,
-    size: { w: number, h: number },
-    title?: string,
-    subtitle?: string,
-    dependencies?: { [id: string]: string },
-    props?: { [id: string]: any },
-    actions?: { [id: string]: any }
-  }>
+  dataSources: IDataSource[],
+  filters: IFilter[],
+  elements: IElement[],
+  dialogs: IDialog[]
 }
 
 interface ILayout { 
@@ -44,3 +28,41 @@ interface ILayout {
 }
 
 interface ILayouts { [id: string]: ILayout[] }
+
+interface IDataSource {
+  id: string,
+  type: string,
+  dependencies?: { [id: string]: string },
+  params?: { [id: string]: any },
+  calculated?: (state, dependencies) => { [index: string]: any }
+}
+
+interface IElement {
+  id: string,
+  type: string,
+  size: { w: number, h: number },
+  title?: string,
+  subtitle?: string,
+  dependencies?: { [id: string]: string },
+  props?: { [id: string]: any },
+  actions?: { [id: string]: any }
+}
+
+interface IFilter {
+  type: string,
+  dependencies?: { [id: string]: string },
+  actions?: { [id: string]: string },
+  first: boolean
+}
+
+interface IDialog {
+  id: string,
+  params: string[],
+  dataSources: IDataSource[],
+  elements: IElement[]
+}
+
+type IAction = string | {
+  action: string,
+  params: { [id: string]: string }
+}

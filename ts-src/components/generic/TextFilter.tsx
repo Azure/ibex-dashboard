@@ -2,18 +2,18 @@ import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
 import Button from 'react-md/lib/Buttons/Button';
 
-export default class TextFilter extends GenericComponent<any> {
+export default class TextFilter extends GenericComponent<any, any> {
   // static propTypes = {}
   // static defaultProps = {}
 
   constructor(props) {
     super(props);
 
-    this.changeSelected = this.changeSelected.bind(this);
+    this.onChange = this.onChange.bind(this);
   }
 
-  changeSelected(newValue) {
-    this.trigger('changeSelected', [newValue]);
+  onChange(newValue) {
+    this.trigger('onChange', [newValue]);
   }
 
   render() {
@@ -21,7 +21,7 @@ export default class TextFilter extends GenericComponent<any> {
     values = values || [];
 
     var buttons = values.map((value, idx) => {
-      return <Button flat key={idx} label={value} primary={value === selectedValue} onClick={this.changeSelected.bind(null, value)} />
+      return <Button flat key={idx} label={value} primary={value === selectedValue} onClick={this.onChange.bind(null, value)} />
     })
 
     return (

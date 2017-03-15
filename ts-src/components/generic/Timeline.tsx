@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { GenericComponent } from './GenericComponent';
+import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
@@ -11,7 +11,13 @@ import styles from '../styles';
 var colors = styles.colors;
 var { ThemeColors } = colors;
 
-export default class Timeline extends GenericComponent<any> {
+interface ITimelineState extends IGenericState {
+  timeFormat: string
+  values: Object[]
+  lines: Object[]
+}
+
+export default class Timeline extends GenericComponent<IGenericProps, ITimelineState> {
   // static propTypes = {}
   // static defaultProps = {}
 

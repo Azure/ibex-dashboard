@@ -15,7 +15,7 @@ interface IGraphProps {};
 
 interface IGraphState {};
 
-export default class Scatter extends GenericComponent<any> {
+export default class Scatter extends GenericComponent<any, any> {
 
   dateFormat (time) {
     return moment(time).format('MMM-DD');

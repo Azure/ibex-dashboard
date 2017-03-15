@@ -4,7 +4,7 @@ import { Media } from 'react-md/lib/Media';
 import { Card } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 
-export default class Scorecard extends GenericComponent<any> {
+export default class Scorecard extends GenericComponent<any, any> {
 
   render() {
     var { value, icon, className } = this.state;

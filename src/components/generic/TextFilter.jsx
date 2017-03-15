@@ -7,16 +7,16 @@ class TextFilter extends GenericComponent_1.GenericComponent {
     // static defaultProps = {}
     constructor(props) {
         super(props);
-        this.changeSelected = this.changeSelected.bind(this);
+        this.onChange = this.onChange.bind(this);
     }
-    changeSelected(newValue) {
-        this.trigger('changeSelected', [newValue]);
+    onChange(newValue) {
+        this.trigger('onChange', [newValue]);
     }
     render() {
         var { selectedValue, values } = this.state;
         values = values || [];
         var buttons = values.map((value, idx) => {
-            return <Button_1.default flat key={idx} label={value} primary={value === selectedValue} onClick={this.changeSelected.bind(null, value)}/>;
+            return <Button_1.default flat key={idx} label={value} primary={value === selectedValue} onClick={this.onChange.bind(null, value)}/>;
         });
         return (<div>
         {buttons}

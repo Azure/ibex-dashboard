@@ -5,7 +5,7 @@ export interface IGenericProps {
   title: string;
   subtitle: string;
   dependencies: { [key: string] : string };
-  actions: { [key: string] : string };
+  actions: { [key: string] : IAction };
   props: { [key: string] : Object };
   layout: {
     "x": number;
@@ -17,14 +17,14 @@ export interface IGenericProps {
 
 export interface IGenericState { [key: string] : any }
 
-export abstract class GenericComponent<T1 extends IGenericProps> extends React.Component<T1, IGenericState> {
+export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGenericState> extends React.Component<T1, IGenericState> {
   // static propTypes = {}
   // static defaultProps = {}
 
   constructor(props) {
     super(props);
 
-    this.onChange = this.onChange.bind(this);
+    this.onStateChange = this.onStateChange.bind(this);
     this.trigger = this.trigger.bind(this);
 
     var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
@@ -39,18 +39,18 @@ export abstract class GenericComponent<T1 extends IGenericProps> extends React.C
   componentDidMount() {
     var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
     Object.keys(result.dataSources).forEach(key => {
-      result.dataSources[key].store.listen(this.onChange);
+      result.dataSources[key].store.listen(this.onStateChange);
     });
   }
 
   componentWillUnmount() {
     var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
     Object.keys(result.dataSources).forEach(key => {
-      result.dataSources[key].store.unlisten(this.onChange);
+      result.dataSources[key].store.unlisten(this.onStateChange);
     });
   }
 
-  private onChange(state) {
+  private onStateChange(state) {
 
     var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
     var updatedState: IGenericState = {};
@@ -65,9 +65,14 @@ export abstract class GenericComponent<T1 extends IGenericProps> extends React.C
     var action = this.props.actions[actionName];
 
     // if action was not defined, not action needed
-    if (!action) return;
+    if (!action) {
+      console.warn(`no action was found with name ${name}`);
+      return;
+    }
 
-    PipeComponent.triggerAction(action, args);
+    var actionId = typeof action === 'string' ? action : action.action;
+    var params = typeof action === 'string' ? {} : action.params;
+    PipeComponent.triggerAction(actionId, params, args);
   }
 
   abstract render();

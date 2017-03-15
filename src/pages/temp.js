@@ -139,13 +139,33 @@ exports.default = {
                     handledAtUncaught
                 };
             }
+        },
+        {
+            id: 'intents',
+            type: 'ApplicationInsights/Query',
+            dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
+            params: {
+                query: ` customEvents` +
+                    ` | extend cslen = customDimensions.callstack_length, intent=customDimensions.intent` +
+                    ` | where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0` +
+                    ` | summarize event_count=count() by tostring(intent)`,
+                mappings: [
+                    { key: 'intent', def: 'Unknown' },
+                    { key: 'count', def: 0 }
+                ]
+            },
+            calculated: (state) => {
+                return {
+                    bars: ['count']
+                };
+            }
         }
     ],
     filters: [
         {
             type: 'TextFilter',
             dependencies: { selectedValue: 'timespan', values: 'timespan:values' },
-            actions: { changeSelected: 'timespan:updateSelectedValue' },
+            actions: { onChange: 'timespan:updateSelectedValue' },
             first: true
         }
     ],
@@ -156,9 +176,7 @@ exports.default = {
             title: 'Message Rate',
             subtitle: 'How many messages were sent per timeframe',
             size: { w: 5, h: 8 },
-            dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
-            props: {},
-            actions: {}
+            dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' }
         },
         {
             id: 'channels',
@@ -168,10 +186,8 @@ exports.default = {
             size: { w: 3, h: 8 },
             dependencies: { values: 'timeline:channelUsage' },
             props: {
-                width: 400,
                 showLegend: false
-            },
-            actions: {}
+            }
         },
         {
             id: 'errors',
@@ -182,13 +198,23 @@ exports.default = {
         },
         {
             id: 'intents',
-            type: 'Scatter',
+            type: 'BarData',
             title: 'Intents Graph',
             subtitle: 'Intents usage per time',
             size: { w: 4, h: 8 },
-            dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
-            props: {},
-            actions: {}
+            dependencies: { values: 'intents', bars: 'intents:bars' },
+            props: {
+                nameKey: 'intent'
+            },
+            actions: {
+                onBarClick: {
+                    action: 'dialog:conversations',
+                    params: {
+                        intent: 'args:intent',
+                        queryspan: 'timespan:queryTimespan'
+                    }
+                }
+            }
         },
         {
             id: 'conversions',
@@ -199,8 +225,52 @@ exports.default = {
             dependencies: { values: 'conversions:displayValues' },
             props: {
                 pieProps: { nameKey: 'label', valueKey: 'count' }
-            },
-            actions: {}
+            }
+        }
+    ],
+    dialogs: [
+        {
+            id: "conversations",
+            //trigger: "openDialog('conversations', { intent: 'set.alarm', timespan: '24 hours' })",
+            params: ['intent', 'queryspan'],
+            dataSources: [
+                {
+                    id: 'conversations-data',
+                    type: 'ApplicationInsights/Query',
+                    dependencies: { intent: 'dialog:intent', queryTimespan: 'dialog:queryspan' },
+                    params: {
+                        query: ({ intent }) => ` customEvents` +
+                            ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
+                            ` | where name startswith "message.intent" and intent =~ '${intent}'` +
+                            ` | summarize event_count=count() by tostring(conversation)`,
+                        mappings: [
+                            { key: 'id', def: 'Unknown' },
+                            { key: 'count', def: 0 }
+                        ]
+                    }
+                }
+            ],
+            elements: [
+                {
+                    id: 'conversations-list',
+                    type: 'Table',
+                    title: 'Conversations',
+                    size: { w: 4, h: 16 },
+                    dependencies: { values: 'conversations-data' },
+                    props: {
+                        cols: [{
+                                header: 'Conversation Id',
+                                field: 'id'
+                            }, {
+                                header: 'Count',
+                                field: 'count'
+                            }, {
+                                type: 'icon',
+                                value: 'done'
+                            }]
+                    }
+                }
+            ]
         }
     ]
 };

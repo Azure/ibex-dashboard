@@ -6,7 +6,7 @@ class GenericComponent extends React.Component {
     // static defaultProps = {}
     constructor(props) {
         super(props);
-        this.onChange = this.onChange.bind(this);
+        this.onStateChange = this.onStateChange.bind(this);
         this.trigger = this.trigger.bind(this);
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
         var initialState = {};
@@ -18,16 +18,16 @@ class GenericComponent extends React.Component {
     componentDidMount() {
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
         Object.keys(result.dataSources).forEach(key => {
-            result.dataSources[key].store.listen(this.onChange);
+            result.dataSources[key].store.listen(this.onStateChange);
         });
     }
     componentWillUnmount() {
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
         Object.keys(result.dataSources).forEach(key => {
-            result.dataSources[key].store.unlisten(this.onChange);
+            result.dataSources[key].store.unlisten(this.onStateChange);
         });
     }
-    onChange(state) {
+    onStateChange(state) {
         var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
         var updatedState = {};
         Object.keys(result.dependencies).forEach(key => {
@@ -38,9 +38,13 @@ class GenericComponent extends React.Component {
     trigger(actionName, args) {
         var action = this.props.actions[actionName];
         // if action was not defined, not action needed
-        if (!action)
+        if (!action) {
+            console.warn(`no action was found with name ${name}`);
             return;
-        generic_1.PipeComponent.triggerAction(action, args);
+        }
+        var actionId = typeof action === 'string' ? action : action.action;
+        var params = typeof action === 'string' ? {} : action.params;
+        generic_1.PipeComponent.triggerAction(actionId, params, args);
     }
 }
 exports.GenericComponent = GenericComponent;

@@ -9,7 +9,7 @@ var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
-import { PipeComponent, IDataSourceDictionary } from '../generic';
+import { PipeComponent, IDataSourceDictionary, Elements } from '../generic';
 
 import dashboard from './temp';
 const layout = dashboard.config.layout;
@@ -50,35 +50,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
     });
 
     // For each column, create a layout according to number of columns
-    var layouts = {};
-    _.each(dashboard.config.layout.cols, (totalColumns, key) => {
-
-      var curCol = 0;
-      var curRowOffset = 0;
-      var maxRowHeight = 0;
-
-      // Go over all elements in the dashboard and check their size
-      dashboard.elements.forEach(element => {
-        var { id, size } = element;
-
-        if (curCol > 0 && (curCol + size.w) >= totalColumns) {
-          curCol = 0;
-          curRowOffset = maxRowHeight;
-        }
-
-        layouts[key] = layouts[key] || [];
-        layouts[key].push({
-          "i": id,
-          "x": curCol,
-          "y": curRowOffset + size.h,
-          "w": size.w,
-          "h": size.h
-        });
-
-        curCol += size.w;
-        maxRowHeight = Math.max(curRowOffset + size.h, maxRowHeight);
-      });
-    });
+    var layouts = Elements.loadLayoutFromDashboard(dashboard);
     
     this.layouts = layouts;
     this.state.layouts = { lg: layouts['lg'] };
@@ -139,50 +111,21 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
     var layout = this.state.layouts[currentBreakpoint];
 
     // Creating visual elements
-    var elements = [];
-    var defaultLayout = [];
-
-    dashboard.elements.forEach((element, idx) => {
-      var ReactElement = plugins[element.type];
-      var { id, dependencies, actions, props, title, subtitle, size } = element;
-      var layoutProps = _.find(layout, { "i": id });
-
-      elements.push(
-        <div key={id}>
-          <ReactElement 
-                key={idx} 
-                dependencies={dependencies}
-                actions={actions}
-                props={props}
-                title={title}
-                subtitle={subtitle}
-                layout={layoutProps}
-          />
-        </div>
-      )
-    });
+    var elements = Elements.loadElementsFromDashboard(dashboard, layout)
 
     // Creating filter elements
-    var filters = [];
-    var additionalFilters = [];
-    dashboard.filters.forEach((element, idx) => {
-      var ReactElement = plugins[element.type];
-      (element.first ? filters : additionalFilters).push(
-        <ReactElement 
-              key={idx} 
-              dependencies={element.dependencies}
-              actions={element.actions}
-        />
-      )
-    });
+    var { filters, additionalFilters } = Elements.loadFiltersFromDashboard(dashboard);
+
+    // Loading dialogs
+    var dialogs = Elements.loadDialogsFromDashboard(dashboard);
 
     return ( 
       <div style={{ width: '100%' }}>
         <Toolbar>
-          {filters}
+          { filters }
         </Toolbar>
         <ResponsiveReactGridLayout
-          {...this.props.grid}
+          { ...this.props.grid }
           layouts={ this.state.layouts }
           onBreakpointChange={this.onBreakpointChange}
           onLayoutChange={this.onLayoutChange}
@@ -191,8 +134,9 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
           // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
           // and set `measureBeforeMount={true}`.
           useCSSTransforms={this.state.mounted}>
-          {elements}
+          { elements }
         </ResponsiveReactGridLayout>
+        { dialogs }
       </div>
     );
   }
