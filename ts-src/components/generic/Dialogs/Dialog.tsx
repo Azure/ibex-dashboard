@@ -14,6 +14,7 @@ export default class Dialog extends React.PureComponent<any, any> {
 
     this.state = DialogsStore.getState();
     this.onChange = this.onChange.bind(this);
+    this.openDialog = this.openDialog.bind(this);
   }
 
   componentDidMount() {
@@ -29,9 +30,14 @@ export default class Dialog extends React.PureComponent<any, any> {
     DialogsActions.closeDialog();
   };
 
+  openDialog = () => {
+    DialogsActions.openDialog('conversations', { title: this.state.dialogArgs.title + ':Blue', intent: 'bla', queryTimespan: 'jjj' });
+  }
+
   render() {
     const { id } = this.props;
     const { dialogId, dialogArgs } = this.state;
+    var { title } = dialogArgs || { title: '' }
     var visible = id === dialogId;
 
     const items = [
@@ -40,13 +46,13 @@ export default class Dialog extends React.PureComponent<any, any> {
       'Single line text goes here',
       'Three line wrapped text goes here making it wrap to the next line and continues longer to be here',
     ].map((primaryText, i) => (
-      <ListItem key={i} onClick={this.closeDialog} primaryText={primaryText} />
+      <ListItem key={i} onClick={this.openDialog} primaryText={primaryText} />
     ));
     return (
       <MDDialog
         id={id}
         visible={visible}
-        title="Simple Title"
+        title={title}
         onHide={this.closeDialog}
       >
         <List>

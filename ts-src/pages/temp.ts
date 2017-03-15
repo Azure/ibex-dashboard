@@ -218,6 +218,7 @@ export default <IDashboardConfig>{
         onBarClick: { 
           action: 'dialog:conversations',
           params: {
+            title: 'args:intent',
             intent: 'args:intent',
             queryspan: 'timespan:queryTimespan'
           }
