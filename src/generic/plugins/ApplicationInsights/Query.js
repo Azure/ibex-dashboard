@@ -1,5 +1,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const $ = require("jquery");
+const _ = require("lodash");
 const DataSourcePlugin_1 = require("../DataSourcePlugin");
 const common_1 = require("./common");
 class ApplicationInsightsQuery extends DataSourcePlugin_1.DataSourcePlugin {
@@ -23,6 +24,14 @@ class ApplicationInsightsQuery extends DataSourcePlugin_1.DataSourcePlugin {
      * @param {function} callback
      */
     updateDependencies(dependencies) {
+        var emptyDependency = _.find(_.keys(this._props.dependencies), dependencyKey => {
+            return typeof dependencies[dependencyKey] === 'undefined';
+        });
+        if (emptyDependency) {
+            return (dispatch) => {
+                return dispatch();
+            };
+        }
         var { queryTimespan } = dependencies;
         var params = this._props.params;
         var query = typeof params.query === 'function' ? params.query(dependencies) : params.query;

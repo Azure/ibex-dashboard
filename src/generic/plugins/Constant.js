@@ -1,4 +1,5 @@
 Object.defineProperty(exports, "__esModule", { value: true });
+const _ = require("lodash");
 const DataSourcePlugin_1 = require("./DataSourcePlugin");
 class Constant extends DataSourcePlugin_1.DataSourcePlugin {
     constructor(options) {
@@ -14,8 +15,9 @@ class Constant extends DataSourcePlugin_1.DataSourcePlugin {
     /**
      * updateDependencies - called when dependencies are created
      */
-    updateDependencies(dependencies) {
-        return dependencies;
+    updateDependencies(dependencies, args) {
+        var result = _.extend(dependencies, args);
+        return result;
     }
     updateSelectedValue(dependencies, selectedValue) {
         return { selectedValue };

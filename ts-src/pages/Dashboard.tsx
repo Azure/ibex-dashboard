@@ -44,13 +44,10 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
   constructor(props) {
     super(props);
 
-    dashboard.dataSources.forEach(source => {
-      var dataSource = PipeComponent.createDataSource(source);
-      this.dataSources[dataSource.id] = dataSource;
-    });
+    PipeComponent.createDataSources(dashboard, this.dataSources);
 
     // For each column, create a layout according to number of columns
-    var layouts = Elements.loadLayoutFromDashboard(dashboard);
+    var layouts = Elements.loadLayoutFromDashboard(dashboard, dashboard);
     
     this.layouts = layouts;
     this.state.layouts = { lg: layouts['lg'] };
@@ -60,30 +57,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
     this.setState({ mounted: true });
 
-    // Connect sources and dependencies
-    var sources = Object.keys(this.dataSources);
-    sources.forEach(sourceId => {
-      var source = this.dataSources[sourceId];
-
-      source.store.listen((state) => {
-
-        sources.forEach(compId => {
-          var compSource = this.dataSources[compId];
-          if (compSource.plugin.getDependencies()[sourceId]) {
-            compSource.action.updateDependencies.defer(state);
-          }
-        });
-      });
-    });
-
-    // Call initalize methods
-    sources.forEach(sourceId => {
-      var source = this.dataSources[sourceId];
-
-      if (typeof source.action['initialize'] === 'function') {
-        source.action.initialize();
-      }
-    });
+    PipeComponent.connectDataSources(this.dataSources);
   }
 
   onBreakpointChange = (breakpoint) => {

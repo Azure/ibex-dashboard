@@ -53,6 +53,49 @@ export class PipeComponent {
     return PipeComponent.dataSources[config.id];
   }
 
+  static createDataSources(dsContainer: IDataSourceContainer, containerDataSources: IDataSourceDictionary) {
+    dsContainer.dataSources.forEach(source => {
+      var dataSource = PipeComponent.createDataSource(source);
+      containerDataSources[dataSource.id] = dataSource;
+    });
+  }
+
+  static connectDataSources(dataSources: IDataSourceDictionary) {
+    // Connect sources and dependencies
+    var sourcesIDs = Object.keys(dataSources);
+    sourcesIDs.forEach(sourceDSId => {
+      var sourceDS = dataSources[sourceDSId];
+
+      sourceDS.store.listen((state) => {
+
+        sourcesIDs.forEach(checkDSId => {
+          var checkDS = dataSources[checkDSId];
+          var dependencies = checkDS.plugin.getDependencies() || {};
+
+          let connected = _.find(_.keys(dependencies), dependencyKey => {
+            let dependencyValue = dependencies[dependencyKey] || '';
+            return (dependencyValue === sourceDSId || dependencyValue.startsWith(sourceDSId + ':'));
+          })
+
+          if (connected) {
+
+            // Todo: add check that all dependencies are met
+            checkDS.action.updateDependencies.defer(state);
+          }
+        });
+      });
+    });
+
+    // Call initalize methods
+    sourcesIDs.forEach(sourceDSId => {
+      var sourceDS = dataSources[sourceDSId];
+
+      if (typeof sourceDS.action['initialize'] === 'function') {
+        sourceDS.action.initialize();
+      }
+    });
+  }
+
   static extrapolateDependencies(dependencies: IStringDictionary, args?: IDictionary): IExtrapolationResult {
     var result: IExtrapolationResult = {
       dataSources: {},
@@ -89,7 +132,7 @@ export class PipeComponent {
     return result;
   }
 
-  static triggerAction(action: string, params: IStringDictionary, args: any[]) {
+  static triggerAction(action: string, params: IStringDictionary, args: IDictionary) {
     var actionLocation = action.split(':');
 
     if (actionLocation.length !== 2) {

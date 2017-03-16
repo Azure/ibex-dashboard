@@ -1,7 +1,7 @@
 type IDictionary = { [ id: string ] : Object }
 type IStringDictionary = { [ id: string ] : string }
 
-interface IDashboardConfig {
+interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
   config: {
     layout: {
       isDraggable?: boolean,
@@ -13,9 +13,7 @@ interface IDashboardConfig {
       breakpoints: { lg?: number, md?: number, sm?: number, xs?: number, xxs?: number }
     }
   },
-  dataSources: IDataSource[],
   filters: IFilter[],
-  elements: IElement[],
   dialogs: IDialog[]
 }
 
@@ -55,11 +53,17 @@ interface IFilter {
   first: boolean
 }
 
-interface IDialog {
+interface IElementsContainer {
+  elements: IElement[]  
+}
+
+interface IDataSourceContainer {
+  dataSources: IDataSource[]
+}
+
+interface IDialog extends IDataSourceContainer, IElementsContainer {
   id: string,
   params: string[],
-  dataSources: IDataSource[],
-  elements: IElement[]
 }
 
 type IAction = string | {

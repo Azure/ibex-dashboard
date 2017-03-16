@@ -39,6 +39,16 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
    */
   updateDependencies(dependencies) {
 
+    var emptyDependency = _.find(_.keys(this._props.dependencies), dependencyKey => {
+      return typeof dependencies[dependencyKey] === 'undefined';
+    });
+
+    if (emptyDependency) {
+      return (dispatch) => {
+        return dispatch();
+      };
+    }
+
     var { queryTimespan } = dependencies;
 
     var params: any = this._props.params;

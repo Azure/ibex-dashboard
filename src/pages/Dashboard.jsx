@@ -35,37 +35,15 @@ class Dashboard extends React.Component {
                 layouts: newLayouts
             });
         };
-        temp_1.default.dataSources.forEach(source => {
-            var dataSource = generic_1.PipeComponent.createDataSource(source);
-            this.dataSources[dataSource.id] = dataSource;
-        });
+        generic_1.PipeComponent.createDataSources(temp_1.default, this.dataSources);
         // For each column, create a layout according to number of columns
-        var layouts = generic_1.Elements.loadLayoutFromDashboard(temp_1.default);
+        var layouts = generic_1.Elements.loadLayoutFromDashboard(temp_1.default, temp_1.default);
         this.layouts = layouts;
         this.state.layouts = { lg: layouts['lg'] };
     }
     componentDidMount() {
         this.setState({ mounted: true });
-        // Connect sources and dependencies
-        var sources = Object.keys(this.dataSources);
-        sources.forEach(sourceId => {
-            var source = this.dataSources[sourceId];
-            source.store.listen((state) => {
-                sources.forEach(compId => {
-                    var compSource = this.dataSources[compId];
-                    if (compSource.plugin.getDependencies()[sourceId]) {
-                        compSource.action.updateDependencies.defer(state);
-                    }
-                });
-            });
-        });
-        // Call initalize methods
-        sources.forEach(sourceId => {
-            var source = this.dataSources[sourceId];
-            if (typeof source.action['initialize'] === 'function') {
-                source.action.initialize();
-            }
-        });
+        generic_1.PipeComponent.connectDataSources(this.dataSources);
     }
     render() {
         var { currentBreakpoint } = this.state;

@@ -1,4 +1,5 @@
 
+import * as _ from 'lodash';
 import {DataSourcePlugin, IDataSourceOptions} from './DataSourcePlugin';
 
 interface IConstantOptions extends IDataSourceOptions {
@@ -27,8 +28,9 @@ export default class Constant extends DataSourcePlugin {
   /**
    * updateDependencies - called when dependencies are created
    */
-  updateDependencies(dependencies) {
-    return dependencies;
+  updateDependencies(dependencies, args) {
+    var result = _.extend(dependencies, args);
+    return result;
   }
 
   updateSelectedValue(dependencies, selectedValue) {
