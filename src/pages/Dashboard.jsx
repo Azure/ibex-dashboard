@@ -1,6 +1,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const Toolbars_1 = require("react-md/lib/Toolbars");
+const Spinner_1 = require("../components/generic/Spinner");
 const ReactGridLayout = require("react-grid-layout");
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
@@ -57,6 +58,7 @@ class Dashboard extends React.Component {
         return (<div style={{ width: '100%' }}>
         <Toolbars_1.default>
           {filters}
+          <Spinner_1.default />
         </Toolbars_1.default>
         <ResponsiveReactGridLayout {...this.props.grid} layouts={this.state.layouts} onBreakpointChange={this.onBreakpointChange} onLayoutChange={this.onLayoutChange} 
         // WidthProvider option
