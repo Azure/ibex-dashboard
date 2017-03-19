@@ -154,7 +154,7 @@ export class DataSourceConnector {
         throw new Error(`Data source ${dataSourceName} was not found`)
       }
 
-      dataSource.action[actionName].apply(dataSource.action, args);
+      dataSource.action[actionName].call(dataSource.action, args);
     }
   }
 
