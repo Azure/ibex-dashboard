@@ -1,10 +1,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
 const _ = require("lodash");
-const plugins_1 = require("../components/generic/plugins");
-const Dialogs_1 = require("../components/generic/Dialogs");
-var { Dialog } = Dialogs_1.default;
-class Elements {
+const plugins_1 = require("./generic/plugins");
+class ElementConnector {
     static loadLayoutFromDashboard(elementsContainer, dashboard) {
         var layouts = {};
         _.each(dashboard.config.layout.cols, (totalColumns, key) => {
@@ -36,10 +34,10 @@ class Elements {
         var elements = [];
         dashboard.elements.forEach((element, idx) => {
             var ReactElement = plugins_1.default[element.type];
-            var { id, dependencies, actions, props, title, subtitle, size } = element;
+            var { id, dependencies, actions, props, title, subtitle, size, theme } = element;
             var layoutProps = _.find(layout, { "i": id });
             elements.push(<div key={id}>
-          <ReactElement key={idx} dependencies={dependencies} actions={actions || {}} props={props || {}} title={title} subtitle={subtitle} layout={layoutProps}/>
+          <ReactElement key={idx} dependencies={dependencies} actions={actions || {}} props={props || {}} title={title} subtitle={subtitle} layout={layoutProps} theme={theme}/>
         </div>);
         });
         return elements;
@@ -53,12 +51,5 @@ class Elements {
         });
         return { filters, additionalFilters };
     }
-    static loadDialogsFromDashboard(dashboard) {
-        if (!dashboard.dialogs) {
-            return null;
-        }
-        var dialogs = dashboard.dialogs.map((dialog, idx) => <Dialog key={idx} dialogData={dialog} dashboard={dashboard}/>);
-        return dialogs;
-    }
 }
-exports.default = Elements;
+exports.default = ElementConnector;

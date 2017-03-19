@@ -1,11 +1,8 @@
 import * as React from 'react';
 import * as _ from 'lodash';
-import plugins from '../components/generic/plugins';
-import Dialogs from '../components/generic/Dialogs';
+import plugins from './generic/plugins';
 
-var { Dialog } = Dialogs;
-
-export default class Elements {
+export default class ElementConnector {
   static loadLayoutFromDashboard(elementsContainer: IElementsContainer, dashboard: IDashboardConfig) : ILayouts {
     
     var layouts = {};
@@ -46,7 +43,7 @@ export default class Elements {
 
     dashboard.elements.forEach((element, idx) => {
       var ReactElement = plugins[element.type];
-      var { id, dependencies, actions, props, title, subtitle, size } = element;
+      var { id, dependencies, actions, props, title, subtitle, size, theme } = element;
       var layoutProps = _.find(layout, { "i": id });
 
       elements.push(
@@ -59,6 +56,7 @@ export default class Elements {
                 title={title}
                 subtitle={subtitle}
                 layout={layoutProps}
+                theme={theme}
           />
         </div>
       )
@@ -85,18 +83,5 @@ export default class Elements {
     });
 
     return { filters, additionalFilters };
-  }
-
-  static loadDialogsFromDashboard(dashboard: IDashboardConfig): JSX.Element[] {
-
-    if (!dashboard.dialogs) {
-      return null;
-    }
-
-    var dialogs = dashboard.dialogs.map((dialog, idx) => 
-      <Dialog key={idx} dialogData={dialog} dashboard={dashboard} />
-    );
-
-    return dialogs
   }
 }

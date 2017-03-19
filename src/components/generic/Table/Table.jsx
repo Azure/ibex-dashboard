@@ -1,6 +1,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const GenericComponent_1 = require("./GenericComponent");
+const GenericComponent_1 = require("../GenericComponent");
 const moment = require("moment");
 const DataTables_1 = require("react-md/lib/DataTables");
 const Cards_1 = require("react-md/lib/Cards");
@@ -22,7 +22,13 @@ class Table extends GenericComponent_1.GenericComponent {
         var { props } = this.props;
         var { checkboxes, cols } = props;
         var { values } = this.state;
-        const rows = values.map((value, i) => (<DataTables_1.TableRow key={i}>
+        var arr = values.slice(0);
+        arr = arr.concat(values);
+        arr = arr.concat(values);
+        arr = arr.concat(values);
+        arr = arr.concat(values);
+        arr = arr.concat(values);
+        const rows = arr.map((value, i) => (<DataTables_1.TableRow key={i}>
         {cols.map((col, i) => <DataTables_1.TableColumn key={i}>{col.type === 'icon' ?
             <FontIcons_1.default>{col.value || value[col.field]}</FontIcons_1.default> :
             col.type === 'button' ?
@@ -35,7 +41,7 @@ class Table extends GenericComponent_1.GenericComponent {
         <DataTables_1.DataTable plain={!checkboxes} data={checkboxes}>
           <DataTables_1.TableHeader>
             <DataTables_1.TableRow>
-              {cols.map((col, i) => <DataTables_1.TableColumn key={i}>{col.header}</DataTables_1.TableColumn>)}
+              {cols.map((col, i) => <DataTables_1.TableColumn key={i} width={col.width}>{col.header}</DataTables_1.TableColumn>)}
             </DataTables_1.TableRow>
           </DataTables_1.TableHeader>
           <DataTables_1.TableBody>

@@ -2,7 +2,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const alt_1 = require("../alt");
 const _ = require("lodash");
 const Dialogs_1 = require("../components/generic/Dialogs");
-class PipeComponent {
+class DataSourceConnector {
     static createDataSource(dataSourceConfig) {
         var config = dataSourceConfig || {};
         if (!config.id || !config.type) {
@@ -13,21 +13,21 @@ class PipeComponent {
         var PluginClass = require(pluginPath);
         var plugin = new PluginClass.default(config);
         // Creating actions class
-        var ActionClass = PipeComponent.createActionClass(plugin);
+        var ActionClass = DataSourceConnector.createActionClass(plugin);
         // Creating store class
-        var StoreClass = PipeComponent.createStoreClass(config, plugin, ActionClass);
-        PipeComponent.dataSources[config.id] = {
+        var StoreClass = DataSourceConnector.createStoreClass(config, plugin, ActionClass);
+        DataSourceConnector.dataSources[config.id] = {
             id: config.id,
             config,
             plugin,
             action: ActionClass,
             store: StoreClass
         };
-        return PipeComponent.dataSources[config.id];
+        return DataSourceConnector.dataSources[config.id];
     }
     static createDataSources(dsContainer, containerDataSources) {
         dsContainer.dataSources.forEach(source => {
-            var dataSource = PipeComponent.createDataSource(source);
+            var dataSource = DataSourceConnector.createDataSource(source);
             containerDataSources[dataSource.id] = dataSource;
         });
     }
@@ -76,7 +76,7 @@ class PipeComponent {
                 result.dependencies[key] = args[valueName];
             }
             else {
-                let dataSource = PipeComponent.dataSources[dataSourceName];
+                let dataSource = DataSourceConnector.dataSources[dataSourceName];
                 if (!dataSource) {
                     throw new Error('Could not find data source for depedency ' + dependencies[key]);
                 }
@@ -96,11 +96,11 @@ class PipeComponent {
         var dataSourceName = actionLocation[0];
         var actionName = actionLocation[1];
         if (dataSourceName === 'dialog') {
-            var extrapolation = PipeComponent.extrapolateDependencies(params, args);
+            var extrapolation = DataSourceConnector.extrapolateDependencies(params, args);
             Dialogs_1.default.DialogsActions.openDialog(actionName, extrapolation.dependencies);
         }
         else {
-            var dataSource = PipeComponent.dataSources[dataSourceName];
+            var dataSource = DataSourceConnector.dataSources[dataSourceName];
             if (!dataSource) {
                 throw new Error(`Data source ${dataSourceName} was not found`);
             }
@@ -117,7 +117,7 @@ class PipeComponent {
                 // This method will be called with an action is dispatched
                 NewActionClass.prototype[action] = function (...args) {
                     // Collecting depedencies from all relevant stores
-                    var extrapolation = PipeComponent.extrapolateDependencies(plugin.getDependencies());
+                    var extrapolation = DataSourceConnector.extrapolateDependencies(plugin.getDependencies());
                     // Calling action with arguments
                     var result = plugin[action].call(this, extrapolation.dependencies, ...args) || {};
                     // Checking is result is a dispatcher or a direct value
@@ -125,13 +125,13 @@ class PipeComponent {
                         return (dispatch) => {
                             result(function (obj) {
                                 obj = obj || {};
-                                var fullResult = PipeComponent.callibrateResult(obj, plugin);
+                                var fullResult = DataSourceConnector.callibrateResult(obj, plugin);
                                 dispatch(fullResult);
                             });
                         };
                     }
                     else {
-                        var fullResult = PipeComponent.callibrateResult(result, plugin);
+                        var fullResult = DataSourceConnector.callibrateResult(result, plugin);
                         return fullResult;
                     }
                 };
@@ -174,7 +174,7 @@ class PipeComponent {
         }
         // Callibrate calculated values
         var calculated = plugin._props.calculated;
-        var state = PipeComponent.dataSources[plugin._props.id].store.getState();
+        var state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
         state = _.extend(state, result);
         if (typeof calculated === 'function') {
             var additionalValues = calculated(state) || {};
@@ -185,5 +185,5 @@ class PipeComponent {
         return result;
     }
 }
-PipeComponent.dataSources = {};
-exports.PipeComponent = PipeComponent;
+DataSourceConnector.dataSources = {};
+exports.DataSourceConnector = DataSourceConnector;

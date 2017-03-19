@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
@@ -17,6 +17,7 @@ export interface ITableProps extends IGenericProps {
       header?: string,
       field?: string,
       value?: string,
+      width?: string | number,
       type?: 'text' | 'time' | 'icon' | 'button',
       click?: string
     }[]
@@ -49,7 +50,14 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     var { checkboxes, cols } = props;
     var { values } = this.state;
 
-    const rows = values.map((value, i) => (
+    var arr = values.slice(0);
+    arr = arr.concat(values);
+    arr = arr.concat(values);
+    arr = arr.concat(values);
+    arr = arr.concat(values);
+    arr = arr.concat(values);
+
+    const rows = arr.map((value, i) => (
       <TableRow key={i}>
         {
           cols.map((col, i) => 
@@ -72,7 +80,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           <TableHeader>
             <TableRow>
               {
-                cols.map((col, i) => <TableColumn key={i}>{col.header}</TableColumn>)
+                cols.map((col, i) => <TableColumn key={i} width={col.width}>{col.header}</TableColumn>)
               }
             </TableRow>
           </TableHeader>

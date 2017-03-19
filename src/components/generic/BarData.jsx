@@ -3,9 +3,8 @@ const React = require("react");
 const GenericComponent_1 = require("./GenericComponent");
 const Card_1 = require("../Card");
 const recharts_1 = require("recharts");
-const styles_1 = require("../styles");
-var colors = styles_1.default.colors;
-var { ThemeColors } = colors;
+const colors_1 = require("../colors");
+var { ThemeColors } = colors_1.default;
 ;
 class BarData extends GenericComponent_1.GenericComponent {
     constructor(props) {

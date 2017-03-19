@@ -6,18 +6,18 @@ import { PieChart, Pie, Sector, Cell, Legend, ResponsiveContainer } from 'rechar
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import styles from '../styles';
-var colors = styles.colors;
+import colors from '../colors';
 var { ThemeColors } = colors;
 
 interface IPieProps extends IGenericProps {
-  mode: string; // users/messages
+  mode: string // users/messages
   props: {
-    pieProps: { [key: string] : Object };
+    pieProps: { [key: string] : Object }
     showLegend: Boolean
-    width: Object;
-    height: Object;
+    width: Object
+    height: Object
   }
+  theme?: string[]
 };
 
 interface IPieState extends IGenericState {
@@ -106,12 +106,14 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
   
   render() {
     var { values } = this.state;
-    var { props, title, subtitle, layout } = this.props;
+    var { props, title, subtitle, layout, theme } = this.props;
     var { pieProps, showLegend } = props;
 
     if (!values) {
       return null;
     }
+
+    var themeColors = theme || ThemeColors;
 
     // Todo: Receive the width of the SVG component from the container
     return (
@@ -130,7 +132,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
               paddingAngle={0}
               {...pieProps}>
               {
-                values.map((entry, index) => <Cell key={index} fill={ThemeColors[index % ThemeColors.length]}/>)
+                values.map((entry, index) => <Cell key={index} fill={themeColors[index % themeColors.length]}/>)
               }
               <Cell key={0} fill={colors.GoodColor}/>
               <Cell key={1} fill={colors.BadColor}/>

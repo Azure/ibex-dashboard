@@ -6,7 +6,9 @@ const ReactGridLayout = require("react-grid-layout");
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
-const generic_1 = require("../generic");
+const data_sources_1 = require("../data-sources");
+const ElementConnector_1 = require("../components/ElementConnector");
+const Dialogs_1 = require("../components/generic/Dialogs");
 const temp_1 = require("./temp");
 const layout = temp_1.default.config.layout;
 class Dashboard extends React.Component {
@@ -36,25 +38,25 @@ class Dashboard extends React.Component {
                 layouts: newLayouts
             });
         };
-        generic_1.PipeComponent.createDataSources(temp_1.default, this.dataSources);
+        data_sources_1.DataSourceConnector.createDataSources(temp_1.default, this.dataSources);
         // For each column, create a layout according to number of columns
-        var layouts = generic_1.Elements.loadLayoutFromDashboard(temp_1.default, temp_1.default);
+        var layouts = ElementConnector_1.default.loadLayoutFromDashboard(temp_1.default, temp_1.default);
         this.layouts = layouts;
         this.state.layouts = { lg: layouts['lg'] };
     }
     componentDidMount() {
         this.setState({ mounted: true });
-        generic_1.PipeComponent.connectDataSources(this.dataSources);
+        data_sources_1.DataSourceConnector.connectDataSources(this.dataSources);
     }
     render() {
         var { currentBreakpoint } = this.state;
         var layout = this.state.layouts[currentBreakpoint];
         // Creating visual elements
-        var elements = generic_1.Elements.loadElementsFromDashboard(temp_1.default, layout);
+        var elements = ElementConnector_1.default.loadElementsFromDashboard(temp_1.default, layout);
         // Creating filter elements
-        var { filters, additionalFilters } = generic_1.Elements.loadFiltersFromDashboard(temp_1.default);
+        var { filters, additionalFilters } = ElementConnector_1.default.loadFiltersFromDashboard(temp_1.default);
         // Loading dialogs
-        var dialogs = generic_1.Elements.loadDialogsFromDashboard(temp_1.default);
+        var dialogs = Dialogs_1.default.loadDialogsFromDashboard(temp_1.default);
         return (<div style={{ width: '100%' }}>
         <Toolbars_1.default>
           {filters}

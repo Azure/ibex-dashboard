@@ -6,8 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import styles from '../styles';
-var colors = styles.colors;
+import colors from '../colors';
 var { ThemeColors } = colors;
 
 interface IBarProps extends IGenericProps {

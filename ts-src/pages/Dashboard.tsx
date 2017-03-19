@@ -10,7 +10,9 @@ var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
-import { PipeComponent, IDataSourceDictionary, Elements } from '../generic';
+import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
+import ElementConnector from  '../components/ElementConnector';
+import Dialogs from '../components/generic/Dialogs';
 
 import dashboard from './temp';
 const layout = dashboard.config.layout;
@@ -45,10 +47,10 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
   constructor(props) {
     super(props);
 
-    PipeComponent.createDataSources(dashboard, this.dataSources);
+    DataSourceConnector.createDataSources(dashboard, this.dataSources);
 
     // For each column, create a layout according to number of columns
-    var layouts = Elements.loadLayoutFromDashboard(dashboard, dashboard);
+    var layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
     
     this.layouts = layouts;
     this.state.layouts = { lg: layouts['lg'] };
@@ -58,7 +60,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
     this.setState({ mounted: true });
 
-    PipeComponent.connectDataSources(this.dataSources);
+    DataSourceConnector.connectDataSources(this.dataSources);
   }
 
   onBreakpointChange = (breakpoint) => {
@@ -86,13 +88,13 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
     var layout = this.state.layouts[currentBreakpoint];
 
     // Creating visual elements
-    var elements = Elements.loadElementsFromDashboard(dashboard, layout)
+    var elements = ElementConnector.loadElementsFromDashboard(dashboard, layout)
 
     // Creating filter elements
-    var { filters, additionalFilters } = Elements.loadFiltersFromDashboard(dashboard);
+    var { filters, additionalFilters } = ElementConnector.loadFiltersFromDashboard(dashboard);
 
     // Loading dialogs
-    var dialogs = Elements.loadDialogsFromDashboard(dashboard);
+    var dialogs = Dialogs.loadDialogsFromDashboard(dashboard);
 
     return ( 
       <div style={{ width: '100%' }}>

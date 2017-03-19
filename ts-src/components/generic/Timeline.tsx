@@ -7,9 +7,12 @@ import Card from '../Card';
 
 import Button from 'react-md/lib/Buttons/Button';
 
-import styles from '../styles';
-var colors = styles.colors;
+import colors from '../colors';
 var { ThemeColors } = colors;
+
+interface ITimelineProps extends IGenericProps {
+  theme?: string[]
+}
 
 interface ITimelineState extends IGenericState {
   timeFormat: string
@@ -17,7 +20,7 @@ interface ITimelineState extends IGenericState {
   lines: Object[]
 }
 
-export default class Timeline extends GenericComponent<IGenericProps, ITimelineState> {
+export default class Timeline extends GenericComponent<ITimelineProps, ITimelineState> {
   // static propTypes = {}
   // static defaultProps = {}
 
@@ -31,14 +34,15 @@ export default class Timeline extends GenericComponent<IGenericProps, ITimelineS
 
   render() {
     var { timeFormat, values, lines } = this.state;
-    var { title, subtitle } = this.props;
+    var { title, subtitle, theme } = this.props;
 
     var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
+    var themeColors = theme || ThemeColors;
 
     var lineElements = [];
     if (values && values.length && lines) {
       lineElements = lines.map((line, idx) => {
-        return <Line key={idx} type="monotone" dataKey={line} stroke={ThemeColors[idx]} dot={false} ticksCount={5}/>
+        return <Line key={idx} type="monotone" dataKey={line} stroke={themeColors[idx % themeColors.length]} dot={false} ticksCount={5}/>
       })
     }
 

@@ -1,6 +1,8 @@
 import * as React from 'react';
 
-import { PipeComponent, Elements, IDataSourceDictionary } from '../../../generic'
+import { DataSourceConnector, IDataSourceDictionary } from '../../../data-sources'
+import ElementConnector from  '../../ElementConnector';
+
 import DialogsActions from './DialogsActions';
 import DialogsStore from './DialogsStore';
 
@@ -47,12 +49,12 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
         selectedValue: null
       }
     };
-    PipeComponent.createDataSources({ dataSources: [ dialogDS ] }, this.dataSources);
+    DataSourceConnector.createDataSources({ dataSources: [ dialogDS ] }, this.dataSources);
 
     // Adding other data sources
-    PipeComponent.createDataSources(this.props.dialogData, this.dataSources);
+    DataSourceConnector.createDataSources(this.props.dialogData, this.dataSources);
 
-    var layouts = Elements.loadLayoutFromDashboard(this.props.dialogData, this.props.dashboard);
+    var layouts = ElementConnector.loadLayoutFromDashboard(this.props.dialogData, this.props.dashboard);
     
     this.layouts = layouts;
     this.state.mounted = false;
@@ -64,7 +66,7 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     this.setState({ mounted: true });
     DialogsStore.listen(this.onChange);
 
-    PipeComponent.connectDataSources(this.dataSources);
+    DataSourceConnector.connectDataSources(this.dataSources);
   }
 
   componentDidUpdate() {
@@ -111,20 +113,7 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     var layout = this.state.layouts[currentBreakpoint];
 
     // Creating visual elements
-    var elements = Elements.loadElementsFromDashboard(dialogData, layout)
-
-    const items = [
-      'Single line text goes here',
-      'Two line wrapped text goes here making it wrap to next line',
-      'Single line text goes here',
-      'Three line wrapped text goes here making it wrap to the next line and continues longer to be here',
-      'Single line text goes here',
-      'Two line wrapped text goes here making it wrap to next line',
-      'Single line text goes here',
-      'Three line wrapped text goes here making it wrap to the next line and continues longer to be here',
-    ].map((primaryText, i) => (
-      <ListItem key={i} onClick={this.openDialog} primaryText={primaryText} />
-    ));
+    var elements = ElementConnector.loadElementsFromDashboard(dialogData, layout)
 
     let grid = {
       className: "layout",
@@ -140,10 +129,10 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
         title={title}
         focusOnMount={false}
         onHide={this.closeDialog}
-        dialogStyle={{ width: '80%' }}
-        contentStyle={{ padding: '0' }}
+        dialogStyle={{ width: dialogData.width || '80%' }}
+        contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}
       >
-        <ResponsiveReactGridLayout
+        {/*<ResponsiveReactGridLayout
           { ...grid }
           layouts={ this.state.layouts }
           onBreakpointChange={this.onBreakpointChange}
@@ -151,9 +140,9 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
           measureBeforeMount={false}
           // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
           // and set `measureBeforeMount={true}`.
-          useCSSTransforms={this.state.mounted}>
+          useCSSTransforms={this.state.mounted}>*/}
           { elements }
-        </ResponsiveReactGridLayout>
+        {/*</ResponsiveReactGridLayout>*/}
       </MDDialog>
     );
   }

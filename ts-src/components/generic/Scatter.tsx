@@ -1,21 +1,23 @@
 import * as React from 'react';
-import { GenericComponent } from './GenericComponent';
+import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 import Card from '../Card';
 import { ScatterChart, Scatter as ScatterLine, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer }  from 'recharts';
 
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import styles from '../styles';
-var colors = styles.colors;
-
+import colors from '../colors';
 var { ThemeColors } = colors;
 
-interface IGraphProps {};
+interface IScatterProps extends IGenericProps {
+  theme?: string[]
+}
 
-interface IGraphState {};
+interface IScatterState extends IGenericState {
 
-export default class Scatter extends GenericComponent<any, any> {
+}
+
+export default class Scatter extends GenericComponent<IScatterProps, IScatterState> {
 
   dateFormat (time) {
     return moment(time).format('MMM-DD');
@@ -27,10 +29,11 @@ export default class Scatter extends GenericComponent<any, any> {
 
   render() {
 
-    var { title, subtitle } = this.props;
+    var { title, subtitle, theme } = this.props;
 
     var { timeFormat, values, lines } = this.state;
     var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
+    var themeColors = theme || ThemeColors;
 
     const data01 = [{x: 100, y: 200, z: 200}, {x: 120, y: 100, z: 260},
                     {x: 170, y: 300, z: 400}, {x: 140, y: 250, z: 280},

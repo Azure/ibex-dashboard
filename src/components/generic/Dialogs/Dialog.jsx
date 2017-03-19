@@ -1,10 +1,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const generic_1 = require("../../../generic");
+const data_sources_1 = require("../../../data-sources");
+const ElementConnector_1 = require("../../ElementConnector");
 const DialogsActions_1 = require("./DialogsActions");
 const DialogsStore_1 = require("./DialogsStore");
 const Dialogs_1 = require("react-md/lib/Dialogs");
-const ListItem_1 = require("react-md/lib/Lists/ListItem");
 const ReactGridLayout = require("react-grid-layout");
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
@@ -39,10 +39,10 @@ class Dialog extends React.PureComponent {
                 selectedValue: null
             }
         };
-        generic_1.PipeComponent.createDataSources({ dataSources: [dialogDS] }, this.dataSources);
+        data_sources_1.DataSourceConnector.createDataSources({ dataSources: [dialogDS] }, this.dataSources);
         // Adding other data sources
-        generic_1.PipeComponent.createDataSources(this.props.dialogData, this.dataSources);
-        var layouts = generic_1.Elements.loadLayoutFromDashboard(this.props.dialogData, this.props.dashboard);
+        data_sources_1.DataSourceConnector.createDataSources(this.props.dialogData, this.dataSources);
+        var layouts = ElementConnector_1.default.loadLayoutFromDashboard(this.props.dialogData, this.props.dashboard);
         this.layouts = layouts;
         this.state.mounted = false;
         this.state.currentBreakpoint = 'lg';
@@ -51,7 +51,7 @@ class Dialog extends React.PureComponent {
     componentDidMount() {
         this.setState({ mounted: true });
         DialogsStore_1.default.listen(this.onChange);
-        generic_1.PipeComponent.connectDataSources(this.dataSources);
+        data_sources_1.DataSourceConnector.connectDataSources(this.dataSources);
     }
     componentDidUpdate() {
         const { dialogData } = this.props;
@@ -75,32 +75,17 @@ class Dialog extends React.PureComponent {
         var { currentBreakpoint } = this.state;
         var layout = this.state.layouts[currentBreakpoint];
         // Creating visual elements
-        var elements = generic_1.Elements.loadElementsFromDashboard(dialogData, layout);
-        const items = [
-            'Single line text goes here',
-            'Two line wrapped text goes here making it wrap to next line',
-            'Single line text goes here',
-            'Three line wrapped text goes here making it wrap to the next line and continues longer to be here',
-            'Single line text goes here',
-            'Two line wrapped text goes here making it wrap to next line',
-            'Single line text goes here',
-            'Three line wrapped text goes here making it wrap to the next line and continues longer to be here',
-        ].map((primaryText, i) => (<ListItem_1.default key={i} onClick={this.openDialog} primaryText={primaryText}/>));
+        var elements = ElementConnector_1.default.loadElementsFromDashboard(dialogData, layout);
         let grid = {
             className: "layout",
             rowHeight: dashboard.config.layout.rowHeight || 30,
             cols: dashboard.config.layout.cols,
             breakpoints: dashboard.config.layout.breakpoints
         };
-        return (<Dialogs_1.default id={id} visible={visible} title={title} focusOnMount={false} onHide={this.closeDialog} dialogStyle={{ width: '80%' }} contentStyle={{ padding: '0' }}>
-        <ResponsiveReactGridLayout {...grid} layouts={this.state.layouts} onBreakpointChange={this.onBreakpointChange} 
-        // WidthProvider option
-        measureBeforeMount={false} 
-        // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
-        // and set `measureBeforeMount={true}`.
-        useCSSTransforms={this.state.mounted}>
+        return (<Dialogs_1.default id={id} visible={visible} title={title} focusOnMount={false} onHide={this.closeDialog} dialogStyle={{ width: dialogData.width || '80%' }} contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}>
+        
           {elements}
-        </ResponsiveReactGridLayout>
+        
       </Dialogs_1.default>);
     }
 }

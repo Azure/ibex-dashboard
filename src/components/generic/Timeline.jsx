@@ -4,9 +4,8 @@ const GenericComponent_1 = require("./GenericComponent");
 const moment = require("moment");
 const recharts_1 = require("recharts");
 const Card_1 = require("../Card");
-const styles_1 = require("../styles");
-var colors = styles_1.default.colors;
-var { ThemeColors } = colors;
+const colors_1 = require("../colors");
+var { ThemeColors } = colors_1.default;
 class Timeline extends GenericComponent_1.GenericComponent {
     // static propTypes = {}
     // static defaultProps = {}
@@ -18,12 +17,13 @@ class Timeline extends GenericComponent_1.GenericComponent {
     }
     render() {
         var { timeFormat, values, lines } = this.state;
-        var { title, subtitle } = this.props;
+        var { title, subtitle, theme } = this.props;
         var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
+        var themeColors = theme || ThemeColors;
         var lineElements = [];
         if (values && values.length && lines) {
             lineElements = lines.map((line, idx) => {
-                return <recharts_1.Line key={idx} type="monotone" dataKey={line} stroke={ThemeColors[idx]} dot={false} ticksCount={5}/>;
+                return <recharts_1.Line key={idx} type="monotone" dataKey={line} stroke={themeColors[idx % themeColors.length]} dot={false} ticksCount={5}/>;
             });
         }
         return (<Card_1.default title={title} subtitle={subtitle}>

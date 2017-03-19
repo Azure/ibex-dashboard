@@ -1,5 +1,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
+const colors_1 = require("../components/colors");
 exports.default = {
     config: {
         layout: {
@@ -176,6 +177,7 @@ exports.default = {
             title: 'Message Rate',
             subtitle: 'How many messages were sent per timeframe',
             size: { w: 5, h: 8 },
+            theme: colors_1.default.ThemeColors2,
             dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' }
         },
         {
@@ -223,6 +225,7 @@ exports.default = {
             title: 'Conversion Rate',
             subtitle: 'Total conversion rate',
             size: { w: 4, h: 8 },
+            theme: colors_1.default.ThemeColors2,
             dependencies: { values: 'conversions:displayValues' },
             props: {
                 pieProps: { nameKey: 'label', valueKey: 'count' }
@@ -232,6 +235,7 @@ exports.default = {
     dialogs: [
         {
             id: "conversations",
+            width: '60%',
             params: ['title', 'intent', 'queryspan'],
             dataSources: [
                 {
@@ -285,6 +289,7 @@ exports.default = {
         },
         {
             id: "messages",
+            width: '50%',
             params: ['title', 'conversation', 'queryspan'],
             dataSources: [
                 {
@@ -317,6 +322,7 @@ exports.default = {
                     props: {
                         cols: [{
                                 header: 'Timestamp',
+                                width: '50px',
                                 field: 'timestamp',
                                 type: 'time',
                                 format: 'MMM-DD HH:mm:ss'

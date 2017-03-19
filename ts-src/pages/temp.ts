@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import colors from '../components/colors';
 
 export default <IDashboardConfig>{
   config: {
@@ -184,6 +185,7 @@ export default <IDashboardConfig>{
       title: 'Message Rate',
       subtitle: 'How many messages were sent per timeframe',
       size: { w: 5, h: 8},
+      theme: colors.ThemeColors2,
       dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' }
     },
     {
@@ -231,6 +233,7 @@ export default <IDashboardConfig>{
       title: 'Conversion Rate',
       subtitle: 'Total conversion rate',
       size: { w: 4, h: 8},
+      theme: colors.ThemeColors2,
       dependencies: { values: 'conversions:displayValues' },
       props: { 
         pieProps: { nameKey: 'label', valueKey: 'count' }
@@ -240,6 +243,7 @@ export default <IDashboardConfig>{
   dialogs: [
     {
       id: "conversations",
+      width: '60%',
       params: [ 'title', 'intent', 'queryspan' ],
       dataSources: [
         {
@@ -293,6 +297,7 @@ export default <IDashboardConfig>{
     },
     {
       id: "messages",
+      width: '50%',
       params: [ 'title', 'conversation', 'queryspan' ],
       dataSources: [
         {
@@ -325,6 +330,7 @@ export default <IDashboardConfig>{
           props: {
             cols: [{
               header: 'Timestamp',
+              width: '50px',
               field: 'timestamp',
               type: 'time',
               format: 'MMM-DD HH:mm:ss'

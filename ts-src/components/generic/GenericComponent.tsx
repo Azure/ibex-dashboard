@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PipeComponent, IDataSourceDictionary } from '../../generic';
+import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 
 export interface IGenericProps {
   title: string;
@@ -27,7 +27,7 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
     this.onStateChange = this.onStateChange.bind(this);
     this.trigger = this.trigger.bind(this);
 
-    var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
+    var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     var initialState: IGenericState = {};
     Object.keys(result.dependencies).forEach(key => {
       initialState[key] = result.dependencies[key];
@@ -37,14 +37,14 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
   }
 
   componentDidMount() {
-    var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
+    var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     Object.keys(result.dataSources).forEach(key => {
       result.dataSources[key].store.listen(this.onStateChange);
     });
   }
 
   componentWillUnmount() {
-    var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
+    var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     Object.keys(result.dataSources).forEach(key => {
       result.dataSources[key].store.unlisten(this.onStateChange);
     });
@@ -52,7 +52,7 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
 
   private onStateChange(state) {
 
-    var result = PipeComponent.extrapolateDependencies(this.props.dependencies);
+    var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     var updatedState: IGenericState = {};
     Object.keys(result.dependencies).forEach(key => {
       updatedState[key] = result.dependencies[key];
@@ -61,7 +61,7 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
     this.setState(updatedState);
   }
 
-  protected trigger(actionName: string, args: any[]) {
+  protected trigger(actionName: string, args: IDictionary) {
     var action = this.props.actions[actionName];
 
     // if action was not defined, not action needed
@@ -72,7 +72,7 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
 
     var actionId = typeof action === 'string' ? action : action.action;
     var params = typeof action === 'string' ? {} : action.params;
-    PipeComponent.triggerAction(actionId, params, args);
+    DataSourceConnector.triggerAction(actionId, params, args);
   }
 
   abstract render();

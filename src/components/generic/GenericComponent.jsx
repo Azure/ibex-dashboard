@@ -1,6 +1,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const React = require("react");
-const generic_1 = require("../../generic");
+const data_sources_1 = require("../../data-sources");
 class GenericComponent extends React.Component {
     // static propTypes = {}
     // static defaultProps = {}
@@ -8,7 +8,7 @@ class GenericComponent extends React.Component {
         super(props);
         this.onStateChange = this.onStateChange.bind(this);
         this.trigger = this.trigger.bind(this);
-        var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
+        var result = data_sources_1.DataSourceConnector.extrapolateDependencies(this.props.dependencies);
         var initialState = {};
         Object.keys(result.dependencies).forEach(key => {
             initialState[key] = result.dependencies[key];
@@ -16,19 +16,19 @@ class GenericComponent extends React.Component {
         this.state = initialState;
     }
     componentDidMount() {
-        var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
+        var result = data_sources_1.DataSourceConnector.extrapolateDependencies(this.props.dependencies);
         Object.keys(result.dataSources).forEach(key => {
             result.dataSources[key].store.listen(this.onStateChange);
         });
     }
     componentWillUnmount() {
-        var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
+        var result = data_sources_1.DataSourceConnector.extrapolateDependencies(this.props.dependencies);
         Object.keys(result.dataSources).forEach(key => {
             result.dataSources[key].store.unlisten(this.onStateChange);
         });
     }
     onStateChange(state) {
-        var result = generic_1.PipeComponent.extrapolateDependencies(this.props.dependencies);
+        var result = data_sources_1.DataSourceConnector.extrapolateDependencies(this.props.dependencies);
         var updatedState = {};
         Object.keys(result.dependencies).forEach(key => {
             updatedState[key] = result.dependencies[key];
@@ -44,7 +44,7 @@ class GenericComponent extends React.Component {
         }
         var actionId = typeof action === 'string' ? action : action.action;
         var params = typeof action === 'string' ? {} : action.params;
-        generic_1.PipeComponent.triggerAction(actionId, params, args);
+        data_sources_1.DataSourceConnector.triggerAction(actionId, params, args);
     }
 }
 exports.GenericComponent = GenericComponent;

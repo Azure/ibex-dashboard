@@ -3,9 +3,8 @@ const React = require("react");
 const GenericComponent_1 = require("./GenericComponent");
 const Card_1 = require("../Card");
 const recharts_1 = require("recharts");
-const styles_1 = require("../styles");
-var colors = styles_1.default.colors;
-var { ThemeColors } = colors;
+const colors_1 = require("../colors");
+var { ThemeColors } = colors_1.default;
 ;
 class PieData extends GenericComponent_1.GenericComponent {
     constructor(props) {
@@ -60,19 +59,20 @@ class PieData extends GenericComponent_1.GenericComponent {
     }
     render() {
         var { values } = this.state;
-        var { props, title, subtitle, layout } = this.props;
+        var { props, title, subtitle, layout, theme } = this.props;
         var { pieProps, showLegend } = props;
         if (!values) {
             return null;
         }
+        var themeColors = theme || ThemeColors;
         // Todo: Receive the width of the SVG component from the container
         return (<Card_1.default title={title} subtitle={subtitle}>
         <recharts_1.ResponsiveContainer>
           <recharts_1.PieChart>
             <recharts_1.Pie data={values} cx={Math.min(layout.h / 4, layout.w) * 60} innerRadius={60} fill="#8884d8" onMouseEnter={this.onPieEnter} activeIndex={this.state.activeIndex} activeShape={this.renderActiveShape.bind(this)} paddingAngle={0} {...pieProps}>
-              {values.map((entry, index) => <recharts_1.Cell key={index} fill={ThemeColors[index % ThemeColors.length]}/>)}
-              <recharts_1.Cell key={0} fill={colors.GoodColor}/>
-              <recharts_1.Cell key={1} fill={colors.BadColor}/>
+              {values.map((entry, index) => <recharts_1.Cell key={index} fill={themeColors[index % themeColors.length]}/>)}
+              <recharts_1.Cell key={0} fill={colors_1.default.GoodColor}/>
+              <recharts_1.Cell key={1} fill={colors_1.default.BadColor}/>
             </recharts_1.Pie>
             {showLegend !== false && <recharts_1.Legend layout="vertical" align="right" verticalAlign="top"/>}
           </recharts_1.PieChart>
