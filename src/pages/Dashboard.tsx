@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import plugins from '../components/generic/plugins';
 
 import Toolbar from 'react-md/lib/Toolbars';
-import Spinner from '../components/generic/Spinner';
+import { Spinner } from '../components/Spinner';
 
 import * as ReactGridLayout from 'react-grid-layout';
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;

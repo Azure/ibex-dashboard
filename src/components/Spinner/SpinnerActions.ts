@@ -1,4 +1,4 @@
-import alt, { AbstractActions } from '../../../alt';
+import alt, { AbstractActions } from '../../alt';
 
 interface ISpinnerActions {
   startPageLoading(): void;
