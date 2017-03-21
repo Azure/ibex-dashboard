@@ -2,11 +2,11 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as TestUtils from 'react-addons-test-utils';
 
-import { Dialog, DialogsActions } from '../components/generic/Dialogs';
+import { Dialog, DialogsActions } from '../../components/generic/Dialogs';
 import MDDialog from 'react-md/lib/Dialogs';
 
-import dashboard from './mocks/dashboard';
-import dialogData from './mocks/dialog';
+import dashboard from '../mocks/dashboard';
+import dialogData from '../mocks/dialog';
 
 describe('Dialog', () => {
 

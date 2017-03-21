@@ -4,12 +4,12 @@ import * as TestUtils from 'react-addons-test-utils';
 
 import { Card } from 'react-md/lib/Cards';
 import { DataTable, TableRow } from 'react-md/lib/DataTables';
-import { Spinner, SpinnerActions } from '../components/Spinner';
-import Table from '../components/generic/Table';
-import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
+import { Spinner, SpinnerActions } from '../../components/Spinner';
+import Table from '../../components/generic/Table';
+import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 
-import dataSourceMock from './mocks/dataSource';
-import tablePropsMock from './mocks/table';
+import dataSourceMock from '../mocks/dataSource';
+import tablePropsMock from '../mocks/table';
 
 describe('Table', () => {
 
