@@ -2,10 +2,12 @@ import * as React from 'react';
 
 import Toast from './Toast';
 import ToastActions from './ToastActions';
-import ToastStore from './ToastStore';
+import ToastStore, { IToast, IToastStoreState } from './ToastStore';
 
-export default {
+export {
   Toast,
   ToastActions,
-  ToastStore
+  ToastStore,
+  IToast, 
+  IToastStoreState
 }

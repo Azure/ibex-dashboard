@@ -30,7 +30,7 @@ export default class Toast extends React.Component<any, IToastStoreState> {
 
   render() {
     return (
-      <Snackbar toasts={...this.state.toasts} onDismiss={this.removeToast} />
+      <Snackbar toasts={...this.state.toasts} autohideTimeout={this.state.autohideTimeout} autohide={this.state.autohide} onDismiss={this.removeToast} />
     );
   }
 }

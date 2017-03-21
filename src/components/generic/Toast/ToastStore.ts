@@ -9,18 +9,28 @@ export interface IToast {
 
 export interface IToastStoreState {
   toasts: IToast[],
-  queued: Array<IToast>
+  queued: Array<IToast>,
+  autohideTimeout: number,
+  autohide: boolean
 }
+
+const MIN_TIMEOUT_MS = 3000;
+const AVG_WORDS_PER_SEC: number = 2;
 
 class ToastStore extends AbstractStoreModel<IToastStoreState> implements IToastStoreState {
   toasts: IToast[];
   queued: Array<IToast>;
+  autohideTimeout: number;
+  autohide: boolean;
+  
 
   constructor() {
     super();
 
     this.toasts = [];
     this.queued = Array<IToast>();
+    this.autohideTimeout = MIN_TIMEOUT_MS;
+    this.autohide = true;
 
     this.bindListeners({
       addToast: toastActions.addToast,
@@ -29,11 +39,21 @@ class ToastStore extends AbstractStoreModel<IToastStoreState> implements IToastS
   }
 
   addToast(toast: IToast): void {
+    if ( this.toasts.findIndex(x => x.text === toast.text) > -1 || this.queued.findIndex(x => x.text === toast.text) > -1 ) {
+      return; // ignore dups
+    }
     if (this.toasts.length === 0) {
       this.toasts.push(toast);
     } else {
       this.queued.push(toast);
     }
+    this.updateSnackbarAttributes(toast);
+  }
+
+  private updateSnackbarAttributes(toast: IToast): void {
+    const words = toast.text.split(' ').length;
+    this.autohideTimeout = Math.max(MIN_TIMEOUT_MS, (words/AVG_WORDS_PER_SEC)*1000);
+    this.autohide = !toast.action;
   }
 
   removeToast(): void {
