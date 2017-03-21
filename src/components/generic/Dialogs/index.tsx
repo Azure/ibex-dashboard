@@ -17,7 +17,7 @@ function loadDialogsFromDashboard(dashboard: IDashboardConfig): JSX.Element[] {
   return dialogs
 }
 
-export default {
+export {
   loadDialogsFromDashboard,
   Dialog,
   DialogsActions,

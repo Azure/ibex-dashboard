@@ -9,10 +9,12 @@
     "@types/lodash": "^4.14.55",
     "@types/node": "^7.0.8",
     "@types/react": "^15.0.16",
+    "@types/react-addons-test-utils": "^0.14.17",
     "@types/react-dom": "^0.14.23",
     "@types/react-router": "^3.0.8",
     "node-sass": "^4.5.0",
     "npm-run-all": "^4.0.2",
+    "react-addons-test-utils": "^15.4.2",
     "react-scripts-ts": "1.1.6"
   },
   "dependencies": {

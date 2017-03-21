@@ -17,7 +17,7 @@ export interface IGenericProps {
 
 export interface IGenericState { [key: string] : any }
 
-export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGenericState> extends React.Component<T1, IGenericState> {
+export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGenericState> extends React.Component<T1, T2> {
   // static propTypes = {}
   // static defaultProps = {}
 
@@ -33,12 +33,17 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
       initialState[key] = result.dependencies[key];
     });
 
-    this.state = initialState;
+    this.state = initialState as any;
   }
 
   componentDidMount() {
     var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     Object.keys(result.dataSources).forEach(key => {
+
+      // Setting initial state to make sure state is updated to the store before future changes
+      this.onStateChange(result.dataSources[key].store.state);
+
+      // Listening to future changes in dependant stores
       result.dataSources[key].store.listen(this.onStateChange);
     });
   }

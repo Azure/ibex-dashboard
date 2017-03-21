@@ -28,6 +28,12 @@
   version "7.0.8"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-7.0.8.tgz#25e4dd804b630c916ae671233e6d71f6ce18124a"
 
+"@types/react-addons-test-utils@^0.14.17":
+  version "0.14.17"
+  resolved "https://registry.yarnpkg.com/@types/react-addons-test-utils/-/react-addons-test-utils-0.14.17.tgz#79adf8a0246a7fe1bb9a6651e2545a7b43d7f0b8"
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-dom@^0.14.23":
   version "0.14.23"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-0.14.23.tgz#cecfcfad754b4c2765fe5d29b81b301889ad6c2e"
@@ -3813,6 +3819,13 @@ react-addons-css-transition-group@^15.4.2:
 "react-addons-shallow-compare@^0.14.0 || ^15.0.0", react-addons-shallow-compare@^15.4.2:
   version "15.4.2"
   resolved "https://registry.yarnpkg.com/react-addons-shallow-compare/-/react-addons-shallow-compare-15.4.2.tgz#027ffd9720e3a1e0b328dcd8fc62e214a0d174a5"
+  dependencies:
+    fbjs "^0.8.4"
+    object-assign "^4.1.0"
+
+react-addons-test-utils@^15.4.2:
+  version "15.4.2"
+  resolved "https://registry.yarnpkg.com/react-addons-test-utils/-/react-addons-test-utils-15.4.2.tgz#93bcaa718fcae7360d42e8fb1c09756cc36302a2"
   dependencies:
     fbjs "^0.8.4"
     object-assign "^4.1.0"

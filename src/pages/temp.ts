@@ -328,6 +328,7 @@ export default <IDashboardConfig>{
           size: { w: 12, h: 16},
           dependencies: { values: 'messages-data' },
           props: {
+            rowClassNameField: 'eventName',
             cols: [{
               header: 'Timestamp',
               width: '50px',

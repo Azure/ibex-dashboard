@@ -8,11 +8,10 @@ import { Card, CardText, TableCardHeader } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
 
-import './Table.css';
-
 export interface ITableProps extends IGenericProps {
   props: {
-    checkboxes: boolean,
+    checkboxes?: boolean,
+    rowClassNameField?: string
     cols: {
       header?: string,
       field?: string,
@@ -44,10 +43,14 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     this.trigger(col.onClick, value);
   }
 
+  fixClassName(value) {
+    return (value && value.replace(/\./g, '-')) || null;
+  }
+
   render () {
 
     var { props } = this.props;
-    var { checkboxes, cols } = props;
+    var { checkboxes, cols, rowClassNameField } = props;
     var { values } = this.state;
 
     var arr = values.slice(0);
@@ -58,10 +61,10 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     arr = arr.concat(values);
 
     const rows = arr.map((value, i) => (
-      <TableRow key={i}>
+      <TableRow key={i} className={ rowClassNameField ? this.fixClassName(value[rowClassNameField]) : null }>
         {
           cols.map((col, i) => (
-            <TableColumn key={i}>{
+            <TableColumn key={i} className={ this.fixClassName(col.field || col.value) }>{
               col.type === 'icon' ?
                 <FontIcon>{col.value || value[col.field]}</FontIcon> :
               col.type === 'button' ?

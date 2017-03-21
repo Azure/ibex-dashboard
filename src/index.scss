@@ -76,3 +76,34 @@ body {
   width: auto;
   position: static;
 }
+
+/*=============*/
+/* Data Tables */
+/*=============*/
+
+.md-data-table {
+
+  .md-table-row {
+      .md-btn--icon {
+        color: $md-secondary-color;
+        height: 30px;
+        padding: 3px 0 10px 0;
+        width: 30px;
+        visibility: hidden;
+      }
+
+    &:hover {
+      .md-btn--icon {
+        visibility: visible;
+      }
+    }
+  }
+
+  .message-send { 
+    background-color: $md-blue-50;
+
+    td.message {
+      text-align: right;
+    }
+  }
+}

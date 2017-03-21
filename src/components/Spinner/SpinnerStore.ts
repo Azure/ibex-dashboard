@@ -1,4 +1,4 @@
-import alt, { AbstractStoreModel } from '../../../alt';
+import alt, { AbstractStoreModel } from '../../alt';
 
 import spinnerActions from './SpinnerActions';
 
