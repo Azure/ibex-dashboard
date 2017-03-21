@@ -39,7 +39,6 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
 
     this.state = DialogsStore.getState();
     this.onChange = this.onChange.bind(this);
-    this.openDialog = this.openDialog.bind(this);
 
     // Create dialog data source
     var dialogDS: IDataSource = {
@@ -70,8 +69,11 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
   componentDidUpdate() {
     const { dialogData } = this.props;
     var { dialogId, dialogArgs } = this.state;
-    var datasourceId = 'dialog_' + dialogData.id;
-    this.dataSources[datasourceId].action.updateDependencies(dialogArgs);
+    
+    if (dialogData.id === dialogId) {
+      var datasourceId = 'dialog_' + dialogData.id;
+      this.dataSources[datasourceId].action.updateDependencies.defer(dialogArgs);
+    }
   }
 
   onBreakpointChange = (breakpoint) => {
@@ -91,10 +93,6 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
   closeDialog = () => {
     DialogsActions.closeDialog();
   };
-
-  openDialog = () => {
-    DialogsActions.openDialog('conversations', { title: this.state.dialogArgs['title'] + ':Blue', intent: 'bla', queryTimespan: 'jjj' });
-  }
 
   render() {
     const { dialogData, dashboard } = this.props;

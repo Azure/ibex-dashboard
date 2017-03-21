@@ -9,7 +9,7 @@ describe('Spinner', () => {
 
   let spinner;
 
-  beforeAll(() => {
+  beforeAll(() => { 
     spinner = TestUtils.renderIntoDocument(<Spinner />);
     TestUtils.isElementOfType(spinner, 'div');
   })

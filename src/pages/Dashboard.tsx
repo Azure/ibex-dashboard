@@ -12,7 +12,7 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
 import ElementConnector from  '../components/ElementConnector';
-import Dialogs from '../components/generic/Dialogs';
+import { loadDialogsFromDashboard } from '../components/generic/Dialogs';
 
 import dashboard from './temp';
 const layout = dashboard.config.layout;
@@ -94,7 +94,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
     var { filters, /*additionalFilters*/ } = ElementConnector.loadFiltersFromDashboard(dashboard);
 
     // Loading dialogs
-    var dialogs = Dialogs.loadDialogsFromDashboard(dashboard);
+    var dialogs = loadDialogsFromDashboard(dashboard);
 
     return ( 
       <div style={{ width: '100%' }}>

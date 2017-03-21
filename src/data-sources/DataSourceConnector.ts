@@ -1,7 +1,7 @@
 import alt from '../alt';
 import * as _ from 'lodash';
 import { IDataSourcePlugin } from './plugins/DataSourcePlugin';
-import Dialogs from '../components/generic/Dialogs'
+import DialogsActions from '../components/generic/Dialogs/DialogsActions';
 
 export interface IDataSource {
   id: string;
@@ -146,7 +146,7 @@ export class DataSourceConnector {
 
       var extrapolation = DataSourceConnector.extrapolateDependencies(params, args);
 
-      Dialogs.DialogsActions.openDialog(actionName, extrapolation.dependencies);
+      DialogsActions.openDialog(actionName, extrapolation.dependencies);
     } else {
       
       var dataSource = DataSourceConnector.dataSources[dataSourceName];

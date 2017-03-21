@@ -5,7 +5,6 @@ import Scatter from './Scatter'
 import Scorecard from './Scorecard'
 import BarData from './BarData'
 import Table from './Table'
-import Dialogs from './Dialogs'
 
 export default {
   PieData,
@@ -14,6 +13,5 @@ export default {
   Scatter,
   Scorecard,
   BarData,
-  Table,
-  Dialogs
+  Table
 };
