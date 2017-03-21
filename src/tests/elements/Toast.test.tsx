@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import * as TestUtils from 'react-addons-test-utils';
 
 import Snackbar from 'react-md/lib/Snackbars';
-import { Toast, IToast, ToastActions } from '../../components/generic/Toast';
+import { Toast, IToast, ToastActions } from '../../components/Toast';
 
 const TEST_TOAST_1: IToast = {
     text: "first test toast"

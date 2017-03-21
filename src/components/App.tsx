@@ -1,6 +1,6 @@
 import * as React from 'react';
 import Navbar from './Navbar';
-import Toast from './generic/Toast/Toast';
+import { Toast } from './Toast';
 
 class App extends React.Component<any, any> {
 

@@ -9,7 +9,7 @@ import Snackbar from 'react-md/lib/Snackbars';
 import SpinnerStore, { ISpinnerStoreState } from './SpinnerStore';
 import SpinnerActions from './SpinnerActions';
 
-import {Toast, ToastActions, IToast} from '../generic/Toast';
+import {Toast, ToastActions, IToast} from '../Toast';
 
 interface ISpinnerState extends ISpinnerStoreState {
 }
