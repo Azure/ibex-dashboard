@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Navbar from './Navbar';
+import Toast from './generic/Toast/Toast';
 
 class App extends React.Component<any, any> {
 
@@ -9,9 +10,12 @@ class App extends React.Component<any, any> {
 
     return (
       // <Navbar history={this.props.history}>
-      <Navbar>
-        { children }
-      </Navbar>
+      <div>
+        <Navbar>
+          { children }
+        </Navbar>
+        <Toast />
+      </div>
     );
   }
 }
