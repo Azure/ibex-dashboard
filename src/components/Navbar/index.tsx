@@ -30,7 +30,7 @@ const drawerHeaderChildren = [
   />
 ]
 
-export default ({ children = null, title = 'Bot Framework Dashboard' }) => {
+export default ({ children = null, title = 'Ibex Dashboard' }) => {
 
   var pathname = '/';
   try { pathname = window.location.pathname; } catch (e) {}
