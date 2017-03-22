@@ -1,5 +1,5 @@
+import * as request from 'xhr-request';
 import * as React from 'react';
-import * as $ from 'jquery';
 import * as _ from 'lodash';
 
 import CSSTransitionGroup from 'react-addons-css-transition-group';
@@ -33,18 +33,25 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     this._429ApplicationInsights = this._429ApplicationInsights.bind(this);
 
     var self = this;
-    $.ajaxSetup({
-      beforeSend: function() {
-        SpinnerActions.startRequestLoading();
-      },
-      complete: function(response) {
-        SpinnerActions.endRequestLoading();
+    var open_original = XMLHttpRequest.prototype.open;
+    var send_original = XMLHttpRequest.prototype.send;
 
-        if (response.status === 429) {
-          self._429ApplicationInsights();
+    XMLHttpRequest.prototype.open = function(method, url, async, unk1, unk2) {
+      SpinnerActions.startRequestLoading();
+      open_original.apply(this, arguments);
+    };
+
+    XMLHttpRequest.prototype.send = function(data) {
+      let _xhr = this;
+      _xhr.onreadystatechange = (response) => {
+
+        // readyState === 4: means the response is complete
+        if(_xhr.readyState === 4) {
+          SpinnerActions.endRequestLoading();
         }
       }
-    });
+      send_original.apply(_xhr, arguments);
+    };
 
     // Todo: Add timeout to requests - if no reply received, turn spinner off
   }

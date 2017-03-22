@@ -1083,7 +1083,7 @@ a.md-btn {
   background: rgba(63, 81, 181, 0.12); }
 
 .md-btn--color-secondary-active {
-  background: rgba(255, 64, 129, 0.12); }
+  background: rgba(233, 30, 99, 0.12); }
 
 .md-btn--text {
   font-weight: 500;
@@ -1421,7 +1421,7 @@ tbody .md-table-row--hover {
   z-index: 1; }
 
 .md-card-title--title-contextual {
-  color: #ff4081;
+  color: #e91e63;
   font-size: 16px;
   font-weight: 500; }
 
@@ -2422,7 +2422,7 @@ tbody .md-table-row--hover {
 
 .md-circular-progress-path {
   fill: none;
-  stroke: #ff4081;
+  stroke: #e91e63;
   stroke-dasharray: 187px; }
 
 .md-circular-progress-path--animated {
@@ -2458,7 +2458,7 @@ tbody .md-table-row--hover {
   width: 100%; }
 
 .md-progress--linear-active {
-  background: #ff4081; }
+  background: #e91e63; }
 
 .md-progress--linear-determinate {
   height: 100%;
@@ -2956,7 +2956,7 @@ tbody .md-table-row--hover {
   color: rgba(255, 255, 255, 0.7); }
 
 .md-tab-indicator {
-  background: #ff4081;
+  background: #e91e63;
   bottom: 0;
   content: '';
   height: 2px;
@@ -3611,13 +3611,13 @@ tbody .md-table-row--hover {
   color: #3f51b5; }
 
 .md-text--theme-secondary {
-  color: #ff4081; }
+  color: #e91e63; }
 
 .md-ink--primary .md-ink {
   background: rgba(63, 81, 181, 0.26); }
 
 .md-ink--secondary .md-ink {
-  background: rgba(255, 64, 129, 0.26); }
+  background: rgba(233, 30, 99, 0.26); }
 
 .md-background {
   background: #fafafa; }
@@ -3630,14 +3630,14 @@ tbody .md-table-row--hover {
   color: #fff; }
 
 .md-background--secondary {
-  background: #ff4081;
+  background: #e91e63;
   color: #fff; }
 
 @media screen and (min-width: 1025px) {
   .md-background--primary-hover:hover {
     background: rgba(63, 81, 181, 0.9); }
   .md-background--secondary-hover:hover {
-    background: rgba(255, 64, 129, 0.9); } }
+    background: rgba(233, 30, 99, 0.9); } }
 
 body {
   margin: 0;
@@ -3700,7 +3700,7 @@ body {
 /* Data Tables */
 /*=============*/
 .md-data-table .md-table-row .md-btn--icon {
-  color: #ff4081;
+  color: #e91e63;
   height: 30px;
   padding: 3px 0 10px 0;
   width: 30px;

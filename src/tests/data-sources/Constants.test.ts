@@ -2,7 +2,7 @@ import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 
 import dataSourceMock from '../mocks/dataSource';
 
-describe('Data Source', () => {
+describe('Data Source: Constant', () => {
 
   let dataSources: IDataSourceDictionary = {};
 
@@ -14,7 +14,7 @@ describe('Data Source', () => {
   });
 
   it ('Check basic data == 3 rows', () => {
-    
+
     expect(dataSources).toHaveProperty('data');
     expect(dataSources.data).toHaveProperty('store');
     expect(dataSources.data).toHaveProperty('action');
