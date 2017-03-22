@@ -12,7 +12,7 @@ class App extends React.Component<any, any> {
       // <Navbar history={this.props.history}>
       <div>
         <Navbar>
-          { children }
+          {children}
         </Navbar>
         <Toast />
       </div>

@@ -81,4 +81,18 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
   }
 
   abstract render();
+
+  // returns boolean option from state, passed props or default values (in that order).
+  is(property : string): boolean {
+        if (this.state[property] !== undefined && typeof(this.state[property]) === 'boolean') {
+            return this.state[property];
+        }
+        if (this.props.props && this.props.props[property] !== undefined && typeof(this.props.props[property]) === 'boolean') {
+            return this.props.props[property] as boolean;
+        }
+        if (this.props[property] !== undefined && typeof(this.props[property]) === 'boolean') {
+            return this.props[property];
+        }
+        return false;
+    }
 }

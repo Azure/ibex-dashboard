@@ -21,7 +21,7 @@ export default <IDashboardConfig>{
         selectedValue: '1 month'
       },
       calculated: (state, dependencies) => {
-        var queryTimespan = state.selectedValue === '24 hours' ? 'PT24H' : state.selectedValue === '1 week' ? 'P7D' : 'P30D';
+        var queryTimespan = state.selectedValue === '24 hours' ? 'PT24H' : state.selectedValue === '1 week' ? 'P7D' : 'P90D';
         var granularity = state.selectedValue === '24 hours' ? '5m' : state.selectedValue === '1 week' ? '1d' : '1d';
 
         return { queryTimespan, granularity };
@@ -237,6 +237,18 @@ export default <IDashboardConfig>{
       dependencies: { values: 'conversions:displayValues' },
       props: { 
         pieProps: { nameKey: 'label', valueKey: 'count' }
+      }
+    },
+    {
+      id: 'timeline-area',
+      type: 'Area',
+      title: 'Message Rate',
+      subtitle: 'How many messages were sent per timeframe',
+      size: { w: 4, h: 8},
+      theme: colors.ThemeColors2,
+      dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
+      props: { 
+        isStacked: true
       }
     }
   ],

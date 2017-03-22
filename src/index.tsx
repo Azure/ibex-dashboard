@@ -5,10 +5,10 @@ import routes from './routes';
 
 import './index.css';
 import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css'
+import 'react-resizable/css/styles.css';
 
 ReactDOM.render(
   <Router history={browserHistory}>
     {routes}
-  </Router>, 
+  </Router>,
   document.getElementById('root'));
