@@ -17,4 +17,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # generated files
-.css
+*.css
