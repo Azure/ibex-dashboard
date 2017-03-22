@@ -9,11 +9,9 @@ import Snackbar from 'react-md/lib/Snackbars';
 import SpinnerStore, { ISpinnerStoreState } from './SpinnerStore';
 import SpinnerActions from './SpinnerActions';
 
+import {Toast, ToastActions, IToast} from '../Toast';
+
 interface ISpinnerState extends ISpinnerStoreState {
-  snacks?: {
-    toasts?: any[],
-    autohide?: boolean
-  }
 }
 
 export default class Spinner extends React.Component<any, ISpinnerState> {
@@ -22,14 +20,8 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     super(props);
 
     this.state = SpinnerStore.getState();
-    (this.state as any).snacks = {
-      toasts: [],
-      autohide: true
-    };
 
     this.onChange = this.onChange.bind(this);
-    this._addToast = this._addToast.bind(this);
-    this._removeToast = this._removeToast.bind(this);
     this._429ApplicationInsights = this._429ApplicationInsights.bind(this);
 
     var self = this;
@@ -60,40 +52,9 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     SpinnerStore.listen(this.onChange);
   }
 
-  componentWillUpdate(nextProps, nextState: ISpinnerState) {
-    const { snacks } = nextState;
-    const [toast] = snacks.toasts;
-    if (this.state.snacks.toasts === snacks.toasts || !toast) {
-      return;
-    }
-
-    snacks.autohide = toast.action !== 'Retry';
-    this.setState({ snacks });
-  }
-
-  _removeToast() {
-    const { snacks } = this.state;
-    const [, ...toasts] = snacks.toasts;
-    snacks.toasts = toasts;
-    this.setState({ snacks });
-  }
-
   _429ApplicationInsights() {
-    this._addToast('You have reached the maximum number of Application Insights requests.');
-  }
-
-  _addToast(text, action = null) {
-    const { snacks } = this.state;
-    const toasts = snacks.toasts.slice();
-
-    if (_.find(toasts, { text })) {
-      return;
-    }
-
-    toasts.push({ text, action });
-    snacks.toasts = toasts;
-
-    this.setState({ snacks });
+    let toast : IToast = { text: 'You have reached the maximum number of Application Insights requests.' };
+    ToastActions.addToast(toast);
   }
 
   onChange(state) {
@@ -107,7 +68,6 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     return (
       <div>
         { refreshing && <CircularProgress key="progress" id="contentLoadingProgress" /> }
-        <Snackbar {...this.state.snacks} onDismiss={this._removeToast} />
       </div>
     )
   }
