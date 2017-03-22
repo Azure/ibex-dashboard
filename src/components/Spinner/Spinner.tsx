@@ -34,12 +34,16 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     };
 
     XMLHttpRequest.prototype.send = function(data) {
-      let _xhr = this;
+      let _xhr: XMLHttpRequest = this;
       _xhr.onreadystatechange = (response) => {
 
         // readyState === 4: means the response is complete
         if(_xhr.readyState === 4) {
           SpinnerActions.endRequestLoading();
+
+          if (_xhr.status === 429) {
+            self._429ApplicationInsights();
+          }
         }
       }
       send_original.apply(_xhr, arguments);
