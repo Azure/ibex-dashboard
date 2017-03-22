@@ -1,5 +1,6 @@
 
-import * as $ from 'jquery';
+//import * as $ from 'jquery';
+import * as request from 'xhr-request';
 import * as _ from 'lodash';
 import {DataSourcePlugin, IDataSourceOptions} from '../DataSourcePlugin';
 import { appInsightsUri, appId, apiKey } from './common';
@@ -55,15 +56,18 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
     return (dispatch) => {
 
-      $.ajax({
-          url,
+      request(url, {
           method: "GET",
+          json: true,
           headers: {
             "x-api-key": apiKey
           }
-        })
-        .then(json => {
+        }, (error, json) => {
 
+          if (error) {
+            return this.failure(error);
+          }
+          
           var resultRows = json.Tables[0].Rows;
           if (!mappings || mappings.length === 0) {
             return dispatch({ values: resultRows });
@@ -80,10 +84,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
             return item;
           });
 
-          return dispatch({ values: rows });
-        })
-        .fail((err) => {
-          return this.failure(err);
+          return dispatch({ values: rows });          
         });
     }
   }

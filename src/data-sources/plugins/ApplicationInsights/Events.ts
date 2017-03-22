@@ -1,5 +1,5 @@
 
-import * as $ from 'jquery';
+import * as request from 'request';
 import * as _ from 'lodash';
 import {DataSourcePlugin, IDataSourceOptions} from '../DataSourcePlugin';
 import ActionsCommon from './actions-common';
@@ -55,19 +55,20 @@ export default class ApplicationInsightsEvents extends DataSourcePlugin {
       top ? `&$top=${top}` : '' +
       skip ? `&$skip=${skip}` : '';
 
-    $.ajax({
+    request({
         url,
         method: "GET",
         headers: {
           "x-api-key": ActionsCommon.appInsightsApiKey
         }
-      })
-      .then(json => {
+      }, 
+      (error, json) => {
 
-        return callback(null, ActionsCommon.prepareResult('value', json.value));
-      })
-      .fail((err) => {
-        return callback(err);
+        if (error) {
+          return this.failure(error);
+        }
+
+        return callback(null, ActionsCommon.prepareResult('value', json));
       });
   }
 }
