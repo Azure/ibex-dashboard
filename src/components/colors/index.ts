@@ -1,4 +1,3 @@
-//import * as colors from 'material-ui/styles/colors';
 import * as colors from 'material-colors';
 
 var ThemeColors = [ 
@@ -17,7 +16,7 @@ var ThemeColors2 = ThemeColors.slice().reverse();
 
 const DangerColor = colors.red[500];
 const PersonColor = colors.teal[700];
-const IntentsColor = colors.teal['a700'];
+const IntentsColor = colors.teal.a700;
 const GoodColor = colors.lightBlue[700];
 const BadColor = colors.red[700];
 const PositiveColor = colors.lightBlue[700];
@@ -40,4 +39,4 @@ export default {
   getColor: (idx) => {
     return ThemeColors[idx];
   }
-}
+};

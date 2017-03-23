@@ -33,7 +33,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     values: []
   };
 
-  constructor(props) {
+  constructor(props: ITableProps) {
     super(props);
 
     this.onButtonClick = this.onButtonClick.bind(this);
@@ -43,7 +43,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     this.trigger(col.onClick, value);
   }
 
-  fixClassName(value) {
+  fixClassName(value: string) {
     return (value && value.replace(/\./g, '-')) || null;
   }
 
@@ -60,17 +60,21 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     arr = arr.concat(values);
     arr = arr.concat(values);
 
-    const rows = arr.map((value, i) => (
-      <TableRow key={i} className={ rowClassNameField ? this.fixClassName(value[rowClassNameField]) : null }>
+    const rows = arr.map((value, ri) => (
+      <TableRow key={ri} className={rowClassNameField ? this.fixClassName(value[rowClassNameField]) : null}>
         {
-          cols.map((col, i) => (
-            <TableColumn key={i} className={ this.fixClassName(col.field || col.value) }>{
+          cols.map((col, ci) => (
+            <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>{
               col.type === 'icon' ?
                 <FontIcon>{col.value || value[col.field]}</FontIcon> :
               col.type === 'button' ?
-                <Button 
+                (
+                  <Button 
                     icon={true} 
-                    onClick={this.onButtonClick.bind(this, col, value)}>{col.value || value[col.field]}</Button> :
+                    onClick={this.onButtonClick.bind(this, col, value)}
+                  >{col.value || value[col.field]}
+                  </Button>
+                ) :
               col.type === 'time' ?
                 moment(value[col.field]).format('MMM-DD HH:mm:ss') :
                 value[col.field]

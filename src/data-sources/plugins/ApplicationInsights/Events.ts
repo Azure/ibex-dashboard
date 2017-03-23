@@ -21,8 +21,11 @@ interface IEventsOptions extends IDataSourceOptions {
 
 export default class ApplicationInsightsEvents extends DataSourcePlugin {
 
+  type = 'ApplicationInsights-Events';
+  defaultProperty = 'values';
+
   constructor(options: IEventsOptions) {
-    super('ApplicationInsights-Events', 'values', options);
+    super(options);
 
     var props = this._props;
     var params: any = props.params;

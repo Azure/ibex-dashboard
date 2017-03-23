@@ -12,11 +12,14 @@ interface IQueryOptions extends IDataSourceOptions {
 
 export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
+  type = 'ApplicationInsights-Query';
+  defaultProperty = 'values';
+
   /**
    * @param options - Options object
    */
   constructor(options: IQueryOptions) {
-    super('ApplicationInsights-Query', 'values', options);
+    super(options);
 
     var props = this._props;
     var params: any = props.params;

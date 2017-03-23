@@ -1,4 +1,6 @@
 
+interface IDictionary { [key: string]: any; }
+
 export interface IDataSourceOptions {
   dependencies: (string | Object)[];
   /** This would be variable storing the results */
@@ -6,56 +8,51 @@ export interface IDataSourceOptions {
 }
 
 export interface ICalculated { 
-  [ key: string] : (state: Object, dependencies: { [ key: string] : any }) => any 
+  [key: string]: (state: Object, dependencies: IDictionary) => any;
 }
 
 export interface IDataSourcePlugin {
 
-  type : string;
+  type: string;
   defaultProperty: string;
 
   _props: {
     id: string,
-    type: string,
-    dependencies: { [ key: string] : string },
+    dependencies: { [key: string]: string },
     dependables: string[],
     actions: string[],
-    params: { [ key: string] : any },
+    params: IDictionary,
     calculated: ICalculated
-  }
+  };
 
-  bind (actionClass) : void;
-  updateDependencies (dependencies, callback) : void;
-  getDependencies() : { [ key: string] : string };
-  getDependables() : string[];
-  getActions() : string[];
-  getParamKeys() : string[];
-  getParams() : { [ key: string] : any };
-  getCalculated() : ICalculated;
+  bind (actionClass: any): void;
+  updateDependencies (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
+  getDependencies(): { [ key: string]: string };
+  getDependables(): string[];
+  getActions(): string[];
+  getParamKeys(): string[];
+  getParams(): IDictionary;
+  getCalculated(): ICalculated;
 }
 
 export abstract class DataSourcePlugin implements IDataSourcePlugin {
 
-  type : string;
-  defaultProperty: string;
-
+  abstract type: string;
+  abstract defaultProperty: string;
+  
   _props = {
     id: '',
-    type: 'none',
-    dependencies: <any>{},
+    dependencies: {} as any,
     dependables: [],
     actions: [ 'updateDependencies', 'failure' ],
     params: {},
     calculated: {}
-  }
+  };
 
   /**
    * @param {DataSourcePlugin} options - Options object
    */
-  constructor(type, defaultProperty, options) {
-
-    this.type = type;
-    this.defaultProperty = defaultProperty;
+  constructor(options: IDictionary) {
 
     var props = this._props;
     props.id = options.id;
@@ -66,12 +63,12 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     props.calculated = options.calculated || {};
   }
 
-  bind (actionClass) {
+  bind (actionClass: any) {
     actionClass.type = this.type;
     actionClass._props = this._props;
   }
 
-  abstract updateDependencies (dependencies, callback) : void;
+  abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
 
   /**
    * @returns {string[]} Array of dependencies
@@ -100,7 +97,7 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     return this._props.calculated;
   }
 
-  failure(error): void { 
+  failure(error: any): void { 
     return error;
   }
 }

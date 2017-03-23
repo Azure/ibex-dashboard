@@ -11,8 +11,11 @@ interface IConstantOptions extends IDataSourceOptions {
 
 export default class Constant extends DataSourcePlugin {
 
+  type = 'Constant';
+  defaultProperty = 'selectedValue';
+
   constructor(options: IConstantOptions) {
-    super('Constant', 'selectedValue', options);
+    super(options);
 
     var props = this._props;
     var params = options.params;
