@@ -68,8 +68,9 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
               col.type === 'icon' ?
                 <FontIcon>{col.value || value[col.field]}</FontIcon> :
               col.type === 'button' ?
-                <Button icon={true} 
-                        onClick={this.onButtonClick.bind(this, col, value)}>{col.value || value[col.field]}</Button> :
+                <Button 
+                    icon={true} 
+                    onClick={this.onButtonClick.bind(this, col, value)}>{col.value || value[col.field]}</Button> :
               col.type === 'time' ?
                 moment(value[col.field]).format('MMM-DD HH:mm:ss') :
                 value[col.field]

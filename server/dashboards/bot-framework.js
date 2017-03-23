@@ -1,7 +1,4 @@
-import * as _ from 'lodash';
-import colors from '../components/colors';
-
-export default <IDashboardConfig>{
+var dashboard = {
   config: {
     layout: {
       isDraggable: true,
@@ -51,8 +48,8 @@ export default <IDashboardConfig>{
       calculated: (state) => {
         var { values } = state;
 
-        var total : any = _.find(values, { name: 'message.convert.start' });
-        var successful: any = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+        var total = _.find(values, { name: 'message.convert.start' });
+        var successful = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
 
         if (!total) {
           return null;
@@ -71,7 +68,7 @@ export default <IDashboardConfig>{
       type: 'ApplicationInsights/Query',
       dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan', granularity: 'timespan:granularity' },
       params: {
-        query: (dependencies: any) => {
+        query: (dependencies) => {
           var { granularity } = dependencies;
           return ` customEvents` +
                    ` | where name == 'Activity'` + 
@@ -191,7 +188,6 @@ export default <IDashboardConfig>{
       title: 'Message Rate',
       subtitle: 'How many messages were sent per timeframe',
       size: { w: 5, h: 8},
-      theme: colors.ThemeColors2,
       dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' }
     },
     {
@@ -239,7 +235,6 @@ export default <IDashboardConfig>{
       title: 'Conversion Rate',
       subtitle: 'Total conversion rate',
       size: { w: 4, h: 8},
-      theme: colors.ThemeColors2,
       dependencies: { values: 'conversions:displayValues' },
       props: { 
         pieProps: { nameKey: 'label', valueKey: 'count' }

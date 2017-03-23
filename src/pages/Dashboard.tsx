@@ -14,7 +14,8 @@ import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
 import ElementConnector from  '../components/ElementConnector';
 import { loadDialogsFromDashboard } from '../components/generic/Dialogs';
 
-import dashboard from './temp';
+var dashboards : IDashboardConfig = (window as any)["dashboards"];
+var dashboard = dashboards[0];
 const layout = dashboard.config.layout;
 
 interface IDashboardState {

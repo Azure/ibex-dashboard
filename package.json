@@ -2,6 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:4000/",
   "devDependencies": {
     "@types/alt": "^0.16.32",
     "@types/jest": "^19.2.2",
@@ -24,6 +25,7 @@
     "lodash": "^4.17.4",
     "material-colors": "^1.2.5",
     "moment": "^2.18.0",
+    "morgan": "^1.8.1",
     "react": "^15.4.2",
     "react-addons-css-transition-group": "^15.4.2",
     "react-addons-transition-group": "^15.4.2",
@@ -35,12 +37,12 @@
     "xhr-request": "^1.0.1"
   },
   "scripts": {
-    "build-css": "node-sass src/ -o src/",
-    "watch-css": "yarn run build-css && node-sass src/ -o src/ --watch --recursive",
-    "start-js": "react-scripts-ts start",
-    "start": "npm-run-all -p watch-css start-js",
-    "build": "yarn run build-css && react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
-    "eject": "react-scripts-ts eject"
+    "css:build": "node-sass src/ -o src/",
+    "css:watch": "yarn run css:build && node-sass src/ -o src/ --watch --recursive",
+    "server:start": "node server",
+    "client:start": "react-scripts-ts start",
+    "start": "npm-run-all -p css:watch server:start client:start",
+    "build": "yarn run css:build && react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom"
   }
 }
