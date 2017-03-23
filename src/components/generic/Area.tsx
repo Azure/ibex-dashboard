@@ -53,7 +53,7 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
     render() {
         var { timeFormat, values, lines } = this.state;
         var { title, subtitle, theme, props } = this.props;
-        var { showLegend } = props;
+        var { showLegend, areaProps } = props;
 
         var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
         var themeColors = theme || ThemeColors;
@@ -78,7 +78,7 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
             <Card title={title} subtitle={subtitle}>
                 {widgets}
                 <ResponsiveContainer>
-                    <AreaChart ref="areaChart" margin={{ top: 5, right: 30, left: 20, bottom: 5 }} data={values} >
+                    <AreaChart ref="areaChart" margin={{ top: 5, right: 30, left: 20, bottom: 5 }} data={values} {...areaProps} >
                         <XAxis dataKey="time" tickFormatter={format} minTickGap={20} />
                         <YAxis />
                         <CartesianGrid strokeDasharray="3 3" />
