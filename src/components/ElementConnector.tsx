@@ -16,7 +16,7 @@ export default class ElementConnector {
       elementsContainer.elements.forEach(element => {
         var { id, size } = element;
 
-        if (curCol > 0 && (curCol + size.w) >= totalColumns) {
+        if (curCol > 0 && (curCol + size.w) > totalColumns) {
           curCol = 0;
           curRowOffset = maxRowHeight;
         }
@@ -25,7 +25,7 @@ export default class ElementConnector {
         layouts[key].push({
           "i": id,
           "x": curCol,
-          "y": curRowOffset + size.h,
+          "y": curRowOffset,
           "w": size.w,
           "h": size.h
         });

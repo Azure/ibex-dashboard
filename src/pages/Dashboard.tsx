@@ -31,6 +31,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
       rowHeight: layout.rowHeight || 30,
       cols: layout.cols,
       breakpoints: layout.breakpoints,
+      verticalCompact: false
     }
   };
 
