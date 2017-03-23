@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import TextField from 'react-md/lib/TextFields';
 import Button from 'react-md/lib/Buttons/Button';
 
+import { loadConfig } from '../common';
 import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 import connections from '../../data-sources/connections';
 
@@ -14,11 +15,6 @@ interface IConfigDashboardState {
   error: string;
 }
 
-// Loading dashboard from 'dashboards' loaded to page
-var dashboards: IDashboardConfig[] = (window as any)["dashboards"]; /* tslint:disable-line */
-var dashboard = dashboards[0];
-const layout = dashboard.config.layout;
-
 export default class ConfigDashboard extends React.Component<null, IConfigDashboardState> {
 
   state = {
@@ -26,6 +22,7 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
     error: null
   };
 
+  dashboard: IDashboardConfig = null;
   dataSources: IDataSourceDictionary = {};
 
   constructor(props: any) {
@@ -34,7 +31,12 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
     this.onChange = this.onChange.bind(this);
     this.state.connections = ConnectionsStore.getState();
 
-    DataSourceConnector.createDataSources(dashboard, this.dataSources);
+    // Loading dashboard from 'dashboards' loaded to page
+    loadConfig((dashboard: IDashboardConfig) => {
+
+      this.dashboard = dashboard;
+      DataSourceConnector.createDataSources(this.dashboard, this.dataSources);
+    });
   }
 
   componentWillMount() {
@@ -55,8 +57,8 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
       connectionType.params.forEach(param => { requiredParameters[dataSource.plugin.connection][param] = null });
 
       // Connection type is already defined - check params
-      if (dashboard.config.connections[dataSource.plugin.connection]) {
-        var connectionParams = dashboard.config.connections[dataSource.plugin.connection];
+      if (this.dashboard.config.connections[dataSource.plugin.connection]) {
+        var connectionParams = this.dashboard.config.connections[dataSource.plugin.connection];
 
         // Checking that all param definitions are defined
         connectionType.params.forEach(param => {

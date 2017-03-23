@@ -6,29 +6,6 @@
     <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500' />
-    <!--script type="text/javascript" src="/api/config.js"></script-->
-    <script>
-
-function getScript(source, callback) {
-    var script = document.createElement('script');
-    var prior = document.getElementsByTagName('script')[0];
-    script.async = 1;
-    prior.parentNode.insertBefore(script, prior);
-
-    script.onload = script.onreadystatechange = function( _, isAbort ) {
-        if(isAbort || !script.readyState || /loaded|complete/.test(script.readyState) ) {
-            script.onload = script.onreadystatechange = null;
-            script = undefined;
-
-            if(!isAbort) { if(callback) callback(); }
-        }
-    };
-
-    script.src = source;
-}
-getScript('/api/config.js');
-
-    </script>
     <!--
       Notice the use of %PUBLIC_URL% in the tag above.
       It will be replaced with the URL of the `public` folder during the build.

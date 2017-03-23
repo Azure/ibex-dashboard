@@ -8,59 +8,62 @@ var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
+import { loadConfig } from '../components/common';
 import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
 import ElementConnector from '../components/ElementConnector';
 import { loadDialogsFromDashboard } from '../components/generic/Dialogs';
-
-// Loading dashboard from 'dashboards' loaded to page
-var dashboards : IDashboardConfig = (window as any)["dashboards"];
-var dashboard = dashboards[0];
-const layout = dashboard.config.layout;
 
 interface IDashboardState {
   mounted?: boolean;
   currentBreakpoint?: string;
   layouts?: ILayouts;
+  grid?: any;
 }
 
 export default class Dashboard extends React.Component<any, IDashboardState> {
 
-  static defaultProps = {
-    grid: {
-      className: 'layout',
-      rowHeight: layout.rowHeight || 30,
-      cols: layout.cols,
-      breakpoints: layout.breakpoints,
-      verticalCompact: false
-    }
-  };
-
   layouts = {};
   dataSources: IDataSourceDictionary = {};
+  dashboard: IDashboardConfig = null;
 
   state = {
     currentBreakpoint: 'lg',
     mounted: false,
-    layouts: { lg: this.props.initialLayout },
+    layouts: { },
+    grid: null
   };
 
   constructor(props: any) {
     super(props);
 
-    DataSourceConnector.createDataSources(dashboard, this.dataSources);
+    // Loading dashboard from 'dashboards' loaded to page
+    loadConfig((dashboard: IDashboardConfig) => {
 
-    // For each column, create a layout according to number of columns
-    var layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
+      this.dashboard = dashboard;
+      const layout = this.dashboard.config.layout;
 
-    this.layouts = layouts;
-    this.state.layouts = { lg: layouts['lg'] };
+      DataSourceConnector.createDataSources(this.dashboard, this.dataSources);
+      DataSourceConnector.connectDataSources(this.dataSources);
+
+      // For each column, create a layout according to number of columns
+      var layouts = ElementConnector.loadLayoutFromDashboard(this.dashboard, this.dashboard);
+
+      this.layouts = layouts;
+      this.setState({ 
+        layouts: { lg: layouts['lg'] },
+        grid: {
+          className: 'layout',
+          rowHeight: layout.rowHeight || 30,
+          cols: layout.cols,
+          breakpoints: layout.breakpoints,
+          verticalCompact: false
+        }
+      });
+    });
   }
 
   componentDidMount() {
-
     this.setState({ mounted: true });
-
-    DataSourceConnector.connectDataSources(this.dataSources);
   }
 
   onBreakpointChange = (breakpoint) => {
@@ -84,17 +87,21 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
   render() {
 
-    var { currentBreakpoint } = this.state;
+    var { currentBreakpoint, grid } = this.state;
     var layout = this.state.layouts[currentBreakpoint];
 
+    if (!grid) {
+      return null;
+    }
+
     // Creating visual elements
-    var elements = ElementConnector.loadElementsFromDashboard(dashboard, layout);
+    var elements = ElementConnector.loadElementsFromDashboard(this.dashboard, layout);
 
     // Creating filter elements
-    var { filters, /*additionalFilters*/ } = ElementConnector.loadFiltersFromDashboard(dashboard);
+    var { filters, /*additionalFilters*/ } = ElementConnector.loadFiltersFromDashboard(this.dashboard);
 
     // Loading dialogs
-    var dialogs = loadDialogsFromDashboard(dashboard);
+    var dialogs = loadDialogsFromDashboard(this.dashboard);
 
     return (
       <div style={{ width: '100%' }}>
@@ -103,7 +110,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
           <Spinner />
         </Toolbar>
         <ResponsiveReactGridLayout
-          {...this.props.grid}
+          {...grid}
           layouts={this.state.layouts}
           onBreakpointChange={this.onBreakpointChange}
           onLayoutChange={this.onLayoutChange}
