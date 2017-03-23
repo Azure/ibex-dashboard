@@ -246,6 +246,19 @@ var dashboard = {
       props: { 
         pieProps: { nameKey: 'label', valueKey: 'count' }
       }
+    },
+    {
+      id: 'timeline-area',
+      type: 'Area',
+      title: 'Message Rate',
+      subtitle: 'How many messages were sent per timeframe',
+      size: { w: 4, h: 8},
+      theme: colors.ThemeColors2,
+      dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
+      props: { 
+        isStacked: true,
+        showLegend: false
+      }
     }
   ],
   dialogs: [

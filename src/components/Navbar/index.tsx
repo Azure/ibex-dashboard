@@ -6,34 +6,34 @@ import ListItem from 'react-md/lib/Lists/ListItem'
 import Avatar from 'react-md/lib/Avatars'
 import SelectField from 'react-md/lib/SelectFields'
 import NavigationLink from './NavigationLink'
-import {Link} from 'react-router';
+import { Link } from 'react-router';
 
 import './style.css';
 
 const avatarSrc = 'https://cloud.githubusercontent.com/assets/13041/19686250/971bf7f8-9ac0-11e6-975c-188defd82df1.png'
 
 const drawerHeaderChildren = [
-  <Avatar
+  (<Avatar
     key={avatarSrc}
     src={avatarSrc}
     role='presentation'
-    iconSized
+    iconSized={true}
     style={{ alignSelf: 'center', marginLeft: 16, marginRight: 16, flexShrink: 0 }}
-  />,
-  <SelectField
+  />),
+  (<SelectField
     id='account-switcher'
     defaultValue='Jonathan'
     menuItems={['Jonathan', 'Fred']}
     key='account-switcher'
     position={SelectField.Positions.BELOW}
     className='md-select-field--toolbar'
-  />
+  />)
 ]
 
 export default ({ children = null, title = 'Ibex Dashboard' }) => {
 
   var pathname = '/';
-  try { pathname = window.location.pathname; } catch (e) {}
+  try { pathname = window.location.pathname; } catch (e) { }
 
   var navigationItems = [
     <ListItem
@@ -68,16 +68,16 @@ export default ({ children = null, title = 'Ibex Dashboard' }) => {
   return (
     <div>
       <NavigationDrawer
-          navItems={ navigationItems }
-          contentClassName='md-grid'
-          drawerHeaderChildren={drawerHeaderChildren}
-          mobileDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-          tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-          desktopDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-          toolbarTitle={title}
-          toolbarActions={null}
-        >
-        { children }
+        navItems={navigationItems}
+        contentClassName='md-grid'
+        drawerHeaderChildren={drawerHeaderChildren}
+        mobileDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+        tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+        desktopDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+        toolbarTitle={title}
+        toolbarActions={null}
+      >
+        {children}
       </NavigationDrawer>
     </div>
   )

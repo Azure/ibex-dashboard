@@ -14,7 +14,7 @@ function loadDialogsFromDashboard(dashboard: IDashboardConfig): JSX.Element[] {
     <Dialog key={idx} dialogData={dialog} dashboard={dashboard} />
   );
 
-  return dialogs
+  return dialogs;
 }
 
 export {
