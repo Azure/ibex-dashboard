@@ -2,7 +2,7 @@ import * as React from 'react';
 import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 import * as moment from 'moment';
 import * as _ from 'lodash';
-import { AreaChart, Area as AreaFill, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, defs } from 'recharts';
+import { AreaChart, Area as AreaFill, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, defs } from 'recharts';
 import Card from '../Card';
 import Switch from 'react-md/lib/SelectionControls/Switch';
 import './generic.css';
@@ -11,6 +11,7 @@ var { ThemeColors } = colors;
 
 interface IAreaProps extends IGenericProps {
     theme?: string[],
+    showLegend?: boolean,
     isStacked?: boolean
 }
 
@@ -51,7 +52,8 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
     render() {
         var { timeFormat, values, lines } = this.state;
-        var { title, subtitle, theme } = this.props;
+        var { title, subtitle, theme, props } = this.props;
+        var { showLegend } = props;
 
         var format = timeFormat === "hour" ? this.hourFormat : this.dateFormat;
         var themeColors = theme || ThemeColors;
@@ -81,6 +83,7 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
                         <YAxis />
                         <CartesianGrid strokeDasharray="3 3" />
                         <Tooltip />
+                        {showLegend !== false && <Legend />}
                         {fillElements}
                     </AreaChart>
                 </ResponsiveContainer>

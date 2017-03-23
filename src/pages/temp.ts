@@ -254,7 +254,8 @@ export default <IDashboardConfig>{
       theme: colors.ThemeColors2,
       dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
       props: { 
-        isStacked: true
+        isStacked: true,
+        showLegend: false
       }
     }
   ],
