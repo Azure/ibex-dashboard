@@ -3,7 +3,9 @@ import * as _ from 'lodash';
 import TextField from 'react-md/lib/TextFields';
 import Button from 'react-md/lib/Buttons/Button';
 
-import { loadConfig } from '../common';
+import ConfigurationsActions from '../../actions/ConfigurationsActions';
+import ConfigurationsStore from '../../stores/ConfigurationsStore';
+
 import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 import connections from '../../data-sources/connections';
 
@@ -11,6 +13,7 @@ import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
 
 interface IConfigDashboardState {
+  dashboard?: IDashboardConfig;
   connections: IDictionary;
   error: string;
 }
@@ -18,28 +21,46 @@ interface IConfigDashboardState {
 export default class ConfigDashboard extends React.Component<null, IConfigDashboardState> {
 
   state = {
+    dashboard: null,
     connections: {},
     error: null
   };
 
-  dashboard: IDashboardConfig = null;
   dataSources: IDataSourceDictionary = {};
 
   constructor(props: any) {
     super(props);
 
+    this.loadParams = this.loadParams.bind(this);
     this.onChange = this.onChange.bind(this);
     this.state.connections = ConnectionsStore.getState();
 
-    // Loading dashboard from 'dashboards' loaded to page
-    loadConfig((dashboard: IDashboardConfig) => {
+    ConfigurationsActions.loadConfiguration();
+  }
 
-      this.dashboard = dashboard;
-      DataSourceConnector.createDataSources(this.dashboard, this.dataSources);
+  componentDidMount() {
+    ConnectionsStore.listen(this.onChange);
+    let { dashboard } = ConfigurationsStore.getState();
+
+    if (dashboard) {
+      DataSourceConnector.createDataSources(dashboard, this.dataSources);
+      this.setState({ dashboard });
+    }
+
+    ConfigurationsStore.listen(state => {
+
+      let { dashboard } = state;
+
+      DataSourceConnector.createDataSources(dashboard, this.dataSources);
+      this.setState({ dashboard });
     });
   }
 
-  componentWillMount() {
+  componentWillUnmount() {
+    ConnectionsStore.unlisten(this.onChange);
+  }
+
+  private loadParams(): any {
     var requiredParameters = {};
     _.values(this.dataSources).forEach(dataSource => {
 
@@ -57,8 +78,9 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
       connectionType.params.forEach(param => { requiredParameters[dataSource.plugin.connection][param] = null });
 
       // Connection type is already defined - check params
-      if (this.dashboard.config.connections[dataSource.plugin.connection]) {
-        var connectionParams = this.dashboard.config.connections[dataSource.plugin.connection];
+      let { dashboard } = this.state;
+      if (dashboard.config.connections[dataSource.plugin.connection]) {
+        var connectionParams = dashboard.config.connections[dataSource.plugin.connection];
 
         // Checking that all param definitions are defined
         connectionType.params.forEach(param => {
@@ -67,15 +89,7 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
       }
     });
 
-    this.setState({ connections: requiredParameters });
-  }
-
-  componentDidMount() {
-    ConnectionsStore.listen(this.onChange);
-  }
-
-  componentWillUnmount() {
-    ConnectionsStore.unlisten(this.onChange);
+    return requiredParameters;
   }
 
   onChange(state) {
@@ -98,7 +112,12 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
 
   render() {
 
-    let { connections, error } = this.state;
+    if (!this.state.dashboard) {
+      return null;
+    }
+
+    let connections = this.loadParams();
+    let { error } = this.state;
 
     return (
       <div style={{ width: '100%' }}>

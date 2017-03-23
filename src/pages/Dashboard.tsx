@@ -8,12 +8,15 @@ var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
 var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
-import { loadConfig } from '../components/common';
 import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
 import ElementConnector from '../components/ElementConnector';
 import { loadDialogsFromDashboard } from '../components/generic/Dialogs';
 
+import ConfigurationsActions from '../actions/ConfigurationsActions';
+import ConfigurationsStore from '../stores/ConfigurationsStore';
+
 interface IDashboardState {
+  dashboard?: IDashboardConfig;
   mounted?: boolean;
   currentBreakpoint?: string;
   layouts?: ILayouts;
@@ -24,9 +27,9 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
   layouts = {};
   dataSources: IDataSourceDictionary = {};
-  dashboard: IDashboardConfig = null;
 
   state = {
+    dashboard: null,
     currentBreakpoint: 'lg',
     mounted: false,
     layouts: { },
@@ -36,20 +39,30 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
   constructor(props: any) {
     super(props);
 
-    // Loading dashboard from 'dashboards' loaded to page
-    loadConfig((dashboard: IDashboardConfig) => {
+    ConfigurationsActions.loadConfiguration();
+  }
 
-      this.dashboard = dashboard;
-      const layout = this.dashboard.config.layout;
+  componentDidMount() {
+    this.setState({ mounted: true });
 
-      DataSourceConnector.createDataSources(this.dashboard, this.dataSources);
+    let { dashboard } = ConfigurationsStore.getState();
+    this.setState({ dashboard });
+
+    ConfigurationsStore.listen(state => {
+
+      let { dashboard } = state;
+      
+      const layout = dashboard.config.layout;
+
+      DataSourceConnector.createDataSources(dashboard, this.dataSources);
       DataSourceConnector.connectDataSources(this.dataSources);
 
       // For each column, create a layout according to number of columns
-      var layouts = ElementConnector.loadLayoutFromDashboard(this.dashboard, this.dashboard);
+      var layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
 
       this.layouts = layouts;
       this.setState({ 
+        dashboard,
         layouts: { lg: layouts['lg'] },
         grid: {
           className: 'layout',
@@ -59,11 +72,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
           verticalCompact: false
         }
       });
-    });
-  }
-
-  componentDidMount() {
-    this.setState({ mounted: true });
+    })
   }
 
   onBreakpointChange = (breakpoint) => {
@@ -87,7 +96,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
   render() {
 
-    var { currentBreakpoint, grid } = this.state;
+    var { dashboard, currentBreakpoint, grid } = this.state;
     var layout = this.state.layouts[currentBreakpoint];
 
     if (!grid) {
@@ -95,13 +104,13 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
     }
 
     // Creating visual elements
-    var elements = ElementConnector.loadElementsFromDashboard(this.dashboard, layout);
+    var elements = ElementConnector.loadElementsFromDashboard(dashboard, layout);
 
     // Creating filter elements
-    var { filters, /*additionalFilters*/ } = ElementConnector.loadFiltersFromDashboard(this.dashboard);
+    var { filters, /*additionalFilters*/ } = ElementConnector.loadFiltersFromDashboard(dashboard);
 
     // Loading dialogs
-    var dialogs = loadDialogsFromDashboard(this.dashboard);
+    var dialogs = loadDialogsFromDashboard(dashboard);
 
     return (
       <div style={{ width: '100%' }}>

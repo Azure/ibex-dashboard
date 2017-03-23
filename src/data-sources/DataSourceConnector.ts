@@ -91,7 +91,7 @@ export class DataSourceConnector {
       var sourceDS = dataSources[sourceDSId];
 
       if (typeof sourceDS.action['initialize'] === 'function') {
-        sourceDS.action.initialize();
+        sourceDS.action.initialize.defer();
       }
     });
   }
