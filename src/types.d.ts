@@ -1,8 +1,10 @@
-type IDictionary = { [ id: string ] : Object }
-type IStringDictionary = { [ id: string ] : string }
+type IDict<T> = { [id: string]: T };
+type IDictionary = IDict<any>;
+type IStringDictionary = IDict<string>;
 
 interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
   config: {
+    connections: IDictionary,
     layout: {
       isDraggable?: boolean
       isResizable?: boolean

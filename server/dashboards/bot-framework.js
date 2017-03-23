@@ -1,5 +1,11 @@
 var dashboard = {
   config: {
+    connections: {
+      "application-insights": {
+        appId: '4d567b3c-e52c-4139-8e56-8e573e55a06c',
+        apiKey: 'tn6hhxs60afz4yzd7cp2nreph1wja3ecxtflq8rs'
+      }
+    },
     layout: {
       isDraggable: true,
       isResizable: true,
@@ -10,7 +16,8 @@ var dashboard = {
       breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}
     }
   },
-  dataSources: [{
+  dataSources: [
+    {
       id: 'timespan',
       type: 'Constant',
       params: {

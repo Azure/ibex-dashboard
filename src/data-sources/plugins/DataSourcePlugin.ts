@@ -1,6 +1,4 @@
 
-interface IDictionary { [key: string]: any; }
-
 export interface IDataSourceOptions {
   dependencies: (string | Object)[];
   /** This would be variable storing the results */
@@ -15,6 +13,7 @@ export interface IDataSourcePlugin {
 
   type: string;
   defaultProperty: string;
+  connection: string;
 
   _props: {
     id: string,
@@ -39,6 +38,8 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
 
   abstract type: string;
   abstract defaultProperty: string;
+
+  connection: string = null;
   
   _props = {
     id: '',

@@ -23,6 +23,7 @@ export default class ApplicationInsightsEvents extends DataSourcePlugin {
 
   type = 'ApplicationInsights-Events';
   defaultProperty = 'values';
+  connection = 'application-insights';
 
   constructor(options: IEventsOptions) {
     super(options);

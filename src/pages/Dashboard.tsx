@@ -1,6 +1,4 @@
 import * as React from 'react';
-import * as _ from 'lodash';
-import plugins from '../components/generic/plugins';
 
 import Toolbar from 'react-md/lib/Toolbars';
 import { Spinner } from '../components/Spinner';
@@ -26,7 +24,6 @@ interface IDashboardState {
 }
 
 export default class Dashboard extends React.Component<any, IDashboardState> {
-  // static propTypes = {}
 
   static defaultProps = {
     grid: {

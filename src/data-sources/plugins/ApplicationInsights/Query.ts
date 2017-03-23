@@ -14,6 +14,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
   type = 'ApplicationInsights-Query';
   defaultProperty = 'values';
+  connection = 'application-insights';
 
   /**
    * @param options - Options object
