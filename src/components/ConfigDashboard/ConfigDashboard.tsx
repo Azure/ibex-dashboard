@@ -54,7 +54,11 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
   }
 
   onSaveGoToDashboard() {
-
+    this.onSave();
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 2000);
   }
 
   render() {
