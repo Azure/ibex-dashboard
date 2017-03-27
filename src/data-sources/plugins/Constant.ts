@@ -14,8 +14,8 @@ export default class Constant extends DataSourcePlugin {
   type = 'Constant';
   defaultProperty = 'selectedValue';
 
-  constructor(options: IConstantOptions) {
-    super(options);
+  constructor(options: IConstantOptions, connections: IDict<IStringDictionary>) {
+    super(options, connections);
 
     var props = this._props;
     var params = options.params;

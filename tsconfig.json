@@ -24,6 +24,7 @@
     "acceptance-tests",
     "webpack",
     "jest",
+    "server",
     "src/setupTests.ts"
   ],
   "types": [

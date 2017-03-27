@@ -13,97 +13,44 @@ import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
 
 interface IConfigDashboardState {
-  dashboard?: IDashboardConfig;
   connections: IDictionary;
   error: string;
 }
 
-export default class ConfigDashboard extends React.Component<null, IConfigDashboardState> {
+interface IConfigDashboardProps {
+  dashboard: IDashboardConfig;
+  connections: IDictionary;
+}
 
-  state = {
-    dashboard: null,
+export default class ConfigDashboard extends React.Component<IConfigDashboardProps, IConfigDashboardState> {
+
+  state: IConfigDashboardState = {
     connections: {},
     error: null
   };
 
-  dataSources: IDataSourceDictionary = {};
-
   constructor(props: any) {
     super(props);
 
-    this.loadParams = this.loadParams.bind(this);
-    this.onChange = this.onChange.bind(this);
-    this.state.connections = ConnectionsStore.getState();
+    this.onSave = this.onSave.bind(this);
+    this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
 
     ConfigurationsActions.loadConfiguration();
   }
 
-  componentDidMount() {
-    ConnectionsStore.listen(this.onChange);
-    let { dashboard } = ConfigurationsStore.getState();
-
-    if (dashboard) {
-      DataSourceConnector.createDataSources(dashboard, this.dataSources);
-      this.setState({ dashboard });
-    }
-
-    ConfigurationsStore.listen(state => {
-
-      let { dashboard } = state;
-
-      DataSourceConnector.createDataSources(dashboard, this.dataSources);
-      this.setState({ dashboard });
-    });
-  }
-
-  componentWillUnmount() {
-    ConnectionsStore.unlisten(this.onChange);
-  }
-
-  private loadParams(): any {
-    var requiredParameters = {};
-    _.values(this.dataSources).forEach(dataSource => {
-
-      // If no connection requirements were set, return
-      if (!dataSource.plugin.connection) {
-        return;
-      }
-
-      if (!connections[dataSource.plugin.connection]) {
-        throw new Error(`No connection names ${dataSource.plugin.connection} was defined`);
-      }
-
-      var connectionType = connections[dataSource.plugin.connection];
-      requiredParameters[dataSource.plugin.connection] = {};
-      connectionType.params.forEach(param => { requiredParameters[dataSource.plugin.connection][param] = null });
-
-      // Connection type is already defined - check params
-      let { dashboard } = this.state;
-      if (dashboard.config.connections[dataSource.plugin.connection]) {
-        var connectionParams = dashboard.config.connections[dataSource.plugin.connection];
-
-        // Checking that all param definitions are defined
-        connectionType.params.forEach(param => {
-          requiredParameters[dataSource.plugin.connection][param] = connectionParams[param];
-        });
-      }
-    });
-
-    return requiredParameters;
-  }
-
-  onChange(state) {
-    this.setState(state);
-  }
-
   onParamChange(connectionKey, paramKey, value) {
     //debugger;
-    this.state.connections[connectionKey][paramKey] = value;
-    this.setState({ connections: this.state.connections });
+    let { connections } = this.state;
+    connections[connectionKey] = connections[connectionKey] || {};
+    connections[connectionKey][paramKey] = value;
+    this.setState({ connections });
   }
 
   onSave() {
-
+    let { dashboard } = this.props;
+    let { connections } = this.state;
+    dashboard.config.connections = connections;
+    ConfigurationsActions.saveConfiguration(dashboard);
   }
 
   onSaveGoToDashboard() {
@@ -112,11 +59,11 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
 
   render() {
 
-    if (!this.state.dashboard) {
+    if (!this.props.dashboard) {
       return null;
     }
 
-    let connections = this.loadParams();
+    let { connections } = this.props;
     let { error } = this.state;
 
     return (
@@ -130,7 +77,7 @@ export default class ConfigDashboard extends React.Component<null, IConfigDashbo
                   <TextField
                     id="paramKey"
                     label={paramKey}
-                    defaultValue={connections[connectionKey][paramKey]}
+                    defaultValue={connections[connectionKey] && connections[connectionKey][paramKey] || ''}
                     lineDirection="center"
                     placeholder="Fill in required connection parameter"
                     className="md-cell md-cell--bottom"

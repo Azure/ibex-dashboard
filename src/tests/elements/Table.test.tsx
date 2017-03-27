@@ -18,8 +18,7 @@ describe('Table', () => {
 
   beforeAll(() => {
 
-    DataSourceConnector.createDataSources({ dataSources: [ dataSourceMock ]}, dataSources);
-    DataSourceConnector.connectDataSources(dataSources);
+    DataSourceConnector.createDataSources({ dataSources: [ dataSourceMock ]}, {});
 
     table = TestUtils.renderIntoDocument(<Table {...tablePropsMock} />);
     TestUtils.isElementOfType(table, 'div');

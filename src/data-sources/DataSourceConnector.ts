@@ -9,6 +9,7 @@ export interface IDataSource {
   plugin : IDataSourcePlugin;
   action: any;
   store: any;
+  initialized: boolean;
 }
 
 export interface IDataSourceDictionary {
@@ -24,7 +25,7 @@ export class DataSourceConnector {
 
   private static dataSources: IDataSourceDictionary = {};
 
-  static createDataSource(dataSourceConfig) {
+  static createDataSource(dataSourceConfig: any, connections: IConnections) {
 
     var config = dataSourceConfig || {};
     if (!config.id || !config.type) {
@@ -34,7 +35,7 @@ export class DataSourceConnector {
     // Dynamically load the plugin from the plugins directory
     var pluginPath = './plugins/' + config.type;
     var PluginClass = require(pluginPath);
-    var plugin : any = new PluginClass.default(config);
+    var plugin : any = new PluginClass.default(config, connections);
     
     // Creating actions class
     var ActionClass = DataSourceConnector.createActionClass(plugin);
@@ -47,52 +48,56 @@ export class DataSourceConnector {
       config,
       plugin,
       action: ActionClass,
-      store: StoreClass
+      store: StoreClass,
+      initialized: false
     }
 
     return DataSourceConnector.dataSources[config.id];
   }
 
-  static createDataSources(dsContainer: IDataSourceContainer, containerDataSources: IDataSourceDictionary) {
+  static createDataSources(dsContainer: IDataSourceContainer, connections: IConnections) {
     dsContainer.dataSources.forEach(source => {
-      var dataSource = DataSourceConnector.createDataSource(source);
-      containerDataSources[dataSource.id] = dataSource;
+      var dataSource = DataSourceConnector.createDataSource(source, connections);
+      DataSourceConnector.connectDataSource(dataSource);
+    });
+
+    DataSourceConnector.initializeDataSources();
+  }
+
+  private static connectDataSource(sourceDS: IDataSource) {
+    // Connect sources and dependencies
+    sourceDS.store.listen((state) => {
+
+      Object.keys(this.dataSources).forEach(checkDSId => {
+        var checkDS = this.dataSources[checkDSId];
+        var dependencies = checkDS.plugin.getDependencies() || {};
+
+        let connected = _.find(_.keys(dependencies), dependencyKey => {
+          let dependencyValue = dependencies[dependencyKey] || '';
+          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
+        })
+
+        if (connected) {
+
+          // Todo: add check that all dependencies are met
+          checkDS.action.updateDependencies.defer(state);
+        }
+      });
     });
   }
 
-  static connectDataSources(dataSources: IDataSourceDictionary) {
-    // Connect sources and dependencies
-    var sourcesIDs = Object.keys(dataSources);
-    sourcesIDs.forEach(sourceDSId => {
-      var sourceDS = dataSources[sourceDSId];
-
-      sourceDS.store.listen((state) => {
-
-        sourcesIDs.forEach(checkDSId => {
-          var checkDS = dataSources[checkDSId];
-          var dependencies = checkDS.plugin.getDependencies() || {};
-
-          let connected = _.find(_.keys(dependencies), dependencyKey => {
-            let dependencyValue = dependencies[dependencyKey] || '';
-            return (dependencyValue === sourceDSId || dependencyValue.startsWith(sourceDSId + ':'));
-          })
-
-          if (connected) {
-
-            // Todo: add check that all dependencies are met
-            checkDS.action.updateDependencies.defer(state);
-          }
-        });
-      });
-    });
-
+  static initializeDataSources() {
     // Call initalize methods
-    sourcesIDs.forEach(sourceDSId => {
-      var sourceDS = dataSources[sourceDSId];
+    Object.keys(this.dataSources).forEach(sourceDSId => {
+      var sourceDS = this.dataSources[sourceDSId];
+
+      if (sourceDS.initialized) { return; }
 
       if (typeof sourceDS.action['initialize'] === 'function') {
         sourceDS.action.initialize.defer();
       }
+
+      sourceDS.initialized = true;
     });
   }
 
@@ -156,6 +161,10 @@ export class DataSourceConnector {
 
       dataSource.action[actionName].call(dataSource.action, args);
     }
+  }
+
+  static getDataSources(): IDataSourceDictionary {
+    return this.dataSources;
   }
 
   private static createActionClass(plugin: IDataSourcePlugin) : any {
