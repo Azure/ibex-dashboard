@@ -167,6 +167,10 @@ export class DataSourceConnector {
     return this.dataSources;
   }
 
+  static getDataSource(name): IDataSource {
+    return this.dataSources[name];
+  }
+
   private static createActionClass(plugin: IDataSourcePlugin) : any {
     class NewActionClass {
       constructor() {}

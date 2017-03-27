@@ -32,7 +32,6 @@ interface IDialogState {
 export default class Dialog extends React.PureComponent<IDialogProps, IDialogState> {
 
   layouts = {};
-  dataSources: IDataSourceDictionary = {};
 
   constructor(props) {
     super(props);
@@ -69,8 +68,9 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     var { dialogId, dialogArgs } = this.state;
     
     if (dialogData.id === dialogId) {
-      var datasourceId = 'dialog_' + dialogData.id;
-      this.dataSources[datasourceId].action.updateDependencies.defer(dialogArgs);
+      let datasourceId = 'dialog_' + dialogData.id;
+      let dataSource = DataSourceConnector.getDataSource(datasourceId);
+      dataSource.action.updateDependencies.defer(dialogArgs);
     }
   }
 
