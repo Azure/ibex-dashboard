@@ -66,6 +66,8 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     this.updateDependencies = this.updateDependencies.bind(this);
   }
 
+  abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void;
+
   bind (actionClass: any) {
     actionClass.type = this.type;
     actionClass._props = this._props;
@@ -78,9 +80,6 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
   getConnection(): IConnection {
     return (this.connections && this.connections[this.connectionType]) || {};
   }
-  
-
-  abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
 
   /**
    * @returns {string[]} Array of dependencies

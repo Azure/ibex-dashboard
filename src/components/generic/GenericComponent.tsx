@@ -4,24 +4,23 @@ import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 export interface IGenericProps {
   title: string;
   subtitle: string;
-  dependencies: { [key: string] : string };
-  actions: { [key: string] : IAction };
-  props: { [key: string] : Object };
+  dependencies: { [key: string]: string };
+  actions: { [key: string]: IAction };
+  props: { [key: string]: Object };
   layout: {
-    "x": number;
-    "y": number;
-    "w": number;
-    "h": number;
-  }
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  };
 }
 
-export interface IGenericState { [key: string] : any }
+export interface IGenericState { [key: string]: any; }
 
-export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGenericState> extends React.Component<T1, T2> {
-  // static propTypes = {}
-  // static defaultProps = {}
+export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGenericState> 
+                      extends React.Component<T1, T2> {
 
-  constructor(props) {
+  constructor(props: T1) {
     super(props);
 
     this.onStateChange = this.onStateChange.bind(this);
@@ -55,17 +54,6 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
     });
   }
 
-  private onStateChange(state) {
-
-    var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
-    var updatedState: IGenericState = {};
-    Object.keys(result.dependencies).forEach(key => {
-      updatedState[key] = result.dependencies[key];
-    });
-
-    this.setState(updatedState);
-  }
-
   protected trigger(actionName: string, args: IDictionary) {
     var action = this.props.actions[actionName];
 
@@ -86,16 +74,29 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
    * returns boolean option from state, passed props or default values (in that order).
    * @param property name of property
    */
-  is(property : string): boolean {
-        if (this.state[property] !== undefined && typeof(this.state[property]) === 'boolean') {
-            return this.state[property];
-        }
-        if (this.props.props && this.props.props[property] !== undefined && typeof(this.props.props[property]) === 'boolean') {
-            return this.props.props[property] as boolean;
-        }
-        if (this.props[property] !== undefined && typeof(this.props[property]) === 'boolean') {
-            return this.props[property];
-        }
-        return false;
+  is(property: string): boolean {
+    if (this.state[property] !== undefined && typeof(this.state[property]) === 'boolean') {
+      return this.state[property];
     }
+
+    let { props } = this.props;
+    if (props && props[property] !== undefined && typeof(props[property]) === 'boolean') {
+      return props[property] as boolean;
+    }
+    if (this.props[property] !== undefined && typeof(this.props[property]) === 'boolean') {
+      return this.props[property];
+    }
+    return false;
+  }
+
+  private onStateChange(state: any) {
+
+    var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
+    var updatedState: IGenericState = {};
+    Object.keys(result.dependencies).forEach(key => {
+      updatedState[key] = result.dependencies[key];
+    });
+
+    this.setState(updatedState);
+  }
 }

@@ -15,28 +15,6 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
   loadConfiguration() {
     
     return (dispatcher: (dashboard: IDashboardConfig) => void) => {
-
-      // request('/api/dashboard.js',
-      //   (error: any, scriptString: string) => {
-
-      //     // do something
-      //     debugger;
-
-      //     if (!scriptString || !scriptString.length) {
-      //       return this.failure(new Error('Could not load dashboard configuration from server'));
-      //     }
-
-      //     let dashboard: IDashboardConfig = null;
-      //     eval(`dashboard = (function() { ${scriptString} })()`); /* tslint:disable-line */
-
-      //     if (!dashboard) {
-      //       return this.failure(new Error('Could not load configuration from script: ' + scriptString));
-      //     }
-
-      //     this.fixCalculatedProperties(dashboard);
-
-      //     return dispatcher(dashboard);
-      //   });
       
       this.getScript('/api/dashboard.js', () => {
         let dashboards: IDashboardConfig[] = (window as any)['dashboards'];
