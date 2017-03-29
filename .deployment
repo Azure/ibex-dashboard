@@ -1,3 +1,3 @@
 [config]
-SCM_COMMAND_IDLE_TIMEOUT=7200
+SCM_COMMAND_IDLE_TIMEOUT=300
 command = ./scripts/deployment/azure-deploy.cmd
