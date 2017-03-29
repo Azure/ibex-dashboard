@@ -186,7 +186,7 @@ return {
         var value = _.values(state);
         return {
           value: value,
-          icon: 'face'
+          icon: 'account_circle'
         };
       }
     },
