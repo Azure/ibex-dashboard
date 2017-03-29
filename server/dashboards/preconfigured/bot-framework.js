@@ -173,6 +173,49 @@ return {
           bars: [ 'count' ]
         };
       }
+    },
+    {
+      id: 'users',
+      type: 'ApplicationInsights/Query',
+      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
+      params: {
+        query: ` customEvents` + 
+                ` | summarize totalUsers=count() by user_Id`,
+      },
+      calculated: (state) => {
+        var value = _.values(state);
+        return {
+          value: value,
+          icon: 'account_circle'
+        };
+      }
+    },
+    {
+      id: 'channelActivity',
+      type: 'ApplicationInsights/Query',
+      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
+      params: {
+        query: ` customEvents` + 
+                ` | where name == 'Activity'` + 
+                ` | extend channel=customDimensions.channel` + 
+                ` | extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr` + 
+                ` | extend duration=tolong(customMeasurements.duration/1000) ` + 
+                ` | summarize count=count() by tolong(duration), tostring(channel), hourOfDay` + 
+                ` | order by hourOfDay asc`,
+        mappings: [
+          { key: 'duration', def: 0 },
+          { key: 'channel', def: 'unknown' },
+          { key: 'hourOfDay', def: 0 },
+          { key: 'count', def: 0 }
+        ]
+      },
+      calculated: (state) => {
+        var { values } = state;
+        var groupedValues = _.chain(values).groupBy('channel').value();
+        return {
+          groupedValues: groupedValues
+        };
+      }
     }
   ],
   filters: [
@@ -209,6 +252,13 @@ return {
       title: "Errors",
       size: { w: 2, h: 2},
       dependencies: { value: 'errors:handledAtTotal', icon: 'errors:handledAtTotal_icon', className: 'errors:handledAtTotal_class' },
+    },
+    {
+      id: 'totalUsers',
+      type: 'Scorecard',
+      title: "Total users",
+      size: { w: 2, h: 3},
+      dependencies: { value: 'users:value', icon: 'users:icon'},
     },
     {
       id: 'intents',
@@ -252,6 +302,20 @@ return {
       props: { 
         isStacked: true,
         showLegend: false
+      }
+    },
+    {
+      id: 'scatter',
+      type: 'Scatter',
+      title: 'Channel activity',
+      subtitle: 'Monitor channel activity across time of day',
+      size: { w: 4, h: 8 },
+      dependencies: { groupedValues:'channelActivity:groupedValues' },
+      props: {
+        xDataKey: "hourOfDay",
+        yDataKey: "duration",
+        zDataKey: "count",
+        zRange: [10,500]
       }
     }
   ],
