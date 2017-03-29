@@ -7,10 +7,7 @@ describe('Data Source: Constant', () => {
   let dataSources: IDataSourceDictionary = {};
 
   beforeAll(() => {
-
-    DataSourceConnector.createDataSources({ dataSources: [ dataSourceMock ]}, dataSources);
-    DataSourceConnector.connectDataSources(dataSources);
-
+    DataSourceConnector.createDataSources({ dataSources: [ dataSourceMock ]}, {});
   });
 
   it ('Check basic data == 3 rows', () => {

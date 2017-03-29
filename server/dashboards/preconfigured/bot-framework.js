@@ -1,11 +1,6 @@
-var dashboard = {
+return {
   config: {
-    connections: {
-      "application-insights": {
-        appId: '4d567b3c-e52c-4139-8e56-8e573e55a06c',
-        apiKey: 'tn6hhxs60afz4yzd7cp2nreph1wja3ecxtflq8rs'
-      }
-    },
+    connections: { },
     layout: {
       isDraggable: true,
       isResizable: true,

@@ -11,8 +11,7 @@ describe('Data Source: Application Insights: Query', () => {
   beforeAll(() => {
 
     mockRequests();
-    DataSourceConnector.createDataSources({ dataSources: dataSourcesMock }, dataSources);
-    DataSourceConnector.connectDataSources(dataSources);
+    DataSourceConnector.createDataSources({ dataSources: dataSourcesMock }, {});
     dataSources.timespan.action.updateDependencies();
   });
 

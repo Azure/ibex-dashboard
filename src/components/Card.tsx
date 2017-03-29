@@ -1,13 +1,15 @@
-import * as React from 'react'
+import * as React from 'react';
 import { Media } from 'react-md/lib/Media';
 import { Card, CardTitle } from 'react-md/lib/Cards';
 
-export default ({ children = null, title = '', subtitle = '' }) => 
+export default ({children = null, title = '', subtitle = ''}) => (
   <Card>
     <CardTitle
-        title={ title }
-        subtitle={ subtitle } />
+        title={title}
+        subtitle={subtitle} 
+    />
     <Media>
-      { children }
+      {children}
     </Media>
   </Card>
+);

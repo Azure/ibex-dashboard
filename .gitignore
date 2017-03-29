@@ -21,3 +21,6 @@ yarn-error.log*
 
 # generated merge temp files
 *.orig
+
+# private files
+*.private.*

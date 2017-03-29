@@ -2,8 +2,11 @@
 //import * as $ from 'jquery';
 import * as request from 'xhr-request';
 import * as _ from 'lodash';
-import {DataSourcePlugin, IDataSourceOptions} from '../DataSourcePlugin';
-import { appInsightsUri, appId, apiKey } from './common';
+import { DataSourcePlugin, IDataSourceOptions } from '../DataSourcePlugin';
+import { appInsightsUri } from './common';
+import ApplicationInsightsConnection from '../../connections/application-insights';
+
+let connectionType = new ApplicationInsightsConnection();
 
 interface IQueryOptions extends IDataSourceOptions {
   query: string
@@ -14,13 +17,13 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
   type = 'ApplicationInsights-Query';
   defaultProperty = 'values';
-  connection = 'application-insights';
+  connectionType = connectionType.type;
 
   /**
    * @param options - Options object
    */
-  constructor(options: IQueryOptions) {
-    super(options);
+  constructor(options: IQueryOptions, connections: IDict<IStringDictionary>) {
+    super(options, connections);
 
     var props = this._props;
     var params: any = props.params;
@@ -45,6 +48,15 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
     });
 
     if (emptyDependency) {
+      return (dispatch) => {
+        return dispatch();
+      };
+    }
+
+    // Validate connection
+    let connection = this.getConnection();
+    let { appId, apiKey } = connection;
+    if (!connection || !apiKey || !appId) {
       return (dispatch) => {
         return dispatch();
       };

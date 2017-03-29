@@ -1,122 +1,56 @@
 import * as React from 'react';
 
-import Toolbar from 'react-md/lib/Toolbars';
-import { Spinner } from '../components/Spinner';
+import DashboardComponent from '../components/Dashboard';
+import ConfigDashboard from '../components/ConfigDashboard';
 
-import * as ReactGridLayout from 'react-grid-layout';
-var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
-var WidthProvider = ReactGridLayout.WidthProvider;
-ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
-
-import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
-import ElementConnector from '../components/ElementConnector';
-import { loadDialogsFromDashboard } from '../components/generic/Dialogs';
-
-// Loading dashboard from 'dashboards' loaded to page
-var dashboards : IDashboardConfig = (window as any)["dashboards"];
-var dashboard = dashboards[0];
-const layout = dashboard.config.layout;
+import ConfigurationsActions from '../actions/ConfigurationsActions';
+import ConfigurationsStore from '../stores/ConfigurationsStore';
 
 interface IDashboardState {
-  mounted?: boolean;
-  currentBreakpoint?: string;
-  layouts?: ILayouts;
+  dashboard?: IDashboardConfig;
+  connections?: IConnections;
+  connectionsMissing?: boolean;
 }
 
 export default class Dashboard extends React.Component<any, IDashboardState> {
 
-  static defaultProps = {
-    grid: {
-      className: 'layout',
-      rowHeight: layout.rowHeight || 30,
-      cols: layout.cols,
-      breakpoints: layout.breakpoints,
-      verticalCompact: false
-    }
-  };
-
-  layouts = {};
-  dataSources: IDataSourceDictionary = {};
-
-  state = {
-    currentBreakpoint: 'lg',
-    mounted: false,
-    layouts: { lg: this.props.initialLayout },
+  state: IDashboardState = {
+    dashboard: null,
+    connections: {},
+    connectionsMissing: false
   };
 
   constructor(props: any) {
     super(props);
 
-    DataSourceConnector.createDataSources(dashboard, this.dataSources);
-
-    // For each column, create a layout according to number of columns
-    var layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
-
-    this.layouts = layouts;
-    this.state.layouts = { lg: layouts['lg'] };
+    ConfigurationsActions.loadConfiguration();
   }
 
   componentDidMount() {
 
-    this.setState({ mounted: true });
+    this.setState(ConfigurationsStore.getState());
 
-    DataSourceConnector.connectDataSources(this.dataSources);
-  }
-
-  onBreakpointChange = (breakpoint) => {
-    var layouts = this.state.layouts;
-    layouts[breakpoint] = layouts[breakpoint] || this.layouts[breakpoint];
-    this.setState({
-      currentBreakpoint: breakpoint,
-      layouts: layouts
-    });
-  }
-
-  onLayoutChange = (layout, layouts) => {
-    // this.props.onLayoutChange(layout, layouts);
-    var breakpoint = this.state.currentBreakpoint;
-    var newLayouts = this.state.layouts;
-    newLayouts[breakpoint] = layout;
-    this.setState({
-      layouts: newLayouts
+    ConfigurationsStore.listen(state => {
+      this.setState(ConfigurationsStore.getState());
     });
   }
 
   render() {
 
-    var { currentBreakpoint } = this.state;
-    var layout = this.state.layouts[currentBreakpoint];
+    var { dashboard, connections, connectionsMissing } = this.state;
 
-    // Creating visual elements
-    var elements = ElementConnector.loadElementsFromDashboard(dashboard, layout);
+    if (!dashboard) {
+      return null;
+    }
 
-    // Creating filter elements
-    var { filters, /*additionalFilters*/ } = ElementConnector.loadFiltersFromDashboard(dashboard);
-
-    // Loading dialogs
-    var dialogs = loadDialogsFromDashboard(dashboard);
+    if (connectionsMissing) {
+      return (
+        <ConfigDashboard dashboard={dashboard} connections={connections} />
+      );
+    }
 
     return (
-      <div style={{ width: '100%' }}>
-        <Toolbar>
-          {filters}
-          <Spinner />
-        </Toolbar>
-        <ResponsiveReactGridLayout
-          {...this.props.grid}
-          layouts={this.state.layouts}
-          onBreakpointChange={this.onBreakpointChange}
-          onLayoutChange={this.onLayoutChange}
-          // WidthProvider option
-          measureBeforeMount={false}
-          // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
-          // and set `measureBeforeMount={true}`.
-          useCSSTransforms={this.state.mounted}
-        >
-          {elements}
-        </ResponsiveReactGridLayout>
-        {dialogs}
-      </div>
+      <DashboardComponent dashboard={dashboard} />
     );
   }
 }

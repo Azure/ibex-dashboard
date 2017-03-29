@@ -13,7 +13,7 @@ export interface IDataSourcePlugin {
 
   type: string;
   defaultProperty: string;
-  connection: string;
+  connectionType: string;
 
   _props: {
     id: string,
@@ -32,15 +32,15 @@ export interface IDataSourcePlugin {
   getParamKeys(): string[];
   getParams(): IDictionary;
   getCalculated(): ICalculated;
+  getConnection(): IStringDictionary;
 }
 
 export abstract class DataSourcePlugin implements IDataSourcePlugin {
 
   abstract type: string;
   abstract defaultProperty: string;
+  connectionType: string = null;
 
-  connection: string = null;
-  
   _props = {
     id: '',
     dependencies: {} as any,
@@ -53,7 +53,7 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
   /**
    * @param {DataSourcePlugin} options - Options object
    */
-  constructor(options: IDictionary) {
+  constructor(options: IDictionary, protected connections: IConnections = {}) {
 
     var props = this._props;
     props.id = options.id;
@@ -62,14 +62,24 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     props.actions.push.apply(props.actions, options.actions || []);
     props.params = options.params || {};
     props.calculated = options.calculated || {};
+
+    this.updateDependencies = this.updateDependencies.bind(this);
   }
+
+  abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void;
 
   bind (actionClass: any) {
     actionClass.type = this.type;
     actionClass._props = this._props;
   }
 
-  abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
+  updateConnections(connections: IConnections) {
+    this.connections = connections;
+  }
+
+  getConnection(): IConnection {
+    return (this.connections && this.connections[this.connectionType]) || {};
+  }
 
   /**
    * @returns {string[]} Array of dependencies

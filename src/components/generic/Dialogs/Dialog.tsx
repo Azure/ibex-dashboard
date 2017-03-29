@@ -17,22 +17,21 @@ var WidthProvider = ReactGridLayout.WidthProvider;
 ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 interface IDialogProps {
-  dialogData: IDialog
-  dashboard: IDashboardConfig
+  dialogData: IDialog;
+  dashboard: IDashboardConfig;
 }
 
 interface IDialogState {
-  dialogId?: string
-  dialogArgs?: IDictionary
-  mounted?: boolean
-  currentBreakpoint?: string
-  layouts?: ILayouts
+  dialogId?: string;
+  dialogArgs?: IDictionary;
+  mounted?: boolean;
+  currentBreakpoint?: string;
+  layouts?: ILayouts;
 }
 
 export default class Dialog extends React.PureComponent<IDialogProps, IDialogState> {
 
   layouts = {};
-  dataSources: IDataSourceDictionary = {};
 
   constructor(props) {
     super(props);
@@ -48,10 +47,10 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
         selectedValue: null
       }
     };
-    DataSourceConnector.createDataSources({ dataSources: [ dialogDS ] }, this.dataSources);
+    DataSourceConnector.createDataSources({ dataSources: [ dialogDS ] }, this.props.dashboard.config.connections);
 
     // Adding other data sources
-    DataSourceConnector.createDataSources(this.props.dialogData, this.dataSources);
+    DataSourceConnector.createDataSources(this.props.dialogData, this.props.dashboard.config.connections);
 
     var layouts = ElementConnector.loadLayoutFromDashboard(this.props.dialogData, this.props.dashboard);
     
@@ -62,8 +61,6 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
   componentDidMount() {
     this.setState({ mounted: true });
     DialogsStore.listen(this.onChange);
-
-    DataSourceConnector.connectDataSources(this.dataSources);
   }
 
   componentDidUpdate() {
@@ -71,8 +68,9 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     var { dialogId, dialogArgs } = this.state;
     
     if (dialogData.id === dialogId) {
-      var datasourceId = 'dialog_' + dialogData.id;
-      this.dataSources[datasourceId].action.updateDependencies.defer(dialogArgs);
+      let datasourceId = 'dialog_' + dialogData.id;
+      let dataSource = DataSourceConnector.getDataSource(datasourceId);
+      dataSource.action.updateDependencies.defer(dialogArgs);
     }
   }
 

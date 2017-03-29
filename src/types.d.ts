@@ -2,9 +2,12 @@ type IDict<T> = { [id: string]: T };
 type IDictionary = IDict<any>;
 type IStringDictionary = IDict<string>;
 
+type IConnection = IStringDictionary; 
+type IConnections = IDict<IConnection>;
+
 interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
   config: {
-    connections: IDictionary,
+    connections: IConnections,
     layout: {
       isDraggable?: boolean
       isResizable?: boolean
