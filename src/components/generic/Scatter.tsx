@@ -9,9 +9,10 @@ var { ThemeColors } = colors;
 
 interface IScatterProps extends IGenericProps {
   theme?: string[],
-  xKey?: string,
-  yKey?: string,
-  zKey?: string,
+  xDataKey?: string,
+  yDataKey?: string,
+  zDataKey?: string,
+  zRange?: number[]
 }
 
 interface IScatterState extends IGenericState {
