@@ -88,12 +88,6 @@ goto :EOF
 :Deployment
 echo Handling node.js deployment.
 
-:: 1. Yarn Installation
-call yarn --version
-IF !ERRORLEVEL! NEQ 0 goto error
-!NPM_CMD! install -g yarn
-IF !ERRORLEVEL! NEQ 0 goto error
-
 :: 1. KuduSync
 IF /I "%IN_PLACE_DEPLOYMENT%" NEQ "1" (
   call :ExecuteCmd "%KUDU_SYNC_CMD%" -v 50 -f "%DEPLOYMENT_SOURCE%" -t "%DEPLOYMENT_TARGET%" -n "%NEXT_MANIFEST_PATH%" -p "%PREVIOUS_MANIFEST_PATH%" -i ".git;.hg;.deployment;deploy.cmd"
@@ -106,6 +100,19 @@ call :SelectNodeVersion
 :: 3. Install npm packages
 IF EXIST "%DEPLOYMENT_TARGET%\package.json" (
   pushd "%DEPLOYMENT_TARGET%"
+
+  :: 1. Yarn Installation
+  echo Checking yarn installation...
+  call yarn --version
+  IF !ERRORLEVEL! NEQ 0 (
+    echo Installing Yarn...
+    !NPM_CMD! install -g yarn
+    IF !ERRORLEVEL! NEQ 0 goto error
+  ) ELSE (
+    echo Yarn is installed
+  )
+
+
   call :ExecuteCmd yarn install
   call :ExecuteCmd yarn build
   IF !ERRORLEVEL! NEQ 0 goto error
