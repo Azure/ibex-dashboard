@@ -83,26 +83,63 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
           if (error) {
             return this.failure(error);
           }
-          
-          var resultRows = json.Tables[0].Rows;
-          if (!mappings || mappings.length === 0) {
-            return dispatch({ values: resultRows });
+
+          let q = query;
+
+          // Check if result is valid
+          let tables = this.mapAllTables(json, mappings);
+          let resultStatus: IQueryStatus[] = _.last(tables);
+          if (!resultStatus || !resultStatus.length) {
+            return dispatch(json);
           }
 
-          var rows = resultRows.map(row => {
-            var item = {};
-            mappings.forEach((mapping, index) => {
-              var key = typeof mapping === 'string' ? mapping : mapping.key;
-              var idx = mapping.idx ? mapping.idx : index;
-              var def = mapping.def ? mapping.def : null;
-              item[key] = (mapping.val && row[idx] && mapping.val(row[index])) || row[idx] || def;
-            });
-            return item;
+          // Map tables to appropriate results
+          var resultTables = tables.filter((table, idx) => {
+            return idx < resultStatus.length && resultStatus[idx].Kind === 'QueryResult';
           });
 
-          return dispatch({ values: rows });          
+          let returnedResults = {
+            values: (resultTables.length && resultTables[0]) || null
+          };
+
+          return dispatch(returnedResults);          
         });
     }
   }
 
+  private mapAllTables(results: IQueryResults, mappings: IDictionary): any[][] {
+
+    if (!results || !results.Tables || !results.Tables.length) {
+      return [];
+    }
+
+    return results.Tables.map(table => this.mapTable(table, mappings));
+  }
+
+  /**
+   * Map the AI results array into JSON objects
+   * @param table Results table to be mapped into JSON object
+   * @param mappings additional mappings to activate of the row
+   */
+  private mapTable(table: IQueryResult, mappings: IDictionary): Array<any> {
+    mappings = mappings || {};
+
+    return table.Rows.map((rowValues, rowIdx) => {
+      var row = {};
+
+      table.Columns.forEach((col, idx) => {
+        row[col.ColumnName] = rowValues[idx];
+      });
+
+      // Going over user defined mappings of the values
+      _.keys(mappings).forEach(col => {
+        row[col] = 
+          typeof mappings[col] === 'function' ? 
+            mappings[col](row[col], row, rowIdx) :
+            mappings[col];
+      });
+
+      return row;
+    });
+  }
 }

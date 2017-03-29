@@ -49,18 +49,13 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
 
   render () {
 
-    var { props } = this.props;
-    var { checkboxes, cols, rowClassNameField } = props;
-    var { values } = this.state;
+    let { props } = this.props;
+    let { checkboxes, cols, rowClassNameField } = props;
+    let { values } = this.state;
 
-    var arr = values.slice(0);
-    arr = arr.concat(values);
-    arr = arr.concat(values);
-    arr = arr.concat(values);
-    arr = arr.concat(values);
-    arr = arr.concat(values);
+    values = values || [];
 
-    const rows = arr.map((value, ri) => (
+    const rows = values.map((value, ri) => (
       <TableRow key={ri} className={rowClassNameField ? this.fixClassName(value[rowClassNameField]) : null}>
         {
           cols.map((col, ci) => (
