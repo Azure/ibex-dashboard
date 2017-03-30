@@ -25,6 +25,8 @@ SET ARTIFACTS=%~dp0%..\artifacts
 IF NOT DEFINED DEPLOYMENT_SOURCE (
   SET DEPLOYMENT_SOURCE=%~dp0%.
 )
+SET WEB_CONFIG=%DEPLOYMENT_SOURCE%/scripts/deployment/web.config
+
 
 IF NOT DEFINED DEPLOYMENT_TARGET (
   SET DEPLOYMENT_TARGET=%ARTIFACTS%\wwwroot
@@ -111,7 +113,6 @@ IF EXIST "%DEPLOYMENT_TARGET%\package.json" (
   ) ELSE (
     echo Yarn is installed
   )
-
 
   call :ExecuteCmd yarn install
   call :ExecuteCmd yarn build
