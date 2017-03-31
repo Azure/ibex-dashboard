@@ -13,39 +13,38 @@ return {
   },
   dataSources: [
     {
-      id: 'timespan',
-      type: 'Constant',
+      id: "timespan",
+      type: "Constant",
       params: {
-        values: ['24 hours', '1 week', '1 month', '3 months'],
-        selectedValue: '1 month'
+        values: ["24 hours", "1 week", "1 month", "3 months"],
+        selectedValue: "1 month"
       },
       calculated: (state, dependencies) => {
-        var queryTimespan = 
-              state.selectedValue === '24 hours' ? 'PT24H' : 
-              state.selectedValue === '1 week' ? 'P7D' : 
-              state.selectedValue === '1 month' ? 'P30D' : 
-              'P90D';
-        var granularity = 
-              state.selectedValue === '24 hours' ? '5m' : 
-              state.selectedValue === '1 week' ? '1d' : '1d';
+        var queryTimespan =
+          state.selectedValue === '24 hours' ? 'PT24H' :
+          state.selectedValue === '1 week' ? 'P7D' :
+          state.selectedValue === '1 month' ? 'P30D' :
+          'P90D';
+        var granularity =
+          state.selectedValue === '24 hours' ? '5m' :
+          state.selectedValue === '1 week' ? '1d' : '1d';
 
         return { queryTimespan, granularity };
       }
-    },
+    }, 
     {
-      id: 'conversions',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
+      id: "conversions",
+      type: "ApplicationInsights/Query",
+      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
       params: {
         query: ` customEvents` +
-          ` | extend successful=customDimensions.successful` +
-          ` | where name startswith 'message.convert'` +
-          ` | summarize event_count=count() by name, tostring(successful)`,
-        mappings: [
-          { key: 'name' },
-          { key: 'successful', val: (val) => val === 'true' },
-          { key: 'event_count', def: 0 }
-        ]
+            ` | extend successful=customDimensions.successful` +
+            ` | where name startswith 'message.convert'` +
+            ` | summarize event_count=count() by name, tostring(successful)`,
+        mappings: {
+          "successful": (val) => val === 'true',
+          "event_count": (val) => val || 0
+        }
       },
       calculated: (state) => {
         var { values } = state;
@@ -64,25 +63,23 @@ return {
 
         return { displayValues };
       }
-    },
+    }, 
     {
-      id: 'timeline',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan', granularity: 'timespan:granularity' },
+      id: "timeline",
+      type: "ApplicationInsights/Query",
+      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan", granularity: "timespan:granularity" },
       params: {
         query: (dependencies) => {
           var { granularity } = dependencies;
           return ` customEvents` +
-                   ` | where name == 'Activity'` + 
-                   ` | summarize event_count=count() by bin(timestamp, ${granularity}), name, tostring(customDimensions.channel)` +
-                   ` | order by timestamp asc `
+            ` | where name == 'Activity'` +
+            ` | summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel)` +
+            ` | order by timestamp asc `
         },
-        mappings: [
-          { key: 'time' },
-          { key: '__' },
-          { key: 'channel', def: 'unknown' },
-          { key: 'count', def: 0 }
-        ]
+        mappings: {
+          "channel": (val) => val || "unknown",
+          "count": (val) => val || 0,
+        }
       },
       calculated: (state) => {
         var _timeline = {};
@@ -91,11 +88,16 @@ return {
         var timespan = state.timespan;
 
         values.forEach(row => {
-          var { channel, time, count } = row;
-          var timeValue = (new Date(time)).getTime();
-          
-          if (!_timeline[timeValue]) _timeline[timeValue] = { time: (new Date(time)).toUTCString() };
-          if (!_channels[channel]) _channels[channel] = { name: channel, value: 0 };
+          var { channel, timestamp, count } = row;
+          var timeValue = (new Date(timestamp)).getTime();
+
+          if (!_timeline[timeValue]) _timeline[timeValue] = {
+            time: (new Date(timestamp)).toUTCString()
+          };
+          if (!_channels[channel]) _channels[channel] = {
+            name: channel,
+            value: 0
+          };
 
           _timeline[timeValue][channel] = count;
           _channels[channel].value += count;
@@ -110,22 +112,26 @@ return {
           return value;
         });
 
-        return { graphData: timeline, channelUsage, channels, timeFormat: (timespan === "24 hours" ? 'hour' : 'date') };
+        return {
+          graphData: timeline,
+          channelUsage,
+          channels,
+          timeFormat: (timespan === "24 hours" ? 'hour' : 'date')
+        };
       }
-    },
+    }, 
     {
-      id: 'errors',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
+      id: "errors",
+      type: "ApplicationInsights/Query",
+      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
       params: {
         query: ` exceptions` +
-          ` | summarize count_error=count() by handledAt, innermostMessage` +
-          ` | order by count_error desc `,
-        mappings: [
-          { key: 'handledAt', def: 'Unknown' },
-          { key: 'message', def: '' }, 
-          { key: 'count', def: '' }
-        ]
+            ` | summarize count_error=count() by handledAt, innermostMessage` +
+            ` | order by count_error desc `,
+        mappings: {
+          "handledAt": (val) => val || "Unknown",
+          "count": (val, row) => row.count_error
+        }
       },
       calculated: (state) => {
         var { values } = state;
@@ -153,20 +159,20 @@ return {
           handledAtUncaught
         };
       }
-    },
+    }, 
     {
-      id: 'intents',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
+      id: "intents",
+      type: "ApplicationInsights/Query",
+      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
       params: {
-        query: ` customEvents` + 
-                   ` | extend cslen = customDimensions.callstack_length, intent=customDimensions.intent` +
-                   ` | where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0` +
-                   ` | summarize event_count=count() by tostring(intent)`,
-        mappings: [
-          { key: 'intent', def: 'Unknown' },
-          { key: 'count', def: 0 }
-        ]
+        query: ` customEvents` +
+          ` | extend cslen = customDimensions.callstack_length, intent=customDimensions.intent` +
+          ` | where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0` +
+          ` | summarize count=count() by tostring(intent)`,
+        mappings: {
+          "intent": (val) => val || "Unknown",
+          "count": (val) => val || 0,
+        }
       },
       calculated: (state) => {
         return {
@@ -224,38 +230,38 @@ return {
   ],
   filters: [
     {
-      type: 'TextFilter',
-      dependencies: { selectedValue: 'timespan', values: 'timespan:values' },
-      actions: { onChange: 'timespan:updateSelectedValue' },
+      type: "TextFilter",
+      dependencies: { selectedValue: "timespan", values: "timespan:values" },
+      actions: { onChange: "timespan:updateSelectedValue" },
       first: true
     }
   ],
   elements: [
     {
-      id: 'timeline',
-      type: 'Timeline',
-      title: 'Message Rate',
-      subtitle: 'How many messages were sent per timeframe',
-      size: { w: 5, h: 8},
-      dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' }
-    },
+      id: "timeline",
+      type: "Timeline",
+      title: "Message Rate",
+      subtitle: "How many messages were sent per timeframe",
+      size: { w: 5, h: 8 },
+      dependencies: { values: "timeline:graphData", lines: "timeline:channels", timeFormat: "timeline:timeFormat" }
+    }, 
     {
-      id: 'channels',
-      type: 'PieData',
-      title: 'Channel Usage',
-      subtitle: 'Total messages sent per channel',
-      size: { w: 3, h: 8},
-      dependencies: { values: 'timeline:channelUsage' },
-      props: {
-        showLegend: false
+      id: "channels",
+      type: "PieData",
+      title: "Channel Usage",
+      subtitle: "Total messages sent per channel",
+      size: { w: 3, h: 8 },
+      dependencies: { values: "timeline:channelUsage" },
+      props: { 
+        showLegend: false 
       }
-    },
+    }, 
     {
-      id: 'errors',
-      type: 'Scorecard',
+      id: "errors",
+      type: "Scorecard",
       title: "Errors",
       size: { w: 2, h: 2},
-      dependencies: { value: 'errors:handledAtTotal', icon: 'errors:handledAtTotal_icon', className: 'errors:handledAtTotal_class' },
+      dependencies: { value: "errors:handledAtTotal", icon: "errors:handledAtTotal_icon", className: "errors:handledAtTotal_class" },
       actions: {
         onCardClick: {
           action: "dialog:errors",
@@ -276,45 +282,45 @@ return {
       dependencies: { value: 'users:value', icon: 'users:icon'},
     },
     {
-      id: 'intents',
-      type: 'BarData',
-      title: 'Intents Graph',
-      subtitle: 'Intents usage per time',
-      size: { w: 4, h: 8},
-      dependencies: { values: 'intents', bars: 'intents:bars' },
+      id: "intents",
+      type: "BarData",
+      title: "Intents Graph",
+      subtitle: "Intents usage per time",      
+      size: { w: 4, h: 8 },
+      dependencies: { values: "intents", bars: "intents:bars" },
       props: {
-        nameKey: 'intent'
+        nameKey: "intent"
       },
       actions: {
-        onBarClick: { 
-          action: 'dialog:conversations',
+        onBarClick: {
+          action: "dialog:conversations",
           params: {
-            title: 'args:intent',
-            intent: 'args:intent',
-            queryspan: 'timespan:queryTimespan'
+            title: "args:intent",
+            intent: "args:intent",
+            queryspan: "timespan:queryTimespan"
           }
         }
       }
-    },
+    }, 
     {
-      id: 'conversions',
-      type: 'PieData',
-      title: 'Conversion Rate',
-      subtitle: 'Total conversion rate',
-      size: { w: 4, h: 8},
-      dependencies: { values: 'conversions:displayValues' },
-      props: { 
-        pieProps: { nameKey: 'label', valueKey: 'count' }
+      id: "conversions",
+      type: "PieData",
+      title: "Conversion Rate",
+      subtitle: "Total conversion rate",
+      size: { w: 4, h: 8 },
+      dependencies: { values: "conversions:displayValues" },
+      props: {
+        pieProps: { nameKey: "label", valueKey: "count" }
       }
-    },
+    }, 
     {
-      id: 'timeline-area',
-      type: 'Area',
-      title: 'Message Rate',
-      subtitle: 'How many messages were sent per timeframe',
-      size: { w: 4, h: 8},
-      dependencies: { values: 'timeline:graphData', lines: 'timeline:channels', timeFormat: 'timeline:timeFormat' },
-      props: { 
+      id: "timeline-area",
+      type: "Area",
+      title: "Message Rate",
+      subtitle: "How many messages were sent per timeframe",
+      size: { w: 4, h: 8 },
+      dependencies: { values: "timeline:graphData", lines: "timeline:channels", timeFormat: "timeline:timeFormat" },
+      props: {
         isStacked: true,
         showLegend: false
       }
@@ -337,52 +343,55 @@ return {
   dialogs: [
     {
       id: "conversations",
-      width: '60%',
-      params: [ 'title', 'intent', 'queryspan' ],
-      dataSources: [
-        {
-          id: 'conversations-data',
-          type: 'ApplicationInsights/Query',
-          dependencies: { intent: 'dialog_conversations:intent', queryTimespan: 'dialog_conversations:queryspan' },
-          params: {
-            query: ({ intent }) => ` customEvents` + 
-                   ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
-                   ` | where name startswith "message.intent" and intent =~ '${intent}'` +
-                   ` | summarize event_count=count() by tostring(conversation)`,
-            mappings: [
-              { key: 'id', def: 'Unknown' },
-              { key: 'count', def: 0 }
-            ]
+      width: "60%",
+      params: ["title", "intent", "queryspan"],
+      dataSources: [{
+        id: "conversations-data",
+        type: "ApplicationInsights/Query",
+        dependencies: { intent: "dialog_conversations:intent", queryTimespan: "dialog_conversations:queryspan" },
+        params: {
+          query: ({ intent }) => ` customEvents` +
+            ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
+            ` | where name startswith "message.intent" and intent =~ '${intent}'` +
+            ` | summarize count=count(), maxTimestamp=max(timestamp) by tostring(conversation)` +
+            ` | order by maxTimestamp`,
+          mappings: {
+            "id": (val, row, idx) => `Conversation ${idx}`
           }
         }
-      ],
+      }],
       elements: [
         {
-          id: 'conversations-list',
-          type: 'Table',
-          title: 'Conversations',
-          size: { w: 12, h: 16},
-          dependencies: { values: 'conversations-data' },
+          id: "conversations-list",
+          type: "Table",
+          title: "Conversations",
+          size: { w: 12, h: 16 },
+          dependencies: { values: "conversations-data" },
           props: {
             cols: [{
-              header: 'Conversation Id',
-              field: 'id'
+              header: "Conversation Id",
+              field: "id"
             }, {
-              header: 'Count',
-              field: 'count'
+              header: "Last Message",
+              field: "maxTimestamp",
+              type: "time",
+              format: "MMM-DD HH:mm:ss"
             }, {
-              type: 'button',
-              value: 'chat',
-              onClick: 'openMessagesDialog'
+              header: "Count",
+              field: "count"
+            }, {
+              type: "button",
+              value: "chat",
+              onClick: "openMessagesDialog"
             }]
           },
           actions: {
-            openMessagesDialog: { 
-              action: 'dialog:messages',
+            openMessagesDialog: {
+              action: "dialog:messages",
               params: {
-                title: 'args:id',
-                conversation: 'args:id',
-                queryspan: 'timespan:queryTimespan'
+                title: "args:id",
+                conversation: "args:conversation",
+                queryspan: "timespan:queryTimespan"
               }
             }
           }
@@ -391,47 +400,40 @@ return {
     },
     {
       id: "messages",
-      width: '50%',
-      params: [ 'title', 'conversation', 'queryspan' ],
+      width: "50%",
+      params: ["title", "conversation", "queryspan"],
       dataSources: [
         {
-          id: 'messages-data',
-          type: 'ApplicationInsights/Query',
-          dependencies: { conversation: 'dialog_messages:conversation', queryTimespan: 'dialog_messages:queryspan' },
+          id: "messages-data",
+          type: "ApplicationInsights/Query",
+          dependencies: { conversation: "dialog_messages:conversation", queryTimespan: "dialog_messages:queryspan" },
           params: {
-            query: ({ conversation }) => ` customEvents` + 
-                   ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
-                   ` | where name in ("message.send", "message.received") and conversation == '${conversation}'` +
-                   ` | order by timestamp asc` +
-                   ` | project timestamp, name, customDimensions.text, customDimensions.userName, customDimensions.userId`,
-            mappings: [
-              { key: 'timestamp' },
-              { key: 'eventName' },
-              { key: 'message' },
-              { key: 'userName' },
-              { key: 'userId' }
-            ]
+            query: ({ conversation }) => ` customEvents` +
+              ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
+              ` | where name in ("message.send", "message.received") and conversation == '${conversation}'` +
+              ` | order by timestamp asc` +
+              ` | project timestamp, eventName=name, message=customDimensions.text, customDimensions.userName, customDimensions.userId`
           }
         }
       ],
       elements: [
         {
-          id: 'messages-list',
-          type: 'Table',
-          title: 'Messages',
-          size: { w: 12, h: 16},
-          dependencies: { values: 'messages-data' },
+          id: "messages-list",
+          type: "Table",
+          title: "Messages",
+          size: { w: 12, h: 16 },
+          dependencies: { values: "messages-data" },
           props: {
-            rowClassNameField: 'eventName',
+            rowClassNameField: "eventName",
             cols: [{
-              header: 'Timestamp',
-              width: '50px',
-              field: 'timestamp',
-              type: 'time',
-              format: 'MMM-DD HH:mm:ss'
+              header: "Timestamp",
+              width: "50px",
+              field: "timestamp",
+              type: "time",
+              format: "MMM-DD HH:mm:ss"
             }, {
-              header: 'Message',
-              field: 'message'
+              header: "Message",
+              field: "message"
             }]
           }
         }
@@ -442,186 +444,179 @@ return {
       width: "70%",
       params: ["title", "queryspan"],
       dataSources: [{
-        id: 'errors-data',
-        type: 'ApplicationInsights/Query',
-        dependencies: { queryTimespan: 'dialog_errors:queryspan' },
+        id: "errors-data",
+        type: "ApplicationInsights/Query",
+        dependencies: {
+          queryTimespan: "dialog_errors:queryspan"
+        },
         params: {
           query: () => ` exceptions` +
             ` | summarize errors=count() by type, innermostMessage` +
             ` | project type, innermostMessage, errors` +
-            ` | order by errors desc `,
-          mappings: [
-            { key: 'type', def: '' },
-            { key: 'innermostMessage', def: '' },
-            { key: 'count', def: 0 }
-          ]
+            ` | order by errors desc `
         }
       }],
       elements: [{
-        id: 'errors-list',
-        type: 'Table',
-        title: 'Errors',
-        size: { w: 12, h: 16 },
-        dependencies: { values: 'errors-data' },
+        id: "errors-list",
+        type: "Table",
+        title: "Errors",
+        size: {
+          w: 12,
+          h: 16
+        },
+        dependencies: {
+          values: "errors-data"
+        },
         props: {
           cols: [{
-            header: 'Type',
-            field: 'type'
+            header: "Type",
+            field: "type"
           }, {
-            header: 'Message',
-            field: 'innermostMessage'
+            header: "Message",
+            field: "innermostMessage"
           }, {
-            header: 'Count',
-            field: 'count'
+            header: "Count",
+            field: "errors"
           }, {
-            type: 'button',
-            value: 'more',
-            onClick: 'openErrorType'
+            type: "button",
+            value: "more",
+            onClick: "openErrorType"
           }]
         },
         actions: {
           openErrorType: {
-            action: 'dialog:errortypes',
+            action: "dialog:errortypes",
             params: {
-              title: 'args:type',
-              type: 'args:type',
-              innermostMessage: 'args:innermostMessage',
-              queryspan: 'timespan:queryTimespan'
+              title: "args:type",
+              type: "args:type",
+              innermostMessage: "args:innermostMessage",
+              queryspan: "timespan:queryTimespan"
             }
           }
         }
       }]
-    },
-    {
+    }, {
       id: "errortypes",
       width: "90%",
       params: ["title", "type", "handledAt", "innermostMessage", "queryspan"],
       dataSources: [{
-        id: 'errortypes-data',
-        type: 'ApplicationInsights/Query',
-        dependencies: { type: 'dialog_errortypes:type', innermostMessage: 'dialog_errortypes:innermostMessage', queryTimespan: 'dialog_errortypes:queryspan' },
+        id: "errortypes-data",
+        type: "ApplicationInsights/Query",
+        dependencies: {
+          type: "dialog_errortypes:type",
+          innermostMessage: "dialog_errortypes:innermostMessage",
+          queryTimespan: "dialog_errortypes:queryspan"
+        },
         params: {
           query: ({ type, innermostMessage }) => ` exceptions` +
             ` | where type == '${type}'` +
             ` | where innermostMessage == "${innermostMessage}"` +
             ` | extend conversationId=customDimensions["Conversation ID"]` +
-            ` | project type, innermostMessage, handledAt, conversationId, operation_Id`,
-          mappings: [
-            { key: 'type', def: '' },
-            { key: 'innermostMessage', def: '' },
-            { key: 'handledAt', def: '' },
-            { key: 'conversationId', def: '' },
-            { key: 'operationId', def: '' },
-          ]
+            ` | project type, innermostMessage, handledAt, conversationId, operation_Id`
         }
       }],
       elements: [{
-        id: 'errortypes-list',
-        type: 'Table',
-        title: 'Error types',
-        size: { w: 12, h: 16 },
-        dependencies: { values: 'errortypes-data' },
+        id: "errortypes-list",
+        type: "Table",
+        title: "Error types",
+        size: {
+          w: 12,
+          h: 16
+        },
+        dependencies: {
+          values: "errortypes-data"
+        },
         props: {
           cols: [{
-            header: 'Type',
-            field: 'type'
-          },
-          {
-            header: 'Message',
-            field: 'innermostMessage'
-          },
-          {
-            header: 'Handle',
-            field: 'handledAt'
-          },
-          {
-            header: 'Conversation ID',
-            field: 'conversationId'
-          },
-          {
-            header: 'Opereration ID',
-            field: 'operationId'
-          },
-          {
-            type: 'button',
-            value: 'more',
-            onClick: 'openErrorDetail'
+            header: "Type",
+            field: "type"
+          }, {
+            header: "Message",
+            field: "innermostMessage"
+          }, {
+            header: "Handle",
+            field: "handledAt"
+          }, {
+            header: "Conversation ID",
+            field: "conversationId"
+          }, {
+            header: "Opereration ID",
+            field: "operation_Id"
+          }, {
+            type: "button",
+            value: "more",
+            onClick: "openErrorDetail"
           }]
         },
         actions: {
           openErrorDetail: {
-            action: 'dialog:errordetail',
+            action: "dialog:errordetail",
             params: {
-              title: 'args:operationId',
-              type: 'args:type',
-              innermostMessage: 'args:innermostMessage',
-              handledAt: 'args:handledAt',
-              conversationId: 'args:conversationId',
-              operationId: 'args:operationId',
-              queryspan: 'timespan:queryTimespan'
+              title: "args:operation_Id",
+              type: "args:type",
+              innermostMessage: "args:innermostMessage",
+              handledAt: "args:handledAt",
+              conversationId: "args:conversationId",
+              operation_Id: "args:operation_Id",
+              queryspan: "timespan:queryTimespan"
             }
           }
         }
       }]
-    },
-    {
+    }, {
       id: "errordetail",
       width: "50%",
-      params: ["title", "handledAt", "type", "operationId", "queryspan"],
+      params: ["title", "handledAt", "type", "operation_Id", "queryspan"],
       dataSources: [{
-        id: 'errordetail-data',
-        type: 'ApplicationInsights/Query',
-        dependencies: { operationId: 'dialog_errordetail:operationId', queryTimespan: 'dialog_errordetail:queryspan' },
+        id: "errordetail-data",
+        type: "ApplicationInsights/Query",
+        dependencies: {
+          operation_Id: "dialog_errordetail:operation_Id",
+          queryTimespan: "dialog_errordetail:queryspan"
+        },
         params: {
-          query: ({ operationId }) => ` exceptions` +
-            ` | where operation_Id == '${operationId}'` +
+          query: ({ operation_Id }) => ` exceptions` +
+            ` | where operation_Id == '${operation_Id}'` +
             ` | extend conversationId=customDimensions["Conversation ID"]` +
-            ` | project handledAt, type, innermostMessage, conversationId, operation_Id, timestamp, details `,
-          mappings: [
-            { key: 'handledAt', def: '' },
-            { key: 'type', def: '' },
-            { key: 'innermostMessage', def: '' },
-            { key: 'conversationId', def: '' },
-            { key: 'operationId', def: '' },
-            { key: 'timestamp', def: '' },
-            { key: 'details', def: [] },
-          ]
+            ` | project handledAt, type, innermostMessage, conversationId, operation_Id, timestamp, details `
         }
       }],
       elements: [{
-        id: 'errordetail-item',
-        type: 'Detail',
-        title: 'Error detail',
-        size: { w: 12, h: 16 },
-        dependencies: { values: 'errordetail-data' },
+        id: "errordetail-item",
+        type: "Detail",
+        title: "Error detail",
+        size: {
+          w: 12,
+          h: 16
+        },
+        dependencies: {
+          values: "errordetail-data"
+        },
         props: {
           cols: [{
-            header: 'Handle',
-            field: 'handledAt'
+            header: "Handle",
+            field: "handledAt"
           }, {
-            header: 'Type',
-            field: 'type'
+            header: "Type",
+            field: "type"
           }, {
-            header: 'Message',
-            field: 'innermostMessage'
+            header: "Message",
+            field: "innermostMessage"
           }, {
-            header: 'Conversation ID',
-            field: 'conversationId'
-          },
-          {
-            header: 'Operation ID',
-            field: 'operationId'
-          },
-          {
-            header: 'Timestamp',
-            field: 'timestamp'
-          },
-          {
-            header: 'Details',
-            field: 'details'
+            header: "Conversation ID",
+            field: "conversationId"
+          }, {
+            header: "Operation ID",
+            field: "operation_Id"
+          }, {
+            header: "Timestamp",
+            field: "timestamp"
+          }, {
+            header: "Details",
+            field: "details"
           }]
         }
       }]
     }
   ]
-};
+}
