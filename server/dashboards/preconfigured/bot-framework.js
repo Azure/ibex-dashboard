@@ -183,9 +183,13 @@ return {
                 ` | summarize totalUsers=count() by user_Id`,
       },
       calculated: (state) => {
-        var value = _.values(state);
+        var { values } = state;
+        let result = 0;
+        if (values.length > 0 && values[0].length >= 1) {
+          result = values[0][1];
+        }
         return {
-          value: value,
+          value: result,
           icon: 'account_circle'
         };
       }
@@ -252,11 +256,22 @@ return {
       title: "Errors",
       size: { w: 2, h: 2},
       dependencies: { value: 'errors:handledAtTotal', icon: 'errors:handledAtTotal_icon', className: 'errors:handledAtTotal_class' },
+      actions: {
+        onCardClick: {
+          action: "dialog:errors",
+          params: {
+            title: "args:title",
+            type: "args:type",
+            innermostMessage: "args:innermostMessage",
+            queryspan: "timespan:queryTimespan"
+          }
+        }
+      }
     },
     {
       id: 'totalUsers',
       type: 'Scorecard',
-      title: "Total users",
+      title: "Total Users",
       size: { w: 2, h: 3},
       dependencies: { value: 'users:value', icon: 'users:icon'},
     },
@@ -307,7 +322,7 @@ return {
     {
       id: 'scatter',
       type: 'Scatter',
-      title: 'Channel activity',
+      title: 'Channel Activity',
       subtitle: 'Monitor channel activity across time of day',
       size: { w: 4, h: 8 },
       dependencies: { groupedValues:'channelActivity:groupedValues' },
@@ -421,6 +436,192 @@ return {
           }
         }
       ]
+    },
+    {
+      id: "errors",
+      width: "70%",
+      params: ["title", "queryspan"],
+      dataSources: [{
+        id: 'errors-data',
+        type: 'ApplicationInsights/Query',
+        dependencies: { queryTimespan: 'dialog_errors:queryspan' },
+        params: {
+          query: () => ` exceptions` +
+            ` | summarize errors=count() by type, innermostMessage` +
+            ` | project type, innermostMessage, errors` +
+            ` | order by errors desc `,
+          mappings: [
+            { key: 'type', def: '' },
+            { key: 'innermostMessage', def: '' },
+            { key: 'count', def: 0 }
+          ]
+        }
+      }],
+      elements: [{
+        id: 'errors-list',
+        type: 'Table',
+        title: 'Errors',
+        size: { w: 12, h: 16 },
+        dependencies: { values: 'errors-data' },
+        props: {
+          cols: [{
+            header: 'Type',
+            field: 'type'
+          }, {
+            header: 'Message',
+            field: 'innermostMessage'
+          }, {
+            header: 'Count',
+            field: 'count'
+          }, {
+            type: 'button',
+            value: 'more',
+            onClick: 'openErrorType'
+          }]
+        },
+        actions: {
+          openErrorType: {
+            action: 'dialog:errortypes',
+            params: {
+              title: 'args:type',
+              type: 'args:type',
+              innermostMessage: 'args:innermostMessage',
+              queryspan: 'timespan:queryTimespan'
+            }
+          }
+        }
+      }]
+    },
+    {
+      id: "errortypes",
+      width: "90%",
+      params: ["title", "type", "handledAt", "innermostMessage", "queryspan"],
+      dataSources: [{
+        id: 'errortypes-data',
+        type: 'ApplicationInsights/Query',
+        dependencies: { type: 'dialog_errortypes:type', innermostMessage: 'dialog_errortypes:innermostMessage', queryTimespan: 'dialog_errortypes:queryspan' },
+        params: {
+          query: ({ type, innermostMessage }) => ` exceptions` +
+            ` | where type == '${type}'` +
+            ` | where innermostMessage == "${innermostMessage}"` +
+            ` | extend conversationId=customDimensions["Conversation ID"]` +
+            ` | project type, innermostMessage, handledAt, conversationId, operation_Id`,
+          mappings: [
+            { key: 'type', def: '' },
+            { key: 'innermostMessage', def: '' },
+            { key: 'handledAt', def: '' },
+            { key: 'conversationId', def: '' },
+            { key: 'operationId', def: '' },
+          ]
+        }
+      }],
+      elements: [{
+        id: 'errortypes-list',
+        type: 'Table',
+        title: 'Error types',
+        size: { w: 12, h: 16 },
+        dependencies: { values: 'errortypes-data' },
+        props: {
+          cols: [{
+            header: 'Type',
+            field: 'type'
+          },
+          {
+            header: 'Message',
+            field: 'innermostMessage'
+          },
+          {
+            header: 'Handle',
+            field: 'handledAt'
+          },
+          {
+            header: 'Conversation ID',
+            field: 'conversationId'
+          },
+          {
+            header: 'Opereration ID',
+            field: 'operationId'
+          },
+          {
+            type: 'button',
+            value: 'more',
+            onClick: 'openErrorDetail'
+          }]
+        },
+        actions: {
+          openErrorDetail: {
+            action: 'dialog:errordetail',
+            params: {
+              title: 'args:operationId',
+              type: 'args:type',
+              innermostMessage: 'args:innermostMessage',
+              handledAt: 'args:handledAt',
+              conversationId: 'args:conversationId',
+              operationId: 'args:operationId',
+              queryspan: 'timespan:queryTimespan'
+            }
+          }
+        }
+      }]
+    },
+    {
+      id: "errordetail",
+      width: "50%",
+      params: ["title", "handledAt", "type", "operationId", "queryspan"],
+      dataSources: [{
+        id: 'errordetail-data',
+        type: 'ApplicationInsights/Query',
+        dependencies: { operationId: 'dialog_errordetail:operationId', queryTimespan: 'dialog_errordetail:queryspan' },
+        params: {
+          query: ({ operationId }) => ` exceptions` +
+            ` | where operation_Id == '${operationId}'` +
+            ` | extend conversationId=customDimensions["Conversation ID"]` +
+            ` | project handledAt, type, innermostMessage, conversationId, operation_Id, timestamp, details `,
+          mappings: [
+            { key: 'handledAt', def: '' },
+            { key: 'type', def: '' },
+            { key: 'innermostMessage', def: '' },
+            { key: 'conversationId', def: '' },
+            { key: 'operationId', def: '' },
+            { key: 'timestamp', def: '' },
+            { key: 'details', def: [] },
+          ]
+        }
+      }],
+      elements: [{
+        id: 'errordetail-item',
+        type: 'Detail',
+        title: 'Error detail',
+        size: { w: 12, h: 16 },
+        dependencies: { values: 'errordetail-data' },
+        props: {
+          cols: [{
+            header: 'Handle',
+            field: 'handledAt'
+          }, {
+            header: 'Type',
+            field: 'type'
+          }, {
+            header: 'Message',
+            field: 'innermostMessage'
+          }, {
+            header: 'Conversation ID',
+            field: 'conversationId'
+          },
+          {
+            header: 'Operation ID',
+            field: 'operationId'
+          },
+          {
+            header: 'Timestamp',
+            field: 'timestamp'
+          },
+          {
+            header: 'Details',
+            field: 'details'
+          }]
+        }
+      }]
     }
   ]
 };

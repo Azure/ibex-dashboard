@@ -1,19 +1,22 @@
 import PieData from './PieData';
-import TextFilter from './TextFilter'
-import Timeline from './Timeline'
-import Scatter from './Scatter'
-import Scorecard from './Scorecard'
-import BarData from './BarData'
-import Table from './Table'
-import Area from './Area'
+import TextFilter from './TextFilter';
+import Timeline from './Timeline';
+import Scatter from './Scatter';
+import BarData from './BarData';
+import Area from './Area';
+import Scorecard from './Scorecard';
+// dialog views
+import Table from './Table';
+import Detail from './Detail';
 
 export default {
   PieData,
   TextFilter,
   Timeline,
   Scatter,
-  Scorecard,
   BarData,
+  Area,
+  Scorecard,
   Table,
-  Area
+  Detail,
 };
