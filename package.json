@@ -24,6 +24,7 @@
     "alt-utils": "^1.0.0",
     "body-parser": "^1.17.1",
     "cookie-parser": "^1.4.3",
+    "express": "^4.15.2",
     "express-session": "^1.15.2",
     "lodash": "^4.17.4",
     "material-colors": "^1.2.5",
