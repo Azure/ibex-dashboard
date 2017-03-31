@@ -8,6 +8,9 @@ import SelectField from 'react-md/lib/SelectFields'
 import NavigationLink from './NavigationLink'
 import { Link } from 'react-router';
 
+import AccountStore from '../../stores/AccountStore';
+import AccountActions from '../../actions/AccountActions';
+
 import './style.css';
 
 const avatarSrc = 'https://cloud.githubusercontent.com/assets/13041/19686250/971bf7f8-9ac0-11e6-975c-188defd82df1.png'
@@ -28,57 +31,75 @@ const drawerHeaderChildren = [
     position={SelectField.Positions.BELOW}
     className='md-select-field--toolbar'
   />)
-]
+];
 
-export default ({ children = null, title = 'Ibex Dashboard' }) => {
+export default class Navbar extends React.Component<any, any> {
+  constructor(props) {
+    super(props);
 
-  var pathname = '/';
-  try { pathname = window.location.pathname; } catch (e) { }
+    this.state = AccountStore.getState();
+    AccountStore.listen((state) => {
+      this.setState(state);
+    });
+    AccountActions.updateAccount();
+  }
 
-  var navigationItems = [
-    <ListItem
-      key='0'
-      component={Link}
-      href='/'
-      active={pathname == '/'}
-      leftIcon={<FontIcon>home</FontIcon>}
-      tileClassName='md-list-tile--mini'
-      primaryText={'Home'}
-    />,
-    <ListItem
-      key='1'
-      component={Link}
-      href='/about'
-      active={pathname == '/about'}
-      leftIcon={<FontIcon>info</FontIcon>}
-      tileClassName='md-list-tile--mini'
-      primaryText={'About'}
-    />,
-    <ListItem
-      key='2'
-      component={Link}
-      href='/dashboard'
-      active={pathname == '/dashboard'}
-      leftIcon={<FontIcon>dashboard</FontIcon>}
-      tileClassName='md-list-tile--mini'
-      primaryText={'Dashboard'}
-    />
-  ];
+  render() {
+    let { children, title } = this.props;
+    let pathname = '/';
+    try { pathname = window.location.pathname; } catch (e) { }
 
-  return (
-    <div>
-      <NavigationDrawer
-        navItems={navigationItems}
-        contentClassName='md-grid'
-        drawerHeaderChildren={drawerHeaderChildren}
-        mobileDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-        tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-        desktopDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-        toolbarTitle={title}
-        toolbarActions={null}
-      >
-        {children}
-      </NavigationDrawer>
-    </div>
-  )
+    let navigationItems = [
+      <ListItem
+        key='0'
+        component={Link}
+        href='/'
+        active={pathname == '/'}
+        leftIcon={<FontIcon>home</FontIcon>}
+        tileClassName='md-list-tile--mini'
+        primaryText={'Home'}
+      />,
+      <ListItem
+        key='1'
+        component={Link}
+        href='/about'
+        active={pathname == '/about'}
+        leftIcon={<FontIcon>info</FontIcon>}
+        tileClassName='md-list-tile--mini'
+        primaryText={'About'}
+      />,
+      <ListItem
+        key='2'
+        component={Link}
+        href='/dashboard'
+        active={pathname == '/dashboard'}
+        leftIcon={<FontIcon>dashboard</FontIcon>}
+        tileClassName='md-list-tile--mini'
+        primaryText={'Dashboard'}
+      />
+    ];
+
+    let toolbarActions = (
+      <div className='md-subheading-1' style={{ paddingRight: 20 }}>
+        {this.state.account && 'Hello, ' + this.state.account.displayName || ''}
+      </div>
+    );
+
+    return (
+      <div>
+        <NavigationDrawer
+          navItems={navigationItems}
+          contentClassName='md-grid'
+          drawerHeaderChildren={drawerHeaderChildren}
+          mobileDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+          tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+          desktopDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+          toolbarTitle={title}
+          toolbarActions={toolbarActions}
+        >
+          {children}
+        </NavigationDrawer>
+      </div>
+    );
+  }
 }

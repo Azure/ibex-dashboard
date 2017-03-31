@@ -103,7 +103,7 @@ const router = new express.Router();
  * A path to enable initializing authentication configuration and add 
  * authentication to middleware pipeline
 */
-router.get('/init', function (req, res) {
+router.get('/init', (req, res) => {
   if (!authEnabled) {
     initializePassport();
     addAuthRoutes();
@@ -113,14 +113,30 @@ router.get('/init', function (req, res) {
 });
 
 /** 
+ * Returning logged in account information
+*/
+router.get('/account', (req, res) => {
+  if (!authEnabled) {
+    return res.json({ account: null });
+  }
+
+  if (req.user) {
+    return res.json({ account: req.user });
+  }
+
+  if (req.query.force) {
+    return res.json({ account: null });
+  }
+
+  return setTimeout(() => {
+    return res.redirect(req.originalUrl + '?force=1');
+  }, 7000);
+});
+
+/** 
  * Dynamically adding authentication routes once passport is initialized
 */
 function addAuthRoutes() {
-  // Authentications Routes
-
-  // app.get('/account', ensureAuthenticated, function(req, res){
-  //   res.render('account', { user: req.user });
-  // });
 
   router.get('/login',
     passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
