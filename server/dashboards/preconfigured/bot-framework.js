@@ -191,8 +191,8 @@ return {
       calculated: (state) => {
         var { values } = state;
         let result = 0;
-        if (values.length > 0 && values[0].length >= 1) {
-          result = values[0][1];
+        if (values.length === 1 && values[0].totalUsers > 0) {
+          result = values[0].totalUsers;
         }
         return {
           value: result,
