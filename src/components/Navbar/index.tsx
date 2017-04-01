@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import NavigationDrawer from 'react-md/lib/NavigationDrawers'
-import FontIcon from 'react-md/lib/FontIcons'
-import ListItem from 'react-md/lib/Lists/ListItem'
-import Avatar from 'react-md/lib/Avatars'
-import SelectField from 'react-md/lib/SelectFields'
-import NavigationLink from './NavigationLink'
+import NavigationDrawer from 'react-md/lib/NavigationDrawers';
+import FontIcon from 'react-md/lib/FontIcons';
+import ListItem from 'react-md/lib/Lists/ListItem';
+import Avatar from 'react-md/lib/Avatars';
+import SelectField from 'react-md/lib/SelectFields';
+import NavigationLink from './NavigationLink';
 import { Link } from 'react-router';
 
 import AccountStore from '../../stores/AccountStore';
@@ -80,10 +80,34 @@ export default class Navbar extends React.Component<any, any> {
     ];
 
     let toolbarActions = (
-      <div className='md-subheading-1' style={{ paddingRight: 20 }}>
+      <div className='md-title' style={{ paddingRight: 20, color: 'white' }}>
         {this.state.account && 'Hello, ' + this.state.account.displayName || ''}
       </div>
     );
+
+    if (!title) {
+      switch(window.location.pathname) {
+        case '/':
+          title = 'Home';
+          break;
+
+        case '/about':
+          title = 'About';
+          break;
+
+        case '/dashboard':
+          title = 'Dashboard';
+          break;
+
+        case '/dashboard/config':
+          title = 'Dashboard Configuration';
+          break;
+
+        default:
+          title = 'Ibex Dashboard';
+          break;
+      }
+    }
 
     return (
       <div>
