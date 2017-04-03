@@ -96,7 +96,8 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     const { dialogData, dashboard } = this.props;
     const { id } = dialogData;
     const { dialogId, dialogArgs } = this.state;
-    var { title } = dialogArgs || { title: '' }
+    let { title } = dialogArgs || { title : '' };
+    if (title === undefined) title = '';
     var visible = id === dialogId;
 
     if (!visible) {

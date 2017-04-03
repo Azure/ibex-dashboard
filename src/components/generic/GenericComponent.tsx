@@ -74,11 +74,10 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
    * returns boolean option from state, passed props or default values (in that order).
    * @param property name of property
    */
-  is(property: string): boolean {
+  protected is(property: string): boolean {
     if (this.state[property] !== undefined && typeof(this.state[property]) === 'boolean') {
       return this.state[property];
     }
-
     let { props } = this.props;
     if (props && props[property] !== undefined && typeof(props[property]) === 'boolean') {
       return props[property] as boolean;

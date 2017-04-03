@@ -7,6 +7,7 @@ import { DataTable, TableHeader, TableBody, TableRow, TableColumn } from 'react-
 import { Card, CardText, TableCardHeader } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
+import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
 export interface ITableProps extends IGenericProps {
   props: {
@@ -53,7 +54,11 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     let { checkboxes, cols, rowClassNameField } = props;
     let { values } = this.state;
 
+    if (!values) {
+      return <CircularProgress key="loading" id="spinner" />;
+    }
     values = values || [];
+
 
     const rows = values.map((value, ri) => (
       <TableRow key={ri} className={rowClassNameField ? this.fixClassName(value[rowClassNameField]) : null}>
