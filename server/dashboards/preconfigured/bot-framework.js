@@ -31,95 +31,107 @@ return {
 
         return { queryTimespan, granularity };
       }
-    }, 
+    },
     {
-      id: "conversions",
-      type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
-      params: {
-        query: ` customEvents` +
-            ` | extend successful=customDimensions.successful` +
-            ` | where name startswith 'message.convert'` +
-            ` | summarize event_count=count() by name, tostring(successful)`,
-        mappings: {
-          "successful": (val) => val === 'true',
-          "event_count": (val) => val || 0
-        }
-      },
-      calculated: (state) => {
-        var { values } = state;
-
-        var total = _.find(values, { name: 'message.convert.start' });
-        var successful = _.find(values, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
-
-        if (!total) {
-          return null;
-        }
-
-        var displayValues = [
-          { label: 'Successful', count: successful.event_count },
-          { label: 'Failed', count: total.event_count - successful.event_count + 5 },
-        ];
-
-        return { displayValues };
-      }
-    }, 
-    {
-      id: "timeline",
+			id: 'ai',
       type: "ApplicationInsights/Query",
       dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan", granularity: "timespan:granularity" },
-      params: {
-        query: (dependencies) => {
-          var { granularity } = dependencies;
-          return ` customEvents` +
-            ` | where name == 'Activity'` +
-            ` | summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel)` +
-            ` | order by timestamp asc `
-        },
-        mappings: {
-          "channel": (val) => val || "unknown",
-          "count": (val) => val || 0,
-        }
+			params: {
+				table: "customEvents",
+				queries: {
+					conversions: {
+						query: `` +
+								` extend successful=customDimensions.successful | ` +
+								` where name startswith 'message.convert' | ` +
+								` summarize event_count=count() by name, tostring(successful)`,
+						mappings: {
+							"successful": (val) => val === 'true',
+							"event_count": (val) => val || 0
+						}
+					},
+					timeline: {
+						query: (dependencies) => {
+							var { granularity } = dependencies;
+							return `` +
+								` where name == 'Activity' | ` +
+								` summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) | ` +
+								` order by timestamp asc `
+						},
+						mappings: {
+							"channel": (val) => val || "unknown",
+							"count": (val) => val || 0,
+						}
+					}
+				}
       },
-      calculated: (state) => {
-        var _timeline = {};
-        var _channels = {};
-        var values = state.values || [];
-        var timespan = state.timespan;
+			calculated: [
+				(state) => {
 
-        values.forEach(row => {
-          var { channel, timestamp, count } = row;
-          var timeValue = (new Date(timestamp)).getTime();
+					// Conversion Handling
+					// ===================
+					var { conversions } = state;
 
-          if (!_timeline[timeValue]) _timeline[timeValue] = {
-            time: (new Date(timestamp)).toUTCString()
-          };
-          if (!_channels[channel]) _channels[channel] = {
-            name: channel,
-            value: 0
-          };
+					var total = _.find(conversions, { name: 'message.convert.start' });
+					var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
 
-          _timeline[timeValue][channel] = count;
-          _channels[channel].value += count;
-        });
+					if (!total) {
+						return null;
+					}
 
-        var channels = Object.keys(_channels);
-        var channelUsage = _.values(_channels);
-        var timeline = _.map(_timeline, value => {
-          channels.forEach(channel => {
-            if (!value[channel]) value[channel] = 0;
-          });
-          return value;
-        });
+					var displayValues = [
+						{ label: 'Successful', count: successful.event_count },
+						{ label: 'Failed', count: total.event_count - successful.event_count + 5 },
+					];
 
-        return {
-          graphData: timeline,
-          channelUsage,
-          channels,
-          timeFormat: (timespan === "24 hours" ? 'hour' : 'date')
-        };
-      }
-    }, 
+					return {
+						"conversions-displayValues": displayValues
+					};
+				},
+				(state) => {
+
+					// Timeline handling
+					// =================
+
+					var { timeline } = state;
+					var _timeline = {};
+					var _channels = {};
+					var timeline = state.timeline || [];
+					var timespan = state.timespan;
+
+					timeline.forEach(row => {
+						var { channel, timestamp, count } = row;
+						var timeValue = (new Date(timestamp)).getTime();
+
+						if (!_timeline[timeValue]) _timeline[timeValue] = {
+							time: (new Date(timestamp)).toUTCString()
+						};
+						if (!_channels[channel]) _channels[channel] = {
+							name: channel,
+							value: 0
+						};
+
+						_timeline[timeValue][channel] = count;
+						_channels[channel].value += count;
+					});
+
+					var channels = Object.keys(_channels);
+					var channelUsage = _.values(_channels);
+					var timelineValues = _.map(_timeline, value => {
+						channels.forEach(channel => {
+							if (!value[channel]) value[channel] = 0;
+						});
+						return value;
+					});
+
+					return {
+						"timeline-graphData": timelineValues,
+						"timeline-channelUsage": channelUsage,
+						"timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
+						"timeline-channels": channels
+					};
+				}
+			]
+		},
     {
       id: "errors",
       type: "ApplicationInsights/Query",
@@ -243,7 +255,7 @@ return {
       title: "Message Rate",
       subtitle: "How many messages were sent per timeframe",
       size: { w: 5, h: 8 },
-      dependencies: { values: "timeline:graphData", lines: "timeline:channels", timeFormat: "timeline:timeFormat" }
+      dependencies: { values: "ai:timeline-graphData", lines: "ai:timeline-channels", timeFormat: "ai:timeline-timeFormat" }
     }, 
     {
       id: "channels",
@@ -251,7 +263,7 @@ return {
       title: "Channel Usage",
       subtitle: "Total messages sent per channel",
       size: { w: 3, h: 8 },
-      dependencies: { values: "timeline:channelUsage" },
+      dependencies: { values: "ai:timeline-channelUsage" },
       props: { 
         showLegend: false 
       }
@@ -308,7 +320,7 @@ return {
       title: "Conversion Rate",
       subtitle: "Total conversion rate",
       size: { w: 4, h: 8 },
-      dependencies: { values: "conversions:displayValues" },
+      dependencies: { values: "ai:conversions-displayValues" },
       props: {
         pieProps: { nameKey: "label", valueKey: "count" }
       }
@@ -319,7 +331,7 @@ return {
       title: "Message Rate",
       subtitle: "How many messages were sent per timeframe",
       size: { w: 4, h: 8 },
-      dependencies: { values: "timeline:graphData", lines: "timeline:channels", timeFormat: "timeline:timeFormat" },
+      dependencies: { values: "ai:timeline-graphData", lines: "ai:timeline-channels", timeFormat: "ai:timeline-timeFormat" },
       props: {
         isStacked: true,
         showLegend: false

@@ -14,8 +14,10 @@ export default class Scorecard extends GenericComponent<any, any> {
   }
 
   render() {
-    var { value, icon, className } = this.state;
-    var { title } = this.props;
+    let { value, icon, className } = this.state;
+    let { title } = this.props;
+
+    value = (value || '').toString();
 
     return (
       <Card onClick={this.handleClick}>

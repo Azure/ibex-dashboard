@@ -260,6 +260,15 @@ export class DataSourceConnector {
       });
     }
 
+    if (Array.isArray(calculated)) {
+      calculated.forEach(calc => {
+        var additionalValues = calc(state) || {};
+        Object.keys(additionalValues).forEach(key => {
+          result[key] = additionalValues[key];
+        });
+      });
+    }
+
     return result;
   }
 }

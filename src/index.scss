@@ -2,6 +2,7 @@
 
 $md-primary-color: $md-cyan-500;
 $md-secondary-color: $md-pink-a-200;
+$md-font-regular: 300;
 
 @include react-md-everything;
 
@@ -9,6 +10,24 @@ body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+}
+
+// Making sure titles are less bold
+h2, .md-subheading-2 {
+  font-weight: $md-font-regular;
+}
+
+.md-dialog.md-transition-in {
+    transform: translate3d(0px, 0px, 0px) scale(1);
+}
+
+/*=============*/
+/* Chips Style */
+/*=============*/
+.chip-list {
+  .md-chip {
+    margin: 1em 1em 0 0;
+  }
 }
 
 /*=============*/
@@ -33,6 +52,7 @@ body {
 .md-card-title {
   padding: 10px;
   padding-top: 10px;
+  font-weight: $md-font-regular;
 }
 
 .md-card .md-media {

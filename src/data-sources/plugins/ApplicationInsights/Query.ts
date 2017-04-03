@@ -27,13 +27,9 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
     var props = this._props;
     var params: any = props.params;
-    if (!params.query) {
-      throw new Error('AIAnalyticsEvents requires a query to run and dependencies that trigger updates.');
-    }
-
-    if (!props.dependencies.queryTimespan) {
-      throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
-    }
+    
+    // Validating params
+    this.validateParams(props, params);
   }
 
   /**
@@ -62,12 +58,38 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
       };
     }
 
-    var { queryTimespan } = dependencies;
+    let { queryTimespan } = dependencies;
+    let params: any = this._props.params;
+    let tableNames: Array<string> = [];
+    let mappings: Array<any> = [];
 
-    var params: any = this._props.params;
-    var query = typeof params.query === 'function' ? params.query(dependencies) : params.query;
-    var mappings = params.mappings;
+    // Checking if this is a single query or a fork query
+    let query: string;
+    let isForked = !params.query && params.table;
+
+    if (!isForked) {
+      query = this.compileQuery(params.query, dependencies);
+      mappings.push(params.mappings);
+
+    } else {
+      let queries: Array<any> = params.queries || [];
+      let table: string = params.table;
+
+      query = ` ${params.table} | fork `;
+      _.keys(queries).forEach(queryKey => {
+
+        let queryParams = queries[queryKey];
+        tableNames.push(queryKey);
+        mappings.push(queryParams.mappings);
+
+        let subquery = this.compileQuery(queryParams.query, dependencies);
+        query += ` (${subquery}) `;
+      });
+
+    }
+
     var queryspan = queryTimespan;
+
     var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${encodeURIComponent(query)}`;
 
     return (dispatch) => {
@@ -102,18 +124,22 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
             values: (resultTables.length && resultTables[0]) || null
           };
 
+          tableNames.forEach((table: string, idx: number) => {
+            returnedResults[table] = resultTables.length > idx ? resultTables[idx] : null;
+          });
+
           return dispatch(returnedResults);          
         });
     }
   }
 
-  private mapAllTables(results: IQueryResults, mappings: IDictionary): any[][] {
+  private mapAllTables(results: IQueryResults, mappings: Array<IDictionary>): any[][] {
 
     if (!results || !results.Tables || !results.Tables.length) {
       return [];
     }
 
-    return results.Tables.map(table => this.mapTable(table, mappings));
+    return results.Tables.map((table, idx) => this.mapTable(table, mappings[idx]));
   }
 
   /**
@@ -141,5 +167,38 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
       return row;
     });
+  }
+
+  private compileQuery(query: any, dependencies: any): string {
+    return typeof query === 'function' ? query(dependencies) : query;
+  }
+
+  private validateParams(props: any, params: any): void {
+
+    if (!props.dependencies.queryTimespan) {
+      throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
+    }
+
+    if (params.query) {
+      if (params.table || params.queries) {
+        throw new Error('Application Insights query should either have { query } or { table, queries } under params.');
+      }
+      if (typeof params.query !== 'string' && typeof params.query !== 'function') {
+        throw new Error('{ query } param should either be a function or a string.');
+      }
+    }
+
+    if (params.table) {
+      if (!params.queries) {
+        return this.failure(new Error('Application Insights query should either have { query } or { table, queries } under params.'));
+      }
+      if (typeof params.table !== 'string' || typeof params.queries !== 'object' || Array.isArray(params.queries)) {
+        throw new Error('{ table, queries } should be of types { "string", { query1: {...}, query2: {...} }  }.');
+      }
+    }
+
+    if (!params.query && !params.table) {
+      throw new Error('{ table, queries } should be of types { "string", { query1: {...}, query2: {...} }  }.');
+    }
   }
 }
