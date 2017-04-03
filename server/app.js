@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Setup logger
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'));
 
-app.use(authRouter.authenticationMiddleware('/auth'));
+app.use(authRouter.authenticationMiddleware('/auth', '/api/setup'));
 app.use('/auth', authRouter.router);
 app.use('/api', apiRouter.router);
 

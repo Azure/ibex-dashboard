@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 interface IQueryResults {
   Tables: IQueryResult[]
 }

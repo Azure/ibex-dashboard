@@ -77,3 +77,13 @@ type IAction = string | {
   action: string
   params: { [id: string]: string }
 }
+
+interface ISetupConfig {
+  stage: string;
+  admins: string[];
+  enableAuthentication: boolean;
+  allowHttp: boolean;
+  redirectUrl: string;
+  clientID: string;
+  clientSecret: string;
+}

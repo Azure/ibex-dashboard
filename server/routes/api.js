@@ -42,6 +42,33 @@ router.post('/dashboard.js', (req, res) => {
   })
 });
 
+router.get('/setup', (req, res) => {
+
+  let privateSetup = path.join(__dirname, '..', 'config', 'setup.private.json');
+  let initialSetup = path.join(__dirname, '..', 'config', 'setup.initial.json');
+  let configPath = fs.existsSync(privateSetup) ? privateSetup : initialSetup;
+
+  fs.readFile(configPath, 'utf8', (err, json) => {
+    if (err) { throw err; }
+
+    res.send(json);
+  });
+});
+
+router.post('/setup', (req, res) => {
+  var content = (req.body && req.body.json) || '';
+  console.dir(content);
+
+  fs.writeFile(path.join(__dirname, '..', 'config', 'setup.private.json'), content, err => {
+    if (err) {
+      console.error(err);
+      return res.end(err);
+    }
+
+    res.end(content);
+  })
+});
+
 module.exports = {
   router
 }

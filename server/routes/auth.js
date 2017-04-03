@@ -7,17 +7,18 @@ const passportAzureAD = require('passport-azure-ad');
 
 const OIDCStrategy = passportAzureAD.OIDCStrategy;
 
-let config = null;
 let authEnabled = false;
+let configAuth = require('../config/auth.basic');
+let configSetup = null;
 let redirectPath = null;
 
-if (fs.existsSync(path.join(__dirname, '..', 'config.private.js'))) {
-  config = require('../config.private');
-  authEnabled = true;
+if (fs.existsSync(path.join(__dirname, '..', 'config', 'setup.private.json'))) {
+  configSetup = require('../config/setup.private.json');
+  authEnabled = configSetup.enableAuthentication;
 }
 
 // array to hold logged in users
-var users = [];
+let users = [];
 function findByEmail(email, fn) {
   for (var i = 0, len = users.length; i < len; i++) {
     var user = users[i];
@@ -49,27 +50,23 @@ function initializePassport() {
     });
   });
 
-  if (!config) {
-    config = require('../config.private');
-  }
-
   // Use the OIDCStrategy within Passport. (Section 2) 
   // 
   //   Strategies in passport require a `validate` function, which accept
   //   credentials (in this case, an OpenID identifier), and invoke a callback
   //   with a user object.
   passport.use(new OIDCStrategy({
-      redirectUrl: config.creds.redirectUrl,
-      allowHttpForRedirectUrl: config.creds.allowHttpForRedirectUrl,
-      realm: config.creds.realm,
-      clientID: config.creds.clientID,
-      clientSecret: config.creds.clientSecret,
-      oidcIssuer: config.creds.issuer,
-      identityMetadata: config.creds.identityMetadata,
-      skipUserProfile: config.creds.skipUserProfile,
-      responseType: config.creds.responseType,
-      responseMode: config.creds.responseMode,
-      validateIssuer: config.creds.validateIssuer
+      redirectUrl: configSetup.redirectUrl,
+      allowHttpForRedirectUrl: configSetup.allowHttp,
+      realm: configAuth.realm,
+      clientID: configSetup.clientID,
+      clientSecret: configSetup.clientSecret,
+      oidcIssuer: configAuth.issuer,
+      identityMetadata: configAuth.identityMetadata,
+      skipUserProfile: configAuth.skipUserProfile,
+      responseType: configAuth.responseType,
+      responseMode: configAuth.responseMode,
+      validateIssuer: configAuth.validateIssuer
     },
     function(iss, sub, profile, accessToken, refreshToken, done) {
 
@@ -104,12 +101,17 @@ const router = new express.Router();
  * authentication to middleware pipeline
 */
 router.get('/init', (req, res) => {
-  if (!authEnabled) {
+
+  let configSetupContent = fs.readFileSync(path.join(__dirname, '..', 'config', 'setup.private.json'), 'utf8');
+  configSetup = JSON.parse(configSetupContent);
+  authEnabled = configSetup.enableAuthentication;
+
+  if (authEnabled) {
     initializePassport();
     addAuthRoutes();
-    authEnabled = true;
-    res.redirect('/');
   }
+
+  res.json({ success: true });
 });
 
 /** 
@@ -236,7 +238,7 @@ let authenticationMiddleware = function (...excludePaths) {
   function ensureAuthenticated(req, res, next) {
     if (!authEnabled || req.isAuthenticated()) { return next(); }
     redirectPath = req.path;
-    res.redirect('/auth/login');
+    res.redirect('/auth/login?redirect=' + encodeURIComponent(req.path));
   }
   
   // Returning an array of all middlewares to be called sequentially
