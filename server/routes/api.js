@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 
+const privateSetupPath = path.join(__dirname, '..', 'config', 'setup.private.json');
+const initialSetupPath = path.join(__dirname, '..', 'config', 'setup.initial.json');
 const router = new express.Router();
 
 router.get('/dashboard.js', (req, res) => {
@@ -42,11 +44,28 @@ router.post('/dashboard.js', (req, res) => {
   })
 });
 
+function isAuthoeizedToSetup(req) {
+  if (!fs.existsSync(privateSetupPath)) { return true; }
+  
+  let configString = fs.readFileSync(privateSetupPath, 'utf8');
+  let config = JSON.parse(configString);
+
+  if (!config || !config.enableAuthentication) { return true; }
+  if (!config.admins || !config.admins.length) { return true; }
+
+  let currentAdmin = (req.user && req.user.email.toLowerCase()) || null;
+  let isAdmin = config.admins.find(admin => admin.toLowerCase() === currentAdmin);
+
+  return true;
+}
+
 router.get('/setup', (req, res) => {
 
-  let privateSetup = path.join(__dirname, '..', 'config', 'setup.private.json');
-  let initialSetup = path.join(__dirname, '..', 'config', 'setup.initial.json');
-  let configPath = fs.existsSync(privateSetup) ? privateSetup : initialSetup;
+  if (!isAuthoeizedToSetup(req)) { 
+    return res.send({ error: new Error('User is not authorized to setup') });
+  }
+
+  let configPath = fs.existsSync(privateSetupPath) ? privateSetupPath : initialSetupPath;
 
   fs.readFile(configPath, 'utf8', (err, json) => {
     if (err) { throw err; }
@@ -56,6 +75,11 @@ router.get('/setup', (req, res) => {
 });
 
 router.post('/setup', (req, res) => {
+
+  if (!isAuthoeizedToSetup(req)) { 
+    return res.send({ error: new Error('User is not authorized to setup') });
+  }
+
   var content = (req.body && req.body.json) || '';
   console.dir(content);
 

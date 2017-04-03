@@ -17,6 +17,10 @@ h2, .md-subheading-2 {
   font-weight: $md-font-regular;
 }
 
+.md-dialog.md-transition-in {
+    transform: translate3d(0px, 0px, 0px) scale(1);
+}
+
 /*=============*/
 /* Chips Style */
 /*=============*/
