@@ -1,5 +1,48 @@
 .md-card .widgets {
-    position: absolute;
-    top: 10px;
-    right: 10px;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+}
+
+.md-card-scorecard {
+
+	.scorecard {
+
+		width: 100px;
+		overflow-x: hidden;
+		white-space: nowrap;
+		float: left; 
+		margin: 10px;
+
+		&.color-bottom {
+			.md-subheading-2 {
+				margin-bottom: 5px;
+			}
+			.scorecard-subheading {
+				padding-bottom: 5px;
+				border-bottom: solid 3px transparent;
+			}
+		}
+
+		&.color-left {
+			padding-left: 5px;
+			border-left: solid 3px transparent;
+		}
+
+		.md-headline {
+			margin-bottom: 0;
+			font-weight: 500;
+		}
+
+		.md-subheading-2 {
+			text-overflow: ellipsis;
+			overflow-x: hidden;
+		}
+
+		b {
+			margin-right: 5px;
+			margin-bottom: 0;
+			font-weight: 500;
+		}
+	}
 }
