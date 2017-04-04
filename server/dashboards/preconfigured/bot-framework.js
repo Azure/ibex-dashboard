@@ -61,11 +61,39 @@ return {
 							"channel": (val) => val || "unknown",
 							"count": (val) => val || 0,
 						}
-					}
+					},
+          intents: {
+            query: `` +
+              ` extend cslen = customDimensions.callstack_length, intent=customDimensions.intent | ` +
+              ` where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
+              ` summarize count=count() by tostring(intent)`,
+            mappings: {
+              "intent": (val) => val || "Unknown",
+              "count": (val) => val || 0,
+            }
+          },
+          users: {
+            query: `summarize totalUsers=count() by user_Id`
+          },
+          channelActivity: {
+            query: `` + 
+                    ` where name == 'Activity' | ` + 
+                    ` extend channel=customDimensions.channel | ` + 
+                    ` extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr | ` + 
+                    ` extend duration=tolong(customMeasurements.duration/1000) | ` + 
+                    ` summarize count=count() by tolong(duration), tostring(channel), hourOfDay | ` + 
+                    ` order by hourOfDay asc`,
+            mappings: {
+              duration: (val) => val || 0,
+              channel: (val) => val || 'unknown'
+            }
+          }
 				}
       },
 			calculated: [
-				(state) => {
+				
+        // Conversions Extraction
+        (state) => {
 
 					// Conversion Handling
 					// ===================
@@ -87,7 +115,9 @@ return {
 						"conversions-displayValues": displayValues
 					};
 				},
-				(state) => {
+				
+        // Timeline Activity Extraction
+        (state) => {
 
 					// Timeline handling
 					// =================
@@ -129,7 +159,36 @@ return {
 						"timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
 						"timeline-channels": channels
 					};
-				}
+				},
+
+        // Intents Extraction
+        (state) => {
+          return {
+            "intents-bars": [ 'count' ]
+          };
+        },
+
+        // Users Extraction
+        (state) => {
+          var { users } = state;
+          let result = 0;
+          if (users.length === 1 && users[0].totalUsers > 0) {
+            result = users[0].totalUsers;
+          }
+          return {
+            "users-value": result,
+            "users-icon": 'account_circle'
+          };
+        },
+
+        // Channel Activity Extraction
+        (state) => {
+          var { channelActivity } = state;
+          var groupedValues = _.chain(channelActivity).groupBy('channel').value();
+          return {
+            "channelActivity-groupedValues": groupedValues
+          };
+        }
 			]
 		},
     {
@@ -169,73 +228,6 @@ return {
           handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
           handledAtTotal_class: handledAtTotal > 0 ? 'dash-error' : 'dash-success',
           handledAtUncaught
-        };
-      }
-    }, 
-    {
-      id: "intents",
-      type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
-      params: {
-        query: ` customEvents` +
-          ` | extend cslen = customDimensions.callstack_length, intent=customDimensions.intent` +
-          ` | where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0` +
-          ` | summarize count=count() by tostring(intent)`,
-        mappings: {
-          "intent": (val) => val || "Unknown",
-          "count": (val) => val || 0,
-        }
-      },
-      calculated: (state) => {
-        return {
-          bars: [ 'count' ]
-        };
-      }
-    },
-    {
-      id: 'users',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
-      params: {
-        query: ` customEvents` + 
-                ` | summarize totalUsers=count() by user_Id`,
-      },
-      calculated: (state) => {
-        var { values } = state;
-        let result = 0;
-        if (values.length === 1 && values[0].totalUsers > 0) {
-          result = values[0].totalUsers;
-        }
-        return {
-          value: result,
-          icon: 'account_circle'
-        };
-      }
-    },
-    {
-      id: 'channelActivity',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
-      params: {
-        query: ` customEvents` + 
-                ` | where name == 'Activity'` + 
-                ` | extend channel=customDimensions.channel` + 
-                ` | extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr` + 
-                ` | extend duration=tolong(customMeasurements.duration/1000) ` + 
-                ` | summarize count=count() by tolong(duration), tostring(channel), hourOfDay` + 
-                ` | order by hourOfDay asc`,
-        mappings: [
-          { key: 'duration', def: 0 },
-          { key: 'channel', def: 'unknown' },
-          { key: 'hourOfDay', def: 0 },
-          { key: 'count', def: 0 }
-        ]
-      },
-      calculated: (state) => {
-        var { values } = state;
-        var groupedValues = _.chain(values).groupBy('channel').value();
-        return {
-          groupedValues: groupedValues
         };
       }
     }
@@ -291,7 +283,7 @@ return {
       type: 'Scorecard',
       title: "Total Users",
       size: { w: 2, h: 3},
-      dependencies: { value: 'users:value', icon: 'users:icon'},
+      dependencies: { value: 'ai:users-value', icon: 'ai:users-icon'},
     },
     {
       id: "intents",
@@ -299,7 +291,7 @@ return {
       title: "Intents Graph",
       subtitle: "Intents usage per time",      
       size: { w: 4, h: 8 },
-      dependencies: { values: "intents", bars: "intents:bars" },
+      dependencies: { values: "ai:intents", bars: "ai:intents-bars" },
       props: {
         nameKey: "intent"
       },
@@ -343,7 +335,7 @@ return {
       title: 'Channel Activity',
       subtitle: 'Monitor channel activity across time of day',
       size: { w: 4, h: 8 },
-      dependencies: { groupedValues:'channelActivity:groupedValues' },
+      dependencies: { groupedValues:'ai:channelActivity-groupedValues' },
       props: {
         xDataKey: "hourOfDay",
         yDataKey: "duration",
