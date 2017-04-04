@@ -28,6 +28,7 @@ class SetupActions extends AbstractActions implements ISetupActions {
   save(setupConfig: ISetupConfig, successCallback: () => void) {
     return (dispatcher: (setupConfig: ISetupConfig) => void) => {
 
+      setupConfig.stage = 'configured';
       let stringConfig = JSON.stringify(setupConfig);
       
       request('/api/setup', {
