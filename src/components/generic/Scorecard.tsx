@@ -22,6 +22,16 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
     this.handleClick = this.handleClick.bind(this);
   }
 
+  shortFormatter(num: any): string {
+    if (typeof num !== 'number') { return num; }
+
+    return (
+      num > 999999 ? 
+        (num/1000000).toFixed(1) + 'M' :
+      num > 999 ? 
+        (num/1000).toFixed(1) + 'K' : num.toString());
+  }
+
   render() {
     let { values, value, icon, subvalue, color, className } = this.state;
     let { title, props, actions } = this.props;
@@ -90,13 +100,13 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
           {
             icon && <FontIcon className={className} style={iconStyle}>{icon}</FontIcon>
           }
-          <div className="md-headline">{value.value}</div>
+          <div className="md-headline">{this.shortFormatter(value.value)}</div>
           <div className="md-subheading-2">{value.heading}</div>
           {
             (value.subvalue || value.subheading) &&
             (
               <div className="scorecard-subheading" style={colorStyle}>
-                <b>{value.subvalue}</b>{value.subheading}
+                <b>{this.shortFormatter(value.subvalue)}</b>{value.subheading}
               </div>
             )
           }

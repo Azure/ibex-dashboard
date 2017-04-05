@@ -260,22 +260,6 @@ return {
         showLegend: false 
       }
     }, 
-    ,{
-			id: "channels",
-			type: "PieData",
-			title: "Channel Usage",
-			subtitle: "Total messages sent per channel",
-			size: {
-				w: 3,
-				h: 8
-			},
-			dependencies: {
-				values: "ai:timeline-channelUsage"
-			},
-			props: {
-				showLegend: false
-			}
-		},
     {
 			id: "scores",
 			type: "Scorecard",
@@ -333,7 +317,28 @@ return {
 					}
 				}
 			}
-		}, 
+		},
+    {
+      id: "intents",
+      type: "BarData",
+      title: "Intents Graph",
+      subtitle: "Intents usage per time",      
+      size: { w: 4, h: 8 },
+      dependencies: { values: "ai:intents", bars: "ai:intents-bars" },
+      props: {
+        nameKey: "intent"
+      },
+      actions: {
+        onBarClick: {
+          action: "dialog:conversations",
+          params: {
+            title: "args:intent",
+            intent: "args:intent",
+            queryspan: "timespan:queryTimespan"
+          }
+        }
+      }
+    },
     {
       id: "conversions",
       type: "PieData",
