@@ -6,9 +6,9 @@ import FontIcon from 'react-md/lib/FontIcons';
 import * as _ from 'lodash';
 
 interface IScorecardProps extends IGenericProps {
-  scorecardWidth?: number;
-  colorPosition?: 'bottom' | 'left';
   props: {
+    scorecardWidth?: number;
+    colorPosition?: 'bottom' | 'left';
     subheading?: string;
     onClick?: string;
   }
@@ -24,8 +24,8 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
   render() {
     let { values, value, icon, subvalue, color, className } = this.state;
-    let { title, props, scorecardWidth, colorPosition, actions } = this.props;
-    let { subheading, onClick } = props;
+    let { title, props, actions } = this.props;
+    let { subheading, colorPosition, scorecardWidth, onClick } = props;
 
     let style = {};
     if (scorecardWidth) {
