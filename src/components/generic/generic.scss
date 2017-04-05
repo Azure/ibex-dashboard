@@ -16,6 +16,10 @@
 
 		&.clickable-card {
 			cursor: pointer;
+
+			&:hover {
+				background-color: #ECEFF1;
+			}
 		}
 
 		&.color-bottom {

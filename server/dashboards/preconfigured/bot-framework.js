@@ -273,10 +273,11 @@ return {
 				className: "errors:handledAtTotal_class"
 			},
       props: {
-				subheading: "Avg"
+				subheading: "Avg",
+        onClick: "onErrorsClick"
 			},
 			actions: {
-        onCardClick: {
+        onErrorsClick: {
           action: "dialog:errors",
           params: {
             title: "args:title",

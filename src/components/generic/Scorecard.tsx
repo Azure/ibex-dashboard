@@ -8,6 +8,10 @@ import * as _ from 'lodash';
 interface IScorecardProps extends IGenericProps {
   scorecardWidth?: number;
   colorPosition?: 'bottom' | 'left';
+  props: {
+    subheading?: string;
+    onClick?: string;
+  }
 }
 
 export default class Scorecard extends GenericComponent<IScorecardProps, any> {
@@ -21,21 +25,18 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
   render() {
     let { values, value, icon, subvalue, color, className } = this.state;
     let { title, props, scorecardWidth, colorPosition, actions } = this.props;
-    let { subheading } = props;
+    let { subheading, onClick } = props;
 
     let style = {};
     if (scorecardWidth) {
       style['width'] = scorecardWidth;
     }
 
-    //colorPosition = colorPosition || 'bottom';
+    if (_.has(this.state, 'values')) {
+      // In case the user defined a "values" parameter
 
-    // In case the user defined a "values" parameter
-    if (values) {
-
-
-    // If not, check the user defined a "value" parameter
-    } else if (value) {
+    } else if (_.has(this.state, 'value')) {
+      // If not, check the user defined a "value" parameter
       value = (value || '').toString();
       values = [
         {
@@ -44,27 +45,48 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
           heading: title,
           subvalue: subvalue,
           subheading: subheading,
-          color: color
+          color: color,
+          onClick: onClick
         }
       ];
+
+    } else {
+      // Checking for dynamic card content like card_cardName_value, card_cardName_heading, ...
+      let dynamicCards = {};
+      Object.keys(this.state).map(key => {
+        if (key.startsWith('card_')) {
+          let key1 = key.substr('card_'.length);
+          if (key1.indexOf('_') > 0 && key1.length > key1.indexOf('_')) {
+            var cardName = key1.substr(0, key1.indexOf('_'));
+            var cardValue = key1.substr(key1.indexOf('_') + 1);
+            dynamicCards[cardName] = dynamicCards[cardName] || {};
+            dynamicCards[cardName][cardValue] = this.state[key];
+          }
+        }
+      });
+
+      values = Object.keys(dynamicCards).map(key => dynamicCards[key]);
     }
 
     values = values || [];
 
-    var cardClassName = 'scorecard ' + (actions.onCardClick ? 'clickable-card ' : '');
     var cards = values.map((value, idx) => {
       let colorStyle = {};
       let cardstyle = _.extend({}, style);
       let color = value.color || '';
+      let icon = value.icon;
       let iconStyle = icon && {color};
+      let onClick = value.onClick;
 
       if (!icon || colorPosition) {
         if (!colorPosition || colorPosition === 'bottom') { colorStyle['borderColor'] = color; }
         if (colorPosition === 'left') { cardstyle['borderColor'] = color; }
       }
 
+      let cardClassName = 'scorecard ' + (onClick ? 'clickable-card ' : '') + (colorPosition ? 'color-' + colorPosition : '');
+
       return (
-        <div key={idx} className={cardClassName + 'color-' + colorPosition} style={cardstyle}>
+        <div key={idx} className={cardClassName} style={cardstyle} onClick={this.handleClick.bind(this, value)}>
           {
             icon && <FontIcon className={className} style={iconStyle}>{icon}</FontIcon>
           }
@@ -83,7 +105,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
     });
 
     return (
-      <Card onClick={this.handleClick}>
+      <Card>
         <Media className='md-card-scorecard'>
           <div className="md-grid--no-spacing">
             {cards}
@@ -93,12 +115,14 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
     );
   }
 
-  handleClick(event, index) {
-    if (_.isEmpty(this.props.actions)) {
+  handleClick(value, proxy, event) {
+    if (value && value.onClick && _.isEmpty(this.props.actions)) {
       return;
     }
+
+    event.preventDefault();
     var { title } = this.props || '' as any;
-    var args = { ...this.state.value, title: title };
-    this.trigger('onCardClick', args);
+    var args = { ...value };
+    this.trigger(value.onClick, args);
   }
 }
