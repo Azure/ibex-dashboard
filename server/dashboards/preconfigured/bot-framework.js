@@ -40,7 +40,7 @@ return {
 				table: "customEvents",
 				queries: {
 					conversions: {
-						query: `` +
+						query: () => `` +
 								` extend successful=customDimensions.successful | ` +
 								` where name startswith 'message.convert' | ` +
 								` summarize event_count=count() by name, tostring(successful)`,
@@ -63,7 +63,7 @@ return {
 						}
 					},
           intents: {
-            query: `` +
+            query: () => `` +
               ` extend cslen = customDimensions.callstack_length, intent=customDimensions.intent | ` +
               ` where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
               ` summarize count=count() by tostring(intent)`,
@@ -76,7 +76,7 @@ return {
             query: `summarize totalUsers=count() by user_Id`
           },
           channelActivity: {
-            query: `` + 
+            query: () => `` + 
                     ` where name == 'Activity' | ` + 
                     ` extend channel=customDimensions.channel | ` + 
                     ` extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr | ` + 
@@ -196,7 +196,7 @@ return {
       type: "ApplicationInsights/Query",
       dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
       params: {
-        query: ` exceptions` +
+        query: () => ` exceptions` +
             ` | summarize count_error=count() by handledAt, innermostMessage` +
             ` | order by count_error desc `,
         mappings: {
@@ -225,8 +225,8 @@ return {
           errors,
           handlers: _.values(handlers),
           handledAtTotal,
-          handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
-          handledAtTotal_class: handledAtTotal > 0 ? 'dash-error' : 'dash-success',
+          handledAtTotal_color: handledAtTotal > 0 ? '#D50000' : '#AEEA00',
+					handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
           handledAtUncaught
         };
       }
@@ -264,9 +264,18 @@ return {
       id: "errors",
       type: "Scorecard",
       title: "Errors",
-      size: { w: 2, h: 2},
-      dependencies: { value: "errors:handledAtTotal", icon: "errors:handledAtTotal_icon", className: "errors:handledAtTotal_class" },
-      actions: {
+      size: { w: 2, h: 3},
+      dependencies: {
+				value: "errors:handledAtTotal",
+				color: "errors:handledAtTotal_color",
+				icon: "errors:handledAtTotal_icon",
+				subvalue: "errors:handledAtTotal",
+				className: "errors:handledAtTotal_class"
+			},
+      props: {
+				subheading: "Avg"
+			},
+			actions: {
         onCardClick: {
           action: "dialog:errors",
           params: {

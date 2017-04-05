@@ -14,13 +14,17 @@
 		float: left; 
 		margin: 10px;
 
+		&.clickable-card {
+			cursor: pointer;
+		}
+
 		&.color-bottom {
 			.md-subheading-2 {
 				margin-bottom: 5px;
 			}
 			.scorecard-subheading {
-				padding-bottom: 5px;
-				border-bottom: solid 3px transparent;
+				padding-bottom: 4px;
+				border-bottom: solid 4px transparent;
 			}
 		}
 
@@ -28,6 +32,12 @@
 			padding-left: 5px;
 			border-left: solid 3px transparent;
 		}
+
+		.md-icon {
+			float: left;
+			padding: 3px 3px 0 0;
+		}
+
 
 		.md-headline {
 			margin-bottom: 0;

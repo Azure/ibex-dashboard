@@ -19,50 +19,55 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
   }
 
   render() {
-    let { value, icon, className } = this.state;
-    let { title, scorecardWidth, colorPosition } = this.props;
+    let { values, value, icon, subvalue, color, className } = this.state;
+    let { title, props, scorecardWidth, colorPosition, actions } = this.props;
+    let { subheading } = props;
 
     let style = {};
     if (scorecardWidth) {
       style['width'] = scorecardWidth;
     }
 
-    colorPosition = colorPosition || 'bottom';
+    //colorPosition = colorPosition || 'bottom';
 
-    value = (value || '').toString();
+    // In case the user defined a "values" parameter
+    if (values) {
 
-    var values = [
-      {
-        value: value || 0,
-        heading: title,
-        subvalue: '000',
-        subheading: 'Avarege',
-        color: ''
-      },
-      {
-        value: '0,000.00',
-        heading: 'Total Messages',
-        subvalue: '000',
-        subheading: 'Avarege',
-        color: ''
-      },
-      {
-        value: '0,000.00',
-        heading: 'Total Messages',
-        subvalue: '000',
-        subheading: 'Avarege',
-        color: ''
-      }
-    ];
 
+    // If not, check the user defined a "value" parameter
+    } else if (value) {
+      value = (value || '').toString();
+      values = [
+        {
+          value: value || 0,
+          icon: icon,
+          heading: title,
+          subvalue: subvalue,
+          subheading: subheading,
+          color: color
+        }
+      ];
+    }
+
+    values = values || [];
+
+    var cardClassName = 'scorecard ' + (actions.onCardClick ? 'clickable-card ' : '');
     var cards = values.map((value, idx) => {
       let colorStyle = {};
       let cardstyle = _.extend({}, style);
-      let color = value.color || 'transparent';
-      if (colorPosition === 'bottom') { colorStyle['borderBottomColor'] = color; }
-      if (colorPosition === 'left') { cardstyle['borderLeftColor'] = color; }
+      let color = value.color || '';
+      let iconStyle = icon && {color};
+
+      if (!icon || colorPosition) {
+        if (!colorPosition || colorPosition === 'bottom') { colorStyle['borderColor'] = color; }
+        if (colorPosition === 'left') { cardstyle['borderColor'] = color; }
+      }
+
       return (
-        <div key={idx} className={'scorecard color-' + colorPosition} style={cardstyle}>
+        <div key={idx} className={cardClassName + 'color-' + colorPosition} style={cardstyle}>
+          {
+            icon && <FontIcon className={className} style={iconStyle}>{icon}</FontIcon>
+          }
           <div className="md-headline">{value.value}</div>
           <div className="md-subheading-2">{value.heading}</div>
           {
@@ -80,15 +85,6 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
     return (
       <Card onClick={this.handleClick}>
         <Media className='md-card-scorecard'>
-          {/*<div className='md-grid md-headline'>
-            {icon &&
-              <div className="ms-cell md-cell--middle md-cell--2 dash-icon">
-                <FontIcon className={className}>{icon}</FontIcon>
-              </div>
-            }
-            <div className='md-cell'>{title}</div>
-            <div className='md-cell--right dash-value'>{value}</div>
-          </div>*/}
           <div className="md-grid--no-spacing">
             {cards}
           </div>
