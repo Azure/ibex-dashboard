@@ -260,62 +260,80 @@ return {
         showLegend: false 
       }
     }, 
+    ,{
+			id: "channels",
+			type: "PieData",
+			title: "Channel Usage",
+			subtitle: "Total messages sent per channel",
+			size: {
+				w: 3,
+				h: 8
+			},
+			dependencies: {
+				values: "ai:timeline-channelUsage"
+			},
+			props: {
+				showLegend: false
+			}
+		},
     {
-      id: "errors",
-      type: "Scorecard",
-      title: "Errors",
-      size: { w: 2, h: 3},
-      dependencies: {
+			id: "totalUsers",
+			type: "Scorecard",
+			size: { w: 2, h: 3 },
+			dependencies: {
+				card_errors_value: "errors:handledAtTotal",
+				card_errors_heading: "::Errors",
+				card_errors_color: "errors:handledAtTotal_color",
+				card_errors_icon: "errors:handledAtTotal_icon",
+				card_errors_subvalue: "errors:handledAtTotal",
+				card_errors_subheading: "::Avg",
+				card_errors_className: "errors:handledAtTotal_class",
+				card_errors_onClick: "::onErrorsClick",
+
+				card_users_value: "ai:users-value",
+				card_users_heading: "::Total Users",
+				card_users_icon: "ai:users-icon"
+			},
+			actions: {
+				onErrorsClick: {
+					action: "dialog:errors",
+					params: {
+						title: "args:heading",
+						type: "args:type",
+						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				}
+			}
+		},
+    {
+			id: "errors",
+			type: "Scorecard",
+			title: "Errors",
+			size: { w: 2, h: 3 },
+			dependencies: {
 				value: "errors:handledAtTotal",
 				color: "errors:handledAtTotal_color",
 				icon: "errors:handledAtTotal_icon",
 				subvalue: "errors:handledAtTotal",
 				className: "errors:handledAtTotal_class"
 			},
-      props: {
+			props: {
 				subheading: "Avg",
         onClick: "onErrorsClick"
 			},
 			actions: {
-        onErrorsClick: {
-          action: "dialog:errors",
-          params: {
-            title: "args:title",
-            type: "args:type",
-            innermostMessage: "args:innermostMessage",
-            queryspan: "timespan:queryTimespan"
-          }
-        }
-      }
-    },
-    {
-      id: 'totalUsers',
-      type: 'Scorecard',
-      title: "Total Users",
-      size: { w: 2, h: 3},
-      dependencies: { value: 'ai:users-value', icon: 'ai:users-icon'},
-    },
-    {
-      id: "intents",
-      type: "BarData",
-      title: "Intents Graph",
-      subtitle: "Intents usage per time",      
-      size: { w: 4, h: 8 },
-      dependencies: { values: "ai:intents", bars: "ai:intents-bars" },
-      props: {
-        nameKey: "intent"
-      },
-      actions: {
-        onBarClick: {
-          action: "dialog:conversations",
-          params: {
-            title: "args:intent",
-            intent: "args:intent",
-            queryspan: "timespan:queryTimespan"
-          }
-        }
-      }
-    }, 
+				onErrorsClick: {
+					action: "dialog:errors",
+					params: {
+						title: "args:heading",
+						type: "args:type",
+						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				}
+			}
+		}, 
     {
       id: "conversions",
       type: "PieData",
