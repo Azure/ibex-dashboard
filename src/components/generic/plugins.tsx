@@ -8,6 +8,7 @@ import Scorecard from './Scorecard';
 // dialog views
 import Table from './Table';
 import Detail from './Detail';
+import SplitPanel from './SplitPanel';
 
 export default {
   PieData,
@@ -19,4 +20,5 @@ export default {
   Scorecard,
   Table,
   Detail,
+  SplitPanel,
 };
