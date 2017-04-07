@@ -40,7 +40,7 @@ return {
 				table: "customEvents",
 				queries: {
 					conversions: {
-						query: `` +
+						query: () => `` +
 								` extend successful=customDimensions.successful | ` +
 								` where name startswith 'message.convert' | ` +
 								` summarize event_count=count() by name, tostring(successful)`,
@@ -61,11 +61,39 @@ return {
 							"channel": (val) => val || "unknown",
 							"count": (val) => val || 0,
 						}
-					}
+					},
+          intents: {
+            query: () => `` +
+              ` extend cslen = customDimensions.callstack_length, intent=customDimensions.intent | ` +
+              ` where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
+              ` summarize count=count() by tostring(intent)`,
+            mappings: {
+              "intent": (val) => val || "Unknown",
+              "count": (val) => val || 0,
+            }
+          },
+          users: {
+            query: `summarize totalUsers=count() by user_Id`
+          },
+          channelActivity: {
+            query: () => `` + 
+                    ` where name == 'Activity' | ` + 
+                    ` extend channel=customDimensions.channel | ` + 
+                    ` extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr | ` + 
+                    ` extend duration=tolong(customMeasurements.duration/1000) | ` + 
+                    ` summarize count=count() by tolong(duration), tostring(channel), hourOfDay | ` + 
+                    ` order by hourOfDay asc`,
+            mappings: {
+              duration: (val) => val || 0,
+              channel: (val) => val || 'unknown'
+            }
+          }
 				}
       },
 			calculated: [
-				(state) => {
+				
+        // Conversions Extraction
+        (state) => {
 
 					// Conversion Handling
 					// ===================
@@ -87,7 +115,9 @@ return {
 						"conversions-displayValues": displayValues
 					};
 				},
-				(state) => {
+				
+        // Timeline Activity Extraction
+        (state) => {
 
 					// Timeline handling
 					// =================
@@ -129,7 +159,36 @@ return {
 						"timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
 						"timeline-channels": channels
 					};
-				}
+				},
+
+        // Intents Extraction
+        (state) => {
+          return {
+            "intents-bars": [ 'count' ]
+          };
+        },
+
+        // Users Extraction
+        (state) => {
+          var { users } = state;
+          let result = 0;
+          if (users.length === 1 && users[0].totalUsers > 0) {
+            result = users[0].totalUsers;
+          }
+          return {
+            "users-value": result,
+            "users-icon": 'account_circle'
+          };
+        },
+
+        // Channel Activity Extraction
+        (state) => {
+          var { channelActivity } = state;
+          var groupedValues = _.chain(channelActivity).groupBy('channel').value();
+          return {
+            "channelActivity-groupedValues": groupedValues
+          };
+        }
 			]
 		},
     {
@@ -137,7 +196,7 @@ return {
       type: "ApplicationInsights/Query",
       dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
       params: {
-        query: ` exceptions` +
+        query: () => ` exceptions` +
             ` | summarize count_error=count() by handledAt, innermostMessage` +
             ` | order by count_error desc `,
         mappings: {
@@ -166,76 +225,9 @@ return {
           errors,
           handlers: _.values(handlers),
           handledAtTotal,
-          handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
-          handledAtTotal_class: handledAtTotal > 0 ? 'dash-error' : 'dash-success',
+          handledAtTotal_color: handledAtTotal > 0 ? '#D50000' : '#AEEA00',
+					handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
           handledAtUncaught
-        };
-      }
-    }, 
-    {
-      id: "intents",
-      type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
-      params: {
-        query: ` customEvents` +
-          ` | extend cslen = customDimensions.callstack_length, intent=customDimensions.intent` +
-          ` | where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0` +
-          ` | summarize count=count() by tostring(intent)`,
-        mappings: {
-          "intent": (val) => val || "Unknown",
-          "count": (val) => val || 0,
-        }
-      },
-      calculated: (state) => {
-        return {
-          bars: [ 'count' ]
-        };
-      }
-    },
-    {
-      id: 'users',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
-      params: {
-        query: ` customEvents` + 
-                ` | summarize totalUsers=count() by user_Id`,
-      },
-      calculated: (state) => {
-        var { values } = state;
-        let result = 0;
-        if (values.length === 1 && values[0].totalUsers > 0) {
-          result = values[0].totalUsers;
-        }
-        return {
-          value: result,
-          icon: 'account_circle'
-        };
-      }
-    },
-    {
-      id: 'channelActivity',
-      type: 'ApplicationInsights/Query',
-      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
-      params: {
-        query: ` customEvents` + 
-                ` | where name == 'Activity'` + 
-                ` | extend channel=customDimensions.channel` + 
-                ` | extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr` + 
-                ` | extend duration=tolong(customMeasurements.duration/1000) ` + 
-                ` | summarize count=count() by tolong(duration), tostring(channel), hourOfDay` + 
-                ` | order by hourOfDay asc`,
-        mappings: [
-          { key: 'duration', def: 0 },
-          { key: 'channel', def: 'unknown' },
-          { key: 'hourOfDay', def: 0 },
-          { key: 'count', def: 0 }
-        ]
-      },
-      calculated: (state) => {
-        var { values } = state;
-        var groupedValues = _.chain(values).groupBy('channel').value();
-        return {
-          groupedValues: groupedValues
         };
       }
     }
@@ -269,37 +261,70 @@ return {
       }
     }, 
     {
-      id: "errors",
-      type: "Scorecard",
-      title: "Errors",
-      size: { w: 2, h: 2},
-      dependencies: { value: "errors:handledAtTotal", icon: "errors:handledAtTotal_icon", className: "errors:handledAtTotal_class" },
-      actions: {
-        onCardClick: {
-          action: "dialog:errors",
-          params: {
-            title: "args:title",
-            type: "args:type",
-            innermostMessage: "args:innermostMessage",
-            queryspan: "timespan:queryTimespan"
-          }
-        }
-      }
-    },
+			id: "scores",
+			type: "Scorecard",
+			size: { w: 2, h: 3 },
+			dependencies: {
+				card_errors_value: "errors:handledAtTotal",
+				card_errors_heading: "::Errors",
+				card_errors_color: "errors:handledAtTotal_color",
+				card_errors_icon: "errors:handledAtTotal_icon",
+				card_errors_subvalue: "errors:handledAtTotal",
+				card_errors_subheading: "::Avg",
+				card_errors_className: "errors:handledAtTotal_class",
+				card_errors_onClick: "::onErrorsClick",
+
+				card_users_value: "ai:users-value",
+				card_users_heading: "::Total Users",
+				card_users_icon: "ai:users-icon"
+			},
+			actions: {
+				onErrorsClick: {
+					action: "dialog:errors",
+					params: {
+						title: "args:heading",
+						type: "args:type",
+						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				}
+			}
+		},
     {
-      id: 'totalUsers',
-      type: 'Scorecard',
-      title: "Total Users",
-      size: { w: 2, h: 3},
-      dependencies: { value: 'users:value', icon: 'users:icon'},
-    },
+			id: "errors",
+			type: "Scorecard",
+			title: "Errors",
+			size: { w: 2, h: 3 },
+			dependencies: {
+				value: "errors:handledAtTotal",
+				color: "errors:handledAtTotal_color",
+				icon: "errors:handledAtTotal_icon",
+				subvalue: "errors:handledAtTotal",
+				className: "errors:handledAtTotal_class"
+			},
+			props: {
+				subheading: "Avg",
+        onClick: "onErrorsClick"
+			},
+			actions: {
+				onErrorsClick: {
+					action: "dialog:errors",
+					params: {
+						title: "args:heading",
+						type: "args:type",
+						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				}
+			}
+		},
     {
       id: "intents",
       type: "BarData",
       title: "Intents Graph",
       subtitle: "Intents usage per time",      
       size: { w: 4, h: 8 },
-      dependencies: { values: "intents", bars: "intents:bars" },
+      dependencies: { values: "ai:intents", bars: "ai:intents-bars" },
       props: {
         nameKey: "intent"
       },
@@ -313,7 +338,7 @@ return {
           }
         }
       }
-    }, 
+    },
     {
       id: "conversions",
       type: "PieData",
@@ -343,7 +368,7 @@ return {
       title: 'Channel Activity',
       subtitle: 'Monitor channel activity across time of day',
       size: { w: 4, h: 8 },
-      dependencies: { groupedValues:'channelActivity:groupedValues' },
+      dependencies: { groupedValues:'ai:channelActivity-groupedValues' },
       props: {
         xDataKey: "hourOfDay",
         yDataKey: "duration",

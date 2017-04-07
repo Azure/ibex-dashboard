@@ -109,7 +109,15 @@ export class DataSourceConnector {
     Object.keys(dependencies).forEach(key => {
       
       // Find relevant store
-      let dependsUpon = dependencies[key].split(':');
+      let dependency = dependencies[key] || '';
+
+      // Checking if this is a constant value
+      if (dependency.startsWith('::')) {
+        result.dependencies[key] = dependency.substr(2);
+        return;
+      }
+
+      let dependsUpon = dependency.split(':');
       let dataSourceName = dependsUpon[0];
 
       if (dataSourceName === 'args' && args) {
@@ -123,7 +131,7 @@ export class DataSourceConnector {
       } else {
         let dataSource = DataSourceConnector.dataSources[dataSourceName];
         if (!dataSource) {
-          throw new Error('Could not find data source for depedency ' + dependencies[key]);
+          throw new Error('Could not find data source for depedency ' + dependency + '. If your want to use a constant value, write "value:some value"');
         }
 
         let valueName = dependsUpon.length > 1 ? dependsUpon[1] : dataSource.plugin.defaultProperty;
