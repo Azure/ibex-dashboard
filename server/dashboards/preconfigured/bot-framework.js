@@ -291,34 +291,6 @@ return {
 			}
 		},
     {
-			id: "errors",
-			type: "Scorecard",
-			title: "Errors",
-			size: { w: 2, h: 3 },
-			dependencies: {
-				value: "errors:handledAtTotal",
-				color: "errors:handledAtTotal_color",
-				icon: "errors:handledAtTotal_icon",
-				subvalue: "errors:handledAtTotal",
-				className: "errors:handledAtTotal_class"
-			},
-			props: {
-				subheading: "Avg",
-        onClick: "onErrorsClick"
-			},
-			actions: {
-				onErrorsClick: {
-					action: "dialog:errors",
-					params: {
-						title: "args:heading",
-						type: "args:type",
-						innermostMessage: "args:innermostMessage",
-						queryspan: "timespan:queryTimespan"
-					}
-				}
-			}
-		},
-    {
       id: "intents",
       type: "BarData",
       title: "Intents Graph",
