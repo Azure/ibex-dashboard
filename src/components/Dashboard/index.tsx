@@ -79,18 +79,27 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   onLayoutChange = (layout, layouts) => {
     // this.props.onLayoutChange(layout, layouts);
-    var breakpoint = this.state.currentBreakpoint;
-    var newLayouts = this.state.layouts;
-    newLayouts[breakpoint] = layout;
-    this.setState({
-      layouts: newLayouts
-    });
 
-    // Saving layout to API
-    let { dashboard } = this.props;
-    dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
-    dashboard.config.layout.layouts[breakpoint] = layout;
-    ConfigurationsActions.saveConfiguration(dashboard);
+    // Waiting for breakpoint to change
+    let currentBreakpoint = this.state.currentBreakpoint;
+    setTimeout(() => {
+
+      if (currentBreakpoint !== this.state.currentBreakpoint) { return; }
+
+      var breakpoint = this.state.currentBreakpoint;
+      var newLayouts = this.state.layouts;
+      newLayouts[breakpoint] = layout;
+      this.setState({
+        layouts: newLayouts
+      });
+
+      // Saving layout to API
+      let { dashboard } = this.props;
+      dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
+      dashboard.config.layout.layouts[breakpoint] = layout;
+      ConfigurationsActions.saveConfiguration(dashboard);
+    }, 500);
+      
   }
 
   render() {
