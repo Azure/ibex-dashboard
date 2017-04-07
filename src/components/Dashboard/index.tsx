@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 
 import Toolbar from 'react-md/lib/Toolbars';
 import { Spinner } from '../Spinner';
@@ -45,7 +46,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       const layout = dashboard.config.layout;
 
       // For each column, create a layout according to number of columns
-      var layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
+      let layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
+      layouts = _.extend(layouts, dashboard.config.layout.layouts || {});
 
       this.layouts = layouts;
       this.setState({ 
@@ -83,6 +85,12 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({
       layouts: newLayouts
     });
+
+    // Saving layout to API
+    let { dashboard } = this.props;
+    dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
+    dashboard.config.layout.layouts[breakpoint] = layout;
+    ConfigurationsActions.saveConfiguration(dashboard);
   }
 
   render() {

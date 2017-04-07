@@ -75,6 +75,16 @@ h2, .md-subheading-2 {
   }
 }
 
+.md-card {
+  .card-icon {
+    cursor: default;
+    position: relative;
+    z-index: 10;
+    float: right;
+    padding: 2px 7px;
+  }
+}
+
 .dash-error {
   color: $md-red-500;
 }
@@ -125,5 +135,25 @@ h2, .md-subheading-2 {
     td.message {
       text-align: right;
     }
+  }
+}
+
+
+/*================*/
+/* Minimal Design */
+/*================*/
+
+.md-card {
+  .md-text--secondary {
+    font-weight: 300;
+  } 
+
+  .md-media {
+    padding: 39px 0 0 0;
+    margin-top: -39px;
+  }
+
+  .widgets {
+    top: -5px;
   }
 }

@@ -106,7 +106,11 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
             (value.subvalue || value.subheading) &&
             (
               <div className="scorecard-subheading" style={colorStyle}>
-                <b>{this.shortFormatter(value.subvalue)}</b>{value.subheading}
+                {
+                  value.subvalue &&
+                  <b>{this.shortFormatter(value.subvalue)}</b>
+                }
+                {value.subheading}
               </div>
             )
           }

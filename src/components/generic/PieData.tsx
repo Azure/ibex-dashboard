@@ -12,10 +12,11 @@ var { ThemeColors } = colors;
 interface IPieProps extends IGenericProps {
   mode: string // users/messages
   props: {
-    pieProps: { [key: string] : Object }
-    showLegend: Boolean
-    width: Object
-    height: Object
+    pieProps: { [key: string] : Object };
+    showLegend: Boolean;
+    width: Object;
+    height: Object;
+    legendVerticalAlign?: 'top' | 'bottom';
   }
   theme?: string[]
 };
@@ -107,7 +108,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
   render() {
     var { values } = this.state;
     var { props, title, subtitle, layout, theme } = this.props;
-    var { pieProps, showLegend } = props;
+    var { pieProps, showLegend, legendVerticalAlign } = props;
 
     if (!values) {
       return null;
@@ -123,7 +124,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
           <PieChart>
             <Pie
               data={values} 
-              cx={Math.min(layout.h / 4, layout.w) * 60}
+              cx={Math.min(layout.h / 4, layout.w) * 70}
               innerRadius={60}
               fill="#8884d8"
               onMouseEnter={this.onPieEnter}
@@ -137,7 +138,16 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
               <Cell key={0} fill={colors.GoodColor}/>
               <Cell key={1} fill={colors.BadColor}/>
             </Pie>
-            {showLegend !== false && <Legend layout="vertical" align="right" verticalAlign="top" /> }
+            {
+              showLegend !== false && (
+                <Legend 
+                      layout="vertical" 
+                      align="right" 
+                      verticalAlign={legendVerticalAlign || 'top'} 
+                      wrapperStyle={{ paddingBottom: 10 }} 
+                />
+              )
+            }
           </PieChart>
         </ResponsiveContainer>
       </Card>
