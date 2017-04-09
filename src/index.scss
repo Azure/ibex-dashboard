@@ -85,6 +85,15 @@ h2, .md-subheading-2 {
   }
 }
 
+.react-draggable {
+  border: 2px solid gray;
+
+  .md-card {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+}
+
 .dash-error {
   color: $md-red-500;
 }

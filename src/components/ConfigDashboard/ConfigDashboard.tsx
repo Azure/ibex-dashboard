@@ -70,8 +70,12 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     this.onSave();
     
     setTimeout(() => {
-      window.location.reload();
+      window.location.replace('/dashboard');
     }, 2000);
+  }
+
+  onCancel() {
+    window.location.replace('/dashboard');    
   }
 
   render() {
@@ -121,6 +125,7 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
         <br/>
         <Button flat primary label="Save" onClick={this.onSave}>save</Button>
         <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
+        <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
       </div>
     );
   }
