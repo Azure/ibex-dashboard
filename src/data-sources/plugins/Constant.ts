@@ -1,20 +1,18 @@
 
 import * as _ from 'lodash';
-import {DataSourcePlugin, IDataSourceOptions} from './DataSourcePlugin';
+import {DataSourcePlugin, IOptions} from './DataSourcePlugin';
 
-interface IConstantOptions extends IDataSourceOptions {
-  params: {
-    values: Array<string>;
-    selectedValue: string;
-  };
+interface IConstantParams {
+  values: Array<string>;
+  selectedValue: string;
 }
 
-export default class Constant extends DataSourcePlugin {
+export default class Constant extends DataSourcePlugin<IConstantParams> {
 
   type = 'Constant';
   defaultProperty = 'selectedValue';
 
-  constructor(options: IConstantOptions, connections: IDict<IStringDictionary>) {
+  constructor(options: IOptions<IConstantParams>, connections: IDict<IStringDictionary>) {
     super(options, connections);
 
     var props = this._props;
