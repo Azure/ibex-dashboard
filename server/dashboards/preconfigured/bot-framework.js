@@ -572,6 +572,8 @@ return {
       calculated: (state) => {
         var { values } = state;
 
+        if (!values || !values.length) { return; }
+
         var errors = values;
         var handlers = {};
         var handledAtTotal = 0;
@@ -642,10 +644,6 @@ return {
 				card_errors_className: "errors:handledAtTotal_class",
 				card_errors_onClick: "::onErrorsClick",
 
-				card_users_value: "ai:users-value",
-				card_users_heading: "::Total Users",
-				card_users_icon: "ai:users-icon",
-
 				card_sentiment_value: "ai:sentiment-height",
 				card_sentiment_heading: "::Sentiment",
 				card_sentiment_color: "ai:sentiment-color",
@@ -653,9 +651,14 @@ return {
 				card_sentiment_subvalue: "ai:sentiment-subvalue",
 				card_sentiment_subheading: "ai:sentiment-subheading",
 
+				card_users_value: "ai:users-value",
+				card_users_heading: "::Total Users",
+				card_users_icon: "ai:users-icon",
+
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
-				card_conversions_icon: "::favorite"
+				card_conversions_icon: "::input",
+				card_conversions_color: "::#2196F3"
 			},
 			actions: {
 				onErrorsClick: {
