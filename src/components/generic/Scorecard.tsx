@@ -129,7 +129,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
     );
   }
 
-  handleClick(value, proxy, event) {
+  handleClick(value, proxy) {
     if (value && value.onClick && _.isEmpty(this.props.actions)) {
       return;
     }

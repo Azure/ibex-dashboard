@@ -630,10 +630,7 @@ return {
     {
 			id: "scores",
 			type: "Scorecard",
-			size: {
-				w: 4,
-				h: 3
-			},
+			size: { w: 4, h: 3 },
 			dependencies: {
 				card_errors_value: "errors:handledAtTotal",
 				card_errors_heading: "::Errors",
@@ -693,17 +690,6 @@ return {
         }
       }
     },
-    {
-      id: "conversions",
-      type: "PieData",
-      title: "Conversion Rate",
-      subtitle: "Total conversion rate",
-      size: { w: 4, h: 8 },
-      dependencies: { values: "ai:conversions-displayValues" },
-      props: {
-        pieProps: { nameKey: "label", valueKey: "count" }
-      }
-    }, 
     {
       id: "timeline-area",
       type: "Area",
