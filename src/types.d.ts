@@ -56,6 +56,7 @@ interface IFilter {
   type: string
   dependencies?: { [id: string]: string }
   actions?: { [id: string]: string }
+  title?: string
   first: boolean
 }
 

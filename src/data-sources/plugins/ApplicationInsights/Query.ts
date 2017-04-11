@@ -83,6 +83,11 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
         mappings.push(queryParams.mappings);
 
         let subquery = this.compileQuery(queryParams.query, dependencies);
+        const selectedChannels = dependencies.selectedChannels || [];
+        if (selectedChannels.length > 0 && !queryKey.startsWith("filter")) {
+          const filter = "where " + dependencies.selectedChannels.map((x) => "customDimensions.channel=='" + x + "'").join(' or ') + " | ";
+          subquery = ` ${filter} ${subquery} `;
+        }
         query += ` (${subquery}) `;
       });
 
@@ -131,6 +136,11 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
           return dispatch(returnedResults);          
         });
     }
+  }
+
+  updateSelectedValues(dependencies: IDictionary, selectedValues: any) {
+    var result = _.extend(dependencies, {selectedValues:selectedValues});
+    return result;
   }
 
   private mapAllTables(results: IQueryResults, mappings: Array<IDictionary>): any[][] {

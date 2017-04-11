@@ -33,9 +33,54 @@ return {
       }
     },
     {
+      id: "filterChannels",
+      type: "ApplicationInsights/Query",
+      dependencies: {
+        timespan: "timespan",
+        queryTimespan: "timespan:queryTimespan",
+        granularity: "timespan:granularity"
+      },
+      params: {
+        table: "customEvents",
+        queries: {
+          filterChannels: {
+            query: () => `` +
+              ` where name == 'Activity' | ` +
+              ` extend channel=customDimensions.channel | ` +
+              ` summarize channels=count() by tostring(channel) | ` +
+              ` order by channels`,
+            mappings: {
+              channel: (val) => val || "unknown",
+              channels: (val) => val || 0
+            }
+          }
+        }
+      },
+      calculated: (state) => {
+        var { filterChannels } = state;
+        const filters = filterChannels.map((x) => x.channel);
+
+        let { selectedValues } = state;
+        if (selectedValues === undefined) {
+          selectedValues = filters;
+        }
+
+        return {
+          "channels-count": filterChannels,
+          "channels-filters": filters,
+          "channels-selected": selectedValues,
+        };
+      }
+    },
+    {
 			id: 'ai',
       type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan", granularity: "timespan:granularity" },
+      dependencies: {
+        timespan: "timespan",
+        queryTimespan: "timespan:queryTimespan",
+        granularity: "timespan:granularity",
+        selectedChannels: "filterChannels:channels-selected"
+      },
 			params: {
 				table: "customEvents",
 				queries: {
@@ -172,7 +217,7 @@ return {
         (state) => {
           var { users } = state;
           let result = 0;
-          if (users.length === 1 && users[0].totalUsers > 0) {
+          if (users && users.length === 1 && users[0].totalUsers > 0) {
             result = users[0].totalUsers;
           }
           return {
@@ -237,6 +282,18 @@ return {
       type: "TextFilter",
       dependencies: { selectedValue: "timespan", values: "timespan:values" },
       actions: { onChange: "timespan:updateSelectedValue" },
+      first: true
+    },
+    {
+      type: "CheckboxFilter",
+      title: "Channels",
+      dependencies: {
+        selectedValues: "filterChannels:channels-selected",
+        values: "filterChannels:channels-filters"
+      },
+      actions: {
+        onChange: "filterChannels:updateSelectedValues"
+      },
       first: true
     }
   ],
