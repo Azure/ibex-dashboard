@@ -291,34 +291,6 @@ return {
 			}
 		},
     {
-			id: "errors",
-			type: "Scorecard",
-			title: "Errors",
-			size: { w: 2, h: 3 },
-			dependencies: {
-				value: "errors:handledAtTotal",
-				color: "errors:handledAtTotal_color",
-				icon: "errors:handledAtTotal_icon",
-				subvalue: "errors:handledAtTotal",
-				className: "errors:handledAtTotal_class"
-			},
-			props: {
-				subheading: "Avg",
-        onClick: "onErrorsClick"
-			},
-			actions: {
-				onErrorsClick: {
-					action: "dialog:errors",
-					params: {
-						title: "args:heading",
-						type: "args:type",
-						innermostMessage: "args:innermostMessage",
-						queryspan: "timespan:queryTimespan"
-					}
-				}
-			}
-		},
-    {
       id: "intents",
       type: "BarData",
       title: "Intents Graph",
@@ -478,10 +450,10 @@ return {
     },
     {
       id: "errors",
-      width: "70%",
+      width: "90%",
       params: ["title", "queryspan"],
       dataSources: [{
-        id: "errors-data",
+        id: "errors-group",
         type: "ApplicationInsights/Query",
         dependencies: {
           queryTimespan: "dialog_errors:queryspan"
@@ -491,58 +463,21 @@ return {
             ` | summarize errors=count() by type, innermostMessage` +
             ` | project type, innermostMessage, errors` +
             ` | order by errors desc `
+        },
+        calculated: (state) => {
+          const { values } = state;
+          return {
+            groups: values
+          };
         }
-      }],
-      elements: [{
-        id: "errors-list",
-        type: "Table",
-        title: "Errors",
-        size: {
-          w: 12,
-          h: 16
-        },
-        dependencies: {
-          values: "errors-data"
-        },
-        props: {
-          cols: [{
-            header: "Type",
-            field: "type"
-          }, {
-            header: "Message",
-            field: "innermostMessage"
-          }, {
-            header: "Count",
-            field: "errors"
-          }, {
-            type: "button",
-            value: "more",
-            onClick: "openErrorType"
-          }]
-        },
-        actions: {
-          openErrorType: {
-            action: "dialog:errortypes",
-            params: {
-              title: "args:type",
-              type: "args:type",
-              innermostMessage: "args:innermostMessage",
-              queryspan: "timespan:queryTimespan"
-            }
-          }
-        }
-      }]
-    }, {
-      id: "errortypes",
-      width: "90%",
-      params: ["title", "type", "handledAt", "innermostMessage", "queryspan"],
-      dataSources: [{
-        id: "errortypes-data",
+      },
+      {
+        id: "errors-selection",
         type: "ApplicationInsights/Query",
         dependencies: {
-          type: "dialog_errortypes:type",
-          innermostMessage: "dialog_errortypes:innermostMessage",
-          queryTimespan: "dialog_errortypes:queryspan"
+          queryTimespan: "dialog_errors:queryspan",
+          type: "args:type",
+          innermostMessage: "args:innermostMessage"
         },
         params: {
           query: ({ type, innermostMessage }) => ` exceptions` +
@@ -553,15 +488,16 @@ return {
         }
       }],
       elements: [{
-        id: "errortypes-list",
-        type: "Table",
-        title: "Error types",
+        id: "errors-list",
+        type: "SplitPanel",
+        title: "Errors",
         size: {
           w: 12,
           h: 16
         },
         dependencies: {
-          values: "errortypes-data"
+          groups: "errors-group",
+          values: "errors-selection",
         },
         props: {
           cols: [{
@@ -571,21 +507,32 @@ return {
             header: "Message",
             field: "innermostMessage"
           }, {
-            header: "Handle",
-            field: "handledAt"
+            header: "HandledAt",
+            field: "innermostMessage"
           }, {
-            header: "Conversation ID",
+            header: "Conversation Id",
             field: "conversationId"
           }, {
-            header: "Opereration ID",
+            header: "Operation Id",
             field: "operation_Id"
           }, {
             type: "button",
             value: "more",
             onClick: "openErrorDetail"
-          }]
+          }],
+          fieldTitle: "type",
+          fieldCount: "errors",
         },
         actions: {
+          select: {
+            action: "errors-selection:updateDependencies",
+            params: {
+              title: "args:type",
+              type: "args:type",
+              innermostMessage: "args:innermostMessage",
+              queryspan: "timespan:queryTimespan"
+            }
+          },
           openErrorDetail: {
             action: "dialog:errordetail",
             params: {
@@ -600,7 +547,8 @@ return {
           }
         }
       }]
-    }, {
+    },
+    {
       id: "errordetail",
       width: "50%",
       params: ["title", "handledAt", "type", "operation_Id", "queryspan"],

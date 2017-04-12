@@ -156,7 +156,7 @@ export class DataSourceConnector {
     var actionName = actionLocation[1];
 
     if (dataSourceName === 'dialog') {
-
+      
       var extrapolation = DataSourceConnector.extrapolateDependencies(params, args);
 
       DialogsActions.openDialog(actionName, extrapolation.dependencies);
@@ -190,9 +190,13 @@ export class DataSourceConnector {
 
         // This method will be called with an action is dispatched
         NewActionClass.prototype[action] = function (...args) {
-
           // Collecting depedencies from all relevant stores
-          var extrapolation = DataSourceConnector.extrapolateDependencies(plugin.getDependencies());
+          var extrapolation;
+          if (args.length === 1) {
+            extrapolation = DataSourceConnector.extrapolateDependencies(plugin.getDependencies(), args[0]);
+          } else {
+            extrapolation = DataSourceConnector.extrapolateDependencies(plugin.getDependencies());
+          }
 
           // Calling action with arguments
           var result = plugin[action].call(this, extrapolation.dependencies, ...args) || {};
