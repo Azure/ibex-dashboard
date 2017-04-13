@@ -15,7 +15,6 @@ import FontIcon from 'react-md/lib/FontIcons';
 const style = {
     container: {
         position: "relative",
-        backgroundColor: "cyan",
         float: "left"
     },
     list: {
