@@ -7,6 +7,7 @@ import Scorecard from './Scorecard';
 // filters
 import TextFilter from './TextFilter';
 import CheckboxFilter from './CheckboxFilter';
+import MenuFilter from './MenuFilter';
 // dialog views
 import Table from './Table';
 import Detail from './Detail';
@@ -20,6 +21,7 @@ export default {
   Scorecard,
   TextFilter,
   CheckboxFilter,
+  MenuFilter,
   Table,
   Detail,
 };

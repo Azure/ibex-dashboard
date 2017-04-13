@@ -285,8 +285,8 @@ return {
       first: true
     },
     {
-      type: "CheckboxFilter",
-      title: "Channels",
+      type: "MenuFilter",
+      title: "Filter Channels",
       dependencies: {
         selectedValues: "filterChannels:channels-selected",
         values: "filterChannels:channels-filters"

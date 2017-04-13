@@ -11,6 +11,11 @@ const style = {
 
 export default class CheckboxFilter extends GenericComponent<any, any> {
 
+  state = {
+    values: [],
+    selectedValues: []
+  };
+
   constructor(props) {
     super(props);
 
@@ -18,7 +23,7 @@ export default class CheckboxFilter extends GenericComponent<any, any> {
   }
 
   onChange(newValue, checked, event) {
-    var { selectedValues, values } = this.state || [];
+    var { selectedValues } = this.state;
     let newSelectedValues = selectedValues.slice(0);
 
     const idx = selectedValues.findIndex((x) => x === newValue);
@@ -35,9 +40,9 @@ export default class CheckboxFilter extends GenericComponent<any, any> {
 
   render() {
     var { title } = this.props;
-    var { selectedValues, values } = this.state || [];
+    var { selectedValues, values } = this.state;
     values = values || [];
-    
+
     let checkboxes = values.map((value, idx) => {
       return (<Checkbox
         key={idx}
