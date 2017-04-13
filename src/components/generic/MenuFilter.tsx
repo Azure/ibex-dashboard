@@ -1,16 +1,11 @@
 import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
-import Menu from 'react-md/lib/Menus/Menu';
-import MenuButton from 'react-md/lib/Menus/MenuButton';
 import Button from 'react-md/lib/Buttons';
 import Portal from 'react-md/lib/Helpers/Portal';
 import AccessibleFakeButton from 'react-md/lib/Helpers/AccessibleFakeButton';
-import cn from 'classnames';
 import List from 'react-md/lib/Lists/List';
-import ListItem from 'react-md/lib/Lists/ListItem';
 import ListItemControl from 'react-md/lib/Lists/ListItemControl';
 import Checkbox from 'react-md/lib/SelectionControls/Checkbox';
-import FontIcon from 'react-md/lib/FontIcons';
 
 const style = {
     container: {
