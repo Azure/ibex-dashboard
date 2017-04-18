@@ -7,9 +7,9 @@ import * as _ from 'lodash';
 
 const styles = {
   chevron: {
-    position: "absolute",
-    top: "calc(50% - 27px/2)",
-    right: 0,
+    float: "none",
+    padding: 0,
+    verticalAlign: "middle"
   }
 };
 
@@ -34,10 +34,10 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
     if (typeof num !== 'number') { return num; }
 
     return (
-      num > 999999 ? 
-        (num/1000000).toFixed(1) + 'M' :
-      num > 999 ? 
-        (num/1000).toFixed(1) + 'K' : num.toString());
+      num > 999999 ?
+        (num / 1000000).toFixed(1) + 'M' :
+        num > 999 ?
+          (num / 1000).toFixed(1) + 'K' : num.toString());
   }
 
   render() {
@@ -93,15 +93,20 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
       let cardstyle = _.extend({}, style);
       let color = value.color || '';
       let icon = value.icon;
-      let iconStyle = icon && {color};
+      let iconStyle = icon && { color };
       let onClick = value.onClick;
+
+      let chevronStyle = _.extend({}, styles.chevron);
+      chevronStyle['color'] = color;
 
       if (!icon || colorPosition) {
         if (!colorPosition || colorPosition === 'bottom') { colorStyle['borderColor'] = color; }
         if (colorPosition === 'left') { cardstyle['borderColor'] = color; }
       }
-      cardstyle['position'] = 'relative';
-      const drillDownChevron = onClick ? <FontIcon style={styles.chevron}>chevron_right</FontIcon> : null;
+
+      const drillDownLink = onClick ?
+        <div className="md-subheading-2" style={{ color: color }}>{value.heading} <FontIcon style={chevronStyle}>chevron_right</FontIcon></div>
+        : <div className="md-subheading-2">{value.heading}</div>;
 
       let cardClassName = 'scorecard ' + (onClick ? 'clickable-card ' : '') + (colorPosition ? 'color-' + colorPosition : '');
       return (
@@ -110,7 +115,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
             icon && <FontIcon className={className} style={iconStyle}>{icon}</FontIcon>
           }
           <div className="md-headline">{this.shortFormatter(value.value)}</div>
-          <div className="md-subheading-2">{value.heading}</div>
+          {drillDownLink}
           {
             (value.subvalue || value.subheading) &&
             (
@@ -119,7 +124,6 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
               </div>
             )
           }
-          {drillDownChevron}
         </div>
       )
     });
