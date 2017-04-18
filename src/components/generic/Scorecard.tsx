@@ -5,6 +5,14 @@ import { Card } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import * as _ from 'lodash';
 
+const styles = {
+  chevron: {
+    position: "absolute",
+    top: "calc(50% - 27px/2)",
+    right: 0,
+  }
+};
+
 interface IScorecardProps extends IGenericProps {
   props: {
     scorecardWidth?: number;
@@ -92,9 +100,10 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
         if (!colorPosition || colorPosition === 'bottom') { colorStyle['borderColor'] = color; }
         if (colorPosition === 'left') { cardstyle['borderColor'] = color; }
       }
+      cardstyle['position'] = 'relative';
+      const drillDownChevron = onClick ? <FontIcon style={styles.chevron}>chevron_right</FontIcon> : null;
 
       let cardClassName = 'scorecard ' + (onClick ? 'clickable-card ' : '') + (colorPosition ? 'color-' + colorPosition : '');
-
       return (
         <div key={idx} className={cardClassName} style={cardstyle} onClick={this.handleClick.bind(this, value)}>
           {
@@ -110,6 +119,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
               </div>
             )
           }
+          {drillDownChevron}
         </div>
       )
     });
