@@ -1,4 +1,8 @@
+# Scorecard
 
+This article explains how define a Scorecard display control.
+
+## Basic properties
 
 | Property | Type | Value | Description 
 | :--------|:-----|:------|:------------
@@ -52,7 +56,67 @@ Define `properties` as follow:
 
 ## Multiple values
 
+To read how to define dependencies [click here](/dependencies).
+Define `dependencies` as follows:
+
+| Property | Description 
+| :--------|:------------
+| `values`| A collection of values containing the interface below
+
+All items in `values` should contains:
+
+```ts
+{ 
+  value: number, 
+  heading: string, 
+  color?: string, 
+  icon?: string,
+  subvalue?: number,
+  subheading?: string,
+  className?: string,
+  onClick?: string // Name of the action to activate on click
+}
+```
+
+```js
+{
+  id: "errors",
+  type: "Scorecard",
+  title: "Errors",
+  size: { w: 2, h: 3 },
+  dependencies: {
+    values: "errors:values"
+  }
+}
+```
+
 ## Dynamic cards
+
+This configuration allows you to define multiple cards from multiple sources in a dynamic way.
+To do that, you need to deinfe each card in the format `card_<card name>_<property>`.
+
+The following example shows how to define two cards, `errors` and `users` where each defines its own properties:
+
+```js
+{
+  id: "scores",
+  type: "Scorecard",
+  size: { w: 2, h: 3 },
+  dependencies: {
+    card_errors_value: "errors:handledAtTotal",
+    card_errors_heading: "::Errors",
+    card_errors_color: "errors:handledAtTotal_color",
+    card_errors_icon: "errors:handledAtTotal_icon",
+    card_errors_subvalue: "errors:handledAtTotal",
+    card_errors_subheading: "::Avg",
+    card_errors_className: "errors:handledAtTotal_class",
+
+    card_users_value: "ai:users-value",
+    card_users_heading: "::Total Users",
+    card_users_icon: "ai:users-icon"
+  }
+}
+```
 
 # Actions
 Selected cards will call an action with the card's value.

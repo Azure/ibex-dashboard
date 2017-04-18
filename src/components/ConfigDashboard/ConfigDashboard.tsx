@@ -39,7 +39,6 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
   }
 
   onParamChange(connectionKey, paramKey, value) {
-    //debugger;
     let { connections } = this.state;
     connections[connectionKey] = connections[connectionKey] || {};
     connections[connectionKey][paramKey] = value;
@@ -49,7 +48,21 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
   onSave() {
     let { dashboard } = this.props;
     let { connections } = this.state;
-    dashboard.config.connections = connections;
+
+    if (!dashboard.config.connections) {
+      dashboard.config.connections = connections;
+
+    } else {
+      _.keys(connections).forEach(connectionKey => {
+
+        if (!dashboard.config.connections[connectionKey]) {
+          dashboard.config.connections[connectionKey] = connections[connectionKey];
+        } else {
+          _.extend(dashboard.config.connections[connectionKey], connections[connectionKey]);
+        }
+      });
+    }
+
     ConfigurationsActions.saveConfiguration(dashboard);
   }
 
@@ -57,8 +70,12 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     this.onSave();
     
     setTimeout(() => {
-      window.location.reload();
+      window.location.replace('/dashboard');
     }, 2000);
+  }
+
+  onCancel() {
+    window.location.replace('/dashboard');    
   }
 
   render() {
@@ -72,30 +89,43 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
 
     return (
       <div style={{ width: '100%' }}>
-        {_.keys(connections).map(connectionKey => (
-          <div key={connectionKey}>
-            <h2>{connectionKey}</h2>
-            {
-              _.keys(connections[connectionKey]).map(paramKey => (
-                <div key={paramKey}>
-                  <TextField
-                    id="paramKey"
-                    label={paramKey}
-                    defaultValue={connections[connectionKey] && connections[connectionKey][paramKey] || ''}
-                    lineDirection="center"
-                    placeholder="Fill in required connection parameter"
-                    className="md-cell md-cell--bottom"
-                    onChange={this.onParamChange.bind(this, connectionKey, paramKey)}
-                  />
-                </div>
-              ))
-            }
-          </div>
-        ))}
+        {_.keys(connections).map(connectionKey => {
+          
+          if (connections[connectionKey].editor) {
+            var EditorClass = connections[connectionKey].editor;
+            return (
+              <div key={connectionKey}>
+                <EditorClass connection={connections[connectionKey]} onParamChange={this.onParamChange.bind(this)} />
+              </div>
+            );
+          } else {
+            return (
+              <div key={connectionKey}>
+                <h2>{connectionKey}</h2>
+                {
+                  _.keys(connections[connectionKey]).map(paramKey => (
+                    <div key={paramKey}>
+                      <TextField
+                        id="paramKey"
+                        label={paramKey}
+                        defaultValue={connections[connectionKey] && connections[connectionKey][paramKey] || ''}
+                        lineDirection="center"
+                        placeholder="Fill in required connection parameter"
+                        className="md-cell md-cell--bottom"
+                        onChange={this.onParamChange.bind(this, connectionKey, paramKey)}
+                      />
+                    </div>
+                  ))
+                }
+              </div>
+            );
+          }
+        })}
 
         <br/>
         <Button flat primary label="Save" onClick={this.onSave}>save</Button>
         <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
+        <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
       </div>
     );
   }

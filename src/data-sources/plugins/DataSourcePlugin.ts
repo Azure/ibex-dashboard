@@ -9,6 +9,10 @@ export interface ICalculated {
   [key: string]: (state: Object, dependencies: IDictionary) => any;
 }
 
+export interface IOptions<T> {
+  params: T;
+}
+
 export interface IDataSourcePlugin {
 
   type: string;
@@ -35,7 +39,7 @@ export interface IDataSourcePlugin {
   getConnection(): IStringDictionary;
 }
 
-export abstract class DataSourcePlugin implements IDataSourcePlugin {
+export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
 
   abstract type: string;
   abstract defaultProperty: string;
@@ -46,7 +50,7 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     dependencies: {} as any,
     dependables: [],
     actions: [ 'updateDependencies', 'failure' ],
-    params: {},
+    params: <T>{},
     calculated: {}
   };
 
@@ -60,7 +64,7 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     props.dependencies = options.dependencies || [];
     props.dependables = options.dependables || [];
     props.actions.push.apply(props.actions, options.actions || []);
-    props.params = options.params || {};
+    props.params = <T>(options.params || {});
     props.calculated = options.calculated || {};
 
     this.updateDependencies = this.updateDependencies.bind(this);
@@ -100,7 +104,7 @@ export abstract class DataSourcePlugin implements IDataSourcePlugin {
     return Object.keys(this._props.params);
   }
 
-  getParams() {
+  getParams(): T {
     return this._props.params;
   }
 

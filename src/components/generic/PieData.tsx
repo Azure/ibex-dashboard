@@ -12,10 +12,12 @@ var { ThemeColors } = colors;
 interface IPieProps extends IGenericProps {
   mode: string // users/messages
   props: {
-    pieProps: { [key: string] : Object }
-    showLegend: Boolean
-    width: Object
-    height: Object
+    pieProps: { [key: string] : Object };
+    width: Object;
+    height: Object;
+    showLegend: boolean;
+    legendVerticalAlign?: 'top' | 'bottom';
+    compact?: boolean;
   }
   theme?: string[]
 };
@@ -44,6 +46,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
 
   renderActiveShape = (props) => {
     const { mode } = this.props;
+    const compact = this.props && this.props.props && this.props.props.compact;
     var type = mode === 'users' ? 'Users' : 'Messages';
 
     const RADIAN = Math.PI / 180;
@@ -75,7 +78,13 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
 
     return (
       <g>
-        <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{name}</text>
+        { compact && [
+          <text x={cx} y={cy} dy={-15} textAnchor="middle" fill={fill} style={{fontWeight: 500}}>{name}</text>,
+          <text x={cx} y={cy} dy={3} textAnchor="middle" fill={fill}>{`${value} ${type.toLowerCase()}`}</text>,
+          <text x={cx} y={cy} dy={25} textAnchor="middle" fill="#999">{`(${(percent * 100).toFixed(2)}%)`}</text>
+        ] || [
+          <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{name}</text>,
+        ]}
         <Sector
           cx={cx}
           cy={cy}
@@ -88,18 +97,21 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
         <Sector
           cx={c.cx}
           cy={c.cy}
-          startAngle={300}
-          endAngle={60}
+          startAngle={compact ? startAngle : 300}
+          endAngle={compact ? endAngle : 60}
           innerRadius={outerRadius + 6}
           outerRadius={outerRadius + 10}
           fill={fill}
         />
-        <path d={`M${c.sx},${c.sy}L${c.mx},${c.my}L${c.ex},${c.ey}`} stroke={fill} fill="none"/>
-        <circle cx={c.ex} cy={c.ey} r={2} fill={fill} stroke="none"/>
-        <text x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} textAnchor={c.textAnchor} fill="#333">{`${value} ${type.toLowerCase()}`}</text>
-        <text x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} dy={18} textAnchor={c.textAnchor} fill="#999">
-          {`(Rate ${(percent * 100).toFixed(2)}%)`}
-        </text>
+
+        { !compact && ([
+          <path d={`M${c.sx},${c.sy}L${c.mx},${c.my}L${c.ex},${c.ey}`} stroke={fill} fill="none"/>,
+          <circle cx={c.ex} cy={c.ey} r={2} fill={fill} stroke="none"/>,
+          <text x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} textAnchor={c.textAnchor} fill="#333">{`${value} ${type.toLowerCase()}`}</text>,
+          <text x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} dy={18} textAnchor={c.textAnchor} fill="#999">
+            {`(Rate ${(percent * 100).toFixed(2)}%)`}
+          </text>
+        ])}
       </g>
     );
   };
@@ -107,7 +119,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
   render() {
     var { values } = this.state;
     var { props, title, subtitle, layout, theme } = this.props;
-    var { pieProps, showLegend } = props;
+    var { pieProps, showLegend, legendVerticalAlign } = props;
 
     if (!values) {
       return null;
@@ -123,7 +135,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
           <PieChart>
             <Pie
               data={values} 
-              cx={Math.min(layout.h / 4, layout.w) * 60}
+              cx={Math.min(layout.h / 4, layout.w) * 70}
               innerRadius={60}
               fill="#8884d8"
               onMouseEnter={this.onPieEnter}
@@ -137,7 +149,16 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
               <Cell key={0} fill={colors.GoodColor}/>
               <Cell key={1} fill={colors.BadColor}/>
             </Pie>
-            {showLegend !== false && <Legend layout="vertical" align="right" verticalAlign="top" /> }
+            {
+              showLegend !== false && (
+                <Legend 
+                      layout="vertical" 
+                      align="right" 
+                      verticalAlign={legendVerticalAlign || 'top'} 
+                      wrapperStyle={{ paddingBottom: 10 }} 
+                />
+              )
+            }
           </PieChart>
         </ResponsiveContainer>
       </Card>

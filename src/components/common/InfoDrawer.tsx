@@ -67,6 +67,7 @@ export default class InfoDrawer extends React.Component<IInfoDrawerProps, IInfoD
         <Drawer
           visible={open}
           defaultVisible={false}
+          onVisibilityToggle={() => {}}
           position={'right'}
           type={Drawer.DrawerTypes.TEMPORARY}
           header={drawerHeader}

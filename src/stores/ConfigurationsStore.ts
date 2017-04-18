@@ -66,6 +66,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
 
       var connectionType = connections[connectionTypeName];
       requiredParameters[connectionTypeName] = {};
+      requiredParameters[connectionTypeName]['editor'] = connectionType.editor;
       connectionType.params.forEach(param => { requiredParameters[connectionTypeName][param] = null });
 
       // Connection type is already defined - check params

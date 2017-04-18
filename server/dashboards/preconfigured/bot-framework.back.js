@@ -2,367 +2,14 @@ return {
   config: {
     connections: { },
     layout: {
-			isDraggable: true,
-			isResizable: true,
-			rowHeight: 30,
-			verticalCompact: false,
-			cols: {
-				lg: 12,
-				md: 10,
-				sm: 6,
-				xs: 4,
-				xxs: 2
-			},
-			breakpoints: {
-				lg: 1200,
-				md: 996,
-				sm: 768,
-				xs: 480,
-				xxs: 0
-			},
-			layouts: {
-				lg: [{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 3,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 8,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 8,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 8,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 8,
-						y: 3,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				md: [{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 3,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 6,
-						y: 8,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 8,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 24,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 6,
-						y: 11,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				sm: [{
-						w: 4,
-						h: 7,
-						x: 0,
-						y: 3,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 10,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 0,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 31,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 39,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 0,
-						y: 18,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				xxs: [{
-						w: 2,
-						h: 7,
-						x: 0,
-						y: 5,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 12,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 5,
-						x: 0,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 33,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 41,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 13,
-						x: 0,
-						y: 20,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}]
-			}
-		}
+      isDraggable: true,
+      isResizable: true,
+      rowHeight: 30,
+      // This turns off compaction so you can place items wherever.
+      verticalCompact: false,
+      cols: {lg: 12, md: 10, sm: 6, xs: 4, xxs: 2},
+      breakpoints: {lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}
+    }
   },
   dataSources: [
     {
@@ -400,30 +47,6 @@ return {
 						mappings: {
 							"successful": (val) => val === 'true',
 							"event_count": (val) => val || 0
-						},
-						calculated: (conversions) => {
-
-							// Conversion Handling
-							// ===================
-
-							var total = _.find(conversions, { name: 'message.convert.start' });
-							var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
-
-							if (!total) {
-								return null;
-							}
-
-							var displayValues = [
-								{ label: 'Successful', count: successful.event_count },
-								{ label: 'Failed', count: total.event_count - successful.event_count + 5 },
-							];
-
-							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1);
-
-							return {
-								"conversions-displayValues": displayValues,
-								"conversions-rate": conversionRate + '%',
-							};
 						}
 					},
 					timeline: {
@@ -437,47 +60,6 @@ return {
 						mappings: {
 							"channel": (val) => val || "unknown",
 							"count": (val) => val || 0,
-						},
-						calculated: (timeline, dependencies) => {
-
-							// Timeline handling
-							// =================
-
-							let _timeline = {};
-							let _channels = {};
-							let { timespan } = dependencies;
-
-							timeline.forEach(row => {
-								var { channel, timestamp, count } = row;
-								var timeValue = (new Date(timestamp)).getTime();
-
-								if (!_timeline[timeValue]) _timeline[timeValue] = {
-									time: (new Date(timestamp)).toUTCString()
-								};
-								if (!_channels[channel]) _channels[channel] = {
-									name: channel,
-									value: 0
-								};
-
-								_timeline[timeValue][channel] = count;
-								_channels[channel].value += count;
-							});
-
-							var channels = Object.keys(_channels);
-							var channelUsage = _.values(_channels);
-							var timelineValues = _.map(_timeline, value => {
-								channels.forEach(channel => {
-									if (!value[channel]) value[channel] = 0;
-								});
-								return value;
-							});
-
-							return {
-								"timeline-graphData": timelineValues,
-								"timeline-channelUsage": channelUsage,
-								"timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
-								"timeline-channels": channels
-							};
 						}
 					},
           intents: {
@@ -488,25 +70,10 @@ return {
             mappings: {
               "intent": (val) => val || "Unknown",
               "count": (val) => val || 0,
-            },
-						calculated: (intents) => {
-							return {
-								"intents-bars": [ 'count' ]
-							};
-						}
+            }
           },
           users: {
-            query: `summarize totalUsers=count() by user_Id`,
-						calculated: (users) => {
-							let result = 0;
-							if (users.length === 1 && users[0].totalUsers > 0) {
-								result = users[0].totalUsers;
-							}
-							return {
-								"users-value": result,
-								"users-icon": 'account_circle'
-							};
-						}
+            query: `summarize totalUsers=count() by user_Id`
           },
           channelActivity: {
             query: () => `` + 
@@ -519,42 +86,110 @@ return {
             mappings: {
               duration: (val) => val || 0,
               channel: (val) => val || 'unknown'
-            },
-						calculated: (channelActivity) => {
-							var groupedValues = _.chain(channelActivity).groupBy('channel').value();
-							return {
-								"channelActivity-groupedValues": groupedValues
-							};
-						}
-          },
-					sentiments: {
-						query: () => `` +
-									` extend score=customDimensions.score, text=customDimensions.text | ` +
-									` where name startswith 'message.sentiment' | ` +
-									` summarize sentiment=avg(todouble(score))`,
-						calculated: (sentiments) => {
-
-							if (!sentiments || !sentiments.length || isNaN(sentiments[0].sentiment)) { return null; }
-
-							var values = [
-								{ name: 'Positive', value: Math.round(sentiments[0].sentiment * 100) },
-								{ name: 'Negative', value: Math.round((1 - sentiments[0].sentiment) * 100) },
-							];
-
-							var sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
-
-							return {
-								"sentiment-value": values,
-								"sentiment-height": sentimentValue + '%',
-								"sentiment-color": sentimentValue > 60 ? '#AEEA00' : sentimentValue < 40 ? '#D50000' : '#FF9810',
-								"sentiment-icon": sentimentValue > 60 ? 'sentiment_satisfied' : sentimentValue < 40 ? 'sentiment_dissatisfied' : 'sentiment_neutral',
-								"sentiment-subvalue": "",
-								"sentiment-subheading" : sentimentValue > 60 ? 'Positive' : sentimentValue < 40 ? 'Negative' : 'Neutral'
-							};
-						}
-					}
+            }
+          }
 				}
-      }
+      },
+			calculated: [
+				
+        // Conversions Extraction
+        (state) => {
+
+					// Conversion Handling
+					// ===================
+					var { conversions } = state;
+
+					var total = _.find(conversions, { name: 'message.convert.start' });
+					var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+
+					if (!total) {
+						return null;
+					}
+
+					var displayValues = [
+						{ label: 'Successful', count: successful.event_count },
+						{ label: 'Failed', count: total.event_count - successful.event_count + 5 },
+					];
+
+					return {
+						"conversions-displayValues": displayValues
+					};
+				},
+				
+        // Timeline Activity Extraction
+        (state) => {
+
+					// Timeline handling
+					// =================
+
+					var { timeline } = state;
+					var _timeline = {};
+					var _channels = {};
+					var timeline = state.timeline || [];
+					var timespan = state.timespan;
+
+					timeline.forEach(row => {
+						var { channel, timestamp, count } = row;
+						var timeValue = (new Date(timestamp)).getTime();
+
+						if (!_timeline[timeValue]) _timeline[timeValue] = {
+							time: (new Date(timestamp)).toUTCString()
+						};
+						if (!_channels[channel]) _channels[channel] = {
+							name: channel,
+							value: 0
+						};
+
+						_timeline[timeValue][channel] = count;
+						_channels[channel].value += count;
+					});
+
+					var channels = Object.keys(_channels);
+					var channelUsage = _.values(_channels);
+					var timelineValues = _.map(_timeline, value => {
+						channels.forEach(channel => {
+							if (!value[channel]) value[channel] = 0;
+						});
+						return value;
+					});
+
+					return {
+						"timeline-graphData": timelineValues,
+						"timeline-channelUsage": channelUsage,
+						"timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
+						"timeline-channels": channels
+					};
+				},
+
+        // Intents Extraction
+        (state) => {
+          return {
+            "intents-bars": [ 'count' ]
+          };
+        },
+
+        // Users Extraction
+        (state) => {
+          var { users } = state;
+          let result = 0;
+          if (users.length === 1 && users[0].totalUsers > 0) {
+            result = users[0].totalUsers;
+          }
+          return {
+            "users-value": result,
+            "users-icon": 'account_circle'
+          };
+        },
+
+        // Channel Activity Extraction
+        (state) => {
+          var { channelActivity } = state;
+          var groupedValues = _.chain(channelActivity).groupBy('channel').value();
+          return {
+            "channelActivity-groupedValues": groupedValues
+          };
+        }
+			]
 		},
     {
       id: "errors",
@@ -571,8 +206,6 @@ return {
       },
       calculated: (state) => {
         var { values } = state;
-
-        if (!values || !values.length) { return; }
 
         var errors = values;
         var handlers = {};
@@ -630,7 +263,7 @@ return {
     {
 			id: "scores",
 			type: "Scorecard",
-			size: { w: 4, h: 3 },
+			size: { w: 2, h: 3 },
 			dependencies: {
 				card_errors_value: "errors:handledAtTotal",
 				card_errors_heading: "::Errors",
@@ -641,21 +274,37 @@ return {
 				card_errors_className: "errors:handledAtTotal_class",
 				card_errors_onClick: "::onErrorsClick",
 
-				card_sentiment_value: "ai:sentiment-height",
-				card_sentiment_heading: "::Sentiment",
-				card_sentiment_color: "ai:sentiment-color",
-				card_sentiment_icon: "ai:sentiment-icon",
-				card_sentiment_subvalue: "ai:sentiment-subvalue",
-				card_sentiment_subheading: "ai:sentiment-subheading",
-
 				card_users_value: "ai:users-value",
 				card_users_heading: "::Total Users",
-				card_users_icon: "ai:users-icon",
-
-				card_conversions_value: "ai:conversions-rate",
-				card_conversions_heading: "::Conversions",
-				card_conversions_icon: "::input",
-				card_conversions_color: "::#2196F3"
+				card_users_icon: "ai:users-icon"
+			},
+			actions: {
+				onErrorsClick: {
+					action: "dialog:errors",
+					params: {
+						title: "args:heading",
+						type: "args:type",
+						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				}
+			}
+		},
+    {
+			id: "errors",
+			type: "Scorecard",
+			title: "Errors",
+			size: { w: 2, h: 3 },
+			dependencies: {
+				value: "errors:handledAtTotal",
+				color: "errors:handledAtTotal_color",
+				icon: "errors:handledAtTotal_icon",
+				subvalue: "errors:handledAtTotal",
+				className: "errors:handledAtTotal_class"
+			},
+			props: {
+				subheading: "Avg",
+        onClick: "onErrorsClick"
 			},
 			actions: {
 				onErrorsClick: {
@@ -690,6 +339,17 @@ return {
         }
       }
     },
+    {
+      id: "conversions",
+      type: "PieData",
+      title: "Conversion Rate",
+      subtitle: "Total conversion rate",
+      size: { w: 4, h: 8 },
+      dependencies: { values: "ai:conversions-displayValues" },
+      props: {
+        pieProps: { nameKey: "label", valueKey: "count" }
+      }
+    }, 
     {
       id: "timeline-area",
       type: "Area",
@@ -818,10 +478,10 @@ return {
     },
     {
       id: "errors",
-      width: "90%",
+      width: "70%",
       params: ["title", "queryspan"],
       dataSources: [{
-        id: "errors-group",
+        id: "errors-data",
         type: "ApplicationInsights/Query",
         dependencies: {
           queryTimespan: "dialog_errors:queryspan"
@@ -831,21 +491,58 @@ return {
             ` | summarize errors=count() by type, innermostMessage` +
             ` | project type, innermostMessage, errors` +
             ` | order by errors desc `
-        },
-        calculated: (state) => {
-          const { values } = state;
-          return {
-            groups: values
-          };
         }
-      },
-      {
-        id: "errors-selection",
+      }],
+      elements: [{
+        id: "errors-list",
+        type: "Table",
+        title: "Errors",
+        size: {
+          w: 12,
+          h: 16
+        },
+        dependencies: {
+          values: "errors-data"
+        },
+        props: {
+          cols: [{
+            header: "Type",
+            field: "type"
+          }, {
+            header: "Message",
+            field: "innermostMessage"
+          }, {
+            header: "Count",
+            field: "errors"
+          }, {
+            type: "button",
+            value: "more",
+            onClick: "openErrorType"
+          }]
+        },
+        actions: {
+          openErrorType: {
+            action: "dialog:errortypes",
+            params: {
+              title: "args:type",
+              type: "args:type",
+              innermostMessage: "args:innermostMessage",
+              queryspan: "timespan:queryTimespan"
+            }
+          }
+        }
+      }]
+    }, {
+      id: "errortypes",
+      width: "90%",
+      params: ["title", "type", "handledAt", "innermostMessage", "queryspan"],
+      dataSources: [{
+        id: "errortypes-data",
         type: "ApplicationInsights/Query",
         dependencies: {
-          queryTimespan: "dialog_errors:queryspan",
-          type: "args:type",
-          innermostMessage: "args:innermostMessage"
+          type: "dialog_errortypes:type",
+          innermostMessage: "dialog_errortypes:innermostMessage",
+          queryTimespan: "dialog_errortypes:queryspan"
         },
         params: {
           query: ({ type, innermostMessage }) => ` exceptions` +
@@ -856,16 +553,15 @@ return {
         }
       }],
       elements: [{
-        id: "errors-list",
-        type: "SplitPanel",
-        title: "Errors",
+        id: "errortypes-list",
+        type: "Table",
+        title: "Error types",
         size: {
           w: 12,
           h: 16
         },
         dependencies: {
-          groups: "errors-group",
-          values: "errors-selection",
+          values: "errortypes-data"
         },
         props: {
           cols: [{
@@ -875,32 +571,21 @@ return {
             header: "Message",
             field: "innermostMessage"
           }, {
-            header: "HandledAt",
-            field: "innermostMessage"
+            header: "Handle",
+            field: "handledAt"
           }, {
-            header: "Conversation Id",
+            header: "Conversation ID",
             field: "conversationId"
           }, {
-            header: "Operation Id",
+            header: "Opereration ID",
             field: "operation_Id"
           }, {
             type: "button",
             value: "more",
             onClick: "openErrorDetail"
-          }],
-          fieldTitle: "type",
-          fieldCount: "errors",
+          }]
         },
         actions: {
-          select: {
-            action: "errors-selection:updateDependencies",
-            params: {
-              title: "args:type",
-              type: "args:type",
-              innermostMessage: "args:innermostMessage",
-              queryspan: "timespan:queryTimespan"
-            }
-          },
           openErrorDetail: {
             action: "dialog:errordetail",
             params: {
@@ -915,8 +600,7 @@ return {
           }
         }
       }]
-    },
-    {
+    }, {
       id: "errordetail",
       width: "50%",
       params: ["title", "handledAt", "type", "operation_Id", "queryspan"],
