@@ -68,12 +68,13 @@ Thinking about integrating with:
 git clone https://github.com/CatalystCode/ibex-dashboard.git
 cd ibex-dashboard
 npm install -g create-react-app
-npm install
+npm install -g yarn
+yarn install
 ```
 
 ### Dev
 ```bash
-npm start
+yarn run start:dev
 ```
 
 ### Test Watcher
