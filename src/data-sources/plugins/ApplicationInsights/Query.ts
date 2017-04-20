@@ -38,7 +38,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
    * @param {function} callback
    */
   updateDependencies(dependencies) {
-
     var emptyDependency = _.find(_.keys(this._props.dependencies), dependencyKey => {
       return typeof dependencies[dependencyKey] === 'undefined';
     });
@@ -68,29 +67,20 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
     let isForked = !params.query && params.table;
 
     if (!isForked) {
-      query = this.compileQuery(params.query, dependencies);
+      let queryKey = this._props.id;
+      query = this.compileQueryWithFilters(params.query, dependencies, isForked, queryKey, params);
       mappings.push(params.mappings);
-
     } else {
-      let queries: Array<any> = params.queries || [];
+      let forkedQueries: Array<any> = params.queries || [];
       let table: string = params.table;
-
       query = ` ${params.table} | fork `;
-      _.keys(queries).forEach(queryKey => {
-
-        let queryParams = queries[queryKey];
+      _.keys(forkedQueries).every(queryKey => {
+        let queryParams = forkedQueries[queryKey];
         tableNames.push(queryKey);
         mappings.push(queryParams.mappings);
-
-        let subquery = this.compileQuery(queryParams.query, dependencies);
-        const selectedChannels = dependencies.selectedChannels || [];
-        if (selectedChannels.length > 0 && !queryKey.startsWith("filter")) {
-          const filter = "where " + dependencies.selectedChannels.map((x) => "customDimensions.channel=='" + x + "'").join(' or ') + " | ";
-          subquery = ` ${filter} ${subquery} `;
-        }
-        query += ` (${subquery}) `;
+        query += this.compileQueryWithFilters(queryParams.query, dependencies, isForked, queryKey, params);
+        return true;
       });
-
     }
 
     var queryspan = queryTimespan;
@@ -181,6 +171,38 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
   private compileQuery(query: any, dependencies: any): string {
     return typeof query === 'function' ? query(dependencies) : query;
+  }
+
+  private compileQueryWithFilters(query: any, dependencies: any, isForked: boolean, queryKey: string, params: any): string {
+    let q = this.compileQuery(query, dependencies);
+    // Don't filter the filter query
+    if (queryKey.startsWith("filter")) {
+      return this.formatQuery(q, isForked);
+    }
+    const { filters } = params;
+    if (filters === undefined || filters.length === 0) {
+      // No filters specified
+      return this.formatQuery(q, isForked);
+    }
+    filters.every((filter) => {
+      const { dependency, queryProperty, queries } = filter;
+      if (queries.findIndex((filterKey) => filterKey === queryKey) === -1) {
+        // Filter is unconnected with query
+        return this.formatQuery(q, isForked);
+      }
+      // Apply selected filters to connected query
+      const selectedFilters = dependencies[dependency] || [];
+      if (selectedFilters.length > 0) {
+        const filter = "where " + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ') + " | ";
+        q = ` ${filter} \n ${q} `;
+      }
+      return this.formatQuery(q, isForked);
+    });
+    return this.formatQuery(q, isForked);
+  }
+
+  private formatQuery(query: string, isForked: boolean = true) {
+    return isForked ? ` (${query}) \n\n` : query;
   }
 
   private validateParams(props: any, params: any): void {

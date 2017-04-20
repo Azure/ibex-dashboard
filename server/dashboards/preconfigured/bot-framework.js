@@ -73,16 +73,69 @@ return {
       }
     },
     {
+      id: "filterIntents",
+      type: "ApplicationInsights/Query",
+      dependencies: {
+        timespan: "timespan",
+        queryTimespan: "timespan:queryTimespan",
+        granularity: "timespan:granularity"
+      },
+      params: {
+        table: "customEvents",
+        queries: {
+          filterIntents: {
+            query: () => `` +
+              ` extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | ` +
+              ` where name startswith 'message.intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
+              ` summarize intents=count() by tostring(intent) | ` +
+              ` order by intents`,
+            mappings: {
+              intent: (val) => val || "unknown",
+              intents: (val) => val || 0
+            }
+          }
+        }
+      },
+      calculated: (state) => {
+        var { filterIntents } = state;
+        const intents = filterIntents.map((x) => x.intent);
+
+        let { selectedValues } = state;
+        if (selectedValues === undefined) {
+          selectedValues = intents;
+        }
+
+        return {
+          "intents-count": filterIntents,
+          "intents-filters": intents,
+          "intents-selected": selectedValues,
+        };
+      }
+    },
+    {
 			id: 'ai',
       type: "ApplicationInsights/Query",
       dependencies: {
         timespan: "timespan",
         queryTimespan: "timespan:queryTimespan",
         granularity: "timespan:granularity",
-        selectedChannels: "filterChannels:channels-selected"
+        selectedChannels: "filterChannels:channels-selected",
+        selectedIntents: "filterIntents:intents-selected"
       },
 			params: {
 				table: "customEvents",
+        filters: [
+          {
+            dependency: "selectedChannels",
+            queryProperty: "customDimensions.channel",
+            queries: ["conversions", "timeline", "users", "channelActivity"]
+          },
+          {
+            dependency: "selectedIntents",
+            queryProperty: "customDimensions.intent",
+            queries: ["intents"]
+          }
+        ],
 				queries: {
 					conversions: {
 						query: () => `` +
@@ -286,13 +339,29 @@ return {
     },
     {
       type: "MenuFilter",
-      title: "Filter Channels",
+      title: "Channels",
+      subtitle: "Select channels",
+      icon: "forum",
       dependencies: {
         selectedValues: "filterChannels:channels-selected",
         values: "filterChannels:channels-filters"
       },
       actions: {
         onChange: "filterChannels:updateSelectedValues"
+      },
+      first: true
+    },
+    {
+      type: "MenuFilter",
+      title: "Intents",
+      subtitle: "Select intents",
+      icon: "textsms",
+      dependencies: {
+        selectedValues: "filterIntents:intents-selected",
+        values: "filterIntents:intents-filters"
+      },
+      actions: {
+        onChange: "filterIntents:updateSelectedValues"
       },
       first: true
     }

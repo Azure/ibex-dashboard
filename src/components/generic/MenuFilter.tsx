@@ -6,8 +6,10 @@ import AccessibleFakeButton from 'react-md/lib/Helpers/AccessibleFakeButton';
 import List from 'react-md/lib/Lists/List';
 import ListItemControl from 'react-md/lib/Lists/ListItemControl';
 import Checkbox from 'react-md/lib/SelectionControls/Checkbox';
+import ListItem from 'react-md/lib/Lists/ListItem';
+import FontIcon from 'react-md/lib/FontIcons';
 
-const style = {
+const styles = {
     container: {
         position: "relative",
         float: "left"
@@ -16,7 +18,10 @@ const style = {
         position: "absolute",
         top: "6px",
         left: "50px",
-        zIndex: 17 /* NB: must be 1 higher than md-overlay */
+        zIndex: 20 /* NB: must be 1 higher than md-overlay or md-toolbar */
+    },
+    overlay: {
+        zIndex: 20
     }
 }
 
@@ -29,12 +34,22 @@ export default class MenuFilter extends GenericComponent<any, any> {
         originalSelectedValues: []
     };
 
+    static defaultProps = {
+        title: '',
+        subtitle: 'Select filter',
+        icon: 'more_vert',
+        selectAll: 'Enable filters',
+        selectNone: 'Clear filters'
+    };
+
     constructor(props) {
         super(props);
 
         this.onChange = this.onChange.bind(this);
         this.toggleOverlay = this.toggleOverlay.bind(this);
         this.hideOverlay = this.hideOverlay.bind(this);
+        this.selectAll = this.selectAll.bind(this);
+        this.selectNone = this.selectNone.bind(this);
     }
 
     toggleOverlay() {
@@ -86,17 +101,21 @@ export default class MenuFilter extends GenericComponent<any, any> {
     }
 
     render() {
-        var { title } = this.props;
+        var { title, subtitle, icon } = this.props;
         var { selectedValues, values, overlay } = this.state;
         values = values || [];
+
+        const button = title === "" ? 
+        <Button icon tooltipLabel={subtitle} onClick={this.toggleOverlay}>{icon}</Button>
+        : <Button flat label={title} onClick={this.toggleOverlay}>{icon}</Button> ;
 
         let listItems = values.map((value, idx) => {
             return (
                 <ListItemControl
-                    key={idx}
+                    key={idx+title}
                     primaryAction={
                         <Checkbox
-                            id={idx}
+                            id={idx+value}
                             name={value}
                             label={value}
                             onChange={this.onChange.bind(null, value)}
@@ -106,23 +125,39 @@ export default class MenuFilter extends GenericComponent<any, any> {
             );
         })
 
-        return (
-            <div id="filters">
-                <Button icon tooltipLabel={title} onClick={this.toggleOverlay} >more_vert</Button>
+        if (values.length > 1) {
+            const selectAll = this.props.selectAll;
+            const selectNone = this.props.selectNone;
+            listItems.push( <ListItem key="all" primaryText={selectAll} onClick={this.selectAll} rightIcon={<FontIcon>done_all</FontIcon>} /> );
+            listItems.push( <ListItem key="none" primaryText={selectNone} onClick={this.selectNone} rightIcon={<FontIcon disabled>check_box_outline_blank</FontIcon>} /> );
+        }
 
-                <div style={style.container} hidden={!overlay}>
-                    <List className="md-paper md-paper--1" style={style.list}>
+        return (
+            <div className="filters">
+                {button}
+
+                <div style={styles.container} hidden={!overlay}>
+                    <List className="md-paper md-paper--1" style={styles.list}>
                         {listItems}
                     </List>
                 </div>
 
-                <Portal visible={overlay} >
+                <Portal visible={overlay}>
                     <AccessibleFakeButton
                         className="md-overlay"
                         onClick={this.hideOverlay}
+                        style={styles.overlay}
                     />
                 </Portal>
             </div>
         );
+    }
+
+    selectAll() {
+        this.setState({ selectedValues: this.state.values });
+    }
+
+    selectNone() {
+        this.setState({ selectedValues: [] });
     }
 }

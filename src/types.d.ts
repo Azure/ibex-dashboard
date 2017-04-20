@@ -57,6 +57,8 @@ interface IFilter {
   dependencies?: { [id: string]: string }
   actions?: { [id: string]: string }
   title?: string
+  subtitle?: string
+  icon?: string
   first: boolean
 }
 
