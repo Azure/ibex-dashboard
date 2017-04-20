@@ -15,7 +15,8 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
       // This turns off compaction so you can place items wherever.
       verticalCompact?: boolean
       cols: { lg?: number, md?: number, sm?: number, xs?: number, xxs?: number }
-      breakpoints: { lg?: number, md?: number, sm?: number, xs?: number, xxs?: number }
+      breakpoints: { lg?: number, md?: number, sm?: number, xs?: number, xxs?: number },
+      layouts: { lg?: any, md?: any, sm?: any, xs?: any, xxs?: any }
     }
   },
   filters: IFilter[]

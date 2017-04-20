@@ -2,18 +2,21 @@
 //import * as $ from 'jquery';
 import * as request from 'xhr-request';
 import * as _ from 'lodash';
-import { DataSourcePlugin, IDataSourceOptions } from '../DataSourcePlugin';
+import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { appInsightsUri } from './common';
 import ApplicationInsightsConnection from '../../connections/application-insights';
 
 let connectionType = new ApplicationInsightsConnection();
 
-interface IQueryOptions extends IDataSourceOptions {
-  query: string
-  mappings: (string|object)[];
+interface IQueryParams {
+  query?: ((dependencies: any) => string) | string;
+  mappings?: (string|object)[];
+  table?: string;
+  queries?: IDictionary;
+  calculated?: (results: any) => object;
 }
 
-export default class ApplicationInsightsQuery extends DataSourcePlugin {
+export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryParams> {
 
   type = 'ApplicationInsights-Query';
   defaultProperty = 'values';
@@ -22,11 +25,11 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
   /**
    * @param options - Options object
    */
-  constructor(options: IQueryOptions, connections: IDict<IStringDictionary>) {
+  constructor(options: IOptions<IQueryParams>, connections: IDict<IStringDictionary>) {
     super(options, connections);
 
     var props = this._props;
-    var params: any = props.params;
+    var params = props.params;
     
     // Validating params
     this.validateParams(props, params);
@@ -42,6 +45,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
       return typeof dependencies[dependencyKey] === 'undefined';
     });
 
+    // If one of the dependencies is not supplied, do not run the query
     if (emptyDependency) {
       return (dispatch) => {
         return dispatch();
@@ -58,24 +62,27 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
     }
 
     let { queryTimespan } = dependencies;
-    let params: any = this._props.params;
+    let params = this._props.params;
     let tableNames: Array<string> = [];
     let mappings: Array<any> = [];
+    let queries: IDictionary = {};
+    let table: string = null;
 
     // Checking if this is a single query or a fork query
     let query: string;
-    let isForked = !params.query && params.table;
+    let isForked = !params.query && !!params.table;
 
     if (!isForked) {
       let queryKey = this._props.id;
       query = this.compileQueryWithFilters(params.query, dependencies, isForked, queryKey, params);
       mappings.push(params.mappings);
     } else {
-      let forkedQueries: Array<any> = params.queries || [];
-      let table: string = params.table;
+      queries = params.queries || {};
+      table = params.table;
+
       query = ` ${params.table} | fork `;
-      _.keys(forkedQueries).every(queryKey => {
-        let queryParams = forkedQueries[queryKey];
+      _.keys(queries).every(queryKey => {
+        let queryParams = queries[queryKey];
         tableNames.push(queryKey);
         mappings.push(queryParams.mappings);
         query += this.compileQueryWithFilters(queryParams.query, dependencies, isForked, queryKey, params);
@@ -121,6 +128,13 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin {
 
           tableNames.forEach((table: string, idx: number) => {
             returnedResults[table] = resultTables.length > idx ? resultTables[idx] : null;
+
+            // Extracting calculated values
+            let calc = queries[table].calculated;
+            if (typeof calc === 'function') {
+              var additionalValues = calc(returnedResults[table], dependencies) || {};
+              _.extend(returnedResults, additionalValues);
+            }
           });
 
           return dispatch(returnedResults);          

@@ -131,6 +131,11 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         break;
       }
 
+      case 'undefined': {
+        result += `undefined`;
+        break;
+      }
+
       default:
         throw new Error('An unhandled type was found: ' + typeof objectType);
     }

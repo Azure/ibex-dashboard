@@ -1,11 +1,13 @@
+import * as React from 'react';
+
 import ApplicationInsightsConnection from './application-insights';
-import Connection from './Connection';
+import { IConnection } from './Connection';
 
 var connectionTypes = [ ApplicationInsightsConnection ];
 
-var connections: IDict<Connection> = {};
+var connections: IDict<IConnection> = {};
 connectionTypes.forEach(connectionType => {
-  var newConnection: Connection = new connectionType();
+  var newConnection: IConnection = new connectionType();
   connections[newConnection.type] = newConnection;
 });
 

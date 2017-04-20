@@ -11,6 +11,7 @@ import MenuFilter from './MenuFilter';
 // dialog views
 import Table from './Table';
 import Detail from './Detail';
+import SplitPanel from './SplitPanel';
 
 export default {
   PieData,
@@ -24,4 +25,5 @@ export default {
   MenuFilter,
   Table,
   Detail,
+  SplitPanel,
 };

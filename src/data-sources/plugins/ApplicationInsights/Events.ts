@@ -12,19 +12,19 @@ interface IEventsConfig {
   timespan;
 }
 
-interface IEventsOptions extends IDataSourceOptions {
+interface IEventsParams {
   /** @type {string} */
   query;
   /** @type {(string|object)[]} mappings */
   mappings;
 }
 
-export default class ApplicationInsightsEvents extends DataSourcePlugin {
+export default class ApplicationInsightsEvents extends DataSourcePlugin<IEventsParams> {
 
   type = 'ApplicationInsights-Events';
   defaultProperty = 'values';
 
-  constructor(options: IEventsOptions, connections: IDict<IStringDictionary>) {
+  constructor(options: IEventsParams, connections: IDict<IStringDictionary>) {
     super(options, connections);
 
     // var props = this._props;
