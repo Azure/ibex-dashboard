@@ -72,9 +72,9 @@ export default class Navbar extends React.Component<any, any> {
           component={Link}
           href="/about"
           active={pathname === '/about'}
-          leftIcon={<FontIcon>info</FontIcon>}
+          leftIcon={<FontIcon>help_outline</FontIcon>}
           tileClassName="md-list-tile--mini"
-          primaryText={'About'}
+          primaryText={'Help'}
         />
       ),
       (
@@ -113,7 +113,7 @@ export default class Navbar extends React.Component<any, any> {
           break;
 
         case '/about':
-          title = 'About';
+          title = 'Help';
           break;
 
         case '/dashboard':
