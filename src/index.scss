@@ -176,3 +176,12 @@ h2, .md-subheading-2 {
     top: -5px;
   }
 }
+
+
+/*================*/
+/* Dialogs with toolbar */
+/*================*/
+
+.dialog-toolbar-no-padding .md-dialog-content--padded{
+  padding: 0px;
+}
