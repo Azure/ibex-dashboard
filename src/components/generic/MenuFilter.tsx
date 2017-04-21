@@ -105,31 +105,32 @@ export default class MenuFilter extends GenericComponent<any, any> {
         var { selectedValues, values, overlay } = this.state;
         values = values || [];
 
-        const button = title === "" ? 
-        <Button icon tooltipLabel={subtitle} onClick={this.toggleOverlay}>{icon}</Button>
-        : <Button flat label={title} onClick={this.toggleOverlay}>{icon}</Button> ;
+        const button = title === "" ?
+            <Button icon tooltipLabel={subtitle} onClick={this.toggleOverlay}>{icon}</Button>
+            : <Button flat label={title} onClick={this.toggleOverlay}>{icon}</Button>;
 
         let listItems = values.map((value, idx) => {
             return (
                 <ListItemControl
-                    key={idx+title}
-                    primaryAction={
+                    key={idx + title}
+                    primaryAction={(
                         <Checkbox
-                            id={idx+value}
+                            id={idx + value}
                             name={value}
                             label={value}
                             onChange={this.onChange.bind(null, value)}
                             checked={selectedValues.find((x) => x === value) !== undefined}
                         />
-                    } />
+                    )}
+                />
             );
         })
 
         if (values.length > 1) {
             const selectAll = this.props.selectAll;
             const selectNone = this.props.selectNone;
-            listItems.push( <ListItem key="all" primaryText={selectAll} onClick={this.selectAll} rightIcon={<FontIcon>done_all</FontIcon>} /> );
-            listItems.push( <ListItem key="none" primaryText={selectNone} onClick={this.selectNone} rightIcon={<FontIcon disabled>check_box_outline_blank</FontIcon>} /> );
+            listItems.push(<ListItem key="all" primaryText={selectAll} onClick={this.selectAll} rightIcon={<FontIcon>done_all</FontIcon>} />);
+            listItems.push(<ListItem key="none" primaryText={selectNone} onClick={this.selectNone} rightIcon={<FontIcon disabled>check_box_outline_blank</FontIcon>} />);
         }
 
         return (

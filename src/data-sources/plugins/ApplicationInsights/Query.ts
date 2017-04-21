@@ -13,7 +13,13 @@ interface IQueryParams {
   mappings?: (string|object)[];
   table?: string;
   queries?: IDictionary;
+  filters?: Array<IFilterParams>;
   calculated?: (results: any) => object;
+}
+
+interface IFilterParams {
+  dependency: string;
+  queryProperty: string;
 }
 
 export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryParams> {
@@ -67,6 +73,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     let mappings: Array<any> = [];
     let queries: IDictionary = {};
     let table: string = null;
+    let filters: Array<IFilterParams> = params.filters;
 
     // Checking if this is a single query or a fork query
     let query: string;
@@ -74,18 +81,18 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
     if (!isForked) {
       let queryKey = this._props.id;
-      query = this.compileQueryWithFilters(params.query, dependencies, isForked, queryKey, params);
+      query = this.compileQueryWithFilters(params.query, dependencies, isForked, queryKey, filters);
       mappings.push(params.mappings);
     } else {
       queries = params.queries || {};
       table = params.table;
-
       query = ` ${params.table} | fork `;
       _.keys(queries).every(queryKey => {
         let queryParams = queries[queryKey];
+        filters = queryParams.filters || [];
         tableNames.push(queryKey);
         mappings.push(queryParams.mappings);
-        query += this.compileQueryWithFilters(queryParams.query, dependencies, isForked, queryKey, params);
+        query += this.compileQueryWithFilters(queryParams.query, dependencies, isForked, queryKey, filters);
         return true;
       });
     }
@@ -143,8 +150,10 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
   }
 
   updateSelectedValues(dependencies: IDictionary, selectedValues: any) {
-    var result = _.extend(dependencies, {selectedValues:selectedValues});
-    return result;
+    if ( Array.isArray(selectedValues) ){
+      return _.extend(dependencies, {"selectedValues":selectedValues});
+    }
+    return _.extend(dependencies, selectedValues);
   }
 
   private mapAllTables(results: IQueryResults, mappings: Array<IDictionary>): any[][] {
@@ -187,30 +196,22 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     return typeof query === 'function' ? query(dependencies) : query;
   }
 
-  private compileQueryWithFilters(query: any, dependencies: any, isForked: boolean, queryKey: string, params: any): string {
+  private compileQueryWithFilters(query: any, dependencies: any, isForked: boolean, queryKey: string, filters: IFilterParams[]): string {
     let q = this.compileQuery(query, dependencies);
-    // Don't filter the filter query
-    if (queryKey.startsWith("filter")) {
+    // Don't filter a filter query, or no filters specified
+    if (queryKey.startsWith("filter") || filters === undefined || filters.length === 0) {
       return this.formatQuery(q, isForked);
     }
-    const { filters } = params;
-    if (filters === undefined || filters.length === 0) {
-      // No filters specified
-      return this.formatQuery(q, isForked);
-    }
+    // Apply selected filters to connected query
     filters.every((filter) => {
-      const { dependency, queryProperty, queries } = filter;
-      if (queries.findIndex((filterKey) => filterKey === queryKey) === -1) {
-        // Filter is unconnected with query
-        return this.formatQuery(q, isForked);
-      }
-      // Apply selected filters to connected query
+      const { dependency, queryProperty } = filter;
       const selectedFilters = dependencies[dependency] || [];
       if (selectedFilters.length > 0) {
         const filter = "where " + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ') + " | ";
         q = ` ${filter} \n ${q} `;
+        return true;
       }
-      return this.formatQuery(q, isForked);
+      return false;
     });
     return this.formatQuery(q, isForked);
   }

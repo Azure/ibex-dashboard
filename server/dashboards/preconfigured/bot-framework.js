@@ -386,7 +386,7 @@ return {
       }
     },
     {
-      id: "filterChannels",
+      id: "filters",
       type: "ApplicationInsights/Query",
       dependencies: {
         timespan: "timespan",
@@ -405,37 +405,20 @@ return {
             mappings: {
               channel: (val) => val || "unknown",
               channels: (val) => val || 0
+            },
+            calculated: (filterChannels) => {
+              const filters = filterChannels.map((x) => x.channel);
+              let { selectedValues } = filterChannels;
+              if (selectedValues === undefined) {
+                selectedValues = filters;
+              }
+              return {
+                "channels-count": filterChannels,
+                "channels-filters": filters,
+                "channels-selected": selectedValues,
+              };
             }
-          }
-        }
-      },
-      calculated: (state) => {
-        var { filterChannels } = state;
-        const filters = filterChannels.map((x) => x.channel);
-
-        let { selectedValues } = state;
-        if (selectedValues === undefined) {
-          selectedValues = filters;
-        }
-
-        return {
-          "channels-count": filterChannels,
-          "channels-filters": filters,
-          "channels-selected": selectedValues,
-        };
-      }
-    },
-    {
-      id: "filterIntents",
-      type: "ApplicationInsights/Query",
-      dependencies: {
-        timespan: "timespan",
-        queryTimespan: "timespan:queryTimespan",
-        granularity: "timespan:granularity"
-      },
-      params: {
-        table: "customEvents",
-        queries: {
+          },
           filterIntents: {
             query: () => `` +
               ` extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | ` +
@@ -445,24 +428,21 @@ return {
             mappings: {
               intent: (val) => val || "unknown",
               intents: (val) => val || 0
+            },
+            calculated: (filterIntents) => {
+              const intents = filterIntents.map((x) => x.intent);
+              let { selectedValues } = filterIntents;
+              if (selectedValues === undefined) {
+                selectedValues = intents;
+              }
+              return {
+                "intents-count": filterIntents,
+                "intents-filters": intents,
+                "intents-selected": selectedValues,
+              };
             }
           }
         }
-      },
-      calculated: (state) => {
-        var { filterIntents } = state;
-        const intents = filterIntents.map((x) => x.intent);
-
-        let { selectedValues } = state;
-        if (selectedValues === undefined) {
-          selectedValues = intents;
-        }
-
-        return {
-          "intents-count": filterIntents,
-          "intents-filters": intents,
-          "intents-selected": selectedValues,
-        };
       }
     },
     {
@@ -472,23 +452,11 @@ return {
         timespan: "timespan",
         queryTimespan: "timespan:queryTimespan",
         granularity: "timespan:granularity",
-        selectedChannels: "filterChannels:channels-selected",
-        selectedIntents: "filterIntents:intents-selected"
+        selectedChannels: "filters:channels-selected",
+        selectedIntents: "filters:intents-selected"
       },
 			params: {
 				table: "customEvents",
-        filters: [
-          {
-            dependency: "selectedChannels",
-            queryProperty: "customDimensions.channel",
-            queries: ["conversions", "timeline", "users", "channelActivity"]
-          },
-          {
-            dependency: "selectedIntents",
-            queryProperty: "customDimensions.intent",
-            queries: ["intents"]
-          }
-        ],
 				queries: {
 					conversions: {
 						query: () => `` +
@@ -499,6 +467,10 @@ return {
 							"successful": (val) => val === 'true',
 							"event_count": (val) => val || 0
 						},
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (conversions) => {
 
 							// Conversion Handling
@@ -536,6 +508,10 @@ return {
 							"channel": (val) => val || "unknown",
 							"count": (val) => val || 0,
 						},
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (timeline, dependencies) => {
 
 							// Timeline handling
@@ -587,6 +563,10 @@ return {
               "intent": (val) => val || "Unknown",
               "count": (val) => val || 0,
             },
+            filters: [{
+              dependency: "selectedIntents",
+              queryProperty: "customDimensions.intent"
+            }],
 						calculated: (intents) => {
 							return {
 								"intents-bars": [ 'count' ]
@@ -595,6 +575,10 @@ return {
           },
           users: {
             query: `summarize totalUsers=count() by user_Id`,
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (users) => {
 							let result = 0;
 							if (users.length === 1 && users[0].totalUsers > 0) {
@@ -618,6 +602,10 @@ return {
               duration: (val) => val || 0,
               channel: (val) => val || 'unknown'
             },
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (channelActivity) => {
 							var groupedValues = _.chain(channelActivity).groupBy('channel').value();
 							return {
@@ -710,11 +698,11 @@ return {
       subtitle: "Select channels",
       icon: "forum",
       dependencies: {
-        selectedValues: "filterChannels:channels-selected",
-        values: "filterChannels:channels-filters"
+        selectedValues: "filters:channels-selected",
+        values: "filters:channels-filters"
       },
       actions: {
-        onChange: "filterChannels:updateSelectedValues"
+        onChange: "filters:updateSelectedValues:channels-selected"
       },
       first: true
     },
@@ -724,11 +712,11 @@ return {
       subtitle: "Select intents",
       icon: "textsms",
       dependencies: {
-        selectedValues: "filterIntents:intents-selected",
-        values: "filterIntents:intents-filters"
+        selectedValues: "filters:intents-selected",
+        values: "filters:intents-filters"
       },
       actions: {
-        onChange: "filterIntents:updateSelectedValues"
+        onChange: "filters:updateSelectedValues:intents-selected"
       },
       first: true
     }
