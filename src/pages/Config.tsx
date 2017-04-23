@@ -43,7 +43,7 @@ export default class Config extends React.Component<any, IDashboardState> {
     }
 
     return (
-      <ConfigDashboard dashboard={dashboard} connections={connections} standaloneView={this.props.standaloneView} />
+      <ConfigDashboard dashboard={dashboard} connections={connections} standaloneView={this.props.standaloneView} shouldSave={this.props.shouldSave} />
     );
   }
 }

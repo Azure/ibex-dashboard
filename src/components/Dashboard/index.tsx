@@ -32,6 +32,7 @@ interface IDashboardState {
   grid?: any;
   askConfig?:boolean;
   activeConfigView:string;
+  shouldSave:boolean;
 }
 
 interface IDashboardProps {
@@ -57,7 +58,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     layouts: { },
     grid: null,
     askConfig: false,
-    activeConfigView: this.ConfigurationViews.ApplicationInsights
+    activeConfigView: this.ConfigurationViews.ApplicationInsights,
+    shouldSave:false
   };
 
   constructor(props: IDashboardProps) {
@@ -162,8 +164,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   onConfigDashboardApprove() {
     //fire up an event to save.
-    ConfigActions.update(this.state.activeConfigView,null);
-
+    //ConfigActions.update(this.state.activeConfigView,null);
+    this.setState({shouldSave:true});
     //show a spinning indicator while saving...
 
     //close dialog
@@ -288,7 +290,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
             titleMenu={titleMenu}
           />
           
-          <Config standaloneView={false} ref="applicationInsightsView" onChange={function(){alert('foo');}} />
+          <Config standaloneView={false} ref="applicationInsightsView" shouldSave={this.state.shouldSave} />
           
         </Dialog>
 

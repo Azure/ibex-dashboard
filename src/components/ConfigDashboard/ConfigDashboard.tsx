@@ -12,6 +12,10 @@ import connections from '../../data-sources/connections';
 import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
 
+
+import ConfigStore from '../../stores/ConfigStore';
+import ConfigActions from '../../actions/ConfigActions';
+
 interface IConfigDashboardState {
   connections: IDictionary;
   error: string;
@@ -22,6 +26,7 @@ interface IConfigDashboardProps {
   dashboard: IDashboardConfig;
   connections: IDictionary;
   standaloneView:boolean;
+  shouldSave: boolean;
 }
 
 export default class ConfigDashboard extends React.Component<IConfigDashboardProps, IConfigDashboardState> {
@@ -41,7 +46,11 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     ConfigurationsActions.loadConfiguration();
   }
 
-  
+  componentDidUpdate(prevProps, prevState){
+    if(this.props.shouldSave){
+      this.onSave();
+    }
+  }
 
   onParamChange(connectionKey, paramKey, value) {
     let { connections } = this.state;
@@ -51,6 +60,7 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
   }
 
   onSave() {
+    console.log("onSave()");
     let { dashboard } = this.props;
     let { connections } = this.state;
 
