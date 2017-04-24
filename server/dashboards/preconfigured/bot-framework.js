@@ -386,9 +386,75 @@ return {
       }
     },
     {
+      id: "filters",
+      type: "ApplicationInsights/Query",
+      dependencies: {
+        timespan: "timespan",
+        queryTimespan: "timespan:queryTimespan",
+        granularity: "timespan:granularity"
+      },
+      params: {
+        table: "customEvents",
+        queries: {
+          filterChannels: {
+            query: () => `` +
+              ` where name == 'Activity' | ` +
+              ` extend channel=customDimensions.channel | ` +
+              ` summarize channel_count=count() by tostring(channel) | ` +
+              ` order by channel_count`,
+            mappings: {
+              channel: (val) => val || "unknown",
+              channel_count: (val) => val || 0
+            },
+            calculated: (filterChannels) => {
+              const filters = filterChannels.map((x) => x.channel);
+              let { selectedValues } = filterChannels;
+              if (selectedValues === undefined) {
+                selectedValues = [];
+              }
+              return {
+                "channels-count": filterChannels,
+                "channels-filters": filters,
+                "channels-selected": selectedValues,
+              };
+            }
+          },
+          filterIntents: {
+            query: () => `` +
+              ` extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | ` +
+              ` where name startswith 'message.intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
+              ` summarize intent_count=count() by tostring(intent) | ` +
+              ` order by intent_count`,
+            mappings: {
+              intent: (val) => val || "unknown",
+              intent_count: (val) => val || 0
+            },
+            calculated: (filterIntents) => {
+              const intents = filterIntents.map((x) => x.intent);
+              let { selectedValues } = filterIntents;
+              if (selectedValues === undefined) {
+                selectedValues = [];
+              }
+              return {
+                "intents-count": filterIntents,
+                "intents-filters": intents,
+                "intents-selected": selectedValues,
+              };
+            }
+          }
+        }
+      }
+    },
+    {
 			id: 'ai',
       type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan", granularity: "timespan:granularity" },
+      dependencies: {
+        timespan: "timespan",
+        queryTimespan: "timespan:queryTimespan",
+        granularity: "timespan:granularity",
+        selectedChannels: "filters:channels-selected",
+        selectedIntents: "filters:intents-selected"
+      },
 			params: {
 				table: "customEvents",
 				queries: {
@@ -401,6 +467,10 @@ return {
 							"successful": (val) => val === 'true',
 							"event_count": (val) => val || 0
 						},
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (conversions) => {
 
 							// Conversion Handling
@@ -438,6 +508,10 @@ return {
 							"channel": (val) => val || "unknown",
 							"count": (val) => val || 0,
 						},
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (timeline, dependencies) => {
 
 							// Timeline handling
@@ -489,6 +563,10 @@ return {
               "intent": (val) => val || "Unknown",
               "count": (val) => val || 0,
             },
+            filters: [{
+              dependency: "selectedIntents",
+              queryProperty: "customDimensions.intent"
+            }],
 						calculated: (intents) => {
 							return {
 								"intents-bars": [ 'count' ]
@@ -497,6 +575,10 @@ return {
           },
           users: {
             query: `summarize totalUsers=count() by user_Id`,
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (users) => {
 							let result = 0;
 							if (users.length === 1 && users[0].totalUsers > 0) {
@@ -520,6 +602,10 @@ return {
               duration: (val) => val || 0,
               channel: (val) => val || 'unknown'
             },
+            filters: [{
+              dependency: "selectedChannels",
+              queryProperty: "customDimensions.channel"
+            }],
 						calculated: (channelActivity) => {
 							var groupedValues = _.chain(channelActivity).groupBy('channel').value();
 							return {
@@ -604,6 +690,34 @@ return {
       type: "TextFilter",
       dependencies: { selectedValue: "timespan", values: "timespan:values" },
       actions: { onChange: "timespan:updateSelectedValue" },
+      first: true
+    },
+    {
+      type: "MenuFilter",
+      title: "Channels",
+      subtitle: "Select channels",
+      icon: "forum",
+      dependencies: {
+        selectedValues: "filters:channels-selected",
+        values: "filters:channels-filters"
+      },
+      actions: {
+        onChange: "filters:updateSelectedValues:channels-selected"
+      },
+      first: true
+    },
+    {
+      type: "MenuFilter",
+      title: "Intents",
+      subtitle: "Select intents",
+      icon: "textsms",
+      dependencies: {
+        selectedValues: "filters:intents-selected",
+        values: "filters:intents-filters"
+      },
+      actions: {
+        onChange: "filters:updateSelectedValues:intents-selected"
+      },
       first: true
     }
   ],

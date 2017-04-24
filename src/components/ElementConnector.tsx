@@ -78,6 +78,9 @@ export default class ElementConnector {
               key={idx} 
               dependencies={element.dependencies}
               actions={element.actions}
+              title={element.title}
+              subtitle={element.subtitle}
+              icon={element.icon}
         />
       )
     });

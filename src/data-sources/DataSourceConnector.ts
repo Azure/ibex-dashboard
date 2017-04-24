@@ -148,12 +148,17 @@ export class DataSourceConnector {
   static triggerAction(action: string, params: IStringDictionary, args: IDictionary) {
     var actionLocation = action.split(':');
 
-    if (actionLocation.length !== 2) {
+    if (actionLocation.length !== 2 && actionLocation.length !== 3) {
       throw new Error(`Action triggers should be in format of "dataSource:action", this is not met by ${action}`);
     }
 
     var dataSourceName = actionLocation[0];
     var actionName = actionLocation[1];
+    var selectedValuesProperty = "selectedValues";
+    if (actionLocation.length === 3) {
+      selectedValuesProperty = actionLocation[2];
+      args = { [selectedValuesProperty]: args };
+    }
 
     if (dataSourceName === 'dialog') {
       
@@ -161,7 +166,7 @@ export class DataSourceConnector {
 
       DialogsActions.openDialog(actionName, extrapolation.dependencies);
     } else {
-      
+
       var dataSource = DataSourceConnector.dataSources[dataSourceName];
       if (!dataSource) {
         throw new Error(`Data source ${dataSourceName} was not found`)

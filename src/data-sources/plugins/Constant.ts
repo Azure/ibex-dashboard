@@ -18,7 +18,7 @@ export default class Constant extends DataSourcePlugin<IConstantParams> {
     var props = this._props;
     var params = options.params;
 
-    props.actions.push.apply(props.actions, [ 'initialize', 'updateSelectedValue' ]);
+    props.actions.push.apply(props.actions, [ 'initialize', 'updateSelectedValue', 'updateSelectedValues' ]);
   }
 
   initialize() {
@@ -41,5 +41,9 @@ export default class Constant extends DataSourcePlugin<IConstantParams> {
 
   updateSelectedValue(dependencies: IDictionary, selectedValue: any) {
     return { selectedValue };
+  }
+
+  updateSelectedValues(dependencies: IDictionary, selectedValues: any) {
+    return { selectedValues };
   }
 }

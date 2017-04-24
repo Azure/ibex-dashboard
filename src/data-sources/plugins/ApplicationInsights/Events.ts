@@ -74,4 +74,8 @@ export default class ApplicationInsightsEvents extends DataSourcePlugin<IEventsP
     //     return callback(null, ActionsCommon.prepareResult('value', json));
     //   });
   }
+
+  updateSelectedValues(dependencies, callback) {
+    
+  }
 }

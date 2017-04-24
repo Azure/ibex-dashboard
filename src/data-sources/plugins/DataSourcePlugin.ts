@@ -49,7 +49,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     id: '',
     dependencies: {} as any,
     dependables: [],
-    actions: [ 'updateDependencies', 'failure' ],
+    actions: [ 'updateDependencies', 'failure', 'updateSelectedValues' ],
     params: <T>{},
     calculated: {}
   };
@@ -68,9 +68,11 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.calculated = options.calculated || {};
 
     this.updateDependencies = this.updateDependencies.bind(this);
+    this.updateSelectedValues = this.updateSelectedValues.bind(this);
   }
 
   abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void;
+  abstract updateSelectedValues (dependencies: IDictionary, selectedValues: any, callback: (result: any) => void): void;
 
   bind (actionClass: any) {
     actionClass.type = this.type;
