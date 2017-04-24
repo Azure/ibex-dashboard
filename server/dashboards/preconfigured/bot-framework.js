@@ -400,11 +400,11 @@ return {
             query: () => `` +
               ` where name == 'Activity' | ` +
               ` extend channel=customDimensions.channel | ` +
-              ` summarize channels=count() by tostring(channel) | ` +
-              ` order by channels`,
+              ` summarize channel_count=count() by tostring(channel) | ` +
+              ` order by channel_count`,
             mappings: {
               channel: (val) => val || "unknown",
-              channels: (val) => val || 0
+              channel_count: (val) => val || 0
             },
             calculated: (filterChannels) => {
               const filters = filterChannels.map((x) => x.channel);
@@ -423,11 +423,11 @@ return {
             query: () => `` +
               ` extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | ` +
               ` where name startswith 'message.intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
-              ` summarize intents=count() by tostring(intent) | ` +
-              ` order by intents`,
+              ` summarize intent_count=count() by tostring(intent) | ` +
+              ` order by intent_count`,
             mappings: {
               intent: (val) => val || "unknown",
-              intents: (val) => val || 0
+              intent_count: (val) => val || 0
             },
             calculated: (filterIntents) => {
               const intents = filterIntents.map((x) => x.intent);
