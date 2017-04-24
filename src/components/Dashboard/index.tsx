@@ -5,7 +5,7 @@ import Toolbar from 'react-md/lib/Toolbars';
 import Button from 'react-md/lib/Buttons';
 import Dialog from 'react-md/lib/Dialogs';
 import Divider from 'react-md/lib/Dividers';
-import SelectField from 'react-md/lib/SelectFields';
+
 import { Spinner } from '../Spinner';
 
 import * as ReactGridLayout from 'react-grid-layout';
@@ -16,12 +16,9 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 import ElementConnector from '../ElementConnector';
 import { loadDialogsFromDashboard } from '../generic/Dialogs';
 
-import Config from '../../pages/Config';
+import SettingsButton from '../ConfigDashboard/SettingsButton';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
-
-import ConfigStore from '../../stores/ConfigStore';
-import ConfigActions from '../../actions/ConfigActions';
 
 interface IDashboardState {
   editMode?: boolean,
@@ -31,8 +28,7 @@ interface IDashboardState {
   layouts?: ILayouts;
   grid?: any;
   askConfig?:boolean;
-  activeConfigView:string;
-  shouldSave:boolean;
+  
 }
 
 interface IDashboardProps {
@@ -41,12 +37,7 @@ interface IDashboardProps {
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
  
-  ConfigurationViews = {
-    ApplicationInsights:'Application Insights',
-    Elements: 'Elements',
-    DataSources: 'Data Sources',
-    Filters: 'Filters'
-  };
+ 
 
   layouts = {};
   
@@ -57,9 +48,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     mounted: false,
     layouts: { },
     grid: null,
-    askConfig: false,
-    activeConfigView: this.ConfigurationViews.ApplicationInsights,
-    shouldSave:false
+    askConfig: false
   };
 
   constructor(props: IDashboardProps) {
@@ -72,8 +61,6 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
     this.onDeleteDashboardApprove = this.onDeleteDashboardApprove.bind(this);
     this.onDeleteDashboardCancel = this.onDeleteDashboardCancel.bind(this);
-    this.onConfigDashboardApprove = this.onConfigDashboardApprove.bind(this);
-    this.onConfigDashboardCancel = this.onConfigDashboardCancel.bind(this);
   }
 
   componentDidMount() {
@@ -162,32 +149,15 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ askDelete: false });
   }
 
-  onConfigDashboardApprove() {
-    //fire up an event to save.
-    //ConfigActions.update(this.state.activeConfigView,null);
-    this.setState({shouldSave:true});
-    //show a spinning indicator while saving...
-
-    //close dialog
-    this.setState({ askConfig: false });
-  }
+  
 
   onConfigDashboardCancel() {
     this.setState({ askConfig: false });
   }
 
-  onConfigDialogViewChange(newValue, newActiveIndex, event){
+  
 
-  }
-
-  returnConfigViewToRender(){
-      if(this.state.activeConfigView === this.ConfigurationViews.ApplicationInsights) {
-        return (<Config standaloneView={false}/>);
-      }
-
-      //default
-      return (<div>Under Construction:{this.state.activeConfigView}</div>);
-  }
+  
 
   render() {
 
@@ -210,8 +180,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     // Actions to perform on an active dashboard
     let toolbarActions = [
-      <Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>edit</Button>,
-      <Button key="settings" icon tooltipLabel="Connections" onClick={this.onConfigDashboard}>settings_applications</Button>
+      <span><Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>edit</Button></span>,
+       <SettingsButton/>
     ];
 
     if (editMode) {
@@ -221,14 +191,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     }
     
     
-    const titleMenu = (
-      <SelectField
-        key="titleMenu"
-        id="titles"
-        menuItems={[this.ConfigurationViews.ApplicationInsights,this.ConfigurationViews.DataSources,,this.ConfigurationViews.Elements, ,this.ConfigurationViews.Filters]}
-        defaultValue={this.ConfigurationViews.ApplicationInsights}
-        onChange={this.onConfigDialogViewChange}
-      />);
+    
 
     return (
       <div style={{ width: '100%' }}>
@@ -273,26 +236,6 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
           </p>
         </Dialog>
         
-        <Dialog
-          id="configForm"
-          visible={askConfig}
-          modal
-          dialogStyle={{ width:'90%', height:'90%'}}
-          className='dialog-toolbar-no-padding'
-          actions={[
-            { onClick: this.onConfigDashboardApprove, primary: true, label: 'Save', },
-            { onClick: this.onConfigDashboardCancel, primary: false, label: 'Cancel' }
-          ]}
-        >
-          <Toolbar
-            colored
-            title="Dashboard Configuration"
-            titleMenu={titleMenu}
-          />
-          
-          <Config standaloneView={false} ref="applicationInsightsView" shouldSave={this.state.shouldSave} />
-          
-        </Dialog>
 
       </div>
     );

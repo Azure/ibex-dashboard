@@ -13,8 +13,8 @@ import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
 
 
-import ConfigStore from '../../stores/ConfigStore';
-import ConfigActions from '../../actions/ConfigActions';
+import SettingsStore from '../../stores/SettingsStore';
+import SettingsActions from '../../actions/SettingsActions';
 
 interface IConfigDashboardState {
   connections: IDictionary;
@@ -60,7 +60,6 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
   }
 
   onSave() {
-    console.log("onSave()");
     let { dashboard } = this.props;
     let { connections } = this.state;
 
@@ -79,6 +78,9 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     }
 
     ConfigurationsActions.saveConfiguration(dashboard);
+
+    //tell the parents save ended
+    SettingsActions.saveSettingsCompleted();
   }
 
   onSaveGoToDashboard() {
