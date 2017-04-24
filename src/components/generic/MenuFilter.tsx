@@ -3,13 +3,18 @@ import { GenericComponent } from './GenericComponent';
 import Button from 'react-md/lib/Buttons';
 import Portal from 'react-md/lib/Helpers/Portal';
 import AccessibleFakeButton from 'react-md/lib/Helpers/AccessibleFakeButton';
+import AccessibleFakeInkedButton from 'react-md/lib/Helpers/AccessibleFakeInkedButton';
 import List from 'react-md/lib/Lists/List';
 import ListItemControl from 'react-md/lib/Lists/ListItemControl';
 import Checkbox from 'react-md/lib/SelectionControls/Checkbox';
 import ListItem from 'react-md/lib/Lists/ListItem';
 import FontIcon from 'react-md/lib/FontIcons';
+import './generic.css';
 
 const styles = {
+  button: {
+    userSelect: 'none',
+  },
   container: {
     position: 'relative',
     float: 'left',
@@ -17,21 +22,25 @@ const styles = {
   },
   animateOpen: {
     transition: '.3s',
-    transform: 'translate(0,50px) scale(1.0,1.0)',
+    transform: 'scale(1.0,1.0)',
     transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
   },
   animateClose: {
-    transform: 'translate(0,50px) scale(1.0,0)',
+    transform: 'scale(1.0,0)',
     transition: '0s',
   },
   list: {
     position: 'absolute',
     top: '0px',
     left: '0px',
-  },
-  overlay: {
-
   }
+};
+
+// using styles from the select field menu
+const classNames = {
+  menu: ['md-inline-block', 'md-menu-container', 'md-menu-container--menu-below', 'md-select-field-menu',
+    'md-select-field-menu--stretch', 'md-select-field--toolbar', ''],
+  label: ['md-floating-label', 'md-floating-label--floating', ''],
 };
 
 export default class MenuFilter extends GenericComponent<any, any> {
@@ -97,7 +106,6 @@ export default class MenuFilter extends GenericComponent<any, any> {
   onChange(newValue: any, checked: boolean, event: any) {
     var { selectedValues } = this.state;
     let newSelectedValues = selectedValues.slice(0);
-
     const idx = selectedValues.findIndex((x) => x === newValue);
     if (idx === -1 && checked) {
       newSelectedValues.push(newValue);
@@ -121,11 +129,6 @@ export default class MenuFilter extends GenericComponent<any, any> {
     var { title, subtitle, icon } = this.props;
     var { selectedValues, values, overlay } = this.state;
     values = values || [];
-
-    const button = title === '' ?
-      <Button icon tooltipLabel={subtitle} onClick={this.toggleOverlay}>{icon}</Button>
-      : <Button flat label={title} onClick={this.toggleOverlay}>{icon}</Button>;
-
     let listItems = values.map((value, idx) => {
       return (
         <ListItemControl
@@ -152,14 +155,39 @@ export default class MenuFilter extends GenericComponent<any, any> {
       listItems.push(<ListItem key="none" primaryText={selectNone} onClick={this.selectNone} rightIcon={iconNone} />);
     }
 
+    const paperStyle = overlay ? classNames.menu.join(' ') + 'md-paper md-paper--1' : classNames.menu.join(' ');
+    const labelStyle = overlay ? classNames.label.join(' ') + 'md-floating-label--active' : classNames.label.join(' ');
+
     const containerStyle = overlay ? { ...styles.container, ...styles.animateOpen }
       : { ...styles.container, ...styles.animateClose };
 
+    let selectText = subtitle || 'Select';
+    if (selectedValues === undefined) {
+      selectText = subtitle || 'Select';
+    } else if (selectedValues.length === 1) {
+      selectText = selectedValues[0];
+    } else if (selectedValues.length > 1) {
+      selectText = `${selectedValues.length} selected`;
+    }
+
     return (
       <div className="filters">
-        {button}
 
-        <div style={containerStyle}>
+        <AccessibleFakeInkedButton
+          className={paperStyle}
+          onClick={this.toggleOverlay}
+          aria-haspopup="true"
+          aria-expanded={overlay}
+          style={styles.button}
+        >
+          <label className={labelStyle}>{title}</label>
+          <div className="md-icon-separator md-text-field md-select-field--btn md-text-field--floating-margin">
+            <span className="md-value md-icon-text">{selectText}</span>
+            <FontIcon>arrow_drop_down</FontIcon>
+          </div>
+        </AccessibleFakeInkedButton>
+
+        <div className="md-multiselect-menu" style={containerStyle}>
           <List className="md-paper md-paper--1" style={styles.list}>
             {listItems}
           </List>
@@ -169,7 +197,6 @@ export default class MenuFilter extends GenericComponent<any, any> {
           <AccessibleFakeButton
             className="md-overlay"
             onClick={this.hideOverlay}
-            style={styles.overlay}
           />
         </Portal>
 

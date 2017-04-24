@@ -410,7 +410,7 @@ return {
               const filters = filterChannels.map((x) => x.channel);
               let { selectedValues } = filterChannels;
               if (selectedValues === undefined) {
-                selectedValues = filters;
+                selectedValues = [];
               }
               return {
                 "channels-count": filterChannels,
@@ -433,7 +433,7 @@ return {
               const intents = filterIntents.map((x) => x.intent);
               let { selectedValues } = filterIntents;
               if (selectedValues === undefined) {
-                selectedValues = intents;
+                selectedValues = [];
               }
               return {
                 "intents-count": filterIntents,

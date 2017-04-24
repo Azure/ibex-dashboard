@@ -61,3 +61,23 @@
 		}
 	}
 }
+
+/* MenuFilter */
+
+@media screen and (min-width: 320px) {
+	.md-multiselect-menu {
+		margin-top: 50px;
+	}
+}
+
+@media screen and (min-width: 1025px) {
+	.md-multiselect-menu {
+		margin-top: 58px;
+	}
+}
+
+.md-value {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
