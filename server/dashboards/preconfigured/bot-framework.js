@@ -704,7 +704,7 @@ return {
       actions: {
         onChange: "filters:updateSelectedValues:channels-selected"
       },
-      first: false
+      first: true
     },
     {
       type: "MenuFilter",
@@ -718,7 +718,7 @@ return {
       actions: {
         onChange: "filters:updateSelectedValues:intents-selected"
       },
-      first: false
+      first: true
     }
   ],
   elements: [

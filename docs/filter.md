@@ -90,6 +90,6 @@ Define `dependencies` as follows:
   actions: {
     onChange: "filters:updateSelectedValues:channels-selected"
   },
-  first: false
+  first: true
 },
 ```
