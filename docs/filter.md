@@ -6,18 +6,18 @@ There are 2 basic types of filter control:
 
 ## Single selection:
 
-The `TextFilter` component is used for single selection.
+The **TextFilter** component is used for single selection.
 
 | Control | UI Style | Description
-| :-----------|:----|:--
+| :-------|:---------|:-----------
 | `TextFilter` | Select menu | Single selection menu 
 
 ## Multi-selection:
 
-The `MenuFilter` or `CheckboxFilter` components can be used for multiple selection.
+The **MenuFilter** or **CheckboxFilter** components can be used for multiple selection.
 
 | Control | UI Style | Description
-| :-----------|:----|:--
+| :-------|:---------|:-----------
 | `MenuFilter` | Select menu | Multi-select menu with checkbox list item controls 
 | `CheckboxFilter` | Checkboxes | Multi-select checkboxes 
 
@@ -25,7 +25,7 @@ The `MenuFilter` or `CheckboxFilter` components can be used for multiple selecti
 
 | Property | Type | Description 
 | :--------|:-----|:-----------
-| `type`| `string` | Either 'TextFilter', 'MenuFilter', 'CheckboxFilter'
+| `type`| `string` | Use 'TextFilter'
 | `dependencies`| `object` | Dependencies required by component
 | `actions`| `object` | Contains an `onChange` action defination with a referenced dependency `string` used to update the selected value
 | `first`| `boolean` | Declare as primary filter
@@ -56,11 +56,11 @@ Define `dependencies` as follows:
 },
 ```
 
-## Multi-selection Properties
+## Multi-selection properties
 
 | Property | Type | Description 
 | :--------|:-----|:-----------
-| `type`| `string` | Either 'TextFilter', 'MenuFilter', 'CheckboxFilter'
+| `type`| `string` | Use either 'MenuFilter', 'CheckboxFilter'
 | `dependencies`| `object` | Dependencies required by component
 | `actions`| `object` | Contains an `onChange` action defination with a referenced dependency `string` used to update the selected values
 | `first`| `boolean` | Declare as primary filter
