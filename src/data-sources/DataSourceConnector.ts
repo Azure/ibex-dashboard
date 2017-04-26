@@ -5,20 +5,20 @@ import DialogsActions from '../components/generic/Dialogs/DialogsActions';
 
 export interface IDataSource {
   id: string;
-  config : any;
-  plugin : IDataSourcePlugin;
+  config: any;
+  plugin: IDataSourcePlugin;
   action: any;
   store: any;
   initialized: boolean;
 }
 
 export interface IDataSourceDictionary {
-  [key: string] : IDataSource;
+  [key: string]: IDataSource;
 }
 
 export interface IExtrapolationResult {
-  dataSources: { [key: string] : IDataSource };
-  dependencies: { [key: string] : any };
+  dataSources: { [key: string]: IDataSource };
+  dependencies: { [key: string]: any };
 }
 
 export class DataSourceConnector {
@@ -35,8 +35,8 @@ export class DataSourceConnector {
     // Dynamically load the plugin from the plugins directory
     var pluginPath = './plugins/' + config.type;
     var PluginClass = require(pluginPath);
-    var plugin : any = new PluginClass.default(config, connections);
-    
+    var plugin: any = new PluginClass.default(config, connections);
+
     // Creating actions class
     var ActionClass = DataSourceConnector.createActionClass(plugin);
 
@@ -50,7 +50,7 @@ export class DataSourceConnector {
       action: ActionClass,
       store: StoreClass,
       initialized: false
-    }
+    };
 
     return DataSourceConnector.dataSources[config.id];
   }
@@ -62,28 +62,6 @@ export class DataSourceConnector {
     });
 
     DataSourceConnector.initializeDataSources();
-  }
-
-  private static connectDataSource(sourceDS: IDataSource) {
-    // Connect sources and dependencies
-    sourceDS.store.listen((state) => {
-
-      Object.keys(this.dataSources).forEach(checkDSId => {
-        var checkDS = this.dataSources[checkDSId];
-        var dependencies = checkDS.plugin.getDependencies() || {};
-
-        let connected = _.find(_.keys(dependencies), dependencyKey => {
-          let dependencyValue = dependencies[dependencyKey] || '';
-          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
-        })
-
-        if (connected) {
-
-          // Todo: add check that all dependencies are met
-          checkDS.action.updateDependencies.defer(state);
-        }
-      });
-    });
   }
 
   static initializeDataSources() {
@@ -107,7 +85,7 @@ export class DataSourceConnector {
       dependencies: {}
     };
     Object.keys(dependencies).forEach(key => {
-      
+
       // Find relevant store
       let dependency = dependencies[key] || '';
 
@@ -131,7 +109,8 @@ export class DataSourceConnector {
       } else {
         let dataSource = DataSourceConnector.dataSources[dataSourceName];
         if (!dataSource) {
-          throw new Error('Could not find data source for depedency ' + dependency + '. If your want to use a constant value, write "value:some value"');
+          throw new Error(`Could not find data source for dependency ${dependency}. 
+            If your want to use a constant value, write "value:some value"`);
         }
 
         let valueName = dependsUpon.length > 1 ? dependsUpon[1] : dataSource.plugin.defaultProperty;
@@ -141,7 +120,7 @@ export class DataSourceConnector {
         result.dataSources[dataSource.id] = dataSource;
       }
     });
-
+    
     return result;
   }
 
@@ -154,14 +133,14 @@ export class DataSourceConnector {
 
     var dataSourceName = actionLocation[0];
     var actionName = actionLocation[1];
-    var selectedValuesProperty = "selectedValues";
+    var selectedValuesProperty = 'selectedValues';
     if (actionLocation.length === 3) {
       selectedValuesProperty = actionLocation[2];
       args = { [selectedValuesProperty]: args };
     }
 
     if (dataSourceName === 'dialog') {
-      
+
       var extrapolation = DataSourceConnector.extrapolateDependencies(params, args);
 
       DialogsActions.openDialog(actionName, extrapolation.dependencies);
@@ -169,7 +148,7 @@ export class DataSourceConnector {
 
       var dataSource = DataSourceConnector.dataSources[dataSourceName];
       if (!dataSource) {
-        throw new Error(`Data source ${dataSourceName} was not found`)
+        throw new Error(`Data source ${dataSourceName} was not found`);
       }
 
       dataSource.action[actionName].call(dataSource.action, args);
@@ -180,21 +159,43 @@ export class DataSourceConnector {
     return this.dataSources;
   }
 
-  static getDataSource(name): IDataSource {
+  static getDataSource(name: string): IDataSource {
     return this.dataSources[name];
   }
 
-  private static createActionClass(plugin: IDataSourcePlugin) : any {
+  private static connectDataSource(sourceDS: IDataSource) {
+    // Connect sources and dependencies
+    sourceDS.store.listen((state) => {
+
+      Object.keys(this.dataSources).forEach(checkDSId => {
+        var checkDS = this.dataSources[checkDSId];
+        var dependencies = checkDS.plugin.getDependencies() || {};
+
+        let connected = _.find(_.keys(dependencies), dependencyKey => {
+          let dependencyValue = dependencies[dependencyKey] || '';
+          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
+        });
+
+        if (connected) {
+
+          // Todo: add check that all dependencies are met
+          checkDS.action.updateDependencies.defer(state);
+        }
+      });
+    });
+  }
+
+  private static createActionClass(plugin: IDataSourcePlugin): any {
     class NewActionClass {
-      constructor() {}
-    };
+      constructor() { }
+    }
 
     plugin.getActions().forEach(action => {
 
       if (typeof plugin[action] === 'function') {
 
         // This method will be called with an action is dispatched
-        NewActionClass.prototype[action] = function (...args) {
+        NewActionClass.prototype[action] = function (...args: Array<any>) {
           // Collecting depedencies from all relevant stores
           var extrapolation;
           if (args.length === 1) {
@@ -209,26 +210,26 @@ export class DataSourceConnector {
           // Checking is result is a dispatcher or a direct value
           if (typeof result === 'function') {
             return (dispatch) => {
-              result(function (obj) {
+              result(function (obj: any) {
                 obj = obj || {};
                 var fullResult = DataSourceConnector.callibrateResult(obj, plugin);
                 dispatch(fullResult);
               });
-            }
+            };
           } else {
             var fullResult = DataSourceConnector.callibrateResult(result, plugin);
             return fullResult;
           }
-        }
+        };
       } else {
 
         // Adding generic actions that are directly proxied to the store
-        alt.addActions(action, <any>NewActionClass);
+        alt.addActions(action, <any> NewActionClass);
       }
     });
 
     // Binding the class to Alt and the plugin
-    var ActionClass = alt.createActions(<any>NewActionClass);
+    var ActionClass = alt.createActions(<any> NewActionClass);
     plugin.bind(ActionClass);
 
     return ActionClass;
@@ -241,19 +242,18 @@ export class DataSourceConnector {
     });
     class NewStoreClass {
       constructor() {
-        (<any>this).bindListeners({ updateState: bindings });
+        (<any> this).bindListeners({ updateState: bindings });
       }
 
-      updateState(newData) {
-        (<any>this).setState(newData);
+      updateState(newData: any) {
+        (<any> this).setState(newData);
       }
-    };
-    var StoreClass = alt.createStore(NewStoreClass, config.id + '-Store');;
-
+    }
+    var StoreClass = alt.createStore(NewStoreClass, config.id + '-Store');
     return StoreClass;
   }
 
-  private static callibrateResult(result: any, plugin: IDataSourcePlugin) : any {
+  private static callibrateResult(result: any, plugin: IDataSourcePlugin): any {
 
     var defaultProperty = plugin.defaultProperty || 'value';
 

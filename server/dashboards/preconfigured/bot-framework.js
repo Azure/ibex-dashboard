@@ -406,12 +406,12 @@ return {
               channel: (val) => val || "unknown",
               channel_count: (val) => val || 0
             },
-            calculated: (filterChannels) => {
+            calculated: (filterChannels, dependencies, prevState) => {
               const filters = filterChannels.map((x) => x.channel);
-              let { selectedValues } = filterChannels;
-              if (selectedValues === undefined) {
-                selectedValues = [];
-              }
+              let selectedValues = [];
+              if (prevState['channels-selected'] !== undefined) {
+								selectedValues = prevState['channels-selected'];
+							}
               return {
                 "channels-count": filterChannels,
                 "channels-filters": filters,
@@ -429,12 +429,12 @@ return {
               intent: (val) => val || "unknown",
               intent_count: (val) => val || 0
             },
-            calculated: (filterIntents) => {
+            calculated: (filterIntents, dependencies, prevState) => {
               const intents = filterIntents.map((x) => x.intent);
-              let { selectedValues } = filterIntents;
-              if (selectedValues === undefined) {
-                selectedValues = [];
-              }
+              let selectedValues = [];
+              if (prevState['intents-selected'] !== undefined) {
+								selectedValues = prevState['intents-selected'];
+							}
               return {
                 "intents-count": filterIntents,
                 "intents-filters": intents,
