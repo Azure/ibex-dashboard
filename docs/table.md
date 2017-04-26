@@ -1,13 +1,13 @@
-# SplitPanel
+# Table
 
-This article explains how define a SplitPanel view control.
+This article explains how define a Table view control.
 
 ## Basic properties
 
 | Property | Type | Value | Description 
 | :--------|:-----|:------|:------------
 | `id`| `string` || ID of the element on the page
-| `type`| `string` | "SplitPanel" |
+| `type`| `string` | "Table" |
 | `title`| `string` || Title that will appear at the top of the view
 | `size`| `{ w: number, h: number}` || Width/Height of the view
 | `dependencies`| `object` || Dependencies that will be requested for this element
@@ -20,8 +20,7 @@ Define `dependencies` as follows:
 
 | Property | Type | Description 
 | :--------|:-----|:-----------
-| `groups`| `string` | Reference to collection of grouped values   
-| `values`| `string` | Reference to values loaded from a selected group
+| `values`| `string` | Reference to values loaded from data source
 
 To read how to define dependencies [click here](/dependencies).
 
@@ -29,8 +28,7 @@ To read how to define dependencies [click here](/dependencies).
 
 ```js
 dependencies: {
-  groups: "errors-group",
-  values: "errors-selection"
+  values: "conversations-data"
 }
 ```
 
@@ -41,7 +39,6 @@ Define `props` as follows:
 | Property | Type | Description 
 | :--------|:-----|:-----------
 | `cols`| `object[]` | Collection of table column properties  
-| `group`| `object` | Dictionary of field names used for displaying the group title, secondary text and badge count
 
 Define `props.cols` as follows:
 
@@ -57,42 +54,27 @@ Define `props.cols` as follows:
 | `value`| `string` | If type is a `icon` or `button` this will define the icon to use
 | `click`| `string` | If type is a `button` this will define the action to trigger when selecting a row
 
-Define `props.group` as follows:
-
-| Property | Type | Description 
-| :--------|:-----|:-----------
-| `field`| `string` | Defines the query field
-| `secondaryField`| `string` | Defines the secondary query field
-| `countField`| `string` | Defines the count field
-
 #### Props sample:
 
 ```js
 props: {
   cols: [{
-    header: "Type",
-    field: "type",
-    secondaryHeader: "Message",
-    secondaryField: "innermostMessage"
-  }, {
     header: "Conversation Id",
-    field: "conversationId",
-    secondaryHeader: "Operation Id",
-    secondaryField: "operation_Id"
-  }, {
-    header: "HandledAt",
-    field: "handledAt"
-  }, {
+    field: "id"
+  },{
+    header: "Last Message",
+    field: "maxTimestamp",
+    type: "time",
+    format: "MMM-DD HH:mm:ss"
+  },{
+    header: "Count",
+    field: "count"
+  },{
     type: "button",
-    value: "more",
-    click: "openErrorDetail"
-  }],
-  group: {
-    field: "type",
-    secondaryField: "innermostMessage",
-    countField: "error_count"
-  }
-}
+    value: "chat",
+    click: "openMessagesDialog"
+  }]
+},
 ```
 
 ## Actions
@@ -108,24 +90,11 @@ Define each `action` as follows:
 
 ```js
 actions: {
-  select: {
-    action: "errors-selection:updateDependencies",
+  openMessagesDialog: {
+    action: "dialog:messages",
     params: {
-      title: "args:type",
-      type: "args:type",
-      innermostMessage: "args:innermostMessage",
-      queryspan: "timespan:queryTimespan"
-    }
-  },
-  openErrorDetail: {
-    action: "dialog:errordetail",
-    params: {
-      title: "args:operation_Id",
-      type: "args:type",
-      innermostMessage: "args:innermostMessage",
-      handledAt: "args:handledAt",
-      conversationId: "args:conversationId",
-      operation_Id: "args:operation_Id",
+      title: "args:id",
+      conversation: "args:conversation",
       queryspan: "timespan:queryTimespan"
     }
   }
