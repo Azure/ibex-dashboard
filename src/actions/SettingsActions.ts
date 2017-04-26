@@ -15,7 +15,6 @@ class SettingsActions extends AbstractActions implements ISettingsActions {
   }
 
   saveSettingsCompleted() {
-    console.log("SettingsActions.saveSettingsCompleted()");
     return {  };
   }
 }

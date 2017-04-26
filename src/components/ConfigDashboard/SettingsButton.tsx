@@ -9,11 +9,15 @@ import SelectField from 'react-md/lib/SelectFields';
 import Config from '../../pages/Config';
 import SettingsStore from '../../stores/SettingsStore';
 import SettingsActions from '../../actions/SettingsActions';
+import ElementsSettings from './Elements/ElementsSettings'
+import ConfigurationsActions from '../../actions/ConfigurationsActions';
+import ConfigurationsStore from '../../stores/ConfigurationsStore';
 
 interface ISettingsButtonState {
   shouldSave: boolean;
   showSettingsDialog:boolean;
   activeConfigView:string;
+  dashboard?: IDashboardConfig;
 }
 
 interface ISettingsButtonProps {
@@ -32,7 +36,8 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   state: ISettingsButtonState = {
     shouldSave: false,
     showSettingsDialog: false,
-    activeConfigView: this.ConfigurationViews.ApplicationInsights
+    activeConfigView: this.ConfigurationViews.DataSources,
+    dashboard: null
   };
 
   constructor(props: ISettingsButtonProps) {
@@ -47,12 +52,24 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     this.onStoreChange = this.onStoreChange.bind(this);
     this.onConfigDialogViewChange = this.onConfigDialogViewChange.bind(this);
     this.chooseComponentToDisplay =  this.chooseComponentToDisplay.bind(this);
+
+    //ConfigurationsActions.loadConfiguration();
   }
 
    
   
   componentDidMount() {
       SettingsStore.listen(this.onStoreChange);
+      
+      //initialize the dashboard state
+      var configStorteState = ConfigurationsStore.getState();
+      this.setState({dashboard:configStorteState.dashboard});
+
+      //update the dashbaord state on change
+      ConfigurationsStore.listen(state => {
+        var configStorteState = ConfigurationsStore.getState();
+        this.setState({dashboard:configStorteState.dashboard});
+      });
   }
   
   componentWillUnmount() {
@@ -61,7 +78,14 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   onStoreChange(state) {
     if(!state.isSavingSettings){
-        this.onChildSaveCompleted();
+      //since we are passing parts of dashbaord by ref, and the cild elements just completed to update the data into it, we can safly save it with all the new changes.
+      var dashboard = this.state.dashboard;
+      var that = this;
+      setTimeout(function(){
+        ConfigurationsActions.saveConfiguration(dashboard);
+        that.onChildSaveCompleted();
+      },100);
+        
     }
   }
 
@@ -86,7 +110,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   }
 
   onChildSaveCompleted() {
-    this.setState({ showSettingsDialog: false });
+    this.setState({ showSettingsDialog: false, shouldSave: false });
   }
 
   onConfigDialogViewChange(newValue, newActiveIndex, event){
@@ -96,10 +120,16 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   ///Display component based on user selection from dropdown menue
   chooseComponentToDisplay() {
     let { shouldSave } = this.state;
+    var elementsSettings:IElementsContainer = this.state.dashboard;
 
     switch(this.state.activeConfigView){
       case this.ConfigurationViews.ApplicationInsights:{
         return (<Config standaloneView={false} shouldSave={shouldSave} />)
+      }
+      case this.ConfigurationViews.DataSources: {
+        return (
+          <ElementsSettings ElementsSettings={elementsSettings} shouldSave={shouldSave}  />
+        );
       }
       default:{
         return (
