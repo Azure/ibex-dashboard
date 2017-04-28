@@ -8,7 +8,9 @@ import configurationActions from '../actions/ConfigurationsActions';
 interface IConfigurationsStoreState {
   dashboard: IDashboardConfig;
   dashboards: IDashboardConfig[];
+  template: IDashboardConfig;
   templates: IDashboardConfig[];
+  creationState: string;
   connections: IDictionary;
   connectionsMissing: boolean;
   loaded: boolean;
@@ -18,7 +20,9 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
 
   dashboard: IDashboardConfig;
   dashboards: IDashboardConfig[];
+  template: IDashboardConfig;
   templates: IDashboardConfig[];
+  creationState: string;
   connections: IDictionary;
   connectionsMissing: boolean;
   loaded: boolean;
@@ -28,14 +32,18 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
 
     this.dashboard = null;
     this.dashboards = null;
+    this.template = null;
     this.templates = null;
+    this.creationState = null;
     this.connections = {};    
     this.connectionsMissing = false;
     this.loaded = false;
 
     this.bindListeners({
       loadConfiguration: configurationActions.loadConfiguration,
-      loadDashboard: configurationActions.loadDashboard
+      loadDashboard: configurationActions.loadDashboard,
+      loadTemplate: configurationActions.loadTemplate,
+      createDashboard: configurationActions.createDashboard
     });
 
     configurationActions.loadConfiguration();
@@ -70,6 +78,26 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
       this.connectionsMissing = Object.keys(this.connections).some(connectionKey => {
         var connection = this.connections[connectionKey];
         
+        return Object.keys(connection).some(paramKey => !connection[paramKey]);
+      })
+    }
+  }
+
+  createDashboard(result: { dashboard: IDashboardConfig }) {
+    this.creationState = 'successful';
+  }
+
+  loadTemplate(result: { template: IDashboardConfig }) {
+    let { template } = result;
+    this.template = template;
+
+    if (this.template) {
+      
+      this.connections = this.getConnections(template);
+
+      // Checking for missing connection params
+      this.connectionsMissing = Object.keys(this.connections).some(connectionKey => {
+        var connection = this.connections[connectionKey];
         return Object.keys(connection).some(paramKey => !connection[paramKey]);
       })
     }

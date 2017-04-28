@@ -1,4 +1,10 @@
 return {
+  id: 'bot_analytics_dashboard',
+  name: 'Bot Analytics Dashboard',
+  icon: "dashboard",
+	url: "bot_analytics_dashboard",
+  description: 'Microsoft Bot Framework based analytics',
+  preview: '/images/bot-framework-preview.png',
   config: {
     connections: { },
     layout: {
