@@ -3,6 +3,7 @@ import * as request from 'xhr-request';
 
 interface IConfigurationsActions {
   loadConfiguration(): any;
+  loadDashboard(id: string): any;
   saveConfiguration(dashboard: IDashboardConfig): any;
   failure(error: any): void;
 }
@@ -14,17 +15,33 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
 
   loadConfiguration() {
     
-    return (dispatcher: (dashboard: IDashboardConfig) => void) => {
+    return (dispatcher: (result: { dashboards: IDashboardConfig[], templates: IDashboardConfig[] }) => void) => {
       
-      this.getScript('/api/dashboard.js', () => {
-        let dashboards: IDashboardConfig[] = (window as any)['dashboards'];
+      this.getScript('/api/dashboards', () => {
+        let dashboards: IDashboardConfig[] = (window as any)['dashboardDefinitions'];
+        let templates: IDashboardConfig[] = (window as any)['dashboardTemplates'];
 
         if (!dashboards || !dashboards.length) {
           return this.failure(new Error('Could not load configuration'));
         }
 
-        let dashboard = dashboards[0];
-        return dispatcher(dashboard);
+        return dispatcher({ dashboards, templates });
+      });
+    };
+  }
+
+  loadDashboard(id: string) {
+    
+    return (dispatcher: (result: { dashboard: IDashboardConfig }) => void) => {
+      
+      this.getScript('/api/dashboards/' + id, () => {
+        let dashboard: IDashboardConfig = (window as any)['dashboard'];
+
+        if (!dashboard) {
+          return this.failure(new Error('Could not load configuration for dashboard ' + id));
+        }
+
+        return dispatcher({ dashboard });
       });
     };
   }

@@ -7,6 +7,8 @@ import configurationActions from '../actions/ConfigurationsActions';
 
 interface IConfigurationsStoreState {
   dashboard: IDashboardConfig;
+  dashboards: IDashboardConfig[];
+  templates: IDashboardConfig[];
   connections: IDictionary;
   connectionsMissing: boolean;
   loaded: boolean;
@@ -15,6 +17,8 @@ interface IConfigurationsStoreState {
 class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> implements IConfigurationsStoreState {
 
   dashboard: IDashboardConfig;
+  dashboards: IDashboardConfig[];
+  templates: IDashboardConfig[];
   connections: IDictionary;
   connectionsMissing: boolean;
   loaded: boolean;
@@ -23,16 +27,38 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
     super();
 
     this.dashboard = null;
+    this.dashboards = null;
+    this.templates = null;
     this.connections = {};    
     this.connectionsMissing = false;
     this.loaded = false;
 
     this.bindListeners({
-      loadConfiguration: configurationActions.loadConfiguration
+      loadConfiguration: configurationActions.loadConfiguration,
+      loadDashboard: configurationActions.loadDashboard
     });
+
+    configurationActions.loadConfiguration();
+
+    let pathname = window.location.pathname;
+    if (pathname === '/dashboard') {
+      configurationActions.loadDashboard("0");
+    }
+    
+    if (pathname.startsWith('/dashboard/')) {
+      let dashboardId = pathname.substring('/dashboard/'.length);
+      configurationActions.loadDashboard(dashboardId);
+    }
   }
   
-  loadConfiguration(dashboard: IDashboardConfig) {
+  loadConfiguration(result: { dashboards: IDashboardConfig[], templates: IDashboardConfig[] }) {
+    let { dashboards,templates } = result;
+    this.dashboards = dashboards;
+    this.templates = templates;
+  }
+
+  loadDashboard(result: { dashboard: IDashboardConfig }) {
+    let { dashboard } = result;
     this.dashboard = dashboard;
 
     if (this.dashboard && !this.loaded) {

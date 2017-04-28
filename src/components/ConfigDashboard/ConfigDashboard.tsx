@@ -35,7 +35,7 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     this.onSave = this.onSave.bind(this);
     this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
 
-    ConfigurationsActions.loadConfiguration();
+    //ConfigurationsActions.loadConfiguration();
   }
 
   onParamChange(connectionKey, paramKey, value) {
