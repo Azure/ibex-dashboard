@@ -18,7 +18,16 @@ router.get('/dashboards', (req, res) => {
       let filePath = path.join(privateDashboard, fileName);
       let stats = fs.statSync(filePath);
       if (stats.isFile()) {
-        let content = fs.readFileSync(filePath, 'utf8');
+        let json = getJSONFromScript(filePath);
+        let jsonDefinition = {
+          id: json.id,
+          name: json.name,
+          description: json.description,
+          icon: json.icon,
+          url: json.url,
+          preview: json.preview
+        };
+        let content = 'return ' + JSON.stringify(jsonDefinition);
 
         // Ensuing this dashboard is loaded into the dashboards array on the page
         script += `
@@ -40,7 +49,16 @@ router.get('/dashboards', (req, res) => {
       let filePath = path.join(preconfDashboard, fileName);
       let stats = fs.statSync(filePath);
       if (stats.isFile()) {
-        let content = fs.readFileSync(filePath, 'utf8');
+        let json = getJSONFromScript(filePath);
+        let jsonDefinition = {
+          id: json.id,
+          name: json.name,
+          description: json.description,
+          icon: json.icon,
+          url: json.url,
+          preview: json.preview
+        };
+        let content = 'return ' + JSON.stringify(jsonDefinition);
         
         // Ensuing this dashboard is loaded into the dashboards array on the page
         script += `
