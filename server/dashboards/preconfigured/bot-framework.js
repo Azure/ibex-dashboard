@@ -873,7 +873,7 @@ return {
             }, {
               type: "button",
               value: "chat",
-              onClick: "openMessagesDialog"
+              click: "openMessagesDialog"
             }]
           },
           actions: {
@@ -942,9 +942,9 @@ return {
         },
         params: {
           query: () => ` exceptions` +
-            ` | summarize errors=count() by type, innermostMessage` +
-            ` | project type, innermostMessage, errors` +
-            ` | order by errors desc `
+            ` | summarize error_count=count() by type, innermostMessage` +
+            ` | project type, innermostMessage, error_count` +
+            ` | order by error_count desc `
         },
         calculated: (state) => {
           const { values } = state;
@@ -984,26 +984,27 @@ return {
         props: {
           cols: [{
             header: "Type",
-            field: "type"
-          }, {
-            header: "Message",
-            field: "innermostMessage"
-          }, {
-            header: "HandledAt",
-            field: "innermostMessage"
+            field: "type",
+            secondaryHeader: "Message",
+            secondaryField: "innermostMessage"
           }, {
             header: "Conversation Id",
-            field: "conversationId"
+            field: "conversationId",
+            secondaryHeader: "Operation Id",
+            secondaryField: "operation_Id"
           }, {
-            header: "Operation Id",
-            field: "operation_Id"
+            header: "HandledAt",
+            field: "handledAt"
           }, {
             type: "button",
             value: "more",
-            onClick: "openErrorDetail"
+            click: "openErrorDetail"
           }],
-          fieldTitle: "type",
-          fieldCount: "errors",
+          group: {
+            field: "type",
+            secondaryField: "innermostMessage",
+            countField: "error_count"
+          }
         },
         actions: {
           select: {
