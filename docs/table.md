@@ -79,7 +79,7 @@ props: {
 
 ## Actions
 
-Define each `action` as follows:
+Define each action as follows:
 
 | Property | Type | Description 
 | :--------|:-----|:-----------

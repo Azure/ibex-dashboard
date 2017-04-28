@@ -1,6 +1,6 @@
 # SplitPanel
 
-This article explains how define a SplitPanel view control.
+A SplitPanel view control consists of a side bar of grouped items which can be selected to load up it's list of items. 
 
 ## Basic properties
 
