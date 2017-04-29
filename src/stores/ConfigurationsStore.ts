@@ -79,7 +79,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
         var connection = this.connections[connectionKey];
         
         return Object.keys(connection).some(paramKey => !connection[paramKey]);
-      })
+      });
     }
   }
 

@@ -3,6 +3,9 @@ import * as _ from 'lodash';
 import { IDataSourcePlugin } from './plugins/DataSourcePlugin';
 import DialogsActions from '../components/generic/Dialogs/DialogsActions';
 
+import VisibilityActions from '../actions/VisibilityActions';
+import VisibilityStore from '../stores/VisibilityStore';
+
 export interface IDataSource {
   id: string;
   config : any;
@@ -83,11 +86,28 @@ export class DataSourceConnector {
           checkDS.action.updateDependencies.defer(state);
         }
       });
+
+      // Checking visibility flags
+      let visibilityState = VisibilityStore.getState() || {};
+      let flags = visibilityState.flags || {};
+      let updatedFlags = {};
+      let shouldUpdate = false;
+      Object.keys(flags).forEach(visibilityKey => {
+        let keyParts = visibilityKey.split(':');
+        if (keyParts[0] === sourceDS.id) {
+          updatedFlags[visibilityKey] = sourceDS.store.getState()[keyParts[1]];
+          shouldUpdate = true;
+        }
+      });
+
+      if (shouldUpdate) {
+        (<any>VisibilityActions.setFlags).defer(updatedFlags);
+      }
     });
   }
 
   static initializeDataSources() {
-    // Call initalize methods
+    // Call initialize methods
     Object.keys(this.dataSources).forEach(sourceDSId => {
       var sourceDS = this.dataSources[sourceDSId];
 
@@ -141,6 +161,20 @@ export class DataSourceConnector {
         result.dataSources[dataSource.id] = dataSource;
       }
     });
+
+    // Checking to see if any of the dependencies control visibility
+    let visibilityFlags = {};
+    let updateVisibility = false;
+    Object.keys(result.dependencies).forEach(key => {
+      if (key === 'visible') {
+        visibilityFlags[dependencies[key]] = result.dependencies[key];
+        updateVisibility = true;
+      }
+    });
+
+    if (updateVisibility) {
+      (<any>VisibilityActions.setFlags).defer(visibilityFlags);
+    }
 
     return result;
   }
