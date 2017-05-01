@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import plugins from './generic/plugins';
 
 export default class ElementConnector {
-  static loadLayoutFromDashboard(elementsContainer: IElementsContainer, dashboard: IDashboardConfig) : ILayouts {
+  static loadLayoutFromDashboard(elementsContainer: IElementsContainer, dashboard: IDashboardConfig): ILayouts {
     
     var layouts = {};
     _.each(dashboard.config.layout.cols, (totalColumns, key) => {
@@ -23,11 +23,11 @@ export default class ElementConnector {
 
         layouts[key] = layouts[key] || [];
         layouts[key].push({
-          "i": id,
-          "x": curCol,
-          "y": curRowOffset,
-          "w": size.w,
-          "h": size.h
+          'i': id,
+          'x': curCol,
+          'y': curRowOffset,
+          'w': size.w,
+          'h': size.h
         });
 
         curCol += size.w;
@@ -44,7 +44,7 @@ export default class ElementConnector {
     dashboard.elements.forEach((element, idx) => {
       var ReactElement = plugins[element.type];
       var { id, dependencies, actions, props, title, subtitle, size, theme } = element;
-      var layoutProps = _.find(layout, { "i": id });
+      var layoutProps = _.find(layout, { 'i': id });
 
       elements.push(
         <div key={id}>
@@ -59,14 +59,14 @@ export default class ElementConnector {
                 theme={theme}
           />
         </div>
-      )
+      );
     });
 
     return elements;
   }
 
   static loadFiltersFromDashboard(dashboard: IDashboardConfig): {
-    filters : React.Component<any, any>[],
+    filters: React.Component<any, any>[],
     additionalFilters: React.Component<any, any>[]
   } {
     var filters = [];
@@ -82,7 +82,7 @@ export default class ElementConnector {
               subtitle={element.subtitle}
               icon={element.icon}
         />
-      )
+      );
     });
 
     return { filters, additionalFilters };

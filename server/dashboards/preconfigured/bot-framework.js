@@ -406,12 +406,17 @@ return {
               channel: (val) => val || "unknown",
               channel_count: (val) => val || 0
             },
-            calculated: (filterChannels) => {
+            calculated: (filterChannels, dependencies, prevState) => {
+
+              // This code is meant to fix the following scenario:
+              // When "Timespan" filter changes, to "channels-selected" variable
+              // is going to be reset into an empty set.
+              // For this reason, using previous state to copy filter
               const filters = filterChannels.map((x) => x.channel);
-              let { selectedValues } = filterChannels;
-              if (selectedValues === undefined) {
-                selectedValues = [];
-              }
+              let selectedValues = [];
+              if (prevState['channels-selected'] !== undefined) {
+								selectedValues = prevState['channels-selected'];
+							}
               return {
                 "channels-count": filterChannels,
                 "channels-filters": filters,
@@ -429,12 +434,12 @@ return {
               intent: (val) => val || "unknown",
               intent_count: (val) => val || 0
             },
-            calculated: (filterIntents) => {
+            calculated: (filterIntents, dependencies, prevState) => {
               const intents = filterIntents.map((x) => x.intent);
-              let { selectedValues } = filterIntents;
-              if (selectedValues === undefined) {
-                selectedValues = [];
-              }
+              let selectedValues = [];
+              if (prevState['intents-selected'] !== undefined) {
+								selectedValues = prevState['intents-selected'];
+							}
               return {
                 "intents-count": filterIntents,
                 "intents-filters": intents,
