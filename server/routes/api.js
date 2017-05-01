@@ -88,7 +88,7 @@ router.get('/dashboards/:id', (req, res) => {
   if (dashboardFile) {
     let filePath = path.join(privateDashboard, dashboardFile);
     let stats = fs.statSync(filePath);
-    if (stats.isFile()) {
+    if (stats.isFile() && filePath.endsWith('.js')) {
       let content = fs.readFileSync(filePath, 'utf8');
 
       // Ensuing this dashboard is loaded into the dashboards array on the page
@@ -135,7 +135,7 @@ router.get('/templates/:id', (req, res) => {
   if (dashboardFile) {
     let filePath = path.join(preconfDashboard, dashboardFile);
     let stats = fs.statSync(filePath);
-    if (stats.isFile()) {
+    if (stats.isFile() && filePath.endsWith('.js')) {
       let content = fs.readFileSync(filePath, 'utf8');
 
       // Ensuing this dashboard is loaded into the dashboards array on the page

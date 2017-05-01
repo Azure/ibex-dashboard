@@ -23,9 +23,9 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         let dashboards: IDashboardConfig[] = (window as any)['dashboardDefinitions'];
         let templates: IDashboardConfig[] = (window as any)['dashboardTemplates'];
 
-        if (!dashboards || !dashboards.length) {
-          return this.failure(new Error('Could not load configuration'));
-        }
+        // if (!dashboards || !dashboards.length) {
+        //   return this.failure(new Error('Could not load configuration'));
+        // }
 
         return dispatcher({ dashboards, templates });
       });
