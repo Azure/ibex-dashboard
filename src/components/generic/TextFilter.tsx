@@ -4,6 +4,10 @@ import SelectField from 'react-md/lib/SelectFields';
 
 export default class TextFilter extends GenericComponent<any, any> {
 
+  static defaultProps = {
+    title: 'Select'
+  };
+
   constructor(props: any) {
     super(props);
 
@@ -16,12 +20,13 @@ export default class TextFilter extends GenericComponent<any, any> {
 
   render() {
     var { selectedValue, values } = this.state;
+    var { title } = this.props;
     values = values || [];
 
     return (
         <SelectField
           id="timespan"
-          label="Timespan"
+          label={title}
           value={selectedValue}
           menuItems={values}
           position={SelectField.Positions.BELOW}
