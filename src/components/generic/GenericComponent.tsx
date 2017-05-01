@@ -106,7 +106,6 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
   }
 
   private onStateChange(state: any) {
-
     var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     var updatedState: IGenericState = {};
     Object.keys(result.dependencies).forEach(key => {

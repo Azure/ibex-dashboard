@@ -14,7 +14,7 @@ export default class TextFilter extends GenericComponent<any, any> {
     this.onChange = this.onChange.bind(this);
   }
 
-  onChange(newValue: any, index: number, event: any) {
+  onChange(newValue: any) {
     this.trigger('onChange', newValue);
   }
 

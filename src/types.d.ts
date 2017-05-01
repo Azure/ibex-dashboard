@@ -44,7 +44,7 @@ interface IDataSource {
   type: string
   dependencies?: { [id: string]: string }
   params?: { [id: string]: any }
-  calculated?: (state, dependencies) => { [index: string]: any }
+  calculated?: (state, dependencies, prevState) => { [index: string]: any }
 }
 
 interface IElement {
