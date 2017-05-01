@@ -17,7 +17,7 @@ router.get('/dashboards', (req, res) => {
     files.forEach((fileName) => {
       let filePath = path.join(privateDashboard, fileName);
       let stats = fs.statSync(filePath);
-      if (stats.isFile() && filePath.substr(-2) === 'js') {
+      if (stats.isFile() && filePath.endsWith('.js')) {
         let json = getJSONFromScript(filePath);
         let jsonDefinition = {
           id: json.id,
@@ -48,7 +48,7 @@ router.get('/dashboards', (req, res) => {
     templates.forEach((fileName) => {
       let filePath = path.join(preconfDashboard, fileName);
       let stats = fs.statSync(filePath);
-      if (stats.isFile() && filePath.substr(-2) === 'js') {
+      if (stats.isFile() && filePath.endsWith('.js')) {
         let json = getJSONFromScript(filePath);
         let jsonDefinition = {
           id: json.id,
@@ -195,7 +195,7 @@ function getFileById(dir, id) {
         let filePath = path.join(dir, fileName);
 
         let stats = fs.statSync(filePath);
-        if (stats.isFile() && filePath.substr(-2) === 'js') {
+        if (stats.isFile() && filePath.endsWith('.js')) {
           let dashboard = getJSONFromScript(filePath);
           if (dashboard.id && dashboard.id === id) {
             dashboardFile = fileName;
@@ -266,7 +266,7 @@ function getJSONFromScript(filePath) {
   
   let jsonScript = {};
   let stats = fs.statSync(filePath);
-  if (stats.isFile() && filePath.substr(-2) === 'js') {
+  if (stats.isFile() && filePath.endsWith('.js')) {
     let content = fs.readFileSync(filePath, 'utf8');
     try {
       eval('jsonScript = (function () { ' + content + ' })();');
