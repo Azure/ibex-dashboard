@@ -766,12 +766,14 @@ return {
   filters: [
     {
       type: "TextFilter",
+			title: "Timespan",
       dependencies: { selectedValue: "timespan", values: "timespan:values" },
       actions: { onChange: "timespan:updateSelectedValue" },
       first: true
     },
     {
 			type: "TextFilter",
+			title: "Mode",
 			dependencies: { selectedValue: "modes", values: "modes:values" },
 			actions: { onChange: "modes:updateSelectedValue" },
 			first: true
