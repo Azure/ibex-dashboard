@@ -407,6 +407,11 @@ return {
               channel_count: (val) => val || 0
             },
             calculated: (filterChannels, dependencies, prevState) => {
+
+              // This code is meant to fix the following scenario:
+              // When "Timespan" filter changes, to "channels-selected" variable
+              // is going to be reset into an empty set.
+              // For this reason, using previous state to copy filter
               const filters = filterChannels.map((x) => x.channel);
               let selectedValues = [];
               if (prevState['channels-selected'] !== undefined) {
