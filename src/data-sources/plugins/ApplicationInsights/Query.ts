@@ -96,25 +96,26 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       });
     }
 
-    var queryspan = queryTimespan;
-
-    var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${encodeURIComponent(query)}`;
+    var url = `${appInsightsUri}/${appId}/query?timespan=${queryTimespan}`; //&query=${encodeURIComponent(query)}`;
 
     return (dispatch) => {
-
       request(url, {
-          method: 'GET',
+          method: 'POST',
           json: true,
           headers: {
             'x-api-key': apiKey
+          },
+          body: {
+            query
           }
         },    (error, json) => {
 
           if (error) {
+            console.log(error);
             return this.failure(error);
           }
 
-          let q = query;
+          // let q = query;
 
           // Check if result is valid
           let tables = this.mapAllTables(json, mappings);
