@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { appInsightsUri } from './common';
 import ApplicationInsightsConnection from '../../connections/application-insights';
-import {DataSourceConnector} from '../../DataSourceConnector';
+import { DataSourceConnector } from '../../DataSourceConnector';
 
 let connectionType = new ApplicationInsightsConnection();
 
@@ -22,22 +22,18 @@ interface IFilterParams {
 }
 
 export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryParams> {
-
   type = 'ApplicationInsights-Query';
   defaultProperty = 'values';
   connectionType = connectionType.type;
 
   /**
    * @param options - Options object
+   * @param connections - List of available connections
    */
   constructor(options: IOptions<IQueryParams>, connections: IDict<IStringDictionary>) {
     super(options, connections);
-
-    var props = this._props;
-    var params = props.params;
-
-    // Validating params
-    this.validateParams(props, params);
+    this.validateTimespan(this._props);
+    this.validateParams(this._props.params);
   }
 
   /**
@@ -96,56 +92,55 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       });
     }
 
-    var queryspan = queryTimespan;
-
-    var url = `${appInsightsUri}/${appId}/query?timespan=${queryspan}&query=${encodeURIComponent(query)}`;
+    var url = `${appInsightsUri}/${appId}/query?timespan=${queryTimespan}`;
 
     return (dispatch) => {
-
       request(url, {
-          method: 'GET',
-          json: true,
-          headers: {
-            'x-api-key': apiKey
-          }
-        },    (error, json) => {
+        method: 'POST',
+        json: true,
+        headers: {
+          'x-api-key': apiKey
+        },
+        body: {
+          query
+        }
+      }, (error, json) => {
 
-          if (error) {
-            return this.failure(error);
-          }
+        if (error) {
+          console.log(error);
+          return this.failure(error);
+        }
 
-          let q = query;
+        // Check if result is valid
+        let tables = this.mapAllTables(json, mappings);
+        let resultStatus: IQueryStatus[] = _.last(tables);
+        if (!resultStatus || !resultStatus.length) {
+          return dispatch(json);
+        }
 
-          // Check if result is valid
-          let tables = this.mapAllTables(json, mappings);
-          let resultStatus: IQueryStatus[] = _.last(tables);
-          if (!resultStatus || !resultStatus.length) {
-            return dispatch(json);
-          }
-
-          // Map tables to appropriate results
-          var resultTables = tables.filter((aTable, idx) => {
-            return idx < resultStatus.length && resultStatus[idx].Kind === 'QueryResult';
-          });
-
-          let returnedResults = {
-            values: (resultTables.length && resultTables[0]) || null
-          };
-
-          tableNames.forEach((aTable: string, idx: number) => {
-            returnedResults[aTable] = resultTables.length > idx ? resultTables[idx] : null;
-            // Get state for filter selection
-            const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
-            // Extracting calculated values
-            let calc = queries[aTable].calculated;
-            if (typeof calc === 'function') {
-              var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
-              _.extend(returnedResults, additionalValues);
-            }
-          });
-
-          return dispatch(returnedResults);
+        // Map tables to appropriate results
+        var resultTables = tables.filter((aTable, idx) => {
+          return idx < resultStatus.length && resultStatus[idx].Kind === 'QueryResult';
         });
+
+        let returnedResults = {
+          values: (resultTables.length && resultTables[0]) || null
+        };
+
+        tableNames.forEach((aTable: string, idx: number) => {
+          returnedResults[aTable] = resultTables.length > idx ? resultTables[idx] : null;
+          // Get state for filter selection
+          const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
+          // Extracting calculated values
+          let calc = queries[aTable].calculated;
+          if (typeof calc === 'function') {
+            var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
+            _.extend(returnedResults, additionalValues);
+          }
+        });
+
+        return dispatch(returnedResults);
+      });
     };
   }
 
@@ -220,12 +215,14 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     return isForked ? ` (${query}) \n\n` : query;
   }
 
-  private validateParams(props: any, params: any): void {
 
+  private validateTimespan(props: any) {
     if (!props.dependencies.queryTimespan) {
       throw new Error('AIAnalyticsEvents requires dependencies: timespan; queryTimespan');
     }
+  }
 
+  private validateParams(params: IQueryParams): void {
     if (params.query) {
       if (params.table || params.queries) {
         throw new Error('Application Insights query should either have { query } or { table, queries } under params.');
