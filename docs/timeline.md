@@ -1,13 +1,13 @@
-# Area
+# Timeline
 
-This article explains how define an Area element. This element is composed of an [AreaChart](http://recharts.org/#/en-US/api/AreaChart) component.
+This article explains how define a Timeline element. This element is composed of an [LineChart](http://recharts.org/#/en-US/api/LineChart) component.
 
 ## Basic properties
 
 | Property | Type | Value | Description 
 | :--------|:-----|:------|:------------
 | `id`| `string` || ID of the element on the page
-| `type`| `string` | "Area" |
+| `type`| `string` | "Timeline" |
 | `title`| `string` || Title that will appear at the top of the view
 | `subtitle`| `string` || Description of the chart (displayed as tooltip)
 | `size`| `{ w: number, h: number}` || Width/Height of the view
@@ -40,27 +40,14 @@ Define `props` as follows:
 
 | Property | Type | Description 
 | :--------|:-----|:-----------
-| `isStacked`| `boolean` | Display as stacked area 
-| `showLegend`| `boolean` | Display legend
-| `areaProps`| `object` | [AreaChart](http://recharts.org/#/en-US/api/AreaChart) properties
+| `lineProps`| `object` | [LineChart](http://recharts.org/#/en-US/api/LineChart) properties
 
-#### Props sample
-
-```js
-props: {
-  isStacked: true,
-  showLegend: false
-}
-```
-
-#### AreaChart properties
-- Tip: `areaProps` can be used to specify additional properties of the [AreaChart](http://recharts.org/#/en-US/api/AreaChart) chart component such as `syncId` to link related charts. Refer to the [AreaChart API](http://recharts.org/#/en-US/api/AreaChart) for more info.
+#### LineChart properties
+- Tip: `lineProps` can be used to specify additional properties of the [LineChart](http://recharts.org/#/en-US/api/LineChart) chart component such as `syncId` to link related charts. Refer to the [LineChart API](http://recharts.org/#/en-US/api/LineChart) for more info.
 
 ```js
 props: {
-  isStacked: true,
-  showLegend: false
-  areaProps: {
+  lineProps: {
     syncId: "sharedId"
   }
 }

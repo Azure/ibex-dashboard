@@ -22,8 +22,6 @@ Define `dependencies` as follows:
 | :--------|:-----|:-----------
 | `values`| `string` | Reference to values loaded from data source
 
-To read how to define dependencies [click here](/dependencies).
-
 #### Dependencies sample:
 
 ```js
