@@ -11,17 +11,18 @@ import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
 export interface ITableProps extends IGenericProps {
   props: {
-    checkboxes?: boolean,
-    rowClassNameField?: string
+    checkboxes?: boolean;
+    rowClassNameField?: string;
+    hideBorders?: boolean;
     cols: {
-      header?: string,
-      field?: string,
-      secondaryHeader?: string,
-      secondaryField?: string,
-      value?: string,
-      width?: string | number,
-      type?: 'text' | 'time' | 'icon' | 'button',
-      click?: string
+      header?: string;
+      field?: string;
+      secondaryHeader?: string;
+      secondaryField?: string;
+      value?: string;
+      width?: string | number;
+      type?: 'text' | 'time' | 'icon' | 'button';
+      click?: string;
     }[]
   };
 }
@@ -62,7 +63,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
   render() {
 
     let { props } = this.props;
-    let { checkboxes, cols, rowClassNameField } = props;
+    let { checkboxes, cols, rowClassNameField, hideBorders } = props;
     let { values } = this.state;
 
     if (!values) {
@@ -104,7 +105,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     ));
 
     return (
-      <Card>
+      <Card className={ hideBorders ? 'hide-borders' : '' }>
         <DataTable plain={!checkboxes} data={checkboxes}>
           <TableHeader>
             <TableRow>
