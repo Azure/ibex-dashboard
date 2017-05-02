@@ -28,11 +28,10 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
   /**
    * @param options - Options object
+   * @param connections - List of available connections
    */
   constructor(options: IOptions<IQueryParams>, connections: IDict<IStringDictionary>) {
     super(options, connections);
-
-    // Validating params
     this.validateTimespan(this._props);
     this.validateParams(this._props.params);
   }
@@ -93,7 +92,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       });
     }
 
-    var url = `${appInsightsUri}/${appId}/query?timespan=${queryTimespan}`; //&query=${encodeURIComponent(query)}`;
+    var url = `${appInsightsUri}/${appId}/query?timespan=${queryTimespan}`;
 
     return (dispatch) => {
       request(url, {
@@ -111,8 +110,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
           console.log(error);
           return this.failure(error);
         }
-
-        // let q = query;
 
         // Check if result is valid
         let tables = this.mapAllTables(json, mappings);
@@ -225,7 +222,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     }
   }
 
-  private validateParams(params: any): void {
+  private validateParams(params: IQueryParams): void {
     if (params.query) {
       if (params.table || params.queries) {
         throw new Error('Application Insights query should either have { query } or { table, queries } under params.');
