@@ -1,5 +1,4 @@
 import * as request from 'xhr-request';
-import * as _ from 'lodash';
 import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { appInsightsUri } from './common';
 import ApplicationInsightsConnection from '../../connections/application-insights';
@@ -42,8 +41,9 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
    * @param {function} callback
    */
   updateDependencies(dependencies: any) {
-    var emptyDependency = _.find(_.keys(this._props.dependencies), dependencyKey => {
-      return typeof dependencies[dependencyKey] === 'undefined';
+    let emptyDependency = false;
+    Object.keys(this._props.dependencies).forEach((key) => {
+      if(typeof dependencies[key] === 'undefined') emptyDependency = true;
     });
 
     // If one of the dependencies is not supplied, do not run the query
@@ -82,12 +82,13 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       queries = params.queries || {};
       table = params.table;
       query = ` ${table} | fork `;
-      _.keys(queries).every(queryKey => {
-        let queryParams = queries[queryKey];
+
+      Object.keys(queries).forEach((key) => {
+        let queryParams = queries[key];
         filters = queryParams.filters || [];
-        tableNames.push(queryKey);
+        tableNames.push(key);
         mappings.push(queryParams.mappings);
-        query += this.query(queryParams.query, dependencies, isForked, queryKey, filters);
+        query += this.query(queryParams.query, dependencies, isForked, key, filters);
         return true;
       });
     }
@@ -105,7 +106,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
           query
         }
       }, (error, json) => {
-
         if (error) {
           console.log(error);
           return this.failure(error);
@@ -113,7 +113,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
         // Check if result is valid
         let tables = this.mapAllTables(json, mappings);
-        let resultStatus: IQueryStatus[] = _.last(tables);
+        let resultStatus: IQueryStatus[] = tables[tables.length - 1];
         if (!resultStatus || !resultStatus.length) {
           return dispatch(json);
         }
@@ -135,7 +135,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
           let calc = queries[aTable].calculated;
           if (typeof calc === 'function') {
             var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
-            _.extend(returnedResults, additionalValues);
+            Object.assign(returnedResults, additionalValues);
           }
         });
 
@@ -146,9 +146,10 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
   updateSelectedValues(dependencies: IDictionary, selectedValues: any) {
     if (Array.isArray(selectedValues)) {
-      return _.extend(dependencies, { 'selectedValues': selectedValues });
+      return Object.assign(dependencies, { 'selectedValues': selectedValues });
+    } else {
+      return Object.assign(dependencies, { ... selectedValues });
     }
-    return _.extend(dependencies, { ...selectedValues });
   }
 
   private mapAllTables(results: IQueryResults, mappings: Array<IDictionary>): any[][] {
@@ -176,7 +177,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       });
 
       // Going over user defined mappings of the values
-      _.keys(mappings).forEach(col => {
+      Object.keys(mappings).forEach(col => {
         row[col] =
           typeof mappings[col] === 'function' ?
             mappings[col](row[col], row, rowIdx) :
