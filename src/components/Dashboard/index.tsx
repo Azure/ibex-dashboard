@@ -18,6 +18,8 @@ import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 import VisibilityStore from '../../stores/VisibilityStore';
 
+import {DataSourceConnector} from '../../data-sources/DataSourceConnector';
+
 interface IDashboardState {
   editMode?: boolean,
   askDelete?: boolean,
@@ -56,6 +58,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
     this.onDeleteDashboardApprove = this.onDeleteDashboardApprove.bind(this);
     this.onDeleteDashboardCancel = this.onDeleteDashboardCancel.bind(this);
+    this.onExport = this.onExport.bind(this);
 
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
@@ -149,6 +152,11 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ askDelete: false });
   }
 
+  onExport() {
+    const sources = DataSourceConnector.getDataSources();
+    // TODO: export sources state
+  }
+
   render() {
 
     let { dashboard } = this.props;
@@ -174,9 +182,13 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       <Button key="settings" icon tooltipLabel="Connections" onClick={this.onEditDashboard}>settings_applications</Button>
     ];
 
+    toolbarActions.unshift(
+      <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>play_for_work</Button>
+    );
+
     if (editMode) {
       toolbarActions.push(
-        <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+        <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onExport}>delete</Button>
       );
     }
 
