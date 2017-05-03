@@ -1267,14 +1267,14 @@ return {
 						queryTimespan: "dialog_user-rentention:queryspan"
 					},
 					params: {   
-						query: () => ` customEvents |
+						query: ({ queryTimespan }) => ` customEvents |
 							where timestamp > ago(90d) |
 							extend uniqueUser=tostring(customDimensions.from) |
-							summarize min(timestamp), max(timestamp) by uniqueUser |
-							summarize 
-								countUniquesSince24hrAgo=countif(max_timestamp > ago(24hr)), 
-								countUniquesSince7dAgo=countif(max_timestamp > ago(7d)),
-								countUniquesSince30dAgo=countif(max_timestamp > ago(30d))`,
+							summarize minTimestamp=min(timestamp), maxTimestamp=max(timestamp) by uniqueUser |
+							summarize
+									countUniquesSince24hrAgo=countif(minTimestamp < ago(24hr) and maxTimestamp >= ago(24hr)),
+									countUniquesSince7dAgo=countif(minTimestamp < ago(24hr) and maxTimestamp >= ago(7d)),
+									countUniquesSince30dAgo=countif(minTimestamp < ago(24hr) and maxTimestamp >= ago(30d))`,
 						mappings: { }
 					},
 					calculated: (state) => {
@@ -1299,16 +1299,19 @@ return {
 								field: "timestamp"
 							},{
 								header: "Rentention",
-								field: "countUniquesSince24hrAgo",
+								field: "60%",
 							},{
 								header: "Unique User 24hr",
 								field: "countUniquesSince24hrAgo"
 							},{
-								header: "Unique User 7d",
+								header: "Unique Users 7d",
 								field: "countUniquesSince7dAgo"
 							},{
-								header: "Unique User 30d",
+								header: "Unique Users 30d",
 								field: "countUniquesSince30dAgo"
+							},,{
+								header: "Unique User 90d",
+								field: "countUniquesSince90dAgo"
 							}]
 					},
 					actions: { }
