@@ -8,8 +8,8 @@ return {
 	config: {
 		connections: {
 			"application-insights": {
-				apiKey: "oxpy4xodzshj4dke7rdiwlqx0xrsntq2vip7y538",
-				appId: "a9c98f0f-594e-44e3-81fd-d5b9fc621447"
+				apiKey: "tn6hhxs60afz4yzd7cp2nreph1wja3ecxtflq8rs", // "oxpy4xodzshj4dke7rdiwlqx0xrsntq2vip7y538"
+				appId: "4d567b3c-e52c-4139-8e56-8e573e55a06c" // "a9c98f0f-594e-44e3-81fd-d5b9fc621447"
 			}
 		},
 		layout: {
@@ -1267,10 +1267,14 @@ return {
 						queryTimespan: "dialog_user-rentention:queryspan"
 					},
 					params: {   
-						query: () => ` customEvents
-            | where timestamp > ago(24h)
-            | summarize countUniquesSince24hrAgo=dcount('customDimensions.from')
-            | project countUniquesSince24hrAgo`,
+						query: () => ` customEvents |
+							where timestamp > ago(90d) |
+							extend uniqueUser=tostring(customDimensions.from) |
+							summarize min(timestamp), max(timestamp) by uniqueUser |
+							summarize 
+								countUniquesSince24hrAgo=countif(max_timestamp > ago(24hr)), 
+								countUniquesSince7dAgo=countif(max_timestamp > ago(7d)),
+								countUniquesSince30dAgo=countif(max_timestamp > ago(30d))`,
 						mappings: { }
 					},
 					calculated: (state) => {
@@ -1297,47 +1301,17 @@ return {
 								header: "Rentention",
 								field: "countUniquesSince24hrAgo",
 							},{
-								header: "New Users",
+								header: "Unique User 24hr",
 								field: "countUniquesSince24hrAgo"
+							},{
+								header: "Unique User 7d",
+								field: "countUniquesSince7dAgo"
+							},{
+								header: "Unique User 30d",
+								field: "countUniquesSince30dAgo"
 							}]
 					},
 					actions: { }
 				}]
 		}]
 }
-
-/*
-// uniques in 24 hours
-customEvents
-| summarize countUniquesSince24hrAgo=countif('customDimensions.from', timestamp > ago(7d))  
-| project countUniquesSince24hrAgo
-
-
-
-// 1. Unique users in last 90 days with min/max visits
-customEvents
-| summarize countUniquesSince24hrAgo=countif('customDimensions.from', timestamp > ago(7d))  
-| project countUniquesSince24hrAgo
-
-// 2. 24 hours => taske result and see if max in > last 24, min < last 24
-
-// 3. 24hours or 7days or 30days => taske result and see if max in > last 24, min < last 24
-
-
-// uniques in past 7 days
-customEvents
-| where timestamp > ago(7d)
-| summarize countUniquesSince7dAgo=count('customDimensions.from') 
-| project countUniquesSince7dAgo
-
-
-// uniques in past 30 days
-customEvents
-| where timestamp > ago(30d)
-| summarize countUniquesSince30dAgo=dcount('customDimensions.from') 
-| project countUniquesSince30dAgo
-
-// between 24 hours and 90 days
-customEvents
-| where timestamp < ago(24hr) and timestamp > ago(90d)
- */
