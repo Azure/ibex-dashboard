@@ -925,11 +925,9 @@ return {
 					}
 				},
 				onUsersClick: {
-					action: "dialog:users",
+					action: "dialog:user-rentention",
 					params: {
 						title: "args:heading",
-						type: "args:type",
-						innermostMessage: "args:innermostMessage",
 						queryspan: "timespan:queryTimespan"
 					}
 				}
@@ -1258,20 +1256,21 @@ return {
 				}]
 		},{
       // TOOD:Issue75 
-			id: "users",
+			id: "user-rentention",
 			width: "90%",
 			params: ["title", "queryspan"],
-			dataSources: [{
-					id: "user-rentention",
+			dataSources: [
+				{
+					id: "user-rentention-datasource",
 					type: "ApplicationInsights/Query",
 					dependencies: {
-						queryTimespan: "dialog_users:queryspan"
+						queryTimespan: "dialog_user-rentention:queryspan"
 					},
 					params: {   
-						query: () => ` customEvents` +
-            ` | where timestamp > ago(24h)` +
-            ` | summarize countd=dcount('customDimensions.from')` +
-            ` | project countd`,
+						query: () => ` customEvents
+            | where timestamp > ago(24h)
+            | summarize countUniquesSince24hrAgo=dcount('customDimensions.from')
+            | project countUniquesSince24hrAgo`,
 						mappings: { }
 					},
 					calculated: (state) => {
@@ -1288,7 +1287,7 @@ return {
 						h: 16
 					},
 					dependencies: {
-						values: "user-rentention"
+						values: "user-rentention-datasource"
 					},
 					props: {
 						cols: [{
@@ -1296,16 +1295,11 @@ return {
 								field: "timestamp"
 							},{
 								header: "Rentention",
-								field: "count",
+								field: "countUniquesSince24hrAgo",
 							},{
 								header: "New Users",
-								field: "countd"
-							}],
-						group: {
-							field: "type",
-							secondaryField: "innermostMessage",
-							countField: "error_count"
-						}
+								field: "countUniquesSince24hrAgo"
+							}]
 					},
 					actions: { }
 				}]
@@ -1315,14 +1309,25 @@ return {
 /*
 // uniques in 24 hours
 customEvents
-| where timestamp > ago(24h)
-| summarize countUniquesSince24hrAgo=dcount('customDimensions.from') 
+| summarize countUniquesSince24hrAgo=countif('customDimensions.from', timestamp > ago(7d))  
 | project countUniquesSince24hrAgo
+
+
+
+// 1. Unique users in last 90 days with min/max visits
+customEvents
+| summarize countUniquesSince24hrAgo=countif('customDimensions.from', timestamp > ago(7d))  
+| project countUniquesSince24hrAgo
+
+// 2. 24 hours => taske result and see if max in > last 24, min < last 24
+
+// 3. 24hours or 7days or 30days => taske result and see if max in > last 24, min < last 24
+
 
 // uniques in past 7 days
 customEvents
 | where timestamp > ago(7d)
-| summarize countUniquesSince7dAgo=dcount('customDimensions.from') 
+| summarize countUniquesSince7dAgo=count('customDimensions.from') 
 | project countUniquesSince7dAgo
 
 
