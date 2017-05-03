@@ -8,8 +8,8 @@ return {
 	config: {
 		connections: {
 			"application-insights": {
-				apiKey: "oxpy4xodzshj4dke7rdiwlqx0xrsntq2vip7y538",
-				appId: "a9c98f0f-594e-44e3-81fd-d5b9fc621447"
+				apiKey: " :p ",
+				appId: " :p "
 			}
 		},
 		layout: {
