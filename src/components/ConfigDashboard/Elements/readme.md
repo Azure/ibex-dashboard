@@ -1,6 +1,6 @@
 # Pie Settings
 Setting up the Pie chart is very easy.
-[![Preview pie settings](/docs/pie-settings.png)]
+[![Preview pie settings](../../docs/pie-settings.png)]
 The UI allows you to change the config file with much ease. It will map the following config:
 ```
 {
