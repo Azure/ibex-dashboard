@@ -61,6 +61,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
     this.onDeleteDashboardApprove = this.onDeleteDashboardApprove.bind(this);
     this.onDeleteDashboardCancel = this.onDeleteDashboardCancel.bind(this);
+    this.onUpdateLayout = this.onUpdateLayout.bind(this);
   }
 
   componentDidMount() {
@@ -156,7 +157,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   }
 
   
-
+  onUpdateLayout(){
+    this.setState({ editMode: !this.state.editMode });
+    this.setState({ editMode: !this.state.editMode });
+  }
   
 
   render() {
@@ -181,12 +185,12 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     // Actions to perform on an active dashboard
     let toolbarActions = [
       <span><Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>edit</Button></span>,
-       <SettingsButton/>
+       <SettingsButton onUpdateLayout={this.onUpdateLayout}/>
     ];
 
     if (editMode) {
       toolbarActions.push(
-        <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+        <span><Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button></span>
       );
     }
     

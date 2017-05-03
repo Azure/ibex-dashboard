@@ -93,7 +93,7 @@ export default class PieSettings extends React.Component<IPieSettingsProps,IPieS
                             label="Id"
                             placeholder="id"
                             leftIcon={<FontIcon>settings</FontIcon>}
-                            className="md-cell md-cell--bottom"
+                            className="md-cell md-cell--bottom md-cell--6"
                             value={id}
                             onChange={this.onParamChange}
                             />
@@ -102,7 +102,7 @@ export default class PieSettings extends React.Component<IPieSettingsProps,IPieS
                             label="Title"
                             placeholder="title"
                             leftIcon={<FontIcon>title</FontIcon>}
-                            className="md-cell md-cell--bottom"
+                            className="md-cell md-cell--bottom  md-cell--6"
                             value={title}
                             onChange={this.onParamChange}
                             />
@@ -111,11 +111,11 @@ export default class PieSettings extends React.Component<IPieSettingsProps,IPieS
                             label="Subtitle"
                             placeholder="subtitle"
                             leftIcon={<FontIcon>text_fields</FontIcon>}
-                            className="md-cell md-cell--bottom"
+                            className="md-cell md-cell--bottom  md-cell--6"
                             value={subtitle}
                             onChange={this.onParamChange}
                             />
-                        <div className="md-cell md-cell--bottom">
+                        <div className="md-cell md-cell--bottom  md-cell--6">
                             <div className="md-grid">
                                 
                                 <SelectField
@@ -141,7 +141,7 @@ export default class PieSettings extends React.Component<IPieSettingsProps,IPieS
                                 
                             </div>
                         </div>
-                        <span className="md-cell md-cell--bottom">
+                        <span className="md-cell md-cell--bottom  md-cell--6">
                             <div className="md-grid">
                                 <span className="md-cell--1 md-cell--middle"><FontIcon>insert_chart</FontIcon></span>
                                 <span className="md-cell--11 md-cell--bottom"><Switch id="props.showLegend" name="props.showLegend" label="Show legend" checked={props.showLegend} onChange={this.onShowLegendChange} /></span>

@@ -22,6 +22,7 @@ interface ISettingsButtonState {
 
 interface ISettingsButtonProps {
   children?: any;
+  onUpdateLayout:any;
 }
 
 export default class SettingsButton extends React.Component<ISettingsButtonProps, ISettingsButtonState> {
@@ -36,7 +37,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   state: ISettingsButtonState = {
     shouldSave: false,
     showSettingsDialog: false,
-    activeConfigView: this.ConfigurationViews.DataSources,
+    activeConfigView: this.ConfigurationViews.ApplicationInsights,
     dashboard: null
   };
 
@@ -111,6 +112,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   onChildSaveCompleted() {
     this.setState({ showSettingsDialog: false, shouldSave: false });
+    this.props.onUpdateLayout();
   }
 
   onConfigDialogViewChange(newValue, newActiveIndex, event){
@@ -123,19 +125,23 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     var elementsSettings:IElementsContainer = this.state.dashboard;
 
     switch(this.state.activeConfigView){
+
       case this.ConfigurationViews.ApplicationInsights:{
         return (<Config standaloneView={false} shouldSave={shouldSave} />)
       }
+      
       case this.ConfigurationViews.DataSources: {
         return (
           <ElementsSettings ElementsSettings={elementsSettings} shouldSave={shouldSave}  />
         );
       }
+      
       default:{
         return (
           <h1>{this.state.activeConfigView} - is not implemented yet</h1>
         );
       }
+
     }
   }
 
@@ -159,7 +165,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                     visible={showSettingsDialog}
                     modal
                     dialogStyle={{ width:'90%', height:'90%'}}
-                    contentStyle={{minHeight:300}}
+                    contentStyle={{minHeight:500}}
                     className='dialog-toolbar-no-padding'
                     actions={[
                         { onClick: this.onSettingsDialogSaveClick, primary: true, label: 'Save', },

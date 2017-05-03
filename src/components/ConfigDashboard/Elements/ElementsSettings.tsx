@@ -18,8 +18,10 @@ export default class ElementsSettings extends React.Component<IElementsSettingsP
         var pieSettings = _.find(this.props.ElementsSettings.elements,{'type':'PieData'});
         var shouldSave = this.props.shouldSave;
         return(
-            <div>
-                <PieSettings settings={pieSettings} shouldSave={shouldSave}/>
+            <div className="md-grid">
+                <div className="md-cell md-cell--6">
+                    <PieSettings settings={pieSettings} shouldSave={shouldSave}/>
+                </div>
             </div>
         );
     }
