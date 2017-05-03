@@ -8,8 +8,8 @@ return {
 	config: {
 		connections: {
 			"application-insights": {
-				apiKey: " :p ",
-				appId: " :p "
+				apiKey: "oxpy4xodzshj4dke7rdiwlqx0xrsntq2vip7y538",
+				appId: "a9c98f0f-594e-44e3-81fd-d5b9fc621447"
 			}
 		},
 		layout: {
@@ -1260,81 +1260,46 @@ return {
       // TOOD:Issue75 
 			id: "users",
 			width: "90%",
-			params: ["title","queryspan"],
+			params: ["title", "queryspan"],
 			dataSources: [{
-					id: "errors-group",
+					id: "user-rentention",
 					type: "ApplicationInsights/Query",
 					dependencies: {
-						queryTimespan: "dialog_errors:queryspan"
+						queryTimespan: "dialog_users:queryspan"
 					},
-					params: {
-            /*
-            customEvents
-              | where timestamp > ago(24h)
-              | extend activitytype=customDimensions.activitytype
-              | where activitytype == 'contactRelationUpdate'
-            */
-            // TODO:implement calcualted method @ln662
-            // TODO:implement mapping (so app does not fail at null or unexpected vals)
-						query: () => ` exceptions` +
-            ` | summarize error_count=count() by type, innermostMessage` +
-            ` | project type, innermostMessage, error_count` +
-            ` | order by error_count desc `
+					params: {   
+						query: () => ` customEvents` +
+            ` | where timestamp > ago(24h)` +
+            ` | summarize countd=dcount('customDimensions.from')` +
+            ` | project countd`,
+						mappings: { }
 					},
 					calculated: (state) => {
           const { values } = state;
-          return {
-            groups: values
-          };
+          return { };
         }
-				},{
-					id: "errors-selection",
-					type: "ApplicationInsights/Query",
-					dependencies: {
-						queryTimespan: "dialog_errors:queryspan",
-						type: "args:type",
-						innermostMessage: "args:innermostMessage"
-					},
-					params: { 
-            // TODO:implement calcualted method @ln662
-            // TODO:implement mapping (so app does not fail at null or unexpected vals)
-						query: ({ type, innermostMessage }) => ` exceptions` +
-            ` | where type == '${type}'` +
-            ` | where innermostMessage == "${innermostMessage}"` +
-            ` | extend conversationId=customDimensions["Conversation ID"]` +
-            ` | project type, innermostMessage, handledAt, conversationId, operation_Id`
-					}
 				}],
 			elements: [{
-					id: "errors-list",
-					type: "SplitPanel",
-					title: "Errors",
+					id: "user-retention-list",
+					type: "Table",
+					title: "User Retention",
 					size: {
 						w: 12,
 						h: 16
 					},
 					dependencies: {
-						groups: "errors-group",
-						values: "errors-selection"
+						values: "user-rentention"
 					},
 					props: {
 						cols: [{
-								header: "Date",
-								field: "type",
-								secondaryHeader: "Message",
-								secondaryField: "innermostMessage"
+								header: "Time Span",
+								field: "timestamp"
 							},{
-								header: "User Count",
-								field: "conversationId",
-								secondaryHeader: "Operation Id",
-								secondaryField: "operation_Id"
+								header: "Rentention",
+								field: "count",
 							},{
-								header: "Day X to ... Y", // iterate based on special field
-								field: "handledAt"
-							},{
-								type: "button",
-								value: "more",
-								click: "openErrorDetail"
+								header: "New Users",
+								field: "countd"
 							}],
 						group: {
 							field: "type",
@@ -1342,29 +1307,32 @@ return {
 							countField: "error_count"
 						}
 					},
-					actions: {
-						select: {
-							action: "errors-selection:updateDependencies",
-							params: {
-								title: "args:type",
-								type: "args:type",
-								innermostMessage: "args:innermostMessage",
-								queryspan: "timespan:queryTimespan"
-							}
-						},
-						openErrorDetail: {
-							action: "dialog:errordetail",
-							params: {
-								title: "args:operation_Id",
-								type: "args:type",
-								innermostMessage: "args:innermostMessage",
-								handledAt: "args:handledAt",
-								conversationId: "args:conversationId",
-								operation_Id: "args:operation_Id",
-								queryspan: "timespan:queryTimespan"
-							}
-						}
-					}
+					actions: { }
 				}]
 		}]
 }
+
+/*
+// uniques in 24 hours
+customEvents
+| where timestamp > ago(24h)
+| summarize countUniquesSince24hrAgo=dcount('customDimensions.from') 
+| project countUniquesSince24hrAgo
+
+// uniques in past 7 days
+customEvents
+| where timestamp > ago(7d)
+| summarize countUniquesSince7dAgo=dcount('customDimensions.from') 
+| project countUniquesSince7dAgo
+
+
+// uniques in past 30 days
+customEvents
+| where timestamp > ago(30d)
+| summarize countUniquesSince30dAgo=dcount('customDimensions.from') 
+| project countUniquesSince30dAgo
+
+// between 24 hours and 90 days
+customEvents
+| where timestamp < ago(24hr) and timestamp > ago(90d)
+ */
