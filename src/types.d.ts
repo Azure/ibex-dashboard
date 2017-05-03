@@ -11,6 +11,7 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
   icon: string,
   url: string,
   description?: string,
+  html?: string,
   preview?: string,
   config: {
     connections: IConnections,

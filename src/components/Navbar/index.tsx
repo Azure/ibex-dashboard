@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import NavigationDrawer from 'react-md/lib/NavigationDrawers';
+import Toolbar from 'react-md/lib/Toolbars';
 import FontIcon from 'react-md/lib/FontIcons';
 import ListItem from 'react-md/lib/Lists/ListItem';
 import Avatar from 'react-md/lib/Avatars';
@@ -8,6 +9,8 @@ import SelectField from 'react-md/lib/SelectFields';
 import NavigationLink from './NavigationLink';
 import { Link } from 'react-router';
 import Chip from 'react-md/lib/Chips';
+import Menu from 'react-md/lib/Menus/Menu';
+import MenuButton from 'react-md/lib/Menus/MenuButton';
 
 import AccountStore from '../../stores/AccountStore';
 import AccountActions from '../../actions/AccountActions';
@@ -18,27 +21,7 @@ import './style.css';
 
 const avatarSrc = 'https://cloud.githubusercontent.com/assets/13041/19686250/971bf7f8-9ac0-11e6-975c-188defd82df1.png';
 
-const drawerHeaderChildren = [
-  (
-    <Avatar
-      key={avatarSrc}
-      src={avatarSrc}
-      role="presentation"
-      iconSized={true}
-      style={{ alignSelf: 'center', marginLeft: 16, marginRight: 16, flexShrink: 0 }}
-    />
-  ),
-  (
-    <SelectField
-      id="account-switcher"
-      defaultValue="Jonathan"
-      menuItems={['Jonathan', 'Fred']}
-      key="account-switcher"
-      position={SelectField.Positions.BELOW}
-      className="md-select-field--toolbar"
-    />
-  )
-];
+const drawerHeaderChildren = [];
 
 export default class Navbar extends React.Component<any, any> {
   constructor(props: any) {
@@ -63,41 +46,7 @@ export default class Navbar extends React.Component<any, any> {
     let pathname = '/';
     try { pathname = window.location.pathname; } catch (e) { }
 
-    let navigationItems = [
-      (
-        <ListItem
-          key="0"
-          component={Link}
-          href="/"
-          active={pathname === '/'}
-          leftIcon={<FontIcon>home</FontIcon>}
-          tileClassName="md-list-tile--mini"
-          primaryText={'Home'}
-        />
-      ),
-      (
-        <ListItem
-          key="1"
-          component={Link}
-          href="/about"
-          active={pathname === '/about'}
-          leftIcon={<FontIcon>help_outline</FontIcon>}
-          tileClassName="md-list-tile--mini"
-          primaryText={'Help'}
-        />
-      ),
-      (
-        <ListItem
-          key="2"
-          component={Link}
-          href="/setup"
-          active={pathname === '/setup'}
-          leftIcon={<FontIcon>settings</FontIcon>}
-          tileClassName="md-list-tile--mini"
-          primaryText={'Settings'}
-        />
-      )
-    ];
+    let navigationItems = [];
 
     (dashboards || []).forEach((dashboard, index) => {
       let name = dashboard.name || null;
@@ -119,10 +68,9 @@ export default class Navbar extends React.Component<any, any> {
             primaryText={name || 'Dashboard'}
           />
         )
-      )
+      );
     });
     
-
     let toolbarActions = 
         this.state.account ?
           <Chip style={{ marginRight: 30 }} label={'Hello, ' + this.state.account.displayName} /> :
@@ -157,20 +105,56 @@ export default class Navbar extends React.Component<any, any> {
       }
     }
 
+    const drawerType = navigationItems.length > 0 ? 
+      NavigationDrawer.DrawerTypes.TEMPORARY_MINI : NavigationDrawer.DrawerTypes.TEMPORARY;
+
+    const moreButtonMenu = (
+      <MenuButton
+        id="vert-menu"
+        icon
+        buttonChildren="more_vert"
+        position={Menu.Positions.BOTTOM_RIGHT}
+      >
+        <ListItem 
+          primaryText="Create Dashboard" 
+          href="/" 
+          active={pathname === '/'} 
+          component={Link} 
+          leftIcon={<FontIcon>add_box</FontIcon>} 
+        />
+        <ListItem 
+          primaryText="Setup Authentication" 
+          href="/setup" 
+          active={pathname === '/setup'} 
+          component={Link} 
+          leftIcon={<FontIcon>lock</FontIcon>} 
+        />
+      </MenuButton>
+    );
+
     return (
       <div>
+        {navigationItems.length > 0 ? (
         <NavigationDrawer
           navItems={navigationItems}
           contentClassName="md-grid"
           drawerHeaderChildren={drawerHeaderChildren}
-          mobileDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-          tabletDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
-          desktopDrawerType={NavigationDrawer.DrawerTypes.TEMPORARY_MINI}
+          mobileDrawerType={drawerType}
+          tabletDrawerType={drawerType}
+          desktopDrawerType={drawerType}
           toolbarTitle={title}
-          toolbarActions={toolbarActions}
+          toolbarActions={moreButtonMenu}
         >
           {children}
         </NavigationDrawer>
+        ) : (
+          <div>
+            <Toolbar title={title} actions={moreButtonMenu} colored />
+            <div className="md-grid">
+              {children}
+            </div>
+        </div>
+        )}
       </div>
     );
   }
