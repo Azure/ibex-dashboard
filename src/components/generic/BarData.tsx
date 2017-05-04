@@ -60,7 +60,8 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
             fill={bar.color || ThemeColors[idx]} 
             onClick={this.handleClick} 
           />
-        )
+        );
+      });
     }
 
     // Todo: Receive the width of the SVG component from the container

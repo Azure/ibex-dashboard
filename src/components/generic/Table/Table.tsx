@@ -2,6 +2,7 @@ import * as React from 'react';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import utils from '../../../utils';
 
 import { DataTable, TableHeader, TableBody, TableRow, TableColumn } from 'react-md/lib/DataTables';
 import { Card, CardText, TableCardHeader } from 'react-md/lib/Cards';
@@ -9,11 +10,14 @@ import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
+export type ColType = 'text' | 'time' | 'icon' | 'button' | 'ago' | 'number';
+
 export interface ITableProps extends IGenericProps {
   props: {
     checkboxes?: boolean;
     rowClassNameField?: string;
     hideBorders?: boolean;
+    compact?: boolean;
     cols: {
       header?: string;
       field?: string;
@@ -21,7 +25,7 @@ export interface ITableProps extends IGenericProps {
       secondaryField?: string;
       value?: string;
       width?: string | number;
-      type?: 'text' | 'time' | 'icon' | 'button';
+      type?: ColType;
       click?: string;
     }[]
   };
@@ -63,7 +67,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
   render() {
 
     let { props } = this.props;
-    let { checkboxes, cols, rowClassNameField, hideBorders } = props;
+    let { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
     let { values } = this.state;
 
     if (!values) {
@@ -97,7 +101,10 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
                         <span className="primary">{value[col.field]}</span>
                         <span className="secondary">{value[col.secondaryField]}</span>
                       </div>
-                    ) : value[col.field]
+                    ) : 
+                  col.type === 'number' ? utils.kmNumber(value[col.field]) :
+                  col.type === 'ago' ? utils.ago(value[col.field]) :
+                  value[col.field]
             }</TableColumn>
           ))
         }
@@ -106,7 +113,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
 
     return (
       <Card className={ hideBorders ? 'hide-borders' : '' }>
-        <DataTable plain={!checkboxes} data={checkboxes}>
+        <DataTable plain={!checkboxes} data={checkboxes} className={compact ? 'table-compact' : ''}>
           <TableHeader>
             <TableRow>
               {cols.map((col, i) => (
