@@ -8,8 +8,8 @@ return {
 	config: {
 		connections: {
 			"application-insights": {
-				apiKey: "tn6hhxs60afz4yzd7cp2nreph1wja3ecxtflq8rs", // "oxpy4xodzshj4dke7rdiwlqx0xrsntq2vip7y538"
-				appId: "4d567b3c-e52c-4139-8e56-8e573e55a06c" // "a9c98f0f-594e-44e3-81fd-d5b9fc621447"
+				apiKey: "oxpy4xodzshj4dke7rdiwlqx0xrsntq2vip7y538", // "tn6hhxs60afz4yzd7cp2nreph1wja3ecxtflq8rs"
+				appId: "a9c98f0f-594e-44e3-81fd-d5b9fc621447" // "4d567b3c-e52c-4139-8e56-8e573e55a06c"
 			}
 		},
 		layout: {
@@ -1270,17 +1270,35 @@ return {
 						query: ({ queryTimespan }) => ` customEvents |
 							where timestamp > ago(90d) |
 							extend uniqueUser=tostring(customDimensions.from) |
-							summarize minTimestamp=min(timestamp), maxTimestamp=max(timestamp) by uniqueUser |
+							summarize firstUsedAppTimeStamp=min(timestamp), lastUsedAppTimeStamp=max(timestamp) by uniqueUser |
 							summarize
-									countUniquesSince24hrAgo=countif(minTimestamp < ago(24hr) and maxTimestamp >= ago(24hr)),
-									countUniquesSince7dAgo=countif(minTimestamp < ago(24hr) and maxTimestamp >= ago(7d)),
-									countUniquesSince30dAgo=countif(minTimestamp < ago(24hr) and maxTimestamp >= ago(30d))`,
+									totalUniquesUsersIn90d=count(uniqueUser),
+									totalUniquesUsersIn24hr=countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr)),
+									totalUniquesUsersIn7d=countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d)),
+									totalUniquesUsersIn30d=countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d))`,
 						mappings: { }
 					},
 					calculated: (state) => {
-          const { values } = state;
-          return { };
-        }
+						var { values } = state;
+
+						if (!values || !values.length) { return; }
+
+						var rententionOver24hrs = 0;
+						var rententionOver7days = 0;
+						var rententionOver30days = 0;
+
+						var totalUniquesUsersIn90d = values[0].totalUniquesUsersIn90d;
+
+						var totalUniquesUsersIn24hr = values[0].totalUniquesUsersIn24hr;
+						var totalUniquesUsersIn7d = values[0].totalUniquesUsersIn7d;
+						var totalUniquesUsersIn30d = values[0].totalUniquesUsersIn30d;
+
+						rententionOver24hr = (totalUniquesUsersIn24hr / totalUniquesUsersIn90d) * 100;
+						rententionOver7d = (totalUniquesUsersIn7d / totalUniquesUsersIn90d) * 100;
+						rententionOver30d = (totalUniquesUsersIn30d / totalUniquesUsersIn90d) * 100;
+
+						return { };
+					}
 				}],
 			elements: [{
 					id: "user-retention-list",
@@ -1302,16 +1320,13 @@ return {
 								field: "60%",
 							},{
 								header: "Unique User 24hr",
-								field: "countUniquesSince24hrAgo"
+								field: "totalUniquesUsersIn24hr"
 							},{
 								header: "Unique Users 7d",
-								field: "countUniquesSince7dAgo"
+								field: "totalUniquesUsersIn7d"
 							},{
 								header: "Unique Users 30d",
-								field: "countUniquesSince30dAgo"
-							},,{
-								header: "Unique User 90d",
-								field: "countUniquesSince90dAgo"
+								field: "totalUniquesUsersIn30d"
 							}]
 					},
 					actions: { }
