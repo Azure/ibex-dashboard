@@ -1261,24 +1261,17 @@ return {
 			params: ["title", "queryspan"],
 			dataSources: [
 				{
-					id: "user-rentention-datasource",
+					id: "userRententionDatasource",
 					type: "ApplicationInsights/Query",
 					dependencies: {
 						queryTimespan: "dialog_user-rentention:queryspan"
 					},
 					params: {   
-						query: ({ queryTimespan }) => ` customEvents |
-							where timestamp > ago(90d) |
+						query: ({ queryTimespan }) => ` customEvents  |
+							where timestamp > ago(90d) | 
 							extend uniqueUser=tostring(customDimensions.from) |
 							summarize firstUsedAppTimeStamp=min(timestamp), lastUsedAppTimeStamp=max(timestamp) by uniqueUser |
-							summarize
-											totalUniquesUsersIn90d=count(uniqueUser),
-											totalUniquesUsersIn24hr=countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr)),
-											totalUniquesUsersIn7d=countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d)),
-											totalUniquesUsersIn30d=countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d)),
-											rententionOver24hr = floor( ((countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr))) / (count(uniqueUser)) * 100) , 1),
-											rententionOver7d = floor( ((countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d))) / (count(uniqueUser)) * 100) , 1),
-											rententionOver30d = floor( ((countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d))) / (count(uniqueUser)) * 100) , 1)`,
+							project firstUsedAppTimeStamp, lastUsedAppTimeStamp, uniqueUser`,
 						mappings: { }
 					},
 					calculated: (state) => {
@@ -1286,18 +1279,6 @@ return {
 
 						if (!values || !values.length) { return; }
 
-						// Delete the code between this delete region
-						// Unless there's a way to pass a var like rententionOver24hr into 
-						// one of the prop col fields below in the elements array
-						/*
-							...
-							props: {
-							cols: [{
-									header: "Retention",
-									field: "rententionOver24hr"
-								}
-							...
-						 */
 						var rententionOver24hrs = 0;
 						var rententionOver7days = 0;
 						var rententionOver30days = 0;
@@ -1312,11 +1293,10 @@ return {
 						rententionOver7d = Math.floor( (totalUniquesUsersIn7d / totalUniquesUsersIn90d) * 100 );
 						rententionOver30d = Math.floor( (totalUniquesUsersIn30d / totalUniquesUsersIn90d) * 100 );
 
-						var rententionGroup = [];
-						rententionGroup.push({ rententionOver24hr, rententionOver7d, rententionOver30d });
-						// Delete region END
+						var userRententionDatasource = [];
+						userRententionDatasource.push({ rententionOver24hr, rententionOver7d, rententionOver30d });
 
-						return { groups: rententionGroup };
+						return { userRententionDatasource };
 					}
 				}],
 			elements: [{
@@ -1328,7 +1308,7 @@ return {
 						h: 16
 					},
 					dependencies: {
-						values: "user-rentention-datasource"
+						values: "userRententionDatasource"
 					},
 					props: {
 						cols: [{
@@ -1338,14 +1318,8 @@ return {
 								header: "Rentention",
 								field: "rententionOver24hr",
 							},{
-								header: "Unique User 24hr",
+								header: "Unique Users",
 								field: "totalUniquesUsersIn24hr"
-							},{
-								header: "Unique Users 7d",
-								field: "totalUniquesUsersIn7d"
-							},{
-								header: "Unique Users 30d",
-								field: "totalUniquesUsersIn30d"
 							}]
 					},
 					actions: { }
