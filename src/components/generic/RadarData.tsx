@@ -46,13 +46,17 @@ export default class RadarData extends GenericComponent<IRadarProps, IRadarState
       return null;
     }
 
+    const domain = 100;
+    var NFL = "NFL";
+    var NBA = "NBA";
+
     const data05 = [
-      { subject: 'Math', A: 120, B: 110, fullMark: 150 },
-      { subject: 'Chinese', A: 98, B: 130, fullMark: 150 },
-      { subject: 'English', A: 86, B: 130, fullMark: 150 },
-      { subject: 'Geography', A: 99, B: 100, fullMark: 150 },
-      { subject: 'Physics', A: 85, B: 90, fullMark: 150 },
-      { subject: 'History', A: 65, B: 85, fullMark: 150 },
+      { subject: 'Math', NFL: 120, NBA: 110, fullMark: domain },
+      { subject: 'Chinese', NFL: 98, NBA: 130, fullMark: domain },
+      { subject: 'English', NFL: 86, NBA: 130, fullMark: domain },
+      { subject: 'Geography', NFL: 99, NBA: 100, fullMark: domain },
+      { subject: 'Physics', NFL: 85, NBA: 90, fullMark: domain },
+      { subject: 'History', NFL: 65, NBA: 85, fullMark: domain },
     ];
 
     return (
@@ -64,12 +68,12 @@ export default class RadarData extends GenericComponent<IRadarProps, IRadarState
             height={250}
             data={data05}
           >
-            <Radar name="Mike" dataKey="NFL" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-            <Radar name="Lily" dataKey="NBA" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+            <Radar name="NFL" dataKey="NFL" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+            <Radar name="NBA" dataKey="NBA" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
             <PolarGrid />
             <Legend />
             <PolarAngleAxis dataKey="intent" />
-            <PolarRadiusAxis angle={30} domain={[0, 100]} />
+            <PolarRadiusAxis angle={30} domain={[0, domain]} />
           </RadarChart>
         </ResponsiveContainer>
       </Card>
