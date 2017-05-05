@@ -13,6 +13,8 @@ import Table from '../Table';
 import { ITableProps, ITableState } from '../Table/Table';
 import Avatar from 'react-md/lib/Avatars';
 
+import utils from '../../../utils';
+
 const style = {
   lhs: {
     position: 'fixed',
@@ -97,7 +99,7 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
       if ( group.secondaryField ) {
         secondaryText = item[group.secondaryField] || '';
       }
-      let badge = item[countField] ? <Avatar>{item[countField]}</Avatar> : null;
+      let badge = item[countField] ? <Avatar>{utils.kmNumber(item[countField])}</Avatar> : null;
       let active = (i === this.state.selectedIndex) ? true : false;
       return (
         <ListItem
@@ -126,7 +128,7 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
 
     return (
       <Card>
-        <div style={style.lhs}>
+        <div style={style.lhs} className='split-view'>
           <List>
             {listItems}
           </List>
@@ -139,7 +141,11 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
     );
   }
 
-  handleClick(group: any, index: number) {
+  handleClick(group: any, index: number, event?: UIEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
+    
     this.setState({ selectedIndex: index, values: [] });
     this.trigger('select', group);
   }

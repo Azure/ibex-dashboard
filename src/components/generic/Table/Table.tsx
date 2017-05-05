@@ -48,11 +48,15 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     this.onRowClick = this.onRowClick.bind(this);
   }
 
-  onButtonClick = (col, value) => {
+  onButtonClick = (col, value, event?: UIEvent) => {
+    if (event) { event.stopPropagation(); }
+
     this.trigger(col.click, value);
   }
 
-  onRowClick = (row, value) => {
+  onRowClick = (row, value, event?: UIEvent) => {
+    if (event) { event.stopPropagation(); }
+
     let i = row.findIndex((col) => col.type === 'button');
     if (i === -1) {
       return;

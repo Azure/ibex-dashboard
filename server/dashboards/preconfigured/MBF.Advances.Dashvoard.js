@@ -7,7 +7,6 @@ return {
 	preview: "/images/bot-framework-preview.png",
 	config: {
 		connections: {
-			"application-insights": { appId: "32f4aed8-8450-41b8-baac-8191389a10ea",apiKey: "5qp7qfeksg1vb545tnmsagzg6gcqsszpa5ufrdes" }
 		},
 		layout: {
 			isDraggable: true,
@@ -52,14 +51,15 @@ return {
 			type: "ApplicationInsights/Query",
 			dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan",granularity: "timespan:granularity" },
 			params: {
-				table: "customEvents",
+				table: "telemetry_import_2_CL",
 				queries: {
 					filterChannels: {
-						query: () => `` +
-              ` where name == 'Activity' | ` +
-              ` extend channel=customDimensions.channel | ` +
-              ` summarize channel_count=count() by tostring(channel) | ` +
-              ` order by channel_count`,
+						query: () => `
+                where recordType == 'intent' |						
+								extend channel=channelId |
+                summarize channel_count=count() by tostring(channel) |
+								order by channel_count
+              `,
 						mappings: { channel: (val) => val || "unknown",channel_count: (val) => val || 0 },
 						calculated: (filterChannels) => {
               const filters = filterChannels.map((x) => x.channel);
@@ -76,10 +76,11 @@ return {
 					},
 					filterIntents: {
 						query: () => `
-              extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | 
-              where name startswith 'message.intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | 
-              summarize intent_count=count() by tostring(intent) | 
-              order by intent_count`,
+              where recordType == "intent" |
+							summarize intent_count=count() by intentName |
+							extend intent=intentName |
+							order by intent_count
+              `,
 						mappings: { intent: (val) => val || "unknown",intent_count: (val) => val || 0 },
 						calculated: (filterIntents) => {
               const intents = filterIntents.map((x) => x.intent);
@@ -100,19 +101,26 @@ return {
 		{
 			id: "nfl",
 			type: "ApplicationInsights/Query",
-			dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan",granularity: "timespan:granularity" },
+			dependencies: { 
+        timespan: "timespan",
+        queryTimespan: "timespan:queryTimespan",
+        granularity: "timespan:granularity",
+        selectedChannels: "filters:channels-selected",
+        selectedIntents: "filters:intents-selected"
+      },
 			params: {
-				table: "telemetry_import",
+				table: "telemetry_import_2_CL",
 				queries: {
 					queries_per_session: {
 						query: () => `
 								where recordType == "intent" | 
-								summarize count_queries=count() by bin(timestamp, 1d), userId | 
-								summarize average=avg(count_queries) | 
-								extend average=round(average, 1) `,
+                summarize count_queries=count() by bin(timestamp, 1d), userId | 
+                summarize average=avg(count_queries), count_sessions=count(timestamp)  | 
+                extend average=round(average, 1), count_sessions `,
 						calculated: (result) => {
 							return {
-								avg_queries_per_session: (result && result.length && result[0].average) || 0
+								avg_queries_per_session: (result && result.length && result[0].average) || 0,
+								total_sessions: (result && result.length && result[0].count_sessions) || 0
 							}
 						}
 					},
@@ -135,10 +143,11 @@ return {
 								timespan === '1 week' ? '7d' :
 								timespan === '1 month' ? '30d' : '90d';
 							return `
-								where recordType == 'intent' |
-								summarize dcount(userId), minTimestamp=min(timestamp), maxTimestamp=max(timestamp) by userId |
-								where minTimestamp < ago(${threshold}) and maxTimestamp > ago(${threshold}) |
-								count`;
+								where recordType == 'intent' and timestamp > ago(90d) |
+                extend userId=substring(userId, 0, 1) |
+                summarize dcount(userId), minTimestamp=min(timestamp), maxTimestamp=max(timestamp) by userId |
+                where minTimestamp < ago(7d) and maxTimestamp > ago(7d) |
+                count`;
 						},
 						calculated: (returning_users) => {
 							return {
@@ -151,10 +160,11 @@ return {
 							var { granularity } = dependencies;
 							return `
 								where recordType == 'intent' |						
-								extend channel=substring(channelId, 0, 1) |
-								summarize count=count() by bin(timestamp, ${granularity}), channel |
-								order by timestamp asc`;
+                extend channel=channelId |
+                summarize count=count() by bin(timestamp, 1d), channel |
+                order by timestamp asc`;
 						},
+            filters: [{ dependency: "selectedChannels", queryProperty: "channelId" }],
 						calculated: (timeline, dependencies) => {
 
 							// Timeline handling
@@ -215,9 +225,9 @@ return {
 							var { granularity } = dependencies;
 							return `
 								where recordType == 'intent' |						
-								extend userId=substring(userId, 0, 1), channelId=substring(channelId, 0, 1) |
-								summarize count=dcount(userId) by bin(timestamp, ${granularity}), channel=channelId |
-								order by timestamp asc`;
+                extend userId=substring(userId, 0, 1) |
+                summarize count=dcount(userId) by bin(timestamp, 1d), channel=channelId |
+                order by timestamp asc`;
 						},
 						calculated: (timeline, dependencies) => {
 
@@ -275,44 +285,15 @@ return {
 						}
 					},
 					intents: {
-						query: () => `` +
-							` where recordType == "intent" |` +
-							` summarize count_intents=count() by intentName |` +
-							` extend intent=substring(intentName, 0, 4) |` +
-							` order by count_intents `,
+						query: () => `
+							  where recordType == "intent" |
+                summarize count_intents=count() by intentName |
+                extend intent=substring(intentName, 0, 4) |
+                order by intent `,
+            filters: [{ dependency: "selectedIntents", queryProperty: "intentName" }],
 						calculated: (intents) => {
 							return {
 								"intents-bars": [ 'count_intents' ]
-							};
-						}
-					}
-				}
-			}
-		},
-		{
-			id: "ai",
-			type: "ApplicationInsights/Query",
-			dependencies: {
-				timespan: "timespan",
-				queryTimespan: "timespan:queryTimespan",
-				granularity: "timespan:granularity",
-				selectedChannels: "filters:channels-selected",
-				selectedIntents: "filters:intents-selected"
-			},
-			params: {
-				table: "customEvents",
-				queries: {
-					users: {
-						query: "summarize totalUsers=count() by user_Id",
-						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
-						calculated: (users) => {
-							let result = 0;
-							if (users.length === 1 && users[0].totalUsers > 0) {
-								result = users[0].totalUsers;
-							}
-							return {
-								"users-value": result,
-								"users-icon": 'account_circle'
 							};
 						}
 					}
@@ -324,9 +305,10 @@ return {
 			type: "ApplicationInsights/Query",
 			dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan" },
 			params: {
-				query: () => ` exceptions` +
-            ` | summarize count_error=count() by handledAt, innermostMessage` +
-            ` | order by count_error desc `,
+				query: () => ` 
+            exceptions
+            | summarize count_error=count() by handledAt, innermostMessage
+            | order by count_error desc `,
 				mappings: { handledAt: (val) => val || "Unknown",count: (val, row) => row.count_error }
 			},
 			calculated: (state) => {
@@ -425,7 +407,7 @@ return {
 			subtitle: "Total messages sent per channel",
 			size: { w: 3,h: 8 },
 			dependencies: { visible: "modes:messages",values: "nfl:timeline-channelUsage" },
-			props: { showLegend: false,compact: true }
+			props: { showLegend: false,compact: true, entityType: 'messages' }
 		},
 		{
 			id: "channels",
@@ -434,12 +416,12 @@ return {
 			subtitle: "Total users sent per channel",
 			size: { w: 3,h: 8 },
 			dependencies: { visible: "modes:users",values: "nfl:timeline-users-channelUsage" },
-			props: { showLegend: false,compact: true }
+			props: { showLegend: false,compact: true, entityType: 'users' }
 		},
 		{
 			id: "scores",
 			type: "Scorecard",
-			size: { w: 3,h: 6 },
+			size: { w: 3,h: 8 },
 			dependencies: {
 				card_errors_value: "errors:handledAtTotal",
 				card_errors_heading: "::Errors",
@@ -453,6 +435,8 @@ return {
 				card_qps_heading: "::Q/Session",
 				card_qps_color: "::#2196F3",
 				card_qps_icon: "::av_timer",
+        card_qps_subvalue: "nfl:total_sessions",
+        card_qps_subheading: "::Sessions",
 				card_users_value: "nfl:total_users",
 				card_users_heading: "::Unique Users",
 				card_users_subvalue: "nfl:returning_users",
@@ -471,7 +455,7 @@ return {
 			type: "BarData",
 			title: "Intents Graph",
 			subtitle: "Intents usage per time",
-			size: { w: 7,h: 8 },
+			size: { w: 6,h: 8 },
 			dependencies: { values: "nfl:intents",bars: "nfl:intents-bars" },
 			props: { nameKey: "intent",showLegend: false },
 			actions: {
@@ -493,15 +477,16 @@ return {
 					type: "ApplicationInsights/Query",
 					dependencies: { intent: "dialog_intentsDialog:intent",queryTimespan: "dialog_intentsDialog:queryspan" },
 					params: {
-						table: "telemetry_import",
+						table: "telemetry_import_2_CL",
 						queries: {
 							"total-conversations": {
 								query: ({ intent }) => `
-										where recordType == "intent" and intentName == '${intent}' |
-										summarize count_intents=count(), maxTimestamp=max(timestamp) by conversationId`,
-								calculated: (conversations) => {
+										where recordType == "intent" and intentName == 'Hello' |
+                    summarize count_intents=count() by conversationId | 
+                    count `,
+								calculated: (results) => {
 									return {
-										"total-conversations": (conversations && conversations.length) || 0
+										"total-conversations": (results && results.length && results[0].Count) || 0
 									}
 								}
 							},
@@ -552,31 +537,13 @@ return {
 												type: "Ambiguous",
 												percentage: "15%"
 											}
-										],
-										"sample-response-types": [
-											{ name: "Disposition", success: 30, fail: 70 },
-											{ name: "Quality", default: 65, ambiguous: 20, normal: 15 },
-											{ name: "Type", card: 80, bubble: 20 },
-											{ name: "Image", success: 80, fail: 20 },
-											{ name: "Requests", "Logged In": 44, "Anonymous": 56 },
-											{ name: "Cache", hits: 90, misses: 10 }
-										],
-										"sample-response-types-bars": [ 
-											{ name: "success", color: "#00BFA5"}, { name: "fail", color: "#B71C1C" } , 
-											{ name: "default", color: "#64FFDA" }, { name: "ambiguous", color: "#1DE9B6" }, { name: "normal", color: "#00BFA5" }, 
-											{ name: "card", color: "#64FFDA" }, { name: "bubble", color: "#1DE9B6" }, 
-											{ name: "Logged In", color: "#00BFA5" }, { name: "Anonymous", color: "#B71C1C" }, 
-											{ name: "hits", color: "#00BFA5" }, { name: "misses", color: "#B71C1C" }
-										],
-										"sample-response-times_0": "100",
-										"sample-response-times_1": "20",
-										"sample-response-times_2": "7000000",
-										"sample-response-times_3": "1500",
+										]
 									};
 								}
 							},
 							"entities-usage": {
-								query: ({ intent }) => `where recordType == "entity" |
+								query: ({ intent }) => `
+                    where recordType == "entity" |
 										summarize entity_count=count() by entityType, conversationId |
 										summarize total_count=count() by entity_count, entityType |
 										order by entityType, entity_count asc |
@@ -596,9 +563,95 @@ return {
 										"entities-usage-bars": count_values
 									};
 								}
-							}
+							},
+              response_times: {
+                query: () => `
+                  where recordType == "response" |
+                  extend response=-responseMilliseconds  |
+                  summarize sum0=sumif(response, response <= 1000), count0=countif(response <= 1000),
+                            sum1=sumif(response, 1000 < response and response <= 2000), count1=countif(1000 < response and response <= 2000),
+                            sum2=sumif(response, 2000 < response and response <= 3000), count2=countif(2000 < response and response <= 3000),
+                            sum3=sumif(response, response > 3000), count3=countif(response > 3000) |
+                  project avg0=sum0/count0, avg1=sum1/count1, avg2=sum2/count2, avg3=sum3/count3`
+              },
+              intent_quality: {
+                query: () => `
+                  where recordType == "response" |
+                  summarize count_quality=count() by responseResult`
+              },
+              intent_cache_hits: {
+                query: () => `
+                  where recordType == "response" |
+                  summarize count_hits=count() by responseCacheHit `
+              },
+              intent_disposition: {
+                query: () => `
+                  where recordType == "response" |
+                  summarize count_success=count() by serviceResultSuccess  `
+              }
 						}
-					}
+					},
+          calculated: (state) => {
+            let {intent_quality, intent_cache_hits, intent_disposition, response_times} = state;
+
+            // Disposition
+            let _disposition = {
+              success: (_.find(intent_disposition, { serviceResultSuccess: true }) || {}).count_success || 0, 
+              fail: (_.find(intent_disposition, { serviceResultSuccess: false }) || {}).count_success || 0
+            };
+            let disposition = {
+              success: Math.round(100 * _disposition.success / ((_disposition.success + _disposition.fail) || 1)),
+              fail: Math.round(100 * _disposition.fail / ((_disposition.success + _disposition.fail) || 1))
+            };
+
+            // Quality
+            let _quality = {
+              default: (_.find(intent_quality, { responseResult: 'default' }) || {}).count_quality || 0, 
+              ambiguous: (_.find(intent_quality, { responseResult: 'ambiguous' }) || {}).count_quality || 0, 
+              normal: (_.find(intent_quality, { responseResult: 'normal' }) || {}).count_quality || 0, 
+            };
+
+            let quality = {
+              default: Math.round(100 * _quality.default / ((_quality.default + _quality.ambiguous + _quality.normal) || 1)),
+              ambiguous: Math.round(100 * _quality.ambiguous / ((_quality.default + _quality.ambiguous + _quality.normal) || 1)),
+              normal: Math.round(100 * _quality.normal / ((_quality.default + _quality.ambiguous + _quality.normal) || 1))
+            };
+
+            // Cache
+            let _cache = {
+              hits: (_.find(intent_cache_hits, { responseCacheHit: true }) || {}).count_hits || 0, 
+              misses: (_.find(intent_cache_hits, { responseCacheHit: false }) || {}).count_hits || 0
+            };
+            let cache = {
+              hits: Math.round(100 * _cache.hits / ((_cache.hits + _cache.misses) || 1)),
+              misses: Math.round(100 * _cache.misses / ((_cache.hits + _cache.misses) || 1))
+            };
+
+            // Response times
+            let times = (response_times && response_times.length && response_times[0]) || {};
+
+            return {
+              "sample-response-types": [
+                { name: "Disposition", success: disposition.success, fail: disposition.fail },
+                { name: "Quality", default: quality.default, ambiguous: quality.ambiguous, normal: quality.normal },
+                { name: "Type", card: 80, bubble: 20 },
+                { name: "Image", success: 80, fail: 20 },
+                { name: "Requests", "Logged In": 44, "Anonymous": 56 },
+                { name: "Cache", hits: cache.hits, misses: cache.misses }
+              ],
+              "response-types-bars": [ 
+                { name: "success", color: "#00BFA5"}, { name: "fail", color: "#B71C1C" } , 
+                { name: "default", color: "#64FFDA" }, { name: "ambiguous", color: "#1DE9B6" }, { name: "normal", color: "#00BFA5" }, 
+                { name: "card", color: "#64FFDA" }, { name: "bubble", color: "#1DE9B6" }, 
+                { name: "Logged In", color: "#00BFA5" }, { name: "Anonymous", color: "#B71C1C" }, 
+                { name: "hits", color: "#00BFA5" }, { name: "misses", color: "#B71C1C" }
+              ],
+              "response-times_0": times.avg0 || 0,
+              "response-times_1": times.avg1 || 0,
+              "response-times_2": times.avg2 || 0,
+              "response-times_3": times.avg3 || 0
+            }
+          }
 				}
 			],
 			elements: [
@@ -612,21 +665,21 @@ return {
 						card_conversations_color: "::#2196F3",
 						card_conversations_icon: "::chat",
 						card_conversations_onClick: "::onConversationsClick",
-						card_responseTimes0_value: "intentsDialog-data:sample-response-times_0",
+						card_responseTimes0_value: "intentsDialog-data:response-times_0",
 						card_responseTimes0_heading: "::In <1 sec",
-						card_responseTimes0_color: "::#82B1FF",
+						card_responseTimes0_color: "::#03A9F4",
 						card_responseTimes0_icon: "::av_timer",
-						card_responseTimes1_value: "intentsDialog-data:sample-response-times_1",
+						card_responseTimes1_value: "intentsDialog-data:response-times_1",
 						card_responseTimes1_heading: "::In <2 sec",
-						card_responseTimes1_color: "::#448AFF",
+						card_responseTimes1_color: "::#FFC107",
 						card_responseTimes1_icon: "::av_timer",
-						card_responseTimes2_value: "intentsDialog-data:sample-response-times_2",
+						card_responseTimes2_value: "intentsDialog-data:response-times_2",
 						card_responseTimes2_heading: "::In < 3 sec",
-						card_responseTimes2_color: "::#2979FF",
+						card_responseTimes2_color: "::#FF5722",
 						card_responseTimes2_icon: "::av_timer",
-						card_responseTimes3_value: "intentsDialog-data:sample-response-times_3",
-						card_responseTimes3_heading: "::In 3+",
-						card_responseTimes3_color: "::#2962FF",
+						card_responseTimes3_value: "intentsDialog-data:response-times_3",
+						card_responseTimes3_heading: "::In 3+ sec",
+						card_responseTimes3_color: "::#F44336",
 						card_responseTimes3_icon: "::av_timer"
 					},
 					actions: {
@@ -653,7 +706,7 @@ return {
 					subtitle: "Entity usage and count for the selected intent",
 					size: { w: 3,h: 8 },
 					location: { x: 3,y: 1 },
-					dependencies: { values: "intentsDialog-data:sample-response-types",bars: "intentsDialog-data:sample-response-types-bars" },
+					dependencies: { values: "intentsDialog-data:sample-response-types",bars: "intentsDialog-data:response-types-bars" },
 					props: { nameKey: "name" }
 				}
 			]
@@ -668,7 +721,7 @@ return {
 					type: "ApplicationInsights/Query",
 					dependencies: { intent: "dialog_conversations:intent",queryTimespan: "dialog_conversations:queryspan" },
 					params: {
-						table: "telemetry_import",
+						table: "telemetry_import_2_CL",
 						queries: {
 							conversations: {
 								query: ({ intent }) => `
@@ -716,11 +769,13 @@ return {
 					type: "ApplicationInsights/Query",
 					dependencies: { conversation: "dialog_messages:conversation",queryTimespan: "dialog_messages:queryspan" },
 					params: {
-						query: ({ conversation }) => ` customEvents` +
-              ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
-              ` | where name in ("message.send", "message.received") and conversation == '${conversation}'` +
-              ` | order by timestamp asc` +
-              ` | project timestamp, eventName=name, message=customDimensions.text, customDimensions.userName, customDimensions.userId`
+						query: ({ conversation }) => ` 
+              telemetry_import_2_CL
+              | where recordType in ("intent", "response") and (intentText != '' or responseText != '') 
+              | order by timestamp asc
+              | extend message=strcat(responseText, intentText)
+              | top 200 by timestamp asc
+              | project timestamp, eventName=recordType, message `
 					}
 				}
 			],
@@ -751,28 +806,31 @@ return {
 					type: "ApplicationInsights/Query",
 					dependencies: { queryTimespan: "dialog_errors:queryspan" },
 					params: {
-						query: () => ` exceptions` +
-            ` | summarize error_count=count() by type, innermostMessage` +
-            ` | project type, innermostMessage, error_count` +
-            ` | order by error_count desc `
+						query: () => ` 
+              exceptions
+              | summarize error_count=count() by type, innermostMessage
+              | project type, innermostMessage, error_count
+              | order by error_count desc `
 					},
 					calculated: (state) => {
-          const { values } = state;
-          return {
-            groups: values
-          };
-        }
+            const { values } = state;
+            return {
+              groups: values
+            };
+          }
 				},
 				{
 					id: "errors-selection",
 					type: "ApplicationInsights/Query",
 					dependencies: { queryTimespan: "dialog_errors:queryspan",type: "args:type",innermostMessage: "args:innermostMessage" },
 					params: {
-						query: ({ type, innermostMessage }) => ` exceptions` +
-            ` | where type == '${type}'` +
-            ` | where innermostMessage == "${innermostMessage}"` +
-            ` | extend conversationId=customDimensions["Conversation ID"]` +
-            ` | project type, innermostMessage, handledAt, conversationId, operation_Id`
+						query: ({ type, innermostMessage }) => ` 
+              exceptions
+              | where type == '${type}'
+              | where innermostMessage == "${innermostMessage}"
+              | extend conversationId=customDimensions.conversationId
+              | project timestamp, type, innermostMessage, client_IP, conversationId
+              | order by timestamp`
 					}
 				}
 			],
@@ -784,13 +842,13 @@ return {
 					size: { w: 12,h: 16 },
 					dependencies: { groups: "errors-group",values: "errors-selection" },
 					props: {
+						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" },
 						cols: [
+							{ header: "Timestamp",field: "timestamp" },
 							{ header: "Type",field: "type",secondaryHeader: "Message",secondaryField: "innermostMessage" },
-							{ header: "Conversation Id",field: "conversationId",secondaryHeader: "Operation Id",secondaryField: "operation_Id" },
-							{ header: "HandledAt",field: "handledAt" },
+							{ header: "Conversation Id",field: "conversationId",secondaryHeader: "Client IP",secondaryField: "client_IP" },
 							{ type: "button",value: "more",click: "openErrorDetail" }
-						],
-						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" }
+						]
 					},
 					actions: {
 						select: {
@@ -798,14 +856,13 @@ return {
 							params: { title: "args:type",type: "args:type",innermostMessage: "args:innermostMessage",queryspan: "timespan:queryTimespan" }
 						},
 						openErrorDetail: {
-							action: "dialog:errordetail",
+							action: "dialog:errorDetail",
 							params: {
-								title: "args:operation_Id",
+								title: "args:innermostMessage",
 								type: "args:type",
 								innermostMessage: "args:innermostMessage",
-								handledAt: "args:handledAt",
+								timestamp: "args:timestamp",
 								conversationId: "args:conversationId",
-								operation_Id: "args:operation_Id",
 								queryspan: "timespan:queryTimespan"
 							}
 						}
@@ -814,38 +871,51 @@ return {
 			]
 		},
 		{
-			id: "errordetail",
+			id: "errorDetail",
 			width: "50%",
-			params: ["title","handledAt","type","operation_Id","queryspan"],
+			params: ["title","timestamp","type","innermostMessage", "conversationId","queryspan"],
 			dataSources: [
 				{
-					id: "errordetail-data",
+					id: "errorDetail-data",
 					type: "ApplicationInsights/Query",
-					dependencies: { operation_Id: "dialog_errordetail:operation_Id",queryTimespan: "dialog_errordetail:queryspan" },
+					dependencies: { 
+            timestamp: "dialog_errorDetail:timestamp",
+            type: "dialog_errorDetail:type",
+            innermostMessage: "dialog_errorDetail:innermostMessage",
+            conversationId: "dialog_errorDetail:conversationId",
+            queryTimespan: "dialog_errorDetail:queryspan" 
+          },
 					params: {
-						query: ({ operation_Id }) => ` exceptions` +
-            ` | where operation_Id == '${operation_Id}'` +
-            ` | extend conversationId=customDimensions["Conversation ID"]` +
-            ` | project handledAt, type, innermostMessage, conversationId, operation_Id, timestamp, details `
+						query: ({ timestamp, type, innermostMessage, conversationId }) => ` 
+              exceptions
+              | where timestamp == '${timestamp}' and type == '${type}' and 
+                      innermostMessage == '${innermostMessage.replace(/'/g, "\\'")}' and 
+                      customDimensions.conversationId == '${conversationId}'
+              | extend conversationId=customDimensions.conversationId `
 					}
 				}
 			],
 			elements: [
 				{
-					id: "errordetail-item",
+					id: "errorDetail-item",
 					type: "Detail",
 					title: "Error detail",
 					size: { w: 12,h: 16 },
-					dependencies: { values: "errordetail-data" },
+					dependencies: { values: "errorDetail-data" },
 					props: {
 						cols: [
-							{ header: "Handle",field: "handledAt" },
+							{ header: "Timestamp",field: "timestamp" },
 							{ header: "Type",field: "type" },
 							{ header: "Message",field: "innermostMessage" },
 							{ header: "Conversation ID",field: "conversationId" },
-							{ header: "Operation ID",field: "operation_Id" },
-							{ header: "Timestamp",field: "timestamp" },
-							{ header: "Details",field: "details" }
+							{ header: "Details",field: "details" },
+							{ header: "Custom Dimensions",field: "customDimensions" },
+							{ header: "Client Type",field: "client_Type" },
+							{ header: "Client IP",field: "client_IP" },
+							{ header: "Client City",field: "client_City" },
+							{ header: "Client State Or Province",field: "client_StateOrProvince" },
+							{ header: "Client Country Or Region",field: "client_CountryOrRegion" },
+							{ header: "Client Role Instance",field: "client_RoleInstance" }
 						]
 					}
 				}
