@@ -1273,17 +1273,17 @@ return {
 						let userRententionData = {};
 						userRententionData = [
 							{
-								name: "24 hours",
+								timeSpan: "24 hours",
 								retention: values[0].rententionOver24hr,
 								uniqueUsers: values[0].totalUniquesUsersIn24hr
 							},
 							{
-								name: "7 days",
+								timeSpan: "7 days",
 								retention: values[0].rententionOver7d,
 								uniqueUsers: values[0].totalUniquesUsersIn7d
 							},
 							{
-								name: "30 days",
+								timeSpan: "30 days",
 								retention: values[0].rententionOver30d,
 								uniqueUsers: values[0].totalUniquesUsersIn30d
 							},
@@ -1305,7 +1305,7 @@ return {
 					props: {
 						cols: [{
 								header: "Time Span",
-								field: "name"
+								field: "timeSpan"
 							},{
 								header: "Rentention",
 								field: "retention"
