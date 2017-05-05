@@ -13,22 +13,28 @@ ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 import ElementConnector from '../ElementConnector';
 import { loadDialogsFromDashboard } from '../generic/Dialogs';
+import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } from './DownloadFile';
 
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 import VisibilityStore from '../../stores/VisibilityStore';
 
-import { DataSourceConnector } from '../../data-sources/DataSourceConnector';
 import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
 import ListItemControl from 'react-md/lib/Lists/ListItemControl';
 import Switch from 'react-md/lib/SelectionControls/Switch';
+import SelectField from 'react-md/lib/SelectFields';
+import FontIcon from 'react-md/lib/FontIcons';
+import Avatar from 'react-md/lib/Avatars';
+import Subheader from 'react-md/lib/Subheaders';
+import Divider from 'react-md/lib/Dividers';
 
 interface IDashboardState {
   editMode?: boolean;
   askDelete?: boolean;
   askDownload?: boolean;
-  download?: any;
+  downloadFiles?: IDownloadFile[];
+  downloadFormat?: string;
   mounted?: boolean;
   currentBreakpoint?: string;
   layouts?: ILayouts;
@@ -40,12 +46,6 @@ interface IDashboardProps {
   dashboard?: IDashboardConfig;
 }
 
-interface IDownloadValue {
-  title: string;
-  data: any;
-  checked: boolean;
-}
-
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
 
   layouts = {};
@@ -54,7 +54,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     editMode: false,
     askDelete: false,
     askDownload: false,
-    download: {},
+    downloadFiles: [],
+    downloadFormat: 'json',
     currentBreakpoint: 'lg',
     mounted: false,
     layouts: {},
@@ -72,10 +73,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
     this.onDeleteDashboardApprove = this.onDeleteDashboardApprove.bind(this);
     this.onDeleteDashboardCancel = this.onDeleteDashboardCancel.bind(this);
-    this.onDownload = this.onDownload.bind(this);
-    this.onDownloadData = this.onDownloadData.bind(this);
-    this.onDownloadCancel = this.onDownloadCancel.bind(this);
-    this.onChangeDownloadOption = this.onChangeDownloadOption.bind(this);
+    this.onExport = this.onExport.bind(this);
+    this.onCloseExport = this.onCloseExport.bind(this);
+    this.onClickDownloadFile = this.onClickDownloadFile.bind(this);
+    this.onChangeDownloadFormat = this.onChangeDownloadFormat.bind(this);
 
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
@@ -169,76 +170,36 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ askDelete: false });
   }
 
-  downloadBlob(data: string, mimeType: string, filename: string) {
-    const blob = new Blob([data], {
-      type: mimeType
+  onExport() {
+    const data = exportDataSources();
+    let downloadFiles: IDownloadFile[] = createDownloadFiles(data);
+    downloadFiles.sort((a, b) => {
+      return a.source === b.source ? a.filename > b.filename ? 1 : -1 : a.source > b.source ? 1 : -1 ;
     });
-    var el = document.createElement('a');
-    el.setAttribute('href', window.URL.createObjectURL(blob));
-    el.setAttribute('download', filename);
-    el.style.display = 'none';
-    document.body.appendChild(el);
-    el.click();
-    document.body.removeChild(el);
+    this.setState({ askDownload: true, downloadFiles: downloadFiles });
   }
 
-  exportDataSources() {
-    const sources = DataSourceConnector.getDataSources();
-    let states = {};
-    Object.keys(sources).forEach(key => {
-      let state = sources[key].store.state;
-      if (_.isEmpty(state)) {
-        return;
-      }
-      let isEmpty = Object.keys(state).every(prop => {
-        if (state[prop] === null || state[prop] === undefined) {
-          return true;
-        }
-        return false;
-      });
-      if (isEmpty) {
-        return;
-      }
-      states[key] = {
-        title: key,
-        data: state,
-        checked: true,
-      };
-    });
-    return states;
-  }
-
-  onDownload() {
-    const data = this.exportDataSources();
-    this.setState({ askDownload: true, download: data });
-  }
-
-  onDownloadData(event: any) {
-    const { download } = this.state;
-    let payload = {};
-    Object.keys(download).forEach(key => {
-      let item = download[key];
-      if (item.checked) {
-        payload[key] = item;
-      }
-    });
-    this.downloadBlob(JSON.stringify(payload), 'application/json', 'data.json');
-  }
-
-  onDownloadCancel() {
+  onCloseExport(event: any) {
     this.setState({ askDownload: false });
   }
 
-  onChangeDownloadOption(item: IDownloadValue, checked: boolean) {
-    let newDownload = { ...this.state.download };
-    newDownload[item.title].checked = checked;
-    this.setState({ download: newDownload });
+  onClickDownloadFile(file: IDownloadFile, event: any) {
+    const { downloadFormat } = this.state;
+    if (downloadFormat === 'json') {
+      downloadBlob(file.json, 'application/json', file.filename + '.json');
+    } else {
+      downloadBlob(file.csv, 'text/csv', file.filename + '.csv');
+    }
+  }
+
+  onChangeDownloadFormat(value: string, event: any) {
+    this.setState({ downloadFormat: value });
   }
 
   render() {
 
     let { dashboard } = this.props;
-    var { currentBreakpoint, grid, editMode, askDelete, askDownload, download } = this.state;
+    var { currentBreakpoint, grid, editMode, askDelete, askDownload, downloadFiles, downloadFormat } = this.state;
     var layout = this.state.layouts[currentBreakpoint];
 
     if (!grid) {
@@ -256,6 +217,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     // Actions to perform on an active dashboard
     let toolbarActions = [
+      <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>play_for_work</Button>,
       <Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>edit</Button>,
       <Button key="settings" icon tooltipLabel="Connections" onClick={this.onEditDashboard}>settings_applications</Button>
     ];
@@ -266,31 +228,33 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       );
     }
 
-    if (download) {
-      toolbarActions.unshift(
-        <Button key="export" icon tooltipLabel="Export data" onClick={this.onDownload}>play_for_work</Button>
-      );
-    }
+    const fileAvatar = (downloadFormat === 'json') ? 
+      <Avatar suffix="red" icon={<FontIcon>insert_drive_file</FontIcon>} /> 
+      : <Avatar suffix="green" icon={<FontIcon>description</FontIcon>} /> ;
 
     let downloadItems = [];
-    if (download) {
-      Object.keys(download).forEach(key => {
-        let item: IDownloadValue = download[key];
+    let prevSection = '';
+    if (!_.isEmpty(downloadFiles)) {
+      Object.keys(downloadFiles).forEach((key, index) => {
+        const item: IDownloadFile = downloadFiles[key];
+        if ( prevSection !== item.source ) {
+          if (prevSection !== '') {
+            downloadItems.push(<Divider key={item.source + '_' + index} className="md-cell md-cell--12" />);
+          }
+          downloadItems.push(<Subheader primaryText={item.source} key={item.source + index} className="md-cell md-cell--12" />);
+        }
         downloadItems.push(
-          <ListItemControl
-            key={item.title}
-            secondaryAction={(
-              <Switch
-                id={item.title}
-                name={item.title}
-                label={item.title}
-                labelBefore
-                checked={item.checked}
-                onChange={this.onChangeDownloadOption.bind(this, item)}
-              />
-            )}
+          <ListItem
+            key={item.filename + index}
+            leftAvatar={fileAvatar}
+            rightIcon={<FontIcon>file_download</FontIcon>}
+            primaryText={item.filename}
+            secondaryText={'.' + downloadFormat}
+            onClick={this.onClickDownloadFile.bind(this, item)}
+            className="md-cell md-cell--3"
           />
         );
+        prevSection = item.source;
       });
     }
 
@@ -322,23 +286,32 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
         <Dialog
           id="downloadData"
+          title={(
+            <Toolbar
+              title="Export Data"
+              fixed
+              style={{ width: '100%' }}
+              actions={(
+                <SelectField
+                  id="selectExportFormat"
+                  placeholder="File format"
+                  position={SelectField.Positions.BELOW}
+                  menuItems={['json', 'csv']}
+                  defaultValue={downloadFormat}
+                  onChange={this.onChangeDownloadFormat.bind(this)}
+                />
+              )}
+            />
+          )}
           visible={askDownload}
-          title="Export data"
-          aria-labelledby="downloadDataDescription"
-          modal
-          actions={[
-            { onClick: this.onDownloadData, primary: true, label: 'Download', },
-            { onClick: this.onDownloadCancel, primary: false, label: 'Cancel' }
-          ]}
+          focusOnMount={false}
+          onHide={this.onCloseExport}
+          dialogStyle={{ width: '80%' }}
+          contentStyle={{ marginTop: '20px' }}
         >
-          <div className="md-grid">
-            <div className="md-cell md-cell--12">
-              <p id="downloadDataDescription" className="md-color--secondary-text">Select data to export&hellip;</p>
-            </div>
-            <List className="md-cell md-cell--12">
-              {downloadItems}
-            </List>
-          </div>
+          <List className="md-grid" style={{ maxHeight: 400 }}>
+            {downloadItems}
+          </List>
         </Dialog>
 
         <Dialog
