@@ -144,19 +144,26 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
 
         // Iterating through all values in object
         let objectValue = '';
+        let objectValues = [];
+        let valuesStringLength = 0;
         Object.keys(obj).forEach((key: string, idx: number) => {
-
-          if (idx > 0) { objectValue += ',\n'; }
 
           let value = this.objectToString(obj[key], indent + 1, true);
 
           // if key contains '.' or '-'
           let skey = key.search(/\.|\-/g) >= 0 ? `"${key}"` : `${key}`;
+          let mapping = `${skey}: ${value}`;
+          valuesStringLength += mapping.length;
 
-          objectValue += `${sind}\t${skey}: ${value}`;
+          objectValues.push(mapping);
         });
 
-        result += `{\n${objectValue}\n${sind}}`;
+        if (valuesStringLength <= 120) {
+          result += `{ ${objectValues.join()} }`;
+        } else {
+          result += `{\n${sind}\t${objectValues.join(',\n' + sind + '\t')}\n${sind}}`;          
+        }
+
         break;
       }
 
@@ -177,13 +184,19 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
       }
 
       case 'array': {
-        let arrayValue = '';
-        (obj as any[]).forEach((value: any, idx: number) => {
-          arrayValue += idx > 0 ? ',' : '';
-          arrayValue += this.objectToString(value, indent + 1, true);
+        let arrayStringLength = 0;
+        let mappedValues = (obj as any[]).map(value => {
+          let res = this.objectToString(value, indent + 1, true);
+          arrayStringLength += res.length;
+          return res;
         });
+
+        if (arrayStringLength <= 120) {
+          result += `[${mappedValues.join()}]`;
+        } else {
+          result += `[\n${sind}\t${mappedValues.join(',\n' + sind + '\t')}\n${sind}]`;          
+        }
         
-        result += `[${arrayValue}]`;
         break;
       }
 
