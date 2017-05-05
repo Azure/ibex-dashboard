@@ -4,6 +4,7 @@ import Scatter from './Scatter';
 import BarData from './BarData';
 import Area from './Area';
 import Scorecard from './Scorecard';
+import RadarData from './RadarData';
 // filters
 import TextFilter from './TextFilter';
 import CheckboxFilter from './CheckboxFilter';
@@ -26,4 +27,5 @@ export default {
   Table,
   Detail,
   SplitPanel,
+  RadarData
 };

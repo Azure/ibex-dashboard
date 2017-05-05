@@ -60,6 +60,8 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
   render() {
     var { timeFormat, values, lines } = this.state;
+    console.log(values);
+    console.log(lines);
     var { title, subtitle, theme, props } = this.props;
     var { showLegend, areaProps } = props;
 
