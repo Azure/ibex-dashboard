@@ -871,6 +871,7 @@ return {
 				card_users_value: "ai:users-value",
 				card_users_heading: "::Total Users",
 				card_users_icon: "ai:users-icon",
+				card_users_onClick: "::onUsersClick",
 
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
@@ -884,6 +885,13 @@ return {
 						title: "args:heading",
 						type: "args:type",
 						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				},
+				onUsersClick: {
+					action: "dialog:userRentention",
+					params: {
+						title: "args:heading",
 						queryspan: "timespan:queryTimespan"
 					}
 				}
@@ -1191,6 +1199,84 @@ return {
           }]
         }
       }]
-    }
-  ]
+    },
+		{
+			id: "userRentention",
+			width: "90%",
+			params: ["title", "queryspan"],
+			dataSources: [
+				{
+					id: "userRententionDatasource",
+					type: "ApplicationInsights/Query",
+					dependencies: {
+						queryTimespan: "dialog_userRentention:queryspan"
+					},
+					params: {   
+						query: ({ queryTimespan }) => ` customEvents |
+							where timestamp > ago(90d) |
+							extend uniqueUser=tostring(customDimensions.from) |
+							summarize firstUsedAppTimeStamp=min(timestamp), lastUsedAppTimeStamp=max(timestamp) by uniqueUser |
+							summarize
+									totalUniquesUsersIn90d = count(uniqueUser),
+									totalUniquesUsersIn24hr = countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr)),
+									totalUniquesUsersIn7d = countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d)),
+									totalUniquesUsersIn30d = countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d)),
+									rententionOver24hr = floor( ((countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr))) / (count(uniqueUser)) * 100) , 1),
+									rententionOver7d = floor( ((countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d))) / (count(uniqueUser)) * 100) , 1),
+									rententionOver30d = floor( ((countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d))) / (count(uniqueUser)) * 100) , 1)`,
+						mappings: { }
+					},
+					calculated: (state) => {
+						var { values } = state;
+
+						if (!values || !values.length) { return; }
+
+						let userRententionData = {};
+						userRententionData = [
+							{
+								name: "24 hours",
+								retention: values[0].rententionOver24hr,
+								uniqueUsers: values[0].totalUniquesUsersIn24hr
+							},
+							{
+								name: "7 days",
+								retention: values[0].rententionOver7d,
+								uniqueUsers: values[0].totalUniquesUsersIn7d
+							},
+							{
+								name: "30 days",
+								retention: values[0].rententionOver30d,
+								uniqueUsers: values[0].totalUniquesUsersIn30d
+							},
+						]
+						return { userRententionData };
+					}
+				}],
+			elements: [{
+					id: "user-retention-table",
+					type: "Table",
+					title: "User Retention",
+					size: {
+						w: 12,
+						h: 16
+					},
+					dependencies: {
+						values: "userRententionDatasource:userRententionData"
+					},
+					props: {
+						cols: [{
+								header: "Time Span",
+								field: "name"
+							},{
+								header: "Rentention",
+								field: "retention"
+							},{
+								header: "Unique Users",
+								field: "uniqueUsers"
+							}]
+					},
+					actions: { }
+				}]
+		}
+	]
 }
