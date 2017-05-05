@@ -4,7 +4,9 @@ import Scatter from './Scatter';
 import BarData from './BarData';
 import Area from './Area';
 import Scorecard from './Scorecard';
-import RadarData from './RadarData';
+import RadarChartCard from './RadarChartCard';
+import RadialBarChartCard from './RadialBarChartCard';
+import SimpleRadialBarChartCard from './SimpleRadialBarChartCard';
 // filters
 import TextFilter from './TextFilter';
 import CheckboxFilter from './CheckboxFilter';
@@ -27,5 +29,7 @@ export default {
   Table,
   Detail,
   SplitPanel,
-  RadarData
+  RadarChartCard,
+  RadialBarChartCard,
+  SimpleRadialBarChartCard
 };

@@ -20,7 +20,7 @@ interface IRadarState extends IGenericState {
   values: Object[];
 }
 
-export default class RadarData extends GenericComponent<IRadarProps, IRadarState> {
+export default class RadarChartCard extends GenericComponent<IRadarProps, IRadarState> {
 
   state = {
     values: [],
@@ -47,16 +47,14 @@ export default class RadarData extends GenericComponent<IRadarProps, IRadarState
     }
 
     const domain = 100;
-    var NFL = "NFL";
-    var NBA = "NBA";
 
     const data05 = [
-      { subject: 'Math', NFL: 120, NBA: 110, fullMark: domain },
-      { subject: 'Chinese', NFL: 98, NBA: 30, fullMark: domain },
-      { subject: 'English', NFL: 86, NBA: 130, fullMark: domain },
-      { subject: 'Geography', NFL: 110, NBA: 95, fullMark: domain },
-      { subject: 'Physics', NFL: 102, NBA: 90, fullMark: domain },
-      { subject: 'History', NFL: 65, NBA: 85, fullMark: domain },
+      { subject: 'Math', "NFL": 120, "NBA": 110, fullMark: domain },
+      { subject: 'Chinese', "NFL": 98, "NBA": 30, fullMark: domain },
+      { subject: 'English', "NFL": 86, "NBA": 130, fullMark: domain },
+      { subject: 'Geography', "NFL": 110, "NBA": 95, fullMark: domain },
+      { subject: 'Physics', "NFL": 102, "NBA": 90, fullMark: domain },
+      { subject: 'History', "NFL": 65, "NBA": 85, fullMark: domain },
     ];
 
     return (
@@ -73,7 +71,7 @@ export default class RadarData extends GenericComponent<IRadarProps, IRadarState
             <PolarGrid />
             <Legend />
             <PolarAngleAxis dataKey="intent" />
-            <PolarRadiusAxis angle={30} domain={[0, domain]} />
+            <PolarRadiusAxis angle={10} domain={[0, domain]} />
           </RadarChart>
         </ResponsiveContainer>
       </Card>
