@@ -6,6 +6,7 @@ return {
   description: 'Microsoft Bot Framework without modes',
   preview: '/images/bot-framework-preview.png',
   html: `<div>
+        <h1>Bot Analytics Dashboard</h1>
         <h2>Background</h2>
         <p>
           This dashboard is designed to enable querying data on top of <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-analytics" target="_blank">Application Insights Analytics</a>.<br/>

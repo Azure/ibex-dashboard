@@ -19,9 +19,13 @@ import ConfigurationsStore from '../../stores/ConfigurationsStore';
 
 import './style.css';
 
-const avatarSrc = 'https://cloud.githubusercontent.com/assets/13041/19686250/971bf7f8-9ac0-11e6-975c-188defd82df1.png';
-
-const drawerHeaderChildren = [];
+const drawerHeaderChildren = [
+  (
+    <div style={{ alignSelf: 'center', marginLeft: 16, marginRight: 16, flexShrink: 0 }}>
+      <h3>Ibex Dashboard</h3>
+    </div>
+  )
+];
 
 export default class Navbar extends React.Component<any, any> {
   constructor(props: any) {
@@ -70,16 +74,11 @@ export default class Navbar extends React.Component<any, any> {
         )
       );
     });
-    
-    let toolbarActions = 
-        this.state.account ?
-          <Chip style={{ marginRight: 30 }} label={'Hello, ' + this.state.account.displayName} /> :
-          null;
 
     if (!title) {
       switch (window.location.pathname) {
         case '/':
-          title = 'Home';
+          title = 'Create Dashboard';
           break;
 
         case '/about':
@@ -95,7 +94,7 @@ export default class Navbar extends React.Component<any, any> {
           break;
 
         case '/setup':
-          title = 'Setup Dashboard';
+          title = 'Setup Authentication';
           break;
 
         default:
@@ -105,29 +104,44 @@ export default class Navbar extends React.Component<any, any> {
       }
     }
 
-    const drawerType = navigationItems.length > 0 ? 
+    const drawerType = navigationItems.length > 0 ?
       NavigationDrawer.DrawerTypes.TEMPORARY_MINI : NavigationDrawer.DrawerTypes.TEMPORARY;
 
-    const moreButtonMenu = (
+    const toolbarActions = (
       <MenuButton
         id="vert-menu"
         icon
         buttonChildren="more_vert"
         position={Menu.Positions.BOTTOM_RIGHT}
       >
-        <ListItem 
-          primaryText="Create Dashboard" 
-          href="/" 
-          active={pathname === '/'} 
-          component={Link} 
-          leftIcon={<FontIcon>add_box</FontIcon>} 
+        {
+          this.state.account ? (
+            <ListItem
+              primaryText={this.state.account.displayName}
+              leftAvatar={<Avatar>this.state.account.displayName.charAt(0).toUpperCase()</Avatar>}
+              disabled
+            />
+          ) : (
+              <ListItem
+                primaryText="Anon"
+                leftAvatar={<Avatar icon={<FontIcon>perm_identity</FontIcon>} />}
+                disabled
+              />
+            )
+        }
+        <ListItem
+          primaryText="Create Dashboard"
+          href="/"
+          active={pathname === '/'}
+          component={Link}
+          leftIcon={<FontIcon>add_box</FontIcon>}
         />
-        <ListItem 
-          primaryText="Setup Authentication" 
-          href="/setup" 
-          active={pathname === '/setup'} 
-          component={Link} 
-          leftIcon={<FontIcon>lock</FontIcon>} 
+        <ListItem
+          primaryText="Setup Authentication"
+          href="/setup"
+          active={pathname === '/setup'}
+          component={Link}
+          leftIcon={<FontIcon>lock</FontIcon>}
         />
       </MenuButton>
     );
@@ -135,26 +149,26 @@ export default class Navbar extends React.Component<any, any> {
     return (
       <div>
         {navigationItems.length > 0 ? (
-        <NavigationDrawer
-          navItems={navigationItems}
-          contentClassName="md-grid"
-          drawerHeaderChildren={drawerHeaderChildren}
-          mobileDrawerType={drawerType}
-          tabletDrawerType={drawerType}
-          desktopDrawerType={drawerType}
-          toolbarTitle={title}
-          toolbarActions={moreButtonMenu}
-        >
-          {children}
-        </NavigationDrawer>
+          <NavigationDrawer
+            navItems={navigationItems}
+            contentClassName="md-grid"
+            drawerHeaderChildren={drawerHeaderChildren}
+            mobileDrawerType={drawerType}
+            tabletDrawerType={drawerType}
+            desktopDrawerType={drawerType}
+            toolbarTitle={title}
+            toolbarActions={toolbarActions}
+          >
+            {children}
+          </NavigationDrawer>
         ) : (
-          <div>
-            <Toolbar title={title} actions={moreButtonMenu} colored />
-            <div className="md-grid">
-              {children}
+            <div>
+              <Toolbar title={title} actions={toolbarActions} colored />
+              <div className="md-grid">
+                {children}
+              </div>
             </div>
-        </div>
-        )}
+          )}
       </div>
     );
   }

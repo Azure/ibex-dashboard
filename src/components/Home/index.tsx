@@ -18,7 +18,7 @@ const renderHTML = require('react-render-html');
 const styles = {
   card: {
     minWidth: 400,
-    minHeight: 200,
+    height: 200,
     marginTop: 40,
   },
   image: {
@@ -104,7 +104,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
   componentDidUpdate() {
     if (this.state.creationState === 'successful') {
-      window.location.replace('/dashboard/' + (this.refs.id as any).getField().value);
+      window.location.replace('/dashboard/' + this._fieldId.getField().value);
     }
   }
 
@@ -206,7 +206,8 @@ export default class Home extends React.Component<any, IHomeState> {
           onHide={this.onCloseInfo}
           dialogStyle={{ width: '80%' }}
           contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}
-          title="Info"
+          aria-label="Info"
+          focusOnMount={false}
         >
           <div className="md-grid">
             {renderHTML(infoHtml)}

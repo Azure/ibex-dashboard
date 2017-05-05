@@ -240,7 +240,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
           onHide={this.onCloseInfo}
           dialogStyle={{ width: '80%' }}
           contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}
-          title="Info"
+          aria-label="Info"
+          focusOnMount={false}
         >
           <div className="md-grid">
             {renderHTML(infoHtml)}
