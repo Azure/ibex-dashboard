@@ -21,8 +21,6 @@ import VisibilityStore from '../../stores/VisibilityStore';
 
 import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
-import ListItemControl from 'react-md/lib/Lists/ListItemControl';
-import Switch from 'react-md/lib/SelectionControls/Switch';
 import SelectField from 'react-md/lib/SelectFields';
 import FontIcon from 'react-md/lib/FontIcons';
 import Avatar from 'react-md/lib/Avatars';
