@@ -52,10 +52,10 @@ export default class RadarData extends GenericComponent<IRadarProps, IRadarState
 
     const data05 = [
       { subject: 'Math', NFL: 120, NBA: 110, fullMark: domain },
-      { subject: 'Chinese', NFL: 98, NBA: 130, fullMark: domain },
+      { subject: 'Chinese', NFL: 98, NBA: 30, fullMark: domain },
       { subject: 'English', NFL: 86, NBA: 130, fullMark: domain },
-      { subject: 'Geography', NFL: 99, NBA: 100, fullMark: domain },
-      { subject: 'Physics', NFL: 85, NBA: 90, fullMark: domain },
+      { subject: 'Geography', NFL: 110, NBA: 95, fullMark: domain },
+      { subject: 'Physics', NFL: 102, NBA: 90, fullMark: domain },
       { subject: 'History', NFL: 65, NBA: 85, fullMark: domain },
     ];
 
@@ -68,8 +68,8 @@ export default class RadarData extends GenericComponent<IRadarProps, IRadarState
             height={250}
             data={data05}
           >
-            <Radar name="NFL" dataKey="NFL" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-            <Radar name="NBA" dataKey="NBA" stroke="#82ca9d" fill="#82ca9d" fillOpacity={0.6} />
+            <Radar name="NFL" dataKey="NFL" stroke="#00838F" fill="#00838F" fillOpacity={0.6} />
+            <Radar name="NBA" dataKey="NBA" stroke="#AD1457" fill="#AD1457" fillOpacity={0.6} />
             <PolarGrid />
             <Legend />
             <PolarAngleAxis dataKey="intent" />
