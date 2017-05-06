@@ -39,7 +39,7 @@ export default class SimpleRadialBarChartCard extends GenericComponent<IRadarPro
 
   render() {
 
-    var { values } = this.state;
+    var { values, bars } = this.state;
     var { title, subtitle, props } = this.props;
 
     if (!values) {
@@ -58,6 +58,13 @@ export default class SimpleRadialBarChartCard extends GenericComponent<IRadarPro
       { name: 'none', uv: 15.69, pv: 1398, fill: '#8dd1e1' },
       { name: 'invalid property type object', uv: 8.22, pv: 9800, fill: '#82ca9d' }
     ];
+    var data2 = [];
+    if (values && values.length && bars) {
+      data2 = bars.map((bar, idx) => {
+        console.log({idx})
+        return data2.push( {name: {bar}, uv: 32.11, pv: 1000, fill: "8884d8"} );
+      });
+    }
 
     return (
       <Card title={title} subtitle={subtitle}>
