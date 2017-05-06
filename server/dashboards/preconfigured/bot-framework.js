@@ -982,7 +982,43 @@ return {
         zDataKey: "count",
         zRange: [10,500]
       }
-    }
+    },
+    {
+			id: "radar",
+			type: "RadarChartCard",
+			title: "NFL and NBA Intents Radar",
+			subtitle: "Intent Count",
+			size: {
+				w: 4,
+				h: 8
+			},
+			dependencies: { },
+			props: { }
+		},
+    {
+			id: "simpleradial",
+			type: "SimpleRadialBarChartCard",
+			title: "Simpl Radial Intent Count",
+			subtitle: "Total numbef of engagment with each intent",
+			size: {
+				w: 4,
+				h: 8
+			},
+			dependencies: { },
+			props: { }
+		},
+    {
+			id: "radial",
+			type: "RadialBarChartCard",
+			title: "Radial Intent Count",
+			subtitle: "Total numbef of engagment with each intent",
+			size: {
+				w: 4,
+				h: 8
+			},
+			dependencies: {	},
+			props: { }
+		}
   ],
   dialogs: [
     {
