@@ -1,0 +1,46 @@
+{"conversationId":"29:1vUfmTEL60rKaob5wKbjW6liKGm4kHWjGTql2Ds7HHII","timestamp":"2017-04-09T10:58:36.2500000Z","text":"create alarm testSk in 5 seconds","type":"message"}	
+
+
+{
+    "timestamp":"2017-04-09T06:08:26.1673447Z",
+    "conversation":"517aa1482cfe4c73b5573dc2fa7c6d0f",
+    "activitytype":"message",
+    "botversion":"3.0",
+    "statuscode":"202","succeeded":"True","channel":"webchat","features":"[\"activities/message\"]","msaappid":"2c7a646c-a7cb-4c4e-b22f-23836c6159ba","ingroup":"False","recipient":"CallerBot","botid":"CallerBot","from":"HLK3tUY3U2f"}	
+
+
+{
+    "timestamp":"2017-04-09T10:59:13.0765883Z",
+    "conversationId":"517aa1482cfe4c73b5573dc2fa7c6d0f",
+    "error":"invalid property type: object",
+    "text":"create alarm testWb in 5 seconds",
+    "score":"0.9938961",
+    "withError":"true",
+    "entities":"[object Object],[object Object]",
+"intent":"alarm.set"}	
+
+{"timestamp":"2017-04-09T10:59:12.9746998Z","conversationId":"517aa1482cfe4c73b5573dc2fa7c6d0f","error":"invalid property type: object","text":"create alarm testWb in 5 seconds","score":"0.9938961","withError":"true","entities":"[object Object],[object Object]","intent":"alarm.set"}	
+
+
+{"correlationId":"8ef7dfaa-ec29-47b6-a8e2-62efc21b0b0e-13d0b690-7cf9-486f-b021-29a100e23220-3a892548-f968-47c2-914e-20fa009a8102-2017-04-03T17:37:54.1762880-04:00","timestamp":"2017-04-03T21:37:54.1762880Z","conversationId":"13d0b690-7cf9-486f-b021-29a100e23220","activityId":"3a892548-f968-47c2-914e-20fa009a8102","channelId":"8ef7dfaa-ec29-47b6-a8e2-62efc21b0b0e","userId":"2a6e1af5-4e56-413d-bf78-8a4221773f77","entity":"player","value":"Ricky Bell"}	
+
+
+
+How many schedule intent questions were asked 
+customEvents
+| where name startswith "message.intent" and customDimensions.intent == '${intent}' 
+| summarize count=count()
+
+
+
+{"channel":"webchat","state":"{}","conversationId":"2237d317727f41508074f408dc049967","userId":"1G9Y0cc7yMW","callstack_length":"1","userName":"You","intent":"BotBuilder:Prompts","callstack_0_state":"{\"BotBuilder.Data.Intent\":\"alarm.set\",\"BotBuilder.Data.WaterfallStep\":1,\"transaction.started\":true,\"transaction.id\":\"alarm.set\",\"alarm\":{\"title\":\"yo\",\"timestamp\":null}}","callstack_0_id":"*:/"}	
+
+
+
+How many Schedule Intents resulted in Status: (200, 500, etc…) 
+customEvents 
+ | where timestamp > ago(90d) and name startswith "message.intent" and customDimensions.intent == 'alarm.set' 
+ | join kind= inner (exceptions 
+ | where timestamp > ago(90d) ) on operation_Id 
+ | project  requestName = name, problem=problemId 
+ | summarize count=count() by requestName, problem
