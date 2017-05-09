@@ -164,7 +164,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                     id="settingsForm"
                     visible={showSettingsDialog}
                     modal
-                    dialogStyle={{ width:'90%', height:'90%'}}
+                    dialogStyle={{ width:'90%', height:'90%',"overflow-y":"auto"}}
                     contentStyle={{minHeight:500}}
                     className='dialog-toolbar-no-padding'
                     actions={[
@@ -173,7 +173,9 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                     ]}
                     >
                     <Toolbar colored title="Dashboard Configuration" titleMenu={titleMenu} />
-                    {this.chooseComponentToDisplay()}
+                    <div>
+                        {this.chooseComponentToDisplay()}
+                    </div>
             </Dialog>  
       </span>
     );

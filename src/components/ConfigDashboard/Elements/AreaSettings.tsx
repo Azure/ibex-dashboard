@@ -5,21 +5,21 @@ import Switch from 'react-md/lib/SelectionControls/Switch';
 
 import BaseSettings from '../../common/BaseSettingsComponent';
 
-interface IPieSettingsProps{
+interface IAreaSettingsProps{
     settings: IElement,
     shouldSave: boolean
 }
-interface IPieSettingsState{ 
+interface IAreaSettingsState{ 
     stateSettings:IElement //we need to persist the changes in state until a save is requested
 }
 
-export default class PieSettings extends React.Component<IPieSettingsProps,IPieSettingsState>{
-    constructor(props: IPieSettingsProps) {
+export default class AreaSettings extends React.Component<IAreaSettingsProps,IAreaSettingsState>{
+    constructor(props: IAreaSettingsProps) {
         super(props);
         this.onShowLegendChange = this.onShowLegendChange.bind(this);
     }
     
-    state:IPieSettingsState ={
+    state:IAreaSettingsState ={
         stateSettings:this.props.settings
     }
     
@@ -30,15 +30,27 @@ export default class PieSettings extends React.Component<IPieSettingsProps,IPieS
         this.setState({stateSettings:s});
     }
 
+    onIsStackedChange(checked:boolean){
+        var s = this.state.stateSettings;
+        s.props.isStacked = checked;
+        this.setState({stateSettings:s});
+    }
+
 
     render(){
         var { id, dependencies, actions, props, title, subtitle, size, theme, type } = this.state.stateSettings;
         return(
-          <BaseSettings fonticon={"pie_chart"} settings={this.props.settings} shouldSave={this.props.shouldSave} >
+          <BaseSettings fonticon={"flip_to_front"} settings={this.props.settings} shouldSave={this.props.shouldSave} >
               <span className="md-cell md-cell--bottom  md-cell--6">
                   <div className="md-grid">
                       <span className="md-cell--1 md-cell--middle"><FontIcon>insert_chart</FontIcon></span>
                       <span className="md-cell--11 md-cell--bottom"><Switch id="props.showLegend" name="props.showLegend" label="Show legend" checked={props.showLegend} onChange={this.onShowLegendChange} /></span>
+                  </div>
+              </span>
+              <span className="md-cell md-cell--bottom  md-cell--6">
+                  <div className="md-grid">
+                      <span className="md-cell--1 md-cell--middle"><FontIcon>dns</FontIcon></span>
+                      <span className="md-cell--11 md-cell--bottom"><Switch id="props.isStacked" name="props.isStacked" label="Is Stacked" checked={props.isStacked} onChange={this.onIsStackedChange} /></span>
                   </div>
               </span>
           </BaseSettings>
