@@ -1,4 +1,8 @@
-return {
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash'; 
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ {
   id: 'bot_analytics_dashboard',
   name: 'Bot Analytics Dashboard',
   icon: "dashboard",
