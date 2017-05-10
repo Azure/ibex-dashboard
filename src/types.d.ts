@@ -115,9 +115,10 @@ interface IElement {
   location?: { x: number, y: number };
   title?: string;
   subtitle?: string;
-  dependencies?: IStringDictionary,
-  props?: IDictionary,
-  actions?: IDictionary
+  theme?: string[];
+  dependencies?: IStringDictionary;
+  props?: IDictionary;
+  actions?: IDictionary;
 }
 
 interface IFilter {

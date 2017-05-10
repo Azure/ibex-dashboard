@@ -12,22 +12,24 @@ import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
 export type ColType = 'text' | 'time' | 'icon' | 'button' | 'ago' | 'number';
 
+export interface ITableColumnProps {
+  header?: string;
+  field?: string;
+  secondaryHeader?: string;
+  secondaryField?: string;
+  value?: string;
+  width?: string | number;
+  type?: ColType;
+  click?: string;
+}
+
 export interface ITableProps extends IGenericProps {
   props: {
     checkboxes?: boolean;
     rowClassNameField?: string;
     hideBorders?: boolean;
     compact?: boolean;
-    cols: {
-      header?: string;
-      field?: string;
-      secondaryHeader?: string;
-      secondaryField?: string;
-      value?: string;
-      width?: string | number;
-      type?: ColType;
-      click?: string;
-    }[]
+    cols: ITableColumnProps[]
   };
 }
 
@@ -87,6 +89,45 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
       return <CircularProgress key="loading" id="spinner" />;
     }
     let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
+
+    let renderColumn = (col: ITableColumnProps, value: any): JSX.Element => {
+      switch (col.type) {
+
+        case 'icon':
+          return <FontIcon>{col.value || value[col.field]}</FontIcon>;
+
+        case 'button':
+          return (
+            <Button
+              icon={true}
+              onClick={this.onButtonClick.bind(this, col, value)}
+            >
+              {col.value || value[col.field]}
+            </Button>
+          );
+
+        case 'time':
+          return <span>{moment(value[col.field]).format('MMM-DD HH:mm:ss')}</span>;
+
+        case 'number':
+          return <span>{utils.kmNumber(value[col.field])}</span>
+
+        case 'ago':
+          return <span>{utils.ago(value[col.field])}</span>
+
+        default:
+          if (col.secondaryField !== undefined)
+            return (
+              <div className="table">
+                <span className="primary">{value[col.field]}</span>
+                <span className="secondary">{value[col.secondaryField]}</span>
+              </div>
+            );
+          else
+            return <span>{value[col.field]}</span>;
+      }
+    }
+
     const rows = pageValues.map((value, ri) => (
       <TableRow
         key={ri}
@@ -95,34 +136,14 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
       >
         {
           cols.map((col, ci) => (
-            <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>{
-              col.type === 'icon' ?
-                <FontIcon>{col.value || value[col.field]}</FontIcon> :
-                col.type === 'button' ?
-                  (
-                    <Button
-                      icon={true}
-                      onClick={this.onButtonClick.bind(this, col, value)}
-                    >{col.value || value[col.field]}
-                    </Button>
-                  ) :
-                  col.type === 'time' ?
-                    moment(value[col.field]).format('MMM-DD HH:mm:ss') :
-                    col.secondaryField !== undefined ? (
-                      <div className="table">
-                        <span className="primary">{value[col.field]}</span>
-                        <span className="secondary">{value[col.secondaryField]}</span>
-                      </div>
-                    ) : 
-                  col.type === 'number' ? utils.kmNumber(value[col.field]) :
-                  col.type === 'ago' ? utils.ago(value[col.field]) :
-                  value[col.field]
+            <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>
+              {renderColumn(col, value)}
             }</TableColumn>
           ))
         }
       </TableRow>
     ));
-    
+
     let className = 'pagination-table';
     className += compact ? 'table-compact' : '';
 
