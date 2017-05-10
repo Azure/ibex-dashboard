@@ -79,7 +79,7 @@ router.get('/dashboards', (req, res) => {
   res.send(script);  
 });
 
-router.get('/dashboards/:id', (req, res) => {
+router.get('/dashboards/:id*', (req, res) => {
 
   let dashboardId = req.params.id;
   let privateDashboard = path.join(__dirname, '..', 'dashboards');
