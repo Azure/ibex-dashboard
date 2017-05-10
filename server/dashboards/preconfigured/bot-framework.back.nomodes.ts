@@ -1,4 +1,8 @@
-return {
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash'; 
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ { 
   id: 'bot_analytics_dashboard_no_modes',
   name: 'BAD - No Modes',
   icon: "dashboard",
@@ -506,8 +510,9 @@ return {
 							// Conversion Handling
 							// ===================
 
-							var total = _.find(conversions, { name: 'message.convert.start' });
-							var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+              let total, successful;
+							total = _.find(conversions, { name: 'message.convert.start' });
+							successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
 
 							if (!total) {
 								return null;
@@ -657,7 +662,8 @@ return {
 								{ name: 'Negative', value: Math.round((1 - sentiments[0].sentiment) * 100) },
 							];
 
-							var sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
+							let sentimentValue;
+              sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
 
 							return {
 								"sentiment-value": values,
