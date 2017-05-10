@@ -70,36 +70,40 @@ export default class Home extends React.Component<any, IHomeState> {
 
     this.onOpenInfo = this.onOpenInfo.bind(this);
     this.onCloseInfo = this.onCloseInfo.bind(this);
+    this.updateSetup = this.updateSetup.bind(this);
+    this.updateConfiguration = this.updateConfiguration.bind(this);
+  }
 
-    // Setting the state from the configuration store
-    let state = ConfigurationStore.getState() || {} as any;
-    let { templates, template, creationState } = state;
-    this.state.templates = templates || [];
-    this.state.template = template;
-    this.state.creationState = creationState;
-
-    ConfigurationStore.listen(aState => {
-      this.setState({
-        templates: aState.templates || [],
-        template: aState.template,
-        creationState: aState.creationState
-      });
+  updateConfiguration(state) {
+    this.setState({
+      templates: state.templates || [],
+      template: state.template,
+      creationState: state.creationState
     });
+  }
+
+  updateSetup(state) {
+    this.setState(state);
+
+    // Setup hasn't been configured yet
+    if (state.stage === 'none') {
+      window.location.replace('/setup');
+    }
   }
 
   componentDidMount() {
 
     this.setState(SetupStore.getState());
+    this.updateConfiguration(ConfigurationStore.getState());
 
     SetupActions.load();
-    SetupStore.listen(state => {
-      this.setState(state);
+    SetupStore.listen(this.updateSetup);
+    ConfigurationStore.listen(this.updateConfiguration);
+  }
 
-      // Setup hasn't been configured yet
-      if (state.stage === 'none') {
-        window.location.replace('/setup');
-      }
-    });
+  componentWillUnmount() {
+    SetupStore.unlisten(this.updateSetup);
+    ConfigurationStore.unlisten(this.updateConfiguration);
   }
 
   componentDidUpdate() {
@@ -166,13 +170,17 @@ export default class Home extends React.Component<any, IHomeState> {
       return <CircularProgress key="progress" id="contentLoadingProgress" />;
     }
 
+    if (!templates) {
+      return null;
+    }
+
     let templateCards = templates.map((temp, index) => (
-      <div className="md-cell" style={styles.card}>
+      <div key={index} className="md-cell" style={styles.card}>
         <Card className="md-block-centered" key={index} >
           <Media>
             <img src={temp.preview} role="presentation" style={styles.image} />
             <MediaOverlay>
-              <CardTitle title={temp.name} subtitle={temp.description} wrapperStyle={{ whiteSpace: 'wrap' }}>
+              <CardTitle title={temp.name} subtitle={temp.description} >
                 <Button
                   icon
                   onClick={this.onOpenInfo.bind(this, temp.html)}
