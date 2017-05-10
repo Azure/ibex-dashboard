@@ -50,7 +50,7 @@ const isValidFile = (filePath) => {
 const getFileContents = (filePath) => {
   let contents = fs.readFileSync(filePath, 'utf8');
   return filePath.endsWith(".ts")
-    ? "return {\n" + contents.slice(contents.indexOf("/*return*/ {") + 10)
+    ? "return " + contents.slice(contents.indexOf("/*return*/ {") + 10)
     : contents;
 }
 
