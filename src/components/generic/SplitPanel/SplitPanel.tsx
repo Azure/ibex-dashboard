@@ -30,22 +30,23 @@ const style = {
 
 export interface ISplitViewProps extends ITableProps {
   props: {
-    checkboxes?: boolean,
-    rowClassNameField?: string
+    checkboxes?: boolean;
+    rowClassNameField?: string;
+    hideBorders?: boolean;
     cols: {
-      header?: string,
-      field?: string,
-      secondaryHeader?: string,
-      secondaryField?: string,
-      value?: string,
-      width?: string | number,
-      type?: 'text' | 'time' | 'icon' | 'button',
-      click?: string
-    }[],
+      header?: string;
+      field?: string;
+      secondaryHeader?: string;
+      secondaryField?: string;
+      value?: string;
+      width?: string | number;
+      type?: 'text' | 'time' | 'icon' | 'button';
+      click?: string;
+    }[]
     group: {
-      field?: string,
-      secondaryField?: string,
-      countField?: string,
+      field?: string;
+      secondaryField?: string;
+      countField?: string;
     }
   };
 }
@@ -53,6 +54,9 @@ export interface ISplitViewProps extends ITableProps {
 export interface ISplitViewState extends ITableState {
   values: Object[];
   groups: Object[];
+  rowIndex: number;
+  rowsPerPage: number;
+  currentPage: number;
 }
 
 export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplitViewState> {
@@ -61,6 +65,9 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
     groups: [],
     values: [],
     selectedIndex: -1,
+    rowIndex: 0,
+    rowsPerPage: 10,
+    currentPage: 1,
   };
 
   constructor(props: ISplitViewProps) {
