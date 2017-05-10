@@ -50,7 +50,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
 
     let pathname = window.location.pathname;
     if (pathname === '/dashboard') {
-      configurationActions.loadDashboard("0");
+      configurationActions.loadDashboard('0');
     }
     
     if (pathname.startsWith('/dashboard/')) {
@@ -60,7 +60,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
   }
   
   loadConfiguration(result: { dashboards: IDashboardConfig[], templates: IDashboardConfig[] }) {
-    let { dashboards,templates } = result;
+    let { dashboards, templates } = result;
     this.dashboards = dashboards;
     this.templates = templates;
   }
@@ -99,7 +99,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
       this.connectionsMissing = Object.keys(this.connections).some(connectionKey => {
         var connection = this.connections[connectionKey];
         return Object.keys(connection).some(paramKey => !connection[paramKey]);
-      })
+      });
     }
   }
 
@@ -121,7 +121,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
       var connectionType = connections[connectionTypeName];
       requiredParameters[connectionTypeName] = {};
       requiredParameters[connectionTypeName]['editor'] = connectionType.editor;
-      connectionType.params.forEach(param => { requiredParameters[connectionTypeName][param] = null });
+      connectionType.params.forEach(param => { requiredParameters[connectionTypeName][param] = null; });
 
       // Connection type is already defined - check params
       if (dashboard.config.connections[connectionTypeName]) {

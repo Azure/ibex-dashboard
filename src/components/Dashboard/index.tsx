@@ -19,6 +19,8 @@ import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 import VisibilityStore from '../../stores/VisibilityStore';
 
+const renderHTML = require('react-render-html');
+
 import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
 import SelectField from 'react-md/lib/SelectFields';
@@ -38,6 +40,8 @@ interface IDashboardState {
   layouts?: ILayouts;
   grid?: any;
   visibilityFlags?: IDict<boolean>;
+  infoVisible?: boolean;
+  infoHtml?: string;
 }
 
 interface IDashboardProps {
@@ -58,7 +62,9 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     mounted: false,
     layouts: {},
     grid: null,
-    visibilityFlags: {}
+    visibilityFlags: {},
+    infoVisible: false,
+    infoHtml: '',
   };
 
   constructor(props: IDashboardProps) {
@@ -71,6 +77,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
     this.onDeleteDashboardApprove = this.onDeleteDashboardApprove.bind(this);
     this.onDeleteDashboardCancel = this.onDeleteDashboardCancel.bind(this);
+    this.onOpenInfo = this.onOpenInfo.bind(this);
+    this.onCloseInfo = this.onCloseInfo.bind(this);
     this.onExport = this.onExport.bind(this);
     this.onCloseExport = this.onCloseExport.bind(this);
     this.onClickDownloadFile = this.onClickDownloadFile.bind(this);
@@ -78,7 +86,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
-    })
+    });
   }
 
   componentDidMount() {
@@ -112,7 +120,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.componentDidMount();
   }
 
-  onBreakpointChange(breakpoint) {
+  onBreakpointChange(breakpoint: any) {
     var layouts = this.state.layouts;
     layouts[breakpoint] = layouts[breakpoint] || this.layouts[breakpoint];
     this.setState({
@@ -121,7 +129,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     });
   }
 
-  onLayoutChange(layout, layouts) {
+  onLayoutChange(layout: any, layouts: any) {
 
     // Waiting for breakpoint to change
     let currentBreakpoint = this.state.currentBreakpoint;
@@ -144,7 +152,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       if (this.state.editMode) {
         ConfigurationsActions.saveConfiguration(dashboard);
       }
-    }, 500);
+    },         500);
 
   }
 
@@ -166,6 +174,14 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   onDeleteDashboardCancel() {
     this.setState({ askDelete: false });
+  }
+
+  onOpenInfo(html: string) {
+    this.setState({ infoVisible: true, infoHtml: html });
+  }
+
+  onCloseInfo() {
+    this.setState({ infoVisible: false });
   }
 
   onExport() {
@@ -198,6 +214,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     let { dashboard } = this.props;
     var { currentBreakpoint, grid, editMode, askDelete, askDownload, downloadFiles, downloadFormat } = this.state;
+    var { infoVisible, infoHtml } = this.state;
     var layout = this.state.layouts[currentBreakpoint];
 
     if (!grid) {
@@ -215,9 +232,24 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     // Actions to perform on an active dashboard
     let toolbarActions = [
-      <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>play_for_work</Button>,
-      <Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>edit</Button>,
-      <Button key="settings" icon tooltipLabel="Connections" onClick={this.onEditDashboard}>settings_applications</Button>
+      (
+       <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
+        play_for_work
+      </Button>
+      ), 
+      (
+      <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
+        info
+      </Button>
+      ), (
+      <Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>
+        edit
+      </Button>
+      ), (
+      <Button key="settings" icon tooltipLabel="Connections" onClick={this.onEditDashboard}>
+        settings_applications
+      </Button>
+      )
     ];
 
     if (editMode) {
@@ -257,7 +289,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     }
 
     return (
-      <div style={{ width: '100%' }}>
+      <div style={{width: '100%'}}>
         <Toolbar actions={toolbarActions}>
           {filters}
           <Spinner />
@@ -282,6 +314,20 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
         {dialogs}
 
+        <Dialog
+          id="infoDialog"
+          visible={infoVisible}
+          onHide={this.onCloseInfo}
+          dialogStyle={{ width: '80%' }}
+          contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}
+          aria-label="Info"
+          focusOnMount={false}
+        >
+          <div className="md-grid">
+            {renderHTML(infoHtml)}
+          </div>
+        </Dialog>
+        
         <Dialog
           id="downloadData"
           title={(

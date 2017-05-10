@@ -25,7 +25,8 @@ router.get('/dashboards', (req, res) => {
           description: json.description,
           icon: json.icon,
           url: json.url,
-          preview: json.preview
+          preview: json.preview,
+          html: json.html,
         };
         let content = 'return ' + JSON.stringify(jsonDefinition);
 
@@ -56,7 +57,8 @@ router.get('/dashboards', (req, res) => {
           description: json.description,
           icon: json.icon,
           url: json.url,
-          preview: json.preview
+          preview: json.preview,
+          html: json.html,
         };
         let content = 'return ' + JSON.stringify(jsonDefinition);
         
