@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 import utils from '../../../utils';
 
-import { DataTable, TableHeader, TableBody, TableRow, TableColumn } from 'react-md/lib/DataTables';
+import { DataTable, TableHeader, TableBody, TableRow, TableColumn, TablePagination } from 'react-md/lib/DataTables';
 import { Card, CardText, TableCardHeader } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
@@ -33,12 +33,18 @@ export interface ITableProps extends IGenericProps {
 
 export interface ITableState extends IGenericState {
   values: Object[];
+  rowIndex: number;
+  rowsPerPage: number;
+  currentPage: number;
 }
 
 export default class Table extends GenericComponent<ITableProps, ITableState> {
 
   state = {
-    values: []
+    values: [],
+    rowIndex: 0,
+    rowsPerPage: 10,
+    currentPage: 1,
   };
 
   constructor(props: ITableProps) {
@@ -46,6 +52,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
 
     this.onButtonClick = this.onButtonClick.bind(this);
     this.onRowClick = this.onRowClick.bind(this);
+    this.handlePagination = this.handlePagination.bind(this);
   }
 
   onButtonClick = (col, value) => {
@@ -64,18 +71,23 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     return (value && value.replace(/\./g, '-')) || null;
   }
 
-  render() {
+  handlePagination(rowIndex: number, rowsPerPage: number, currentPage: number) {
+    const { values } = this.state;
+    const newPage = currentPage < Math.floor(values.length / rowsPerPage) ? currentPage : 1 ;
+    this.setState({ rowIndex: rowIndex, rowsPerPage: rowsPerPage, currentPage: newPage });
+  }
 
-    let { props } = this.props;
-    let { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
-    let { values } = this.state;
+  render() {
+    const { props } = this.props;
+    const { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
+    const { values, rowIndex, rowsPerPage, currentPage } = this.state;
+    const totalRows = values.length;
 
     if (!values) {
       return <CircularProgress key="loading" id="spinner" />;
     }
-    values = values || [];
-
-    const rows = values.map((value, ri) => (
+    let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
+    const rows = pageValues.map((value, ri) => (
       <TableRow
         key={ri}
         className={rowClassNameField ? this.fixClassName(value[rowClassNameField]) : null}
@@ -110,10 +122,13 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
         }
       </TableRow>
     ));
+    
+    let className = 'pagination-table';
+    className += compact ? 'table-compact' : '';
 
     return (
-      <Card className={ hideBorders ? 'hide-borders' : '' }>
-        <DataTable plain={!checkboxes} data={checkboxes} className={compact ? 'table-compact' : ''}>
+      <Card className={hideBorders ? 'hide-borders' : ''}>
+        <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination">
           <TableHeader>
             <TableRow>
               {cols.map((col, i) => (
@@ -132,6 +147,15 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           <TableBody>
             {rows}
           </TableBody>
+          {totalRows > rowsPerPage ? (
+            <TablePagination
+              onPagination={this.handlePagination}
+              rows={totalRows}
+              rowsPerPage={rowsPerPage}
+              page={currentPage}
+            />
+          ) : null
+          }
         </DataTable>
       </Card>
     );

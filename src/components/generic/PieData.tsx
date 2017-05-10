@@ -79,11 +79,11 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
     return (
       <g>
         {compact && [
-          <text x={cx} y={cy} dy={-15} textAnchor="middle" fill={fill} style={{ fontWeight: 500 }}>{name}</text>,
-          <text x={cx} y={cy} dy={3} textAnchor="middle" fill={fill}>{`${value} ${type.toLowerCase()}`}</text>,
-          <text x={cx} y={cy} dy={25} textAnchor="middle" fill="#999">{`(${(percent * 100).toFixed(2)}%)`}</text>
+          <text key={0} x={cx} y={cy} dy={-15} textAnchor="middle" fill={fill} style={{ fontWeight: 500 }}>{name}</text>,
+          <text key={1} x={cx} y={cy} dy={3} textAnchor="middle" fill={fill}>{`${value} ${type.toLowerCase()}`}</text>,
+          <text key={2} x={cx} y={cy} dy={25} textAnchor="middle" fill="#999">{`(${(percent * 100).toFixed(2)}%)`}</text>
         ] || [
-            <text x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{name}</text>,
+            <text key={3} x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{name}</text>,
           ]}
         <Sector
           cx={cx}
@@ -105,15 +105,15 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
         />
 
         {!compact && ([
-          <path d={`M${c.sx},${c.sy}L${c.mx},${c.my}L${c.ex},${c.ey}`} stroke={fill} fill="none" />,
-          <circle cx={c.ex} cy={c.ey} r={2} fill={fill} stroke="none" />,
+          <path key={0} d={`M${c.sx},${c.sy}L${c.mx},${c.my}L${c.ex},${c.ey}`} stroke={fill} fill="none" />,
+          <circle key={1} cx={c.ex} cy={c.ey} r={2} fill={fill} stroke="none" />,
           (
-            <text x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} textAnchor={c.textAnchor} fill="#333">
+            <text key={2} x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} textAnchor={c.textAnchor} fill="#333">
               {`${value} ${type.toLowerCase()}`}
             </text>
           ),
           (
-            <text x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} dy={18} textAnchor={c.textAnchor} fill="#999">
+            <text key={3} x={c.ex + (c.cos >= 0 ? 1 : -1) * 12} y={c.ey} dy={18} textAnchor={c.textAnchor} fill="#999">
               {`(Rate ${(percent * 100).toFixed(2)}%)`}
             </text>
           )

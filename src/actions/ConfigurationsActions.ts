@@ -168,8 +168,13 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
       }
 
       case 'string':
-        let stringValue = obj.toString().replace(/\"/g, '\\"');
-        result += `"${stringValue}"`;
+        let stringValue = obj.toString();
+        if ( stringValue.startsWith('<') && stringValue.endsWith('>') ) {
+          result += '`' + stringValue + '`'; // html needs to be wrapped in back ticks
+        } else {
+          stringValue = stringValue.replace(/\"/g, '\\"');
+          result += `"${stringValue}"`;
+        }
         break;
 
       case 'function': {
