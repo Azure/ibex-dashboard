@@ -157,7 +157,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   }
 
   onEditDashboard() {
-    window.location.replace('/dashboard/config');
+    let { dashboard } = this.props;
+    window.location.replace(`/dashboard/${dashboard.id}/config`);
   }
 
   toggleEditMode() {
