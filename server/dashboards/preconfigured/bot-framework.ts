@@ -537,19 +537,20 @@ export const config: IDashboardConfig = /*return*/ {
 							// Conversion Handling
 							// ===================
 
-							var total = _.find(conversions, { name: 'message.convert.start' });
-							var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+              let total, successful;
+							total = _.find(conversions, { name: 'message.convert.start' });
+							successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
 
 							if (!total) {
 								return null;
 							}
 
 							var displayValues = [
-								{ label: 'Successful', count: successful.event_count },
-								{ label: 'Failed', count: total.event_count - successful.event_count + 5 },
+								{ label: 'Successful', count: successful.event_count }, 
+								{ label: 'Failed', count: total.event_count - successful.event_count + 5 }, 
 							];
 
-							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1);
+							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1); 
 
 							return {
 								"conversions-displayValues": displayValues,
@@ -746,7 +747,8 @@ export const config: IDashboardConfig = /*return*/ {
 								{ name: 'Negative', value: Math.round((1 - sentiments[0].sentiment) * 100) },
 							];
 
-							var sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
+							let sentimentValue;
+              sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
 
 							return {
 								"sentiment-value": values,
