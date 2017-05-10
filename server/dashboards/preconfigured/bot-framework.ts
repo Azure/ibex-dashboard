@@ -147,6 +147,21 @@ export const config: IDashboardConfig = /*return*/ {
 						static: false,
 						isDraggable: undefined,
 						isResizable: undefined
+					},
+          {
+						w: 4,
+						h: 8,
+						x: 4,
+						y: 8,
+						i: "map",
+						minW: undefined,
+						maxW: undefined,
+						minH: undefined,
+						maxH: undefined,
+						moved: false,
+						static: false,
+						isDraggable: undefined,
+						isResizable: undefined
 					}],
 				md: [{
 						w: 5,
@@ -733,6 +748,25 @@ export const config: IDashboardConfig = /*return*/ {
 							};
 						}
           },
+          mapActivity: {
+						query: () => `` +
+                    ` extend city=client_City, region=client_CountryOrRegion | ` + 
+                    ` extend location=strcat(client_City, ', ', client_CountryOrRegion) | ` + 
+                    ` summarize location_count=count() by region, city, location | ` +
+                    ` order by region, location_count `,
+						mappings: {
+							region: (val) => val || 'unknown',
+							city: (val) => val || 'unknown',
+							location: (val) => val || 'unknown',
+							location_count: (val) => val || 0
+						},
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: (mapActivity) => {
+							return {
+								"mapActivity-locations": mapActivity
+							};
+						}
+					},
 					sentiments: {
 						query: () => `` +
 									` extend score=customDimensions.score, text=customDimensions.text | ` +
@@ -973,7 +1007,22 @@ export const config: IDashboardConfig = /*return*/ {
         zDataKey: "count",
         zRange: [10,500]
       }
-    }
+    },
+    {
+			id: "map",
+			type: "MapData",
+			title: "Map Activity",
+			subtitle: "Monitor regional activity",
+			size: { w: 4,h: 8 },
+			dependencies: { locations: "ai:mapActivity-locations" },
+			props: { 
+        mapProps: 
+          { 
+            zoom: 1,
+            maxZoom: 6,
+          } 
+      }
+		}
   ],
   dialogs: [
     {
