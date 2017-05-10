@@ -21,7 +21,7 @@ import './style.css';
 
 const drawerHeaderChildren = [
   (
-    <div style={{ alignSelf: 'center', marginLeft: 16, marginRight: 16, flexShrink: 0 }}>
+    <div key={0} style={{ alignSelf: 'center', marginLeft: 16, marginRight: 16, flexShrink: 0 }}>
       <h3>Ibex Dashboard</h3>
     </div>
   )
