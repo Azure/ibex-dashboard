@@ -83,11 +83,12 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     const { props } = this.props;
     const { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
     const { values, rowIndex, rowsPerPage, currentPage } = this.state;
-    const totalRows = values.length;
 
     if (!values) {
       return <CircularProgress key="loading" id="spinner" />;
     }
+
+    let totalRows = values.length;
     let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
 
     let renderColumn = (col: ITableColumnProps, value: any): JSX.Element => {
@@ -138,7 +139,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           cols.map((col, ci) => (
             <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>
               {renderColumn(col, value)}
-            }</TableColumn>
+            </TableColumn>
           ))
         }
       </TableRow>
