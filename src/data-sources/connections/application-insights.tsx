@@ -6,6 +6,7 @@ import Card from 'react-md/lib/Cards/Card';
 import CardTitle from 'react-md/lib/Cards/CardTitle';
 import Avatar from 'react-md/lib/Avatars';
 import FontIcon from 'react-md/lib/FontIcons';
+import QueryTester from '../../../src/components/ConfigDashboard/QueryTester';
 
 export default class ApplicationInsightsConnection implements IConnection {
   type = 'application-insights';
@@ -35,6 +36,7 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
     return (
       <Card>
           <CardTitle title={"Application Insights"} avatar={<Avatar icon={<FontIcon>receipt</FontIcon>} />} style={{float:'left'}}/>
+          <QueryTester apiKey={connection['apiKey']} applicationID={connection['appId']} buttonStyle={{float:"right", margin:10}} />
           <InfoDrawer 
             width={300} 
             title='Authentication'
