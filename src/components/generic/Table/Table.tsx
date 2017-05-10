@@ -2,6 +2,7 @@ import * as React from 'react';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import utils from '../../../utils';
 
 import { DataTable, TableHeader, TableBody, TableRow, TableColumn, TablePagination } from 'react-md/lib/DataTables';
 import { Card, CardText, TableCardHeader } from 'react-md/lib/Cards';
@@ -9,21 +10,26 @@ import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
+export type ColType = 'text' | 'time' | 'icon' | 'button' | 'ago' | 'number';
+
+export interface ITableColumnProps {
+  header?: string;
+  field?: string;
+  secondaryHeader?: string;
+  secondaryField?: string;
+  value?: string;
+  width?: string | number;
+  type?: ColType;
+  click?: string;
+}
+
 export interface ITableProps extends IGenericProps {
   props: {
     checkboxes?: boolean;
     rowClassNameField?: string;
     hideBorders?: boolean;
-    cols: {
-      header?: string;
-      field?: string;
-      secondaryHeader?: string;
-      secondaryField?: string;
-      value?: string;
-      width?: string | number;
-      type?: 'text' | 'time' | 'icon' | 'button';
-      click?: string;
-    }[]
+    compact?: boolean;
+    cols: ITableColumnProps[]
   };
 }
 
@@ -75,7 +81,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
 
   render() {
     const { props } = this.props;
-    const { checkboxes, cols, rowClassNameField, hideBorders } = props;
+    const { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
     const { values, rowIndex, rowsPerPage, currentPage } = this.state;
     const totalRows = values.length;
 
@@ -83,6 +89,45 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
       return <CircularProgress key="loading" id="spinner" />;
     }
     let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
+
+    let renderColumn = (col: ITableColumnProps, value: any): JSX.Element => {
+      switch (col.type) {
+
+        case 'icon':
+          return <FontIcon>{col.value || value[col.field]}</FontIcon>;
+
+        case 'button':
+          return (
+            <Button
+              icon={true}
+              onClick={this.onButtonClick.bind(this, col, value)}
+            >
+              {col.value || value[col.field]}
+            </Button>
+          );
+
+        case 'time':
+          return <span>{moment(value[col.field]).format('MMM-DD HH:mm:ss')}</span>;
+
+        case 'number':
+          return <span>{utils.kmNumber(value[col.field])}</span>
+
+        case 'ago':
+          return <span>{utils.ago(value[col.field])}</span>
+
+        default:
+          if (col.secondaryField !== undefined)
+            return (
+              <div className="table">
+                <span className="primary">{value[col.field]}</span>
+                <span className="secondary">{value[col.secondaryField]}</span>
+              </div>
+            );
+          else
+            return <span>{value[col.field]}</span>;
+      }
+    }
+
     const rows = pageValues.map((value, ri) => (
       <TableRow
         key={ri}
@@ -91,34 +136,20 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
       >
         {
           cols.map((col, ci) => (
-            <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>{
-              col.type === 'icon' ?
-                <FontIcon>{col.value || value[col.field]}</FontIcon> :
-                col.type === 'button' ?
-                  (
-                    <Button
-                      icon={true}
-                      onClick={this.onButtonClick.bind(this, col, value)}
-                    >{col.value || value[col.field]}
-                    </Button>
-                  ) :
-                  col.type === 'time' ?
-                    moment(value[col.field]).format('MMM-DD HH:mm:ss') :
-                    col.secondaryField !== undefined ? (
-                      <div className="table">
-                        <span className="primary">{value[col.field]}</span>
-                        <span className="secondary">{value[col.secondaryField]}</span>
-                      </div>
-                    ) : value[col.field]
+            <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>
+              {renderColumn(col, value)}
             }</TableColumn>
           ))
         }
       </TableRow>
     ));
 
+    let className = 'pagination-table';
+    className += compact ? 'table-compact' : '';
+
     return (
       <Card className={hideBorders ? 'hide-borders' : ''}>
-        <DataTable plain={!checkboxes} data={checkboxes} className="pagination-table" baseId="pagination">
+        <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination">
           <TableHeader>
             <TableRow>
               {cols.map((col, i) => (

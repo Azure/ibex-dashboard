@@ -109,15 +109,16 @@ interface ILayout {
 type ILayouts = Sizes<ILayout[]>;
 
 interface IElement {
-  id: string
-  type: string
-  size: { w: number, h: number }
-  title?: string
-  subtitle?: string
-  theme?: string[]
-  dependencies?: IStringDictionary,
-  props?: IDictionary,
-  actions?: IDictionary
+  id: string;
+  type: string;
+  size: { w: number, h: number };
+  location?: { x: number, y: number };
+  title?: string;
+  subtitle?: string;
+  theme?: string[];
+  dependencies?: IStringDictionary;
+  props?: IDictionary;
+  actions?: IDictionary;
 }
 
 interface IFilter {

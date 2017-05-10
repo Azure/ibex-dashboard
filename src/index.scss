@@ -126,6 +126,18 @@ h2, .md-subheading-2 {
 
 .md-data-table {
 
+  &.table-compact {
+    .md-table-column--header {
+      height: 47px;
+    }
+    .md-table-column {
+      vertical-align: middle;
+      padding-top: 7px;
+      padding-bottom: 7px;
+      height: 51px;
+    }
+  }
+
   .md-table-row {
       .md-btn--icon {
         color: $md-secondary-color;
