@@ -679,7 +679,7 @@ return {
 						card_responseTimes2_icon: "::av_timer",
 						card_responseTimes3_value: "intentsDialog-data:response-times_3",
 						card_responseTimes3_heading: "::In 3+ sec",
-						card_responseTimes3_color: "::#F44336",
+						card_responseTimes3_color: "::#D50000",
 						card_responseTimes3_icon: "::av_timer"
 					},
 					actions: {
