@@ -1,13 +1,17 @@
-return {
-	id: "nfl_analytics",
-	name: "NFL Analytics",
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash'; 
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ {
+	id: "mbf_advanced_analytics",
+	name: "MBF Advanced Analytics",
 	icon: "equalizer",
-	url: "nfl_analytics",
-	description: "NFL Analytics Dashboard",
+	url: "mbf_advanced_analytics",
+	description: "Bot Framework Advanced Analytics Dashboard",
 	preview: "/images/bot-framework-preview.png",
+  html: ``,
 	config: {
-		connections: {
-		},
+		connections: { },
 		layout: {
 			isDraggable: true,
 			isResizable: true,
@@ -592,8 +596,8 @@ return {
 
             // Disposition
             let _disposition = {
-              success: (_.find(intent_disposition, { serviceResultSuccess: true }) || {}).count_success || 0, 
-              fail: (_.find(intent_disposition, { serviceResultSuccess: false }) || {}).count_success || 0
+              success: (_.find(intent_disposition, { serviceResultSuccess: true }) || {})['count_success'] || 0, 
+              fail: (_.find(intent_disposition, { serviceResultSuccess: false }) || {})['count_success'] || 0
             };
             let disposition = {
               success: Math.round(100 * _disposition.success / ((_disposition.success + _disposition.fail) || 1)),
@@ -602,9 +606,9 @@ return {
 
             // Quality
             let _quality = {
-              default: (_.find(intent_quality, { responseResult: 'default' }) || {}).count_quality || 0, 
-              ambiguous: (_.find(intent_quality, { responseResult: 'ambiguous' }) || {}).count_quality || 0, 
-              normal: (_.find(intent_quality, { responseResult: 'normal' }) || {}).count_quality || 0, 
+              default: (_.find(intent_quality, { responseResult: 'default' }) || {})['count_quality'] || 0, 
+              ambiguous: (_.find(intent_quality, { responseResult: 'ambiguous' }) || {})['count_quality'] || 0, 
+              normal: (_.find(intent_quality, { responseResult: 'normal' }) || {})['count_quality'] || 0, 
             };
 
             let quality = {
@@ -615,8 +619,8 @@ return {
 
             // Cache
             let _cache = {
-              hits: (_.find(intent_cache_hits, { responseCacheHit: true }) || {}).count_hits || 0, 
-              misses: (_.find(intent_cache_hits, { responseCacheHit: false }) || {}).count_hits || 0
+              hits: (_.find(intent_cache_hits, { responseCacheHit: true }) || {})['count_hits'] || 0, 
+              misses: (_.find(intent_cache_hits, { responseCacheHit: false }) || {})['count_hits'] || 0
             };
             let cache = {
               hits: Math.round(100 * _cache.hits / ((_cache.hits + _cache.misses) || 1)),

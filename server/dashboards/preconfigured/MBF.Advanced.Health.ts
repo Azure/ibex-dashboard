@@ -1,10 +1,15 @@
-return {
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash'; 
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ {
 	id: "mbf_advanced_health",
 	name: "MBF Advanced Health",
 	icon: "av_timer",
 	url: "mbf_advanced_health",
 	description: "Bot Framework Advanced Health Dashboard",
 	preview: "/images/bot-framework-preview.png",
+  html: ``,
 	config: {
 		connections: {
 		},
@@ -177,7 +182,7 @@ return {
               summarize success=countif(serviceResultSuccess), failed=countif(not(serviceResultSuccess)) by service=serviceResultName |
               order by service  `,
 						calculated: (serviceSuccess) => {
-              _.remove(serviceSuccess, row => row.service.startsWith("serviceNameValue"))
+              _.remove(serviceSuccess, row => row['service'].startsWith("serviceNameValue"))
 							return {
                 "service-success": serviceSuccess,
 								"service-success-bars": [ 
