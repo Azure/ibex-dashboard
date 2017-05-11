@@ -15,8 +15,8 @@ export default (
     <Route path="/home" component={Home} />
     <Route path="/about" component={About} />
     <Route path="/dashboard" component={Dashboard} />
-    <Route path="/dashboard/config" component={Config} />
     <Route path="/dashboard/:id" component={Dashboard}/>
+    <Route path="/dashboard/:id/config" component={Config} />
     <Route path="/setup" component={Setup} />
     <Route path="*" component={NotFound} />
   </Route>

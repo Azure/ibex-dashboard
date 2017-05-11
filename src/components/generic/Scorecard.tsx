@@ -5,6 +5,8 @@ import { Card } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import * as _ from 'lodash';
 
+import utils from '../../utils';
+
 const styles = {
   chevron: {
     float: "none",
@@ -31,13 +33,10 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
   }
 
   shortFormatter(num: any): string {
-    if (typeof num !== 'number') { return num; }
+    if (!num && num !== 0) { return ''; }
+    if (isNaN(num)) { return num; }
 
-    return (
-      num > 999999 ?
-        (num / 1000000).toFixed(1) + 'M' :
-        num > 999 ?
-          (num / 1000).toFixed(1) + 'K' : num.toString());
+    return utils.kmNumber(num);
   }
 
   render() {
@@ -120,10 +119,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
             (value.subvalue || value.subheading) &&
             (
               <div className="scorecard-subheading" style={colorStyle}>
-                {
-                  value.subvalue &&
-                  <b>{this.shortFormatter(value.subvalue)}</b>
-                }
+                <b>{this.shortFormatter(value.subvalue)}</b>
                 {value.subheading}
               </div>
             )

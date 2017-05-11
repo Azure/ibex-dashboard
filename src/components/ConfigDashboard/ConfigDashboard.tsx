@@ -34,6 +34,7 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
 
     this.onSave = this.onSave.bind(this);
     this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
+    this.onCancel = this.onCancel.bind(this);
   }
 
   onParamChange(connectionKey: string, paramKey: string, value: any) {
@@ -66,17 +67,20 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
 
   onSaveGoToDashboard() {
     this.onSave();
+
+    let { dashboard } = this.props;
     
     setTimeout(
       () => {
-        window.location.reload();
+        window.location.replace(`/dashboard/${dashboard.id}`);
       }, 
       2000
     );
   }
 
   onCancel() {
-    window.location.reload();    
+    let { dashboard } = this.props;
+    window.location.replace(`/dashboard/${dashboard.id}`); 
   }
 
   render() {

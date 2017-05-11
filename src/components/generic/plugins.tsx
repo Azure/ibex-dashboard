@@ -15,6 +15,7 @@ import MenuFilter from './MenuFilter';
 import Table from './Table';
 import Detail from './Detail';
 import SplitPanel from './SplitPanel';
+import MapData from './MapData';
 
 export default {
   PieData,
@@ -29,6 +30,7 @@ export default {
   Table,
   Detail,
   SplitPanel,
+  MapData,
   RadarChartCard,
   RadialBarChartCard,
   SimpleRadialBarChartCard
