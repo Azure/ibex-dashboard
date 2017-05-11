@@ -149,7 +149,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
       </TableRow>
     ));
 
-    let className = 'pagination-table';
+    let className = 'pagination-table ';
     className += compact ? 'table-compact' : '';
 
     return (
