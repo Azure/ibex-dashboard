@@ -75,7 +75,7 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
       verticalCompact?: boolean, // Turns off compaction so you can place items wherever.
       cols: Sizes<number>,
       breakpoints: Sizes<number>,
-      layouts: ILayouts
+      layouts?: ILayouts
     }
   },
   filters: IFilter[]

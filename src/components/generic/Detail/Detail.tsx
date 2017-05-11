@@ -75,9 +75,14 @@ export default class Detail extends GenericComponent<IDetailProps, IDetailState>
 
   private renderData(data: any): any {
     if (data && data.length > 1 && data.substr(0, 1) === '[' && data.substr(-1) == ']') {
-      const arr = JSON.parse(data);
-      if (Array.isArray(arr)) {
-        return this.renderArray(arr);
+      const obj = JSON.parse(data);
+      if (Array.isArray(obj)) {
+        return this.renderArray(obj);
+      }
+    } else if (data && data.length > 1 && data.substr(0, 1) === '{' && data.substr(-1) == '}') {
+      const obj = JSON.parse(data);
+      if (typeof obj === 'object') {
+        return this.renderObject(obj);
       }
     }
     return <p>{data}</p>;

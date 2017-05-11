@@ -1,13 +1,17 @@
-return {
-	id: "nfl_analytics",
-	name: "NFL Analytics",
-	icon: "equalizer",
-	url: "nfl_analytics",
-	description: "NFL Analytics Dashboard",
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash'; 
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ {
+	id: "mbf_advanced_health",
+	name: "MBF Advanced Health",
+	icon: "av_timer",
+	url: "mbf_advanced_health",
+	description: "Bot Framework Advanced Health Dashboard",
 	preview: "/images/bot-framework-preview.png",
+  html: ``,
 	config: {
 		connections: {
-			"application-insights": { appId: "32f4aed8-8450-41b8-baac-8191389a10ea",apiKey: "5qp7qfeksg1vb545tnmsagzg6gcqsszpa5ufrdes" }
 		},
 		layout: {
 			isDraggable: true,
@@ -37,14 +41,19 @@ return {
       }
 		},
 		{
-			id: "modes",
+			id: "samples",
 			type: "Constant",
-			params: { values: ["messages","users"],selectedValue: "messages" },
+			params: { values: [],selectedValue: "" },
 			calculated: (state, dependencies) => {
-        let flags = {};
-				flags['messages'] = (state.selectedValue === 'messages');
-				flags['users'] 		= (state.selectedValue !== 'messages');
-        return flags;
+        let sampleJobs = [
+          { name: 'Heist', lastExecution: new Date("2017-05-04T12:00:00Z") },
+          { name: 'Quick Job', lastExecution: new Date("2017-05-04T12:00:00Z") },
+          { name: 'Some Job', lastExecution: new Date("2017-05-03T12:00:00Z") },
+          { name: 'Bad Job', lastExecution: new Date("2017-05-02T12:00:00Z") },
+          { name: 'Good Job', lastExecution: new Date("2017-05-01T12:00:00Z") }
+        ];
+
+        return { sampleJobs };
       }
 		},
 		{
@@ -104,55 +113,12 @@ return {
 			params: {
 				table: "telemetry_import",
 				queries: {
-					queries_per_session: {
-						query: () => `
-								where recordType == "intent" | 
-								summarize count_queries=count() by bin(timestamp, 1d), userId | 
-								summarize average=avg(count_queries) | 
-								extend average=round(average, 1) `,
-						calculated: (result) => {
-							return {
-								avg_queries_per_session: (result && result.length && result[0].average) || 0
-							}
-						}
-					},
-					total_users: {
-						query: () => `
-							where recordType == 'intent' |
-							summarize dcount(userId) by userId |
-							count`,
-						calculated: (total_users) => {
-							return {
-								total_users: (total_users.length && total_users[0].Count) || 0
-							}
-						}
-					},
-					returning_users: {
-						query: (dependencies) => {
-							let { timespan } = dependencies;
-							let threshold =
-								timespan === '24 hours' ? '24h' :
-								timespan === '1 week' ? '7d' :
-								timespan === '1 month' ? '30d' : '90d';
-							return `
-								where recordType == 'intent' |
-								summarize dcount(userId), minTimestamp=min(timestamp), maxTimestamp=max(timestamp) by userId |
-								where minTimestamp < ago(${threshold}) and maxTimestamp > ago(${threshold}) |
-								count`;
-						},
-						calculated: (returning_users) => {
-							return {
-								returning_users: (returning_users.length && returning_users[0].Count) || 0
-							}
-						}
-					},
 					timeline: {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
 							return `
-								where recordType == 'intent' |						
-								extend channel=substring(channelId, 0, 1) |
-								summarize count=count() by bin(timestamp, ${granularity}), channel |
+								where recordType == "serviceResult" | 
+                summarize count=avg(serviceResultMillisecondsDuration) by bin(timestamp, ${granularity}), service=serviceResultName |
 								order by timestamp asc`;
 						},
 						calculated: (timeline, dependencies) => {
@@ -161,158 +127,68 @@ return {
 							// =================
 
 							let _timeline = {};
-							let _channels = {};
+							let _services = {};
 							let { timespan } = dependencies;
 
 							/**
 							 * Looping through all results building timeline format values
 							 * Expected result:
 							 * {
-							 * 	timestampValue1: { channel1: count, channel2: count ... }
-							 * 	timestampValue2: { channel1: count2, channel2: count2 ... }
+							 * 	timestampValue1: { service1: count, service2: count ... }
+							 * 	timestampValue2: { service1: count2, service2: count2 ... }
 							 * }
 							 * 
-							 * Channels result:
-							 * { channel1_total: count, channel2_total: count ... }
+							 * Services result:
+							 * { service1_total: count, service2_total: count ... }
 							 */
 							timeline.forEach(row => {
-								var { channel, timestamp, count } = row;
+								var { service, timestamp, count } = row;
 								var timeValue = (new Date(timestamp)).getTime();
+
+                if (service.startsWith('serviceNameValue')) return;
 
 								if (!_timeline[timeValue]) _timeline[timeValue] = {
 									time: (new Date(timestamp)).toUTCString()
 								};
-								if (!_channels[channel]) _channels[channel] = {
-									name: channel,
-									value: 0
-								};
+								if (!_services[service]) _services[service] = { service, value: 0 };
 
-								_timeline[timeValue][channel] = count;
-								_channels[channel].value += count;
+								_timeline[timeValue][service] = count;
+								_services[service].value += count;
 							});
 
-							// Going over all the channels making sure that we add "0" count
-							// For every timestamp on the timeline (for no value channels)
-							var channels = Object.keys(_channels);
-							var channelUsage = _.values(_channels);
-							var timelineValues = _.map(_timeline, value => {
-								channels.forEach(channel => {
-									if (!value[channel]) value[channel] = 0;
+							// Going over all the services making sure that we add "0" count
+							// For every timestamp on the timeline (for no value services)
+							let services = Object.keys(_services);
+							let serviceUsage = _.values(_services);
+							let timelineValues = _.map(_timeline, value => {
+								services.forEach(service => {
+									if (!value[service]) value[service] = 0;
+                  value[service] = Math.round(value[service]);
 								});
 								return value;
 							});
 
 							return {
 								"timeline-graphData": timelineValues,
-								"timeline-channelUsage": channelUsage,
+								"timeline-serviceUsage": serviceUsage,
 								"timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
-								"timeline-channels": channels
+								"timeline-services": services
 							};
 						}
 					},
-					"timeline-users": {
-						query: (dependencies) => {
-							var { granularity } = dependencies;
-							return `
-								where recordType == 'intent' |						
-								extend userId=substring(userId, 0, 1), channelId=substring(channelId, 0, 1) |
-								summarize count=dcount(userId) by bin(timestamp, ${granularity}), channel=channelId |
-								order by timestamp asc`;
-						},
-						calculated: (timeline, dependencies) => {
-
-							// Timeline handling
-							// =================
-
-							let _timeline = {};
-							let _channels = {};
-							let { timespan } = dependencies;
-
-							/**
-							 * Looping through all results building timeline format values
-							 * Expected result:
-							 * {
-							 * 	timestampValue1: { channel1: count, channel2: count ... }
-							 * 	timestampValue2: { channel1: count2, channel2: count2 ... }
-							 * }
-							 * 
-							 * Channels result:
-							 * { channel1_total: count, channel2_total: count ... }
-							 */
-							timeline.forEach(row => {
-								var { channel, timestamp, count } = row;
-								var timeValue = (new Date(timestamp)).getTime();
-
-								if (!_timeline[timeValue]) _timeline[timeValue] = {
-									time: (new Date(timestamp)).toUTCString()
-								};
-								if (!_channels[channel]) _channels[channel] = {
-									name: channel,
-									value: 0
-								};
-
-								_timeline[timeValue][channel] = count;
-								_channels[channel].value += count;
-							});
-
-							// Going over all the channels making sure that we add "0" count
-							// For every timestamp on the timeline (for no value channels)
-							var channels = Object.keys(_channels);
-							var channelUsage = _.values(_channels);
-							var timelineValues = _.map(_timeline, value => {
-								channels.forEach(channel => {
-									if (!value[channel]) value[channel] = 0;
-								});
-								return value;
-							});
-
+					"service-success": {
+						query: () => `
+              where recordType == "serviceResult" | 
+              summarize success=countif(serviceResultSuccess), failed=countif(not(serviceResultSuccess)) by service=serviceResultName |
+              order by service  `,
+						calculated: (serviceSuccess) => {
+              _.remove(serviceSuccess, row => row['service'].startsWith("serviceNameValue"))
 							return {
-								"timeline-users-graphData": timelineValues,
-								"timeline-users-channelUsage": channelUsage,
-								"timeline-users-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
-								"timeline-users-channels": channels
-							};
-						}
-					},
-					intents: {
-						query: () => `` +
-							` where recordType == "intent" |` +
-							` summarize count_intents=count() by intentName |` +
-							` extend intent=substring(intentName, 0, 4) |` +
-							` order by count_intents `,
-						calculated: (intents) => {
-							return {
-								"intents-bars": [ 'count_intents' ]
-							};
-						}
-					}
-				}
-			}
-		},
-		{
-			id: "ai",
-			type: "ApplicationInsights/Query",
-			dependencies: {
-				timespan: "timespan",
-				queryTimespan: "timespan:queryTimespan",
-				granularity: "timespan:granularity",
-				selectedChannels: "filters:channels-selected",
-				selectedIntents: "filters:intents-selected"
-			},
-			params: {
-				table: "customEvents",
-				queries: {
-					users: {
-						query: "summarize totalUsers=count() by user_Id",
-						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
-						calculated: (users) => {
-							let result = 0;
-							if (users.length === 1 && users[0].totalUsers > 0) {
-								result = users[0].totalUsers;
-							}
-							return {
-								"users-value": result,
-								"users-icon": 'account_circle'
+                "service-success": serviceSuccess,
+								"service-success-bars": [ 
+                  { name: 'success', color: "#00BFA5" }, 
+                  { name: 'failed', color: "#B71C1C" } 
+                ]
 							};
 						}
 					}
@@ -324,39 +200,12 @@ return {
 			type: "ApplicationInsights/Query",
 			dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan" },
 			params: {
-				query: () => ` exceptions` +
-            ` | summarize count_error=count() by handledAt, innermostMessage` +
-            ` | order by count_error desc `,
-				mappings: { handledAt: (val) => val || "Unknown",count: (val, row) => row.count_error }
-			},
-			calculated: (state) => {
-        var { values } = state;
-
-        if (!values || !values.length) { return; }
-
-        var errors = values;
-        var handlers = {};
-        var handledAtTotal = 0;
-        var handledAtUncaught = 0;
-        errors.forEach(error => {
-          if (!handlers[error.handledAt]) handlers[error.handledAt] = {
-            name: error.handledAt,
-            count: 0
-          };
-          handlers[error.handledAt].count += error.count;
-          handledAtTotal += error.count;
-          handledAtUncaught += (error.handledAt !== 'UserCode' ? error.count : 0);
-        });
-
-        return {
-          errors,
-          handlers: _.values(handlers),
-          handledAtTotal,
-          handledAtTotal_color: handledAtTotal > 0 ? '#D50000' : '#AEEA00',
-					handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
-          handledAtUncaught
-        };
-      }
+				query: () => `
+            exceptions |
+            summarize count_errors=count() by type=innermostType, message=innermostMessage, bin(timestamp, 1d) |
+            order by count_errors desc |
+            top 5 by count_errors  `
+			}
 		}
 	],
 	filters: [
@@ -364,12 +213,6 @@ return {
 			type: "TextFilter",
 			dependencies: { selectedValue: "timespan",values: "timespan:values" },
 			actions: { onChange: "timespan:updateSelectedValue" },
-			first: true
-		},
-		{
-			type: "TextFilter",
-			dependencies: { selectedValue: "modes",values: "modes:values" },
-			actions: { onChange: "modes:updateSelectedValue" },
 			first: true
 		},
 		{
@@ -395,91 +238,40 @@ return {
 		{
 			id: "timeline",
 			type: "Timeline",
-			title: "Message Rate",
-			subtitle: "How many messages were sent per timeframe",
+			title: "Service response times (ms)",
+			subtitle: "Average response times of each service per time unit",
 			size: { w: 6,h: 8 },
-			dependencies: {
-				visible: "modes:messages",
-				values: "nfl:timeline-graphData",
-				lines: "nfl:timeline-channels",
-				timeFormat: "nfl:timeline-timeFormat"
-			}
+			dependencies: { values: "nfl:timeline-graphData",lines: "nfl:timeline-services",timeFormat: "nfl:timeline-timeFormat" }
 		},
 		{
-			id: "timeline",
-			type: "Timeline",
-			title: "Users Rate",
-			subtitle: "How many users were sent per timeframe",
-			size: { w: 6,h: 8 },
-			dependencies: {
-				visible: "modes:users",
-				values: "nfl:timeline-users-graphData",
-				lines: "nfl:timeline-users-channels",
-				timeFormat: "nfl:timeline-users-timeFormat"
-			}
-		},
-		{
-			id: "channels",
-			type: "PieData",
-			title: "Channel Usage",
-			subtitle: "Total messages sent per channel",
+			id: "topErrors",
+			type: "Table",
+			title: "Top Errors",
+			subtitle: "Most common errors on the selected time slot",
 			size: { w: 3,h: 8 },
-			dependencies: { visible: "modes:messages",values: "nfl:timeline-channelUsage" },
-			props: { showLegend: false,compact: true }
-		},
-		{
-			id: "channels",
-			type: "PieData",
-			title: "Channel Usage (Users)",
-			subtitle: "Total users sent per channel",
-			size: { w: 3,h: 8 },
-			dependencies: { visible: "modes:users",values: "nfl:timeline-users-channelUsage" },
-			props: { showLegend: false,compact: true }
-		},
-		{
-			id: "scores",
-			type: "Scorecard",
-			size: { w: 3,h: 6 },
-			dependencies: {
-				card_errors_value: "errors:handledAtTotal",
-				card_errors_heading: "::Errors",
-				card_errors_color: "errors:handledAtTotal_color",
-				card_errors_icon: "errors:handledAtTotal_icon",
-				card_errors_subvalue: "errors:handledAtTotal",
-				card_errors_subheading: "::Avg",
-				card_errors_className: "errors:handledAtTotal_class",
-				card_errors_onClick: "::onErrorsClick",
-				card_qps_value: "nfl:avg_queries_per_session",
-				card_qps_heading: "::Q/Session",
-				card_qps_color: "::#2196F3",
-				card_qps_icon: "::av_timer",
-				card_users_value: "nfl:total_users",
-				card_users_heading: "::Unique Users",
-				card_users_subvalue: "nfl:returning_users",
-				card_users_subheading: "::Returning",
-				card_users_icon: "::account_circle"
-			},
-			actions: {
-				onErrorsClick: {
-					action: "dialog:errors",
-					params: { title: "args:heading",type: "args:type",innermostMessage: "args:innermostMessage",queryspan: "timespan:queryTimespan" }
-				}
+			dependencies: { values: "errors" },
+			props: {
+				compact: true,
+				cols: [{ header: "Top Errors",field: "type",secondaryField: "message" },{ header: "Count",field: "count_errors",type: "number" }]
 			}
 		},
 		{
-			id: "intents",
+			id: "jobs",
+			type: "Table",
+			title: "Last Job Executions",
+			subtitle: "Most common errors on the selected time slot",
+			size: { w: 3,h: 8 },
+			dependencies: { values: "samples:sampleJobs" },
+			props: { compact: true,cols: [{ header: "Top Errors",field: "name" },{ header: "Last",field: "lastExecution",type: "ago" }] }
+		},
+		{
+			id: "service-success",
 			type: "BarData",
-			title: "Intents Graph",
+			title: "Service success rate",
 			subtitle: "Intents usage per time",
-			size: { w: 7,h: 8 },
-			dependencies: { values: "nfl:intents",bars: "nfl:intents-bars" },
-			props: { nameKey: "intent",showLegend: false },
-			actions: {
-				onBarClick: {
-					action: "dialog:intentsDialog",
-					params: { title: "args:intentName",intent: "args:intentName",queryspan: "timespan:queryTimespan" }
-				}
-			}
+			size: { w: 6,h: 8 },
+			dependencies: { values: "nfl:service-success",bars: "nfl:service-success-bars" },
+			props: { nameKey: "service" }
 		}
 	],
 	dialogs: [

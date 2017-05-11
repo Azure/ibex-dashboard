@@ -422,14 +422,11 @@ export const config: IDashboardConfig = /*return*/ {
 		}
   },
   dataSources: [
-    {
-      id: "timespan",
-      type: "Constant",
-      params: {
-        values: ["24 hours", "1 week", "1 month", "3 months"],
-        selectedValue: "1 month"
-      },
-      calculated: (state, dependencies) => {
+		{
+			id: "timespan",
+			type: "Constant",
+			params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "1 month" },
+			calculated: (state, dependencies) => {
         var queryTimespan =
           state.selectedValue === '24 hours' ? 'PT24H' :
           state.selectedValue === '1 week' ? 'P7D' :
@@ -441,14 +438,11 @@ export const config: IDashboardConfig = /*return*/ {
 
         return { queryTimespan, granularity };
       }
-    },
-    {
+		},
+		{
 			id: "modes",
 			type: "Constant",
-			params: {
-				values: ["messages","users"],
-				selectedValue: "messages"
-			},
+			params: { values: ["messages","users"],selectedValue: "messages" },
 			calculated: (state, dependencies) => {
         let flags = {};
 				flags['messages'] = (state.selectedValue === 'messages');
@@ -456,28 +450,21 @@ export const config: IDashboardConfig = /*return*/ {
         return flags;
       }
 		},
-    {
-      id: "filters",
-      type: "ApplicationInsights/Query",
-      dependencies: {
-        timespan: "timespan",
-        queryTimespan: "timespan:queryTimespan",
-        granularity: "timespan:granularity"
-      },
-      params: {
-        table: "customEvents",
-        queries: {
-          filterChannels: {
-            query: () => `` +
+		{
+			id: "filters",
+			type: "ApplicationInsights/Query",
+			dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan",granularity: "timespan:granularity" },
+			params: {
+				table: "customEvents",
+				queries: {
+					filterChannels: {
+						query: () => `` +
               ` where name == 'Activity' | ` +
               ` extend channel=customDimensions.channel | ` +
               ` summarize channel_count=count() by tostring(channel) | ` +
               ` order by channel_count`,
-            mappings: {
-              channel: (val) => val || "unknown",
-              channel_count: (val) => val || 0
-            },
-            calculated: (filterChannels, dependencies, prevState) => {
+						mappings: { channel: (val) => val || "unknown",channel_count: (val) => val || 0 },
+						calculated: (filterChannels, dependencies, prevState) => {
 
               // This code is meant to fix the following scenario:
               // When "Timespan" filter changes, to "channels-selected" variable
@@ -494,18 +481,15 @@ export const config: IDashboardConfig = /*return*/ {
                 "channels-selected": selectedValues,
               };
             }
-          },
-          filterIntents: {
-            query: () => `` +
+					},
+					filterIntents: {
+						query: () => `` +
               ` extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | ` +
               ` where name startswith 'message.intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
               ` summarize intent_count=count() by tostring(intent) | ` +
               ` order by intent_count`,
-            mappings: {
-              intent: (val) => val || "unknown",
-              intent_count: (val) => val || 0
-            },
-            calculated: (filterIntents, dependencies, prevState) => {
+						mappings: { intent: (val) => val || "unknown",intent_count: (val) => val || 0 },
+						calculated: (filterIntents, dependencies, prevState) => {
               const intents = filterIntents.map((x) => x.intent);
               let selectedValues = [];
               if (prevState['intents-selected'] !== undefined) {
@@ -517,20 +501,20 @@ export const config: IDashboardConfig = /*return*/ {
                 "intents-selected": selectedValues,
               };
             }
-          }
-        }
-      }
-    },
-    {
-			id: 'ai',
-      type: "ApplicationInsights/Query",
-      dependencies: {
-        timespan: "timespan",
-        queryTimespan: "timespan:queryTimespan",
-        granularity: "timespan:granularity",
-        selectedChannels: "filters:channels-selected",
-        selectedIntents: "filters:intents-selected"
-      },
+					}
+				}
+			}
+		},
+		{
+			id: "ai",
+			type: "ApplicationInsights/Query",
+			dependencies: {
+				timespan: "timespan",
+				queryTimespan: "timespan:queryTimespan",
+				granularity: "timespan:granularity",
+				selectedChannels: "filters:channels-selected",
+				selectedIntents: "filters:intents-selected"
+			},
 			params: {
 				table: "customEvents",
 				queries: {
@@ -539,14 +523,8 @@ export const config: IDashboardConfig = /*return*/ {
 								` extend successful=customDimensions.successful | ` +
 								` where name startswith 'message.convert' | ` +
 								` summarize event_count=count() by name, tostring(successful)`,
-						mappings: {
-							"successful": (val) => val === 'true',
-							"event_count": (val) => val || 0
-						},
-            filters: [{
-              dependency: "selectedChannels",
-              queryProperty: "customDimensions.channel"
-            }],
+						mappings: { successful: (val) => val === 'true',event_count: (val) => val || 0 },
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						calculated: (conversions) => {
 
 							// Conversion Handling
@@ -581,14 +559,8 @@ export const config: IDashboardConfig = /*return*/ {
 								` summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) | ` +
 								` order by timestamp asc `
 						},
-						mappings: {
-							"channel": (val) => val || "unknown",
-							"count": (val) => val || 0,
-						},
-            filters: [{
-              dependency: "selectedChannels",
-              queryProperty: "customDimensions.channel"
-            }],
+						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						calculated: (timeline, dependencies) => {
 
 							// Timeline handling
@@ -631,7 +603,7 @@ export const config: IDashboardConfig = /*return*/ {
 							};
 						}
 					},
-          users_timeline: {
+					users_timeline: {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
 							return `` +
@@ -639,14 +611,8 @@ export const config: IDashboardConfig = /*return*/ {
                   ` summarize count=dcount(tostring(customDimensions.from)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |` +
                   ` order by timestamp asc`
 						},
-						mappings: {
-							channel: (val) => val || "unknown",
-							count: (val) => val || 0
-						},
-						filters: [{
-              dependency: "selectedChannels",
-              queryProperty: "customDimensions.channel"
-            }],
+						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						calculated: (timeline, dependencies) => {
 
 							// Timeline handling
@@ -689,26 +655,20 @@ export const config: IDashboardConfig = /*return*/ {
 							};
 						}
 					},
-          intents: {
-            query: () => `` +
+					intents: {
+						query: () => `` +
               ` extend cslen = customDimensions.callstack_length, intent=customDimensions.intent | ` +
               ` where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
               ` summarize count=count() by tostring(intent)`,
-            mappings: {
-              "intent": (val) => val || "Unknown",
-              "count": (val) => val || 0,
-            },
-            filters: [{
-              dependency: "selectedIntents",
-              queryProperty: "customDimensions.intent"
-            }],
+						mappings: { intent: (val) => val || "Unknown",count: (val) => val || 0 },
+						filters: [{ dependency: "selectedIntents",queryProperty: "customDimensions.intent" }],
 						calculated: (intents) => {
 							return {
 								"intents-bars": [ 'count' ]
 							};
 						}
-          },
-          users: {
+					},
+					users: {
             query: `summarize totalUsers=count() by user_Id`,
             filters: [{
               dependency: "selectedChannels",
@@ -719,36 +679,27 @@ export const config: IDashboardConfig = /*return*/ {
 							if (users.length === 1 && users[0].totalUsers > 0) {
 								result = users[0].totalUsers;
 							}
-							return {
-								"users-value": result,
-								"users-icon": 'account_circle'
-							};
+							return { "users-value": result };
 						}
           },
-          channelActivity: {
-            query: () => `` + 
+					channelActivity: {
+						query: () => `` + 
                     ` where name == 'Activity' | ` + 
                     ` extend channel=customDimensions.channel | ` + 
                     ` extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr | ` + 
                     ` extend duration=tolong(customMeasurements.duration/1000) | ` + 
                     ` summarize count=count() by tolong(duration), tostring(channel), hourOfDay | ` + 
                     ` order by hourOfDay asc`,
-            mappings: {
-              duration: (val) => val || 0,
-              channel: (val) => val || 'unknown'
-            },
-            filters: [{
-              dependency: "selectedChannels",
-              queryProperty: "customDimensions.channel"
-            }],
+						mappings: { duration: (val) => val || 0,channel: (val) => val || 'unknown' },
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						calculated: (channelActivity) => {
 							var groupedValues = _.chain(channelActivity).groupBy('channel').value();
 							return {
 								"channelActivity-groupedValues": groupedValues
 							};
 						}
-          },
-          mapActivity: {
+					},
+					mapActivity: {
 						query: () => `` +
                     ` extend city=client_City, region=client_CountryOrRegion | ` + 
                     ` extend location=strcat(client_City, ', ', client_CountryOrRegion) | ` + 
@@ -795,142 +746,221 @@ export const config: IDashboardConfig = /*return*/ {
 						}
 					}
 				}
-      }
+			}
 		},
-    {
-      id: "errors",
-      type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
-      params: {
-        query: () => ` exceptions` +
-            ` | summarize count_error=count() by handledAt, innermostMessage` +
-            ` | order by count_error desc `,
-        mappings: {
-          "handledAt": (val) => val || "Unknown",
-          "count": (val, row) => row.count_error
-        }
-      },
-      calculated: (state) => {
+		{
+			id: "errors",
+			type: "ApplicationInsights/Query",
+			dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan" },
+			params: {
+				query: () => ` 
+            exceptions
+            | summarize count_error=count() by type, innermostMessage
+            | order by count_error desc `
+			},
+			calculated: (state) => {
         var { values } = state;
 
-        if (!values || !values.length) { return; }
+        if (!values || !values.length) { 
+          return {
+            typesTotal: 0,
+            typesTotal_color: '#AEEA00',
+            typesTotal_icon: 'done'
+          };
+        }
 
         var errors = values;
-        var handlers = {};
-        var handledAtTotal = 0;
-        var handledAtUncaught = 0;
+        var types = {};
+        var typesTotal = 0;
         errors.forEach(error => {
-          if (!handlers[error.handledAt]) handlers[error.handledAt] = {
-            name: error.handledAt,
+          if (!types[error.type]) types[error.type] = {
+            name: error.type,
             count: 0
           };
-          handlers[error.handledAt].count += error.count;
-          handledAtTotal += error.count;
-          handledAtUncaught += (error.handledAt !== 'UserCode' ? error.count : 0);
+          types[error.type].count += error.count_error;
+          typesTotal += error.count_error;
         });
 
         return {
           errors,
-          handlers: _.values(handlers),
-          handledAtTotal,
-          handledAtTotal_color: handledAtTotal > 0 ? '#D50000' : '#AEEA00',
-					handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
-          handledAtUncaught
+          types: _.values(types),
+          typesTotal,
+          typesTotal_color: typesTotal > 0 ? '#D50000' : '#AEEA00',
+					typesTotal_icon: typesTotal > 0 ? 'bug_report' : 'done'
         };
       }
+		},
+    {
+      id: "retention",
+      type: "ApplicationInsights/Query",
+      dependencies: { timespan: "timespan", selectedTimespan: "timespan:queryTimespan", queryTimespan: "::P90D" },
+      params: {
+        query: () => `
+          customEvents |
+          extend uniqueUser=tostring(customDimensions.from) |
+          summarize oldestVisit=min(timestamp), lastVisit=max(timestamp) by uniqueUser |
+          summarize
+                  totalUnique = dcount(uniqueUser),
+                  totalUniqueUsersIn24hr = countif(lastVisit > ago(24hr)),
+                  totalUniqueUsersIn7d = countif(lastVisit > ago(7d)),
+                  totalUniqueUsersIn30d = countif(lastVisit > ago(30d)),
+                  returning24hr = countif(lastVisit > ago(24hr) and oldestVisit <= ago(24hr)),
+                  returning7d = countif(lastVisit > ago(7d) and oldestVisit <= ago(7d)),
+                  returning30d = countif(lastVisit > ago(30d) and oldestVisit <= ago(30d))
+        `
+      },
+      calculated: ({ values }, { selectedTimespan }) => {
+
+        let result = {
+          totalUnique: 0,
+          totalUniqueUsersIn24hr: 0,
+          totalUniqueUsersIn7d: 0,
+          totalUniqueUsersIn30d: 0,
+          returning24hr: 0,
+          returning7d: 0,
+          returning30d: 0,
+
+          total: 0,
+          returning: 0,
+          values: []
+        };
+
+        if (values && values.length) {
+          _.extend(result, values[0]);
+        }
+
+        switch (selectedTimespan) {
+          case 'PT24H':
+            result.total = result.totalUniqueUsersIn24hr;
+            result.returning = result.returning24hr;
+            break;
+
+          case 'P7D':
+            result.total = result.totalUniqueUsersIn7d;
+            result.returning = result.returning7d;
+            break;
+
+          case 'P30D':
+            result.total = result.totalUniqueUsersIn30d;
+            result.returning = result.returning30d;
+            break;
+        }
+
+        result.values = [
+          { 
+            timespan: '24 hours', 
+            retention: Math.round(100 * result.returning24hr / result.totalUniqueUsersIn24hr || 0) + '%',
+            returning: result.returning24hr,
+            unique: result.totalUniqueUsersIn24hr 
+          },
+          { 
+            timespan: '7 days', 
+            retention: Math.round(100 * result.returning7d / result.totalUniqueUsersIn7d || 0) + '%',
+            returning: result.returning7d,
+            unique: result.totalUniqueUsersIn7d
+          },
+          { 
+            timespan: '30 days', 
+            retention: Math.round(100 * result.returning30d / result.totalUniqueUsersIn30d || 0) + '%',
+            returning: result.returning30d,
+            unique: result.totalUniqueUsersIn30d
+          },
+        ];
+
+        return result;
+      }
     }
-  ],
-  filters: [
-    {
-      type: "TextFilter",
+	],
+	filters: [
+		{
+			type: "TextFilter",
 			title: "Timespan",
-      dependencies: { selectedValue: "timespan", values: "timespan:values" },
-      actions: { onChange: "timespan:updateSelectedValue" },
-      first: true
-    },
-    {
+			dependencies: { selectedValue: "timespan",values: "timespan:values" },
+			actions: { onChange: "timespan:updateSelectedValue" },
+			first: true
+		},
+		{
 			type: "TextFilter",
 			title: "Mode",
-			dependencies: { selectedValue: "modes", values: "modes:values" },
+			dependencies: { selectedValue: "modes",values: "modes:values" },
 			actions: { onChange: "modes:updateSelectedValue" },
 			first: true
 		},
-    {
-      type: "MenuFilter",
-      title: "Channels",
-      subtitle: "Select channels",
-      icon: "forum",
-      dependencies: {
-        selectedValues: "filters:channels-selected",
-        values: "filters:channels-filters"
-      },
-      actions: {
-        onChange: "filters:updateSelectedValues:channels-selected"
-      },
-      first: true
-    },
-    {
-      type: "MenuFilter",
-      title: "Intents",
-      subtitle: "Select intents",
-      icon: "textsms",
-      dependencies: {
-        selectedValues: "filters:intents-selected",
-        values: "filters:intents-filters"
-      },
-      actions: {
-        onChange: "filters:updateSelectedValues:intents-selected"
-      },
-      first: true
-    }
-  ],
-  elements: [
-    {
-      id: "timeline",
-      type: "Timeline",
-      title: "Message Rate",
-      subtitle: "How many messages were sent per timeframe",
-      size: { w: 5, h: 8 },
-      dependencies: { visible: "modes:messages", values: "ai:timeline-graphData", lines: "ai:timeline-channels", timeFormat: "ai:timeline-timeFormat" }
-    },
-    {
+		{
+			type: "MenuFilter",
+			title: "Channels",
+			subtitle: "Select channels",
+			icon: "forum",
+			dependencies: { selectedValues: "filters:channels-selected",values: "filters:channels-filters" },
+			actions: { onChange: "filters:updateSelectedValues:channels-selected" },
+			first: true
+		},
+		{
+			type: "MenuFilter",
+			title: "Intents",
+			subtitle: "Select intents",
+			icon: "textsms",
+			dependencies: { selectedValues: "filters:intents-selected",values: "filters:intents-filters" },
+			actions: { onChange: "filters:updateSelectedValues:intents-selected" },
+			first: true
+		}
+	],
+	elements: [
+		{
+			id: "timeline",
+			type: "Timeline",
+			title: "Message Rate",
+			subtitle: "How many messages were sent per timeframe",
+			size: { w: 5,h: 8 },
+			dependencies: {
+				visible: "modes:messages",
+				values: "ai:timeline-graphData",
+				lines: "ai:timeline-channels",
+				timeFormat: "ai:timeline-timeFormat"
+			}
+		},
+		{
 			id: "timeline",
 			type: "Timeline",
 			title: "Users Rate",
 			subtitle: "How many users were sent per timeframe",
-			size: { w: 5, h: 8 },
-			dependencies: { visible: "modes:users", values: "ai:timeline-users-graphData", lines: "ai:timeline-users-channels", timeFormat: "ai:timeline-users-timeFormat" }
+			size: { w: 5,h: 8 },
+			dependencies: {
+				visible: "modes:users",
+				values: "ai:timeline-users-graphData",
+				lines: "ai:timeline-users-channels",
+				timeFormat: "ai:timeline-users-timeFormat"
+			}
 		},
-    {
-      id: "channels",
-      type: "PieData",
-      title: "Channel Usage",
-      subtitle: "Total messages sent per channel",
-      size: { w: 3, h: 8 },
-      dependencies: { visible: "modes:messages", values: "ai:timeline-channelUsage" },
-      props: { showLegend: false, compact: true }
-    },
-    {
+		{
+			id: "channels",
+			type: "PieData",
+			title: "Channel Usage",
+			subtitle: "Total messages sent per channel",
+			size: { w: 3,h: 8 },
+			dependencies: { visible: "modes:messages",values: "ai:timeline-channelUsage" },
+			props: { showLegend: false,compact: true }
+		},
+		{
 			id: "channels",
 			type: "PieData",
 			title: "Channel Usage (Users)",
 			subtitle: "Total users sent per channel",
-			size: { w: 3, h: 8 },
-			dependencies: { visible: "modes:users", values: "ai:timeline-users-channelUsage" },
-			props: { showLegend: false, compact: true }
+			size: { w: 3,h: 8 },
+			dependencies: { visible: "modes:users",values: "ai:timeline-users-channelUsage" },
+			props: { showLegend: false,compact: true }
 		},
-    {
+		{
 			id: "scores",
 			type: "Scorecard",
-			size: { w: 4, h: 3 },
+			size: { w: 4,h: 3 },
 			dependencies: {
-				card_errors_value: "errors:handledAtTotal",
+				card_errors_value: "errors:typesTotal",
 				card_errors_heading: "::Errors",
-				card_errors_color: "errors:handledAtTotal_color",
-				card_errors_icon: "errors:handledAtTotal_icon",
-				card_errors_subvalue: "errors:handledAtTotal",
+				card_errors_color: "errors:typesTotal_color",
+				card_errors_icon: "errors:typesTotal_icon",
+				card_errors_subvalue: "errors:typesTotal",
 				card_errors_subheading: "::Avg",
-				card_errors_className: "errors:handledAtTotal_class",
 				card_errors_onClick: "::onErrorsClick",
 
 				card_sentiment_value: "ai:sentiment-height",
@@ -940,9 +970,12 @@ export const config: IDashboardConfig = /*return*/ {
 				card_sentiment_subvalue: "ai:sentiment-subvalue",
 				card_sentiment_subheading: "ai:sentiment-subheading",
 
-				card_users_value: "ai:users-value",
-				card_users_heading: "::Total Users",
-				card_users_icon: "ai:users-icon",
+				card_users_value: "retention:total",
+				card_users_heading: "::Unique Users",
+				card_users_icon: "::account_circle",
+				card_users_subvalue: "retention:returning",
+				card_users_subheading: "::Returning",
+				card_users_onClick: "::onUsersClick",
 
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
@@ -952,332 +985,255 @@ export const config: IDashboardConfig = /*return*/ {
 			actions: {
 				onErrorsClick: {
 					action: "dialog:errors",
-					params: {
-						title: "args:heading",
-						type: "args:type",
-						innermostMessage: "args:innermostMessage",
-						queryspan: "timespan:queryTimespan"
-					}
+					params: { title: "args:heading",type: "args:type",innermostMessage: "args:innermostMessage",queryspan: "timespan:queryTimespan" }
+				},
+				onUsersClick: {
+					action: "dialog:userRetention",
+					params: { title: "args:heading", queryspan: "::P90D" }
 				}
 			}
 		},
-    {
-      id: "intents",
-      type: "BarData",
-      title: "Intents Graph",
-      subtitle: "Intents usage per time",      
-      size: { w: 4, h: 8 },
-      dependencies: { values: "ai:intents", bars: "ai:intents-bars" },
-      props: {
-        nameKey: "intent"
-      },
-      actions: {
-        onBarClick: {
-          action: "dialog:conversations",
-          params: {
-            title: "args:intent",
-            intent: "args:intent",
-            queryspan: "timespan:queryTimespan"
-          }
-        }
-      }
-    },
-    {
-      id: "timeline-area",
-      type: "Area",
-      title: "Message Rate",
-      subtitle: "How many messages were sent per timeframe",
-      size: { w: 4, h: 8 },
-      dependencies: { values: "ai:timeline-graphData", lines: "ai:timeline-channels", timeFormat: "ai:timeline-timeFormat" },
-      props: {
-        isStacked: true,
-        showLegend: false
-      }
-    },
-    {
-      id: 'scatter',
-      type: 'Scatter',
-      title: 'Channel Activity',
-      subtitle: 'Monitor channel activity across time of day',
-      size: { w: 4, h: 8 },
-      dependencies: { groupedValues:'ai:channelActivity-groupedValues' },
-      props: {
-        xDataKey: "hourOfDay",
-        yDataKey: "duration",
-        zDataKey: "count",
-        zRange: [10,500]
-      }
-    },
-    {
+		{
+			id: "intents",
+			type: "BarData",
+			title: "Intents Graph",
+			subtitle: "Intents usage per time",
+			size: { w: 4,h: 8 },
+			dependencies: { values: "ai:intents",bars: "ai:intents-bars" },
+			props: { nameKey: "intent" },
+			actions: {
+				onBarClick: { action: "dialog:conversations",params: { title: "args:intent",intent: "args:intent",queryspan: "timespan:queryTimespan" } }
+			}
+		},
+		{
+			id: "timeline-area",
+			type: "Area",
+			title: "Message Rate",
+			subtitle: "How many messages were sent per timeframe",
+			size: { w: 4,h: 8 },
+			dependencies: { values: "ai:timeline-graphData",lines: "ai:timeline-channels",timeFormat: "ai:timeline-timeFormat" },
+			props: { isStacked: true,showLegend: false }
+		},
+		{
 			id: "map",
 			type: "MapData",
 			title: "Map Activity",
 			subtitle: "Monitor regional activity",
-			size: { w: 4,h: 8 },
+			size: { w: 4,h: 13 },
+      location: { x: 9, y: 1 },
 			dependencies: { locations: "ai:mapActivity-locations" },
-			props: { 
-        mapProps: 
-          { 
-            zoom: 1,
-            maxZoom: 6,
-          } 
-      }
+			props: { mapProps: { zoom: 1,maxZoom: 6 } }
 		}
-  ],
-  dialogs: [
-    {
-      id: "conversations",
-      width: "60%",
-      params: ["title", "intent", "queryspan"],
-      dataSources: [{
-        id: "conversations-data",
-        type: "ApplicationInsights/Query",
-        dependencies: { intent: "dialog_conversations:intent", queryTimespan: "dialog_conversations:queryspan" },
-        params: {
-          query: ({ intent }) => ` customEvents` +
+	],
+	dialogs: [
+		{
+			id: "conversations",
+			width: "60%",
+			params: ["title","intent","queryspan"],
+			dataSources: [
+				{
+					id: "conversations-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { intent: "dialog_conversations:intent",queryTimespan: "dialog_conversations:queryspan" },
+					params: {
+						query: ({ intent }) => ` customEvents` +
             ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
             ` | where name startswith "message.intent" and intent =~ '${intent}'` +
             ` | summarize count=count(), maxTimestamp=max(timestamp) by tostring(conversation)` +
             ` | order by maxTimestamp`,
-          mappings: {
-            "id": (val, row, idx) => `Conversation ${idx}`
-          }
-        }
-      }],
-      elements: [
-        {
-          id: "conversations-list",
-          type: "Table",
-          title: "Conversations",
-          size: { w: 12, h: 16 },
-          dependencies: { values: "conversations-data" },
-          props: {
-            cols: [{
-              header: "Conversation Id",
-              field: "id"
-            }, {
-              header: "Last Message",
-              field: "maxTimestamp",
-              type: "time",
-              format: "MMM-DD HH:mm:ss"
-            }, {
-              header: "Count",
-              field: "count"
-            }, {
-              type: "button",
-              value: "chat",
-              click: "openMessagesDialog"
-            }]
-          },
-          actions: {
-            openMessagesDialog: {
-              action: "dialog:messages",
-              params: {
-                title: "args:id",
-                conversation: "args:conversation",
-                queryspan: "timespan:queryTimespan"
-              }
-            }
-          }
-        }
-      ]
-    },
-    {
-      id: "messages",
-      width: "50%",
-      params: ["title", "conversation", "queryspan"],
-      dataSources: [
-        {
-          id: "messages-data",
-          type: "ApplicationInsights/Query",
-          dependencies: { conversation: "dialog_messages:conversation", queryTimespan: "dialog_messages:queryspan" },
-          params: {
-            query: ({ conversation }) => ` customEvents` +
+						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
+					}
+				}
+			],
+			elements: [
+				{
+					id: "conversations-list",
+					type: "Table",
+					title: "Conversations",
+					size: { w: 12,h: 16 },
+					dependencies: { values: "conversations-data" },
+					props: {
+						cols: [
+							{ header: "Conversation Id",field: "id" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",field: "count" },
+							{ type: "button",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				}
+			]
+		},
+		{
+			id: "messages",
+			width: "50%",
+			params: ["title","conversation","queryspan"],
+			dataSources: [
+				{
+					id: "messages-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { conversation: "dialog_messages:conversation",queryTimespan: "dialog_messages:queryspan" },
+					params: {
+						query: ({ conversation }) => ` customEvents` +
               ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
               ` | where name in ("message.send", "message.received") and conversation == '${conversation}'` +
               ` | order by timestamp asc` +
               ` | project timestamp, eventName=name, message=customDimensions.text, customDimensions.userName, customDimensions.userId`
-          }
-        }
-      ],
-      elements: [
-        {
-          id: "messages-list",
-          type: "Table",
-          title: "Messages",
-          size: { w: 12, h: 16 },
-          dependencies: { values: "messages-data" },
-          props: {
-            rowClassNameField: "eventName",
-            cols: [{
-              header: "Timestamp",
-              width: "50px",
-              field: "timestamp",
-              type: "time",
-              format: "MMM-DD HH:mm:ss"
-            }, {
-              header: "Message",
-              field: "message"
-            }]
-          }
-        }
-      ]
-    },
-    {
-      id: "errors",
-      width: "90%",
-      params: ["title", "queryspan"],
-      dataSources: [{
-        id: "errors-group",
-        type: "ApplicationInsights/Query",
-        dependencies: {
-          queryTimespan: "dialog_errors:queryspan"
-        },
-        params: {
-          query: () => ` exceptions` +
+					}
+				}
+			],
+			elements: [
+				{
+					id: "messages-list",
+					type: "Table",
+					title: "Messages",
+					size: { w: 12,h: 16 },
+					dependencies: { values: "messages-data" },
+					props: {
+						rowClassNameField: "eventName",
+						cols: [
+							{ header: "Timestamp",width: "50px",field: "timestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Message",field: "message" }
+						]
+					}
+				}
+			]
+		},
+		{
+			id: "errors",
+			width: "90%",
+			params: ["title","queryspan"],
+			dataSources: [
+				{
+					id: "errors-group",
+					type: "ApplicationInsights/Query",
+					dependencies: { queryTimespan: "dialog_errors:queryspan" },
+					params: {
+						query: () => ` exceptions` +
             ` | summarize error_count=count() by type, innermostMessage` +
             ` | project type, innermostMessage, error_count` +
             ` | order by error_count desc `
-        },
-        calculated: (state) => {
+					},
+					calculated: (state) => {
           const { values } = state;
           return {
             groups: values
           };
         }
-      },
-      {
-        id: "errors-selection",
-        type: "ApplicationInsights/Query",
-        dependencies: {
-          queryTimespan: "dialog_errors:queryspan",
-          type: "args:type",
-          innermostMessage: "args:innermostMessage"
-        },
-        params: {
-          query: ({ type, innermostMessage }) => ` exceptions` +
+				},
+				{
+					id: "errors-selection",
+					type: "ApplicationInsights/Query",
+					dependencies: { queryTimespan: "dialog_errors:queryspan",type: "args:type",innermostMessage: "args:innermostMessage" },
+					params: {
+						query: ({ type, innermostMessage }) => ` exceptions` +
             ` | where type == '${type}'` +
             ` | where innermostMessage == "${innermostMessage}"` +
             ` | extend conversationId=customDimensions["Conversation ID"]` +
             ` | project type, innermostMessage, handledAt, conversationId, operation_Id`
-        }
-      }],
-      elements: [{
-        id: "errors-list",
-        type: "SplitPanel",
-        title: "Errors",
-        size: {
-          w: 12,
-          h: 16
-        },
-        dependencies: {
-          groups: "errors-group",
-          values: "errors-selection",
-        },
-        props: {
-          cols: [{
-            header: "Type",
-            field: "type",
-            secondaryHeader: "Message",
-            secondaryField: "innermostMessage"
-          }, {
-            header: "Conversation Id",
-            field: "conversationId",
-            secondaryHeader: "Operation Id",
-            secondaryField: "operation_Id"
-          }, {
-            header: "HandledAt",
-            field: "handledAt"
-          }, {
-            type: "button",
-            value: "more",
-            click: "openErrorDetail"
-          }],
-          group: {
-            field: "type",
-            secondaryField: "innermostMessage",
-            countField: "error_count"
-          }
-        },
-        actions: {
-          select: {
-            action: "errors-selection:updateDependencies",
-            params: {
-              title: "args:type",
-              type: "args:type",
-              innermostMessage: "args:innermostMessage",
-              queryspan: "timespan:queryTimespan"
-            }
-          },
-          openErrorDetail: {
-            action: "dialog:errordetail",
-            params: {
-              title: "args:operation_Id",
-              type: "args:type",
-              innermostMessage: "args:innermostMessage",
-              handledAt: "args:handledAt",
-              conversationId: "args:conversationId",
-              operation_Id: "args:operation_Id",
-              queryspan: "timespan:queryTimespan"
-            }
-          }
-        }
-      }]
-    },
-    {
-      id: "errordetail",
-      width: "50%",
-      params: ["title", "handledAt", "type", "operation_Id", "queryspan"],
-      dataSources: [{
-        id: "errordetail-data",
-        type: "ApplicationInsights/Query",
-        dependencies: {
-          operation_Id: "dialog_errordetail:operation_Id",
-          queryTimespan: "dialog_errordetail:queryspan"
-        },
-        params: {
-          query: ({ operation_Id }) => ` exceptions` +
+					}
+				}
+			],
+			elements: [
+				{
+					id: "errors-list",
+					type: "SplitPanel",
+					title: "Errors",
+					size: { w: 12,h: 16 },
+					dependencies: { groups: "errors-group",values: "errors-selection" },
+					props: {
+						cols: [
+							{ header: "Type",field: "type",secondaryHeader: "Message",secondaryField: "innermostMessage" },
+							{ header: "Conversation Id",field: "conversationId",secondaryHeader: "Operation Id",secondaryField: "operation_Id" },
+							{ header: "HandledAt",field: "handledAt" },
+							{ type: "button",value: "more",click: "openErrorDetail" }
+						],
+						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" }
+					},
+					actions: {
+						select: {
+							action: "errors-selection:updateDependencies",
+							params: { title: "args:type",type: "args:type",innermostMessage: "args:innermostMessage",queryspan: "timespan:queryTimespan" }
+						},
+						openErrorDetail: {
+							action: "dialog:errordetail",
+							params: {
+								title: "args:operation_Id",
+								type: "args:type",
+								innermostMessage: "args:innermostMessage",
+								handledAt: "args:handledAt",
+								conversationId: "args:conversationId",
+								operation_Id: "args:operation_Id",
+								queryspan: "timespan:queryTimespan"
+							}
+						}
+					}
+				}
+			]
+		},
+		{
+			id: "errordetail",
+			width: "50%",
+			params: ["title","handledAt","type","operation_Id","queryspan"],
+			dataSources: [
+				{
+					id: "errordetail-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { operation_Id: "dialog_errordetail:operation_Id",queryTimespan: "dialog_errordetail:queryspan" },
+					params: {
+						query: ({ operation_Id }) => ` exceptions` +
             ` | where operation_Id == '${operation_Id}'` +
             ` | extend conversationId=customDimensions["Conversation ID"]` +
             ` | project handledAt, type, innermostMessage, conversationId, operation_Id, timestamp, details `
-        }
-      }],
-      elements: [{
-        id: "errordetail-item",
-        type: "Detail",
-        title: "Error detail",
-        size: {
-          w: 12,
-          h: 16
-        },
-        dependencies: {
-          values: "errordetail-data"
-        },
-        props: {
-          cols: [{
-            header: "Handle",
-            field: "handledAt"
-          }, {
-            header: "Type",
-            field: "type"
-          }, {
-            header: "Message",
-            field: "innermostMessage"
-          }, {
-            header: "Conversation ID",
-            field: "conversationId"
-          }, {
-            header: "Operation ID",
-            field: "operation_Id"
-          }, {
-            header: "Timestamp",
-            field: "timestamp"
-          }, {
-            header: "Details",
-            field: "details"
-          }]
-        }
-      }]
-    }
-  ]
+					}
+				}
+			],
+			elements: [
+				{
+					id: "errordetail-item",
+					type: "Detail",
+					title: "Error detail",
+					size: { w: 12,h: 16 },
+					dependencies: { values: "errordetail-data" },
+					props: {
+						cols: [
+							{ header: "Handle",field: "handledAt" },
+							{ header: "Type",field: "type" },
+							{ header: "Message",field: "innermostMessage" },
+							{ header: "Conversation ID",field: "conversationId" },
+							{ header: "Operation ID",field: "operation_Id" },
+							{ header: "Timestamp",field: "timestamp" },
+							{ header: "Details",field: "details" }
+						]
+					}
+				}
+			]
+		},
+    {
+			id: "userRetention",
+			width: "50%",
+			params: ["title", "queryspan"],
+			dataSources: [ ],
+			elements: [{
+					id: "user-retention-table",
+					type: "Table",
+					title: "User Retention",
+					size: { w: 12, h: 16 },
+					dependencies: { values: "retention" },
+					props: {
+						cols: [
+              { header: "Time Span", field: "timespan" },
+              { header: "Retention", field: "retention" },
+              { header: "Returning", field: "returning" },
+              { header: "Unique Users", field: "unique" }
+            ]
+					}
+				}]
+		}
+	]
 }
