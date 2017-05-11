@@ -26,6 +26,9 @@
     "cookie-parser": "^1.4.3",
     "express": "^4.15.2",
     "express-session": "^1.15.2",
+    "leaflet": "^1.0.3",
+    "leaflet-geosearch": "^2.2.0",
+    "leaflet.markercluster": "^1.0.5",
     "lodash": "^4.17.4",
     "material-colors": "^1.2.5",
     "moment": "^2.18.0",
@@ -37,19 +40,23 @@
     "react-addons-transition-group": "^15.4.2",
     "react-dom": "^15.4.2",
     "react-grid-layout": "^0.14.4",
+    "react-leaflet": "^1.1.6",
+    "react-leaflet-div-icon": "^1.0.2",
+    "react-leaflet-markercluster": "^1.1.5",
     "react-md": "^1.0.10",
+    "react-render-html": "^0.1.6",
     "react-router": "3.0.0",
     "recharts": "^0.21.2",
     "xhr-request": "^1.0.1"
   },
   "scripts": {
     "css:build": "node-sass src/ -o src/",
-    "css:watch": "yarn run css:build && node-sass src/ -o src/ --watch --recursive",
+    "css:watch": "yarn css:build && node-sass src/ -o src/ --watch --recursive",
     "server:start": "yarn start",
     "client:start": "react-scripts-ts start",
     "start:dev": "npm-run-all -p css:watch server:start client:start",
     "start": "node server",
-    "build": "npm run css:build && react-scripts-ts build",
+    "build": "yarn css:build && react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom"
   }
 }

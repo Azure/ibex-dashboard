@@ -11,7 +11,7 @@ This is an application insights based project that displays a bots analytics das
 1. Clone
 2. [Get an Application Insights App ID and Api Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID)
 
-4. Run `npm run start:dev`
+4. Run `yarn start:dev`
 5. Open **http://localhost:3000/**
 6. Run through setup and afterwards, fill in **API Key** and **Application ID**
 
@@ -67,14 +67,13 @@ Thinking about integrating with:
 ```bash
 git clone https://github.com/CatalystCode/ibex-dashboard.git
 cd ibex-dashboard
-npm install -g create-react-app
 npm install -g yarn
-yarn install
+yarn
 ```
 
 ### Dev
 ```bash
-yarn run start:dev
+yarn start:dev
 ```
 
 ### Test Watcher
@@ -82,12 +81,12 @@ Runs the test watcher in an interactive mode.
 By default, runs tests related to files changes since the last commit.
 
 ```bash
-npm test
+yarn test
 ```
 
 ### Build for Production
 ```bash
-npm run build
+yarn build
 ```
 
 ## What’s Inside?

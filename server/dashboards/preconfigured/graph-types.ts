@@ -1,10 +1,15 @@
-return {
-  id: 'bot_analytics_dashboard',
-  name: 'Bot Analytics Dashboard',
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash'; 
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ {
+  id: 'graph_types',
+  name: 'Graph Types',
   icon: "dashboard",
-	url: "bot_analytics_dashboard",
-  description: 'Microsoft Bot Framework based analytics',
+	url: "graph_types",
+  description: 'Display the various graph types in action',
   preview: '/images/bot-framework-preview.png',
+	html: ``,
   config: {
     connections: { },
     layout: {
@@ -12,362 +17,8 @@ return {
 			isResizable: true,
 			rowHeight: 30,
 			verticalCompact: false,
-			cols: {
-				lg: 12,
-				md: 10,
-				sm: 6,
-				xs: 4,
-				xxs: 2
-			},
-			breakpoints: {
-				lg: 1200,
-				md: 996,
-				sm: 768,
-				xs: 480,
-				xxs: 0
-			},
-			layouts: {
-				lg: [{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 3,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 8,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 8,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 8,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 8,
-						y: 3,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				md: [{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 3,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 6,
-						y: 8,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 8,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 24,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 6,
-						y: 11,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				sm: [{
-						w: 4,
-						h: 7,
-						x: 0,
-						y: 3,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 10,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 0,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 31,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 39,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 0,
-						y: 18,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				xxs: [{
-						w: 2,
-						h: 7,
-						x: 0,
-						y: 5,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 12,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 5,
-						x: 0,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 33,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 41,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 13,
-						x: 0,
-						y: 20,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}]
-			}
+			cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
+			breakpoints: { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }
 		}
   },
   dataSources: [
@@ -501,19 +152,20 @@ return {
 							// Conversion Handling
 							// ===================
 
-							var total = _.find(conversions, { name: 'message.convert.start' });
-							var successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+              let total, successful;
+							total = _.find(conversions, { name: 'message.convert.start' });
+							successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
 
 							if (!total) {
 								return null;
 							}
 
 							var displayValues = [
-								{ label: 'Successful', count: successful.event_count },
-								{ label: 'Failed', count: total.event_count - successful.event_count + 5 },
+								{ label: 'Successful', count: successful.event_count }, 
+								{ label: 'Failed', count: total.event_count - successful.event_count + 5 }, 
 							];
 
-							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1);
+							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1); 
 
 							return {
 								"conversions-displayValues": displayValues,
@@ -673,6 +325,7 @@ return {
 							};
 						}
           },
+          // BUILT INTO AI -Activity- 
           channelActivity: {
             query: () => `` + 
                     ` where name == 'Activity' | ` + 
@@ -696,6 +349,25 @@ return {
 							};
 						}
           },
+          mapActivity: {
+						query: () => `` +
+                    ` extend city=client_City, region=client_CountryOrRegion | ` + 
+                    ` extend location=strcat(client_City, ', ', client_CountryOrRegion) | ` + 
+                    ` summarize location_count=count() by region, city, location | ` +
+                    ` order by region, location_count `,
+						mappings: {
+							region: (val) => val || 'unknown',
+							city: (val) => val || 'unknown',
+							location: (val) => val || 'unknown',
+							location_count: (val) => val || 0
+						},
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: (mapActivity) => {
+							return {
+								"mapActivity-locations": mapActivity
+							};
+						}
+					},
 					sentiments: {
 						query: () => `` +
 									` extend score=customDimensions.score, text=customDimensions.text | ` +
@@ -710,7 +382,8 @@ return {
 								{ name: 'Negative', value: Math.round((1 - sentiments[0].sentiment) * 100) },
 							];
 
-							var sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
+							let sentimentValue;
+              sentimentValue = (sentiments[0].sentiment * 100).toFixed(1);
 
 							return {
 								"sentiment-value": values,
@@ -730,9 +403,9 @@ return {
       type: "ApplicationInsights/Query",
       dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
       params: {
-        query: () => ` exceptions` +
-            ` | summarize count_error=count() by handledAt, innermostMessage` +
-            ` | order by count_error desc `,
+        query: () => `
+                | summarize count_error=count() by handledAt, innermostMessage
+                | order by count_error desc `,
         mappings: {
           "handledAt": (val) => val || "Unknown",
           "count": (val, row) => row.count_error
@@ -765,6 +438,17 @@ return {
 					handledAtTotal_icon: handledAtTotal > 0 ? 'bug_report' : 'done',
           handledAtUncaught
         };
+      }
+    },
+    {
+      id: "total-users",
+      type: "ApplicationInsights/Query",
+      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
+      params: { //Top 10 countries by traffic in the past 24 hours
+        query: () => ` requests
+            | where  timestamp > ago(24h)
+            | summarize country_count=count() by client_CountryOrRegion 
+            | top 10 by country_count`
       }
     }
   ],
@@ -871,6 +555,7 @@ return {
 				card_users_value: "ai:users-value",
 				card_users_heading: "::Total Users",
 				card_users_icon: "ai:users-icon",
+				card_users_onClick: "::onUsersClick",
 
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
@@ -884,6 +569,13 @@ return {
 						title: "args:heading",
 						type: "args:type",
 						innermostMessage: "args:innermostMessage",
+						queryspan: "timespan:queryTimespan"
+					}
+				},
+				onUsersClick: {
+					action: "dialog:userRentention",
+					params: {
+						title: "args:heading",
 						queryspan: "timespan:queryTimespan"
 					}
 				}
@@ -935,7 +627,58 @@ return {
         zDataKey: "count",
         zRange: [10,500]
       }
-    }
+    },
+    {
+			id: "map",
+			type: "MapData",
+			title: "Map Activity",
+			subtitle: "Monitor regional activity",
+			size: { w: 4,h: 8 },
+			dependencies: { locations: "ai:mapActivity-locations" },
+			props: { 
+        mapProps: 
+          { 
+            zoom: 1,
+            maxZoom: 6,
+          } 
+      }
+    },
+    {
+			id: "radar",
+			type: "RadarChartCard",
+			title: "NFL and NBA Intents Radar",
+			subtitle: "Intent Count",
+			size: {
+				w: 4,
+				h: 8
+			},
+			dependencies: { },
+			props: { }
+		},
+    {
+			id: "simpleradial",
+			type: "SimpleRadialBarChartCard",
+			title: "Simpl Radial Intent Count",
+			subtitle: "Total numbef of engagment with each intent",
+			size: {
+				w: 4,
+				h: 8
+			},
+			dependencies: { },
+			props: { }
+		},
+    {
+			id: "radial",
+			type: "RadialBarChartCard",
+			title: "Radial Intent Count",
+			subtitle: "Total numbef of engagment with each intent",
+			size: {
+				w: 4,
+				h: 8
+			},
+			dependencies: {	},
+			props: { }
+		}
   ],
   dialogs: [
     {
@@ -1191,6 +934,84 @@ return {
           }]
         }
       }]
-    }
-  ]
+    },
+		{
+			id: "userRentention",
+			width: "90%",
+			params: ["title", "queryspan"],
+			dataSources: [
+				{
+					id: "userRententionDatasource",
+					type: "ApplicationInsights/Query",
+					dependencies: {
+						queryTimespan: "dialog_userRentention:queryspan"
+					},
+					params: {   
+						query: ({ queryTimespan }) => ` customEvents |
+							where timestamp > ago(90d) |
+							extend uniqueUser=tostring(customDimensions.from) |
+							summarize firstUsedAppTimeStamp=min(timestamp), lastUsedAppTimeStamp=max(timestamp) by uniqueUser |
+							summarize
+									totalUniquesUsersIn90d = count(uniqueUser),
+									totalUniquesUsersIn24hr = countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr)),
+									totalUniquesUsersIn7d = countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d)),
+									totalUniquesUsersIn30d = countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d)),
+									rententionOver24hr = floor( ((countif(lastUsedAppTimeStamp > ago(24hr) and firstUsedAppTimeStamp <= ago(24hr))) / (count(uniqueUser)) * 100) , 1),
+									rententionOver7d = floor( ((countif(lastUsedAppTimeStamp > ago(7d) and firstUsedAppTimeStamp <= ago(7d))) / (count(uniqueUser)) * 100) , 1),
+									rententionOver30d = floor( ((countif(lastUsedAppTimeStamp > ago(30d) and firstUsedAppTimeStamp <= ago(30d))) / (count(uniqueUser)) * 100) , 1)`,
+						mappings: { }
+					},
+					calculated: (state) => {
+						var { values } = state;
+
+						if (!values || !values.length) { return; }
+
+						let userRententionData = {};
+						userRententionData = [
+							{
+								timeSpan: "24 hours",
+								retention: values[0].rententionOver24hr,
+								uniqueUsers: values[0].totalUniquesUsersIn24hr
+							},
+							{
+								timeSpan: "7 days",
+								retention: values[0].rententionOver7d,
+								uniqueUsers: values[0].totalUniquesUsersIn7d
+							},
+							{
+								timeSpan: "30 days",
+								retention: values[0].rententionOver30d,
+								uniqueUsers: values[0].totalUniquesUsersIn30d
+							},
+						]
+						return { userRententionData };
+					}
+				}],
+			elements: [{
+					id: "user-retention-table",
+					type: "Table",
+					title: "User Retention",
+					size: {
+						w: 12,
+						h: 16
+					},
+					dependencies: {
+						values: "userRententionDatasource:userRententionData"
+					},
+					props: {
+						cols: [{
+								header: "Time Span",
+								field: "timeSpan"
+							},{
+								header: "Rentention",
+								field: "retention"
+							},{
+								header: "Unique Users",
+								field: "uniqueUsers"
+							}]
+					},
+					actions: { }
+				}]
+		}
+	]
 }
