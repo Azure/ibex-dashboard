@@ -41,6 +41,9 @@ const provider = new EsriProvider(); // does the search from address to lng and 
 
 interface IMapDataProps extends IGenericProps {
   mapProps: any;
+  props: {
+    searchLocations: boolean;
+  }
 };
 
 interface IMapDataState extends IGenericState {
@@ -51,8 +54,8 @@ interface IMapDataState extends IGenericState {
 export default class MapData extends GenericComponent<IMapDataProps, IMapDataState> {
 
   static defaultProps = {
-    center: [34.704929, -81.210251],
-    zoom: 2,
+    center: [34.704929, -25.210251],
+    zoom: 1.4,
     maxZoom: 8,
   };
 
@@ -70,16 +73,23 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
   }
 
   shouldComponentUpdate(nextProps: any, nextState: any) {
-    if (!_.isEqual(this.state.locations, nextState.locations)) {
+    if (_.isEqual(this.state.locations, nextState.locations) &&
+        _.isEqual(this.state.markers, nextState.markers)) {
       return false;
     }
     return true;
   }
 
   componentDidUpdate() {
+    const { searchLocations } = this.props.props;
     const { locations } = this.state;
 
     if (!locations || !locations.length) { return; }
+
+    if (!searchLocations) {
+      this.setState({ markers: locations });
+      return;
+    }
 
     let promises = [];
     let markers = [];
@@ -112,8 +122,7 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
 
   render() {
     const { markers } = this.state;
-    const { title, subtitle, props } = this.props;
-    const { mapProps } = props;
+    const { title, subtitle, props, mapProps } = this.props;
 
     if (!markers) {
       return null;
@@ -146,6 +155,9 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
           />
           <MarkerClusterGroup
             markers={markers}
+            options={{
+              maxClusterRadius: 10,
+            }}
             wrapperOptions={{ enableDefaultStyle: true }}
           />
         </Map>
