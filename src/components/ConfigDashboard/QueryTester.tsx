@@ -13,6 +13,7 @@ interface IQueryTesterState {
   query:string;
   response:string;
   loadingData:boolean;
+  responseHeight:number;
 }
 
 interface IQueryTesterProps {
@@ -36,7 +37,8 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
     showDialog:false,
     query:"",
     response:"",
-    loadingData:false
+    loadingData:false,
+    responseHeight:100
   };
 
   closeDialog() {
@@ -50,14 +52,15 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
     (new ApplicationInsightsApi(this.props.applicationID, this.props.apiKey)).callQuery(this.state.query,(json)=>{
       //and later turn off indicator
       var response =  JSON.stringify(json);
-      this.setState({loadingData:false, response:response});
+      var h = document.getElementById('testerForm').clientHeight-185;
+      this.setState({loadingData:false, response:response,responseHeight:h});
     });
   }
   onQueryChange(value: string, event: any) {
     this.setState({query:value});
   }
   render(){
-      var {showDialog,query,response,loadingData} = this.state;
+      var {showDialog,query,response,loadingData,responseHeight} = this.state;
       const nav = <Button icon onClick={this.closeDialog}>close</Button>;
       const action = <Button flat label="Send" onClick={this.submitQuery} />;
       return (
@@ -91,12 +94,13 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
                     <Divider />
                     <TextField
                       id="responseView"
+                      ref="responseView"
                       block
                       paddedBlock
                       rows={4}
                       value={response}
                       disabled
-                      inputStyle={{"max-height":"300px"}}
+                      inputStyle={{"max-height":responseHeight}}
                     />
                     <div style={{"width":"100%",position:"absolute",top:130,left:0,display:(loadingData?"block":"none")}}>
                       <CircularProgress key="progress" id={"testerProgress"} />
