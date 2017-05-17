@@ -14,7 +14,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # generated files
-*.css
+src/**/*.css
 
 # generated merge temp files
 *.orig

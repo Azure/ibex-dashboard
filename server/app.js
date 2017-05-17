@@ -22,7 +22,6 @@ app.use(authRouter.authenticationMiddleware('/auth', '/api/setup'));
 app.use('/auth', authRouter.router);
 app.use('/api', apiRouter.router);
 
-app.use('/static', express.static(path.resolve(__dirname, '..', 'build', 'static')));
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
 // Always return the main index.html, so react-router render the route in the client
