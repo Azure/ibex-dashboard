@@ -38,8 +38,6 @@ export default class Sample extends DataSourcePlugin<ISampleParams> {
     return result;
   }
 
-  
-
   updateSelectedValues(dependencies: IDictionary, selectedValues: any) {
     if (Array.isArray(selectedValues)) {
       return _.extend(dependencies, { 'selectedValues': selectedValues });

@@ -12,4 +12,4 @@ export default {
   ago: (date: Date): string => {
     return moment(date).fromNow();
   }
-}
+};

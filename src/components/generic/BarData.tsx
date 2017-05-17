@@ -55,7 +55,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
         return (
           <Bar 
             key={idx} 
-            stackId='1' 
+            stackId="1" 
             dataKey={bar.name || bar} 
             fill={bar.color || ThemeColors[idx]} 
             onClick={this.handleClick} 

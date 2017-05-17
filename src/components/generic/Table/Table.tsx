@@ -115,23 +115,24 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           return <span>{moment(value[col.field]).format('MMM-DD HH:mm:ss')}</span>;
 
         case 'number':
-          return <span>{utils.kmNumber(value[col.field])}</span>
+          return <span>{utils.kmNumber(value[col.field])}</span>;
 
         case 'ago':
-          return <span>{utils.ago(value[col.field])}</span>
+          return <span>{utils.ago(value[col.field])}</span>;
 
         default:
-          if (col.secondaryField !== undefined)
+          if (col.secondaryField !== undefined) {
             return (
               <div className="table">
                 <span className="primary">{value[col.field]}</span>
                 <span className="secondary">{value[col.secondaryField]}</span>
               </div>
             );
-          else
+          } else {
             return <span>{value[col.field]}</span>;
+          }
       }
-    }
+    };
 
     const rows = pageValues.map((value, ri) => (
       <TableRow

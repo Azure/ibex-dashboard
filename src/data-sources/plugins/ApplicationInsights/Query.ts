@@ -43,7 +43,9 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
   updateDependencies(dependencies: any) {
     let emptyDependency = false;
     Object.keys(this._props.dependencies).forEach((key) => {
-      if(typeof dependencies[key] === 'undefined') emptyDependency = true;
+      if (typeof dependencies[key] === 'undefined') {
+        emptyDependency = true;
+      }
     });
 
     // If one of the dependencies is not supplied, do not run the query
@@ -105,8 +107,9 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
         body: {
           query
         }
-      }, (error, json) => {
+      },      (error, json) => {
         if (error) {
+          // tslint:disable-next-line:no-console
           console.log(error);
           return this.failure(error);
         }
@@ -215,7 +218,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
   private formatQuery(query: string, isForked: boolean = true) {
     return isForked ? ` (${query}) \n\n` : query;
   }
-
 
   private validateTimespan(props: any) {
     if (!props.dependencies.queryTimespan) {
