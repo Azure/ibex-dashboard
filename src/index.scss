@@ -1,4 +1,5 @@
 @import '../node_modules/react-md/src/scss/react-md';
+@import '../node_modules/leaflet/dist/leaflet.css';
 
 $md-primary-color: $md-cyan-500;
 $md-secondary-color: $md-pink-a-200;
@@ -196,5 +197,20 @@ h2, .md-subheading-2 {
 
   .widgets {
     top: -5px;
+  }
+}
+
+
+/*======*/
+/* Map  */
+/*======*/
+
+.leaflet-control-attribution {
+  display: none;
+}
+
+.leaflet-popup-content {
+  b {
+    font-weight: 600;
   }
 }

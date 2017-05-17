@@ -49,6 +49,14 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
       return null;
     }
 
+    if (!values || !values.length) {
+      return (
+        <Card title={title} subtitle={subtitle}>
+          <div style={{ padding: 20 }}>No data is available</div>
+        </Card>
+      );
+    }
+
     var barElements = [];
     if (values && values.length && bars) {
       barElements = bars.map((bar, idx) => {
