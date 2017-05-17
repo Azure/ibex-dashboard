@@ -3,27 +3,19 @@ import * as _ from 'lodash';
 import FontIcon from 'react-md/lib/FontIcons';
 import Switch from 'react-md/lib/SelectionControls/Switch';
 
-import BaseSettings from '../../common/BaseSettingsComponent';
+import {BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
 
-interface IAreaSettingsProps{
-    settings: IElement,
-    shouldSave: boolean
-}
-interface IAreaSettingsState{ 
-    stateSettings:IElement //we need to persist the changes in state until a save is requested
-}
 
-export default class AreaSettings extends React.Component<IAreaSettingsProps,IAreaSettingsState>{
-    constructor(props: IAreaSettingsProps) {
+export default class AreaSettings extends BaseSettings{
+
+    //abstract members implementation
+    icon = "flip_to_front";
+
+    constructor(props: IBaseSettingsProps) {
         super(props);
         this.onShowLegendChange = this.onShowLegendChange.bind(this);
     }
-    
-    state:IAreaSettingsState ={
-        stateSettings:this.props.settings
-    }
-    
-    
+     
     onShowLegendChange(checked:boolean){
         var s = this.state.stateSettings;
         s.props.showLegend = checked;
@@ -37,23 +29,23 @@ export default class AreaSettings extends React.Component<IAreaSettingsProps,IAr
     }
 
 
-    render(){
+    renderChildren(){
         var { id, dependencies, actions, props, title, subtitle, size, theme, type } = this.state.stateSettings;
         return(
-          <BaseSettings fonticon={"flip_to_front"} settings={this.props.settings} shouldSave={this.props.shouldSave} >
+          <span >
               <span className="md-cell md-cell--bottom  md-cell--6">
                   <div className="md-grid">
-                      <span className="md-cell--1 md-cell--middle"><FontIcon>insert_chart</FontIcon></span>
-                      <span className="md-cell--11 md-cell--bottom"><Switch id="props.showLegend" name="props.showLegend" label="Show legend" checked={props.showLegend} onChange={this.onShowLegendChange} /></span>
+                      <span className="md-cell--3 md-cell--middle"><FontIcon>insert_chart</FontIcon></span>
+                      <span className="md-cell--9 md-cell--bottom"><Switch id="props.showLegend" name="props.showLegend" label="Show legend" checked={props.showLegend} onChange={this.onShowLegendChange} /></span>
                   </div>
               </span>
               <span className="md-cell md-cell--bottom  md-cell--6">
                   <div className="md-grid">
-                      <span className="md-cell--1 md-cell--middle"><FontIcon>dns</FontIcon></span>
-                      <span className="md-cell--11 md-cell--bottom"><Switch id="props.isStacked" name="props.isStacked" label="Is Stacked" checked={props.isStacked} onChange={this.onIsStackedChange} /></span>
+                      <span className="md-cell--3 md-cell--middle"><FontIcon>dns</FontIcon></span>
+                      <span className="md-cell--9 md-cell--bottom"><Switch id="props.isStacked" name="props.isStacked" label="Is Stacked" checked={props.isStacked} onChange={this.onIsStackedChange} /></span>
                   </div>
               </span>
-          </BaseSettings>
+          </span>
             
         );
     }

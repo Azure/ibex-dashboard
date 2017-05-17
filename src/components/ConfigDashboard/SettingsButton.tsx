@@ -5,6 +5,8 @@ import Toolbar from 'react-md/lib/Toolbars';
 import Dialog from 'react-md/lib/Dialogs';
 import Paper from 'react-md/lib/Papers';
 import SelectField from 'react-md/lib/SelectFields';
+import { TabsContainer, Tabs, Tab } from 'react-md/lib/Tabs';
+import FontIcon from 'react-md/lib/FontIcons';
 
 import Config from '../../pages/Config';
 import SettingsStore from '../../stores/SettingsStore';
@@ -148,6 +150,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   render() {
 
     let { shouldSave,showSettingsDialog } = this.state;
+    var elementsSettings:IElementsContainer = this.state.dashboard;
     const titleMenu = (
       <SelectField
         key="titleMenu"
@@ -165,17 +168,33 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                     visible={showSettingsDialog}
                     modal
                     dialogStyle={{ width:'90%', height:'90%',"overflow-y":"auto"}}
-                    contentStyle={{minHeight:500}}
+                    
                     className='dialog-toolbar-no-padding'
                     actions={[
                         { onClick: this.onSettingsDialogSaveClick, primary: true, label: 'Save', },
                         { onClick: this.onSettingsDialogCancelClick, primary: false, label: 'Cancel' }
                     ]}
                     >
-                    <Toolbar colored title="Dashboard Configuration" titleMenu={titleMenu} />
-                    <div>
-                        {this.chooseComponentToDisplay()}
-                    </div>
+                    
+                      <TabsContainer colored panelClassName="md-grid">
+                        <Tabs tabId="settings-tabs">
+                          <Tab label={this.ConfigurationViews.ApplicationInsights}>
+                            <div className="md-cell md-cell--6">
+                              <Config standaloneView={false} shouldSave={shouldSave} />
+                            </div>
+                          </Tab>
+                          <Tab label={this.ConfigurationViews.Elements}>
+                            <ElementsSettings ElementsSettings={elementsSettings} shouldSave={shouldSave}  />
+                          </Tab>
+                          <Tab label={this.ConfigurationViews.DataSources}>
+                            <h1>{this.ConfigurationViews.DataSources} - is not implemented yet</h1>
+                          </Tab>
+                          <Tab label={this.ConfigurationViews.Filters}>
+                            <h1>{this.ConfigurationViews.Filters} - is not implemented yet</h1>
+                          </Tab>
+                        </Tabs>
+                    </TabsContainer>
+                    
             </Dialog>  
       </span>
     );

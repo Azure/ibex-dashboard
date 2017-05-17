@@ -3,26 +3,18 @@ import * as _ from 'lodash';
 import FontIcon from 'react-md/lib/FontIcons';
 import TextField from 'react-md/lib/TextFields';
 import SelectField from 'react-md/lib/SelectFields';
-import BaseSettings from '../../common/BaseSettingsComponent';
+import {BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
 import ArrayInput from '../../common/ArrayInput';
 
-interface IScatterSettingsProps{
-    settings: IElement,
-    shouldSave: boolean
-}
-interface IScatterSettingsState{ 
-    stateSettings:IElement //we need to persist the changes in state until a save is requested
-}
+export default class ScatterSettings extends BaseSettings{
 
-export default class ScatterSettings extends React.Component<IScatterSettingsProps,IScatterSettingsState>{
-    constructor(props: IScatterSettingsProps) {
+     //abstract members implementation
+    icon = "bubble_chart";
+
+    constructor(props: IBaseSettingsProps) {
         super(props);
         this.onParamChange = this.onParamChange.bind(this);
         this.onRangeParamChange = this.onRangeParamChange.bind(this);
-    }
-    
-    state:IScatterSettingsState ={
-        stateSettings:this.props.settings
     }
     
     onParamChange(value: string, event: any) {
@@ -31,6 +23,7 @@ export default class ScatterSettings extends React.Component<IScatterSettingsPro
         this.updateProperty(s,id,value);
         this.setState({stateSettings:s});
     }
+
     onParamSelectChange(newValue: string,newActiveIndex:number, event: any) {
  
            //a little hacking to get the id of the parent, because event does not contain the outer element, but only the inner li
@@ -46,16 +39,7 @@ export default class ScatterSettings extends React.Component<IScatterSettingsPro
             this.setState({stateSettings:s});
         }
     }
-    updateProperty (object:any, property: string, value: any) {
-        let arr = property.split('.');
-        let parent: any;
-        let key: string;
-        while (arr.length && (parent = object) && (key = arr.shift()) && (object = object[key])) { }
-          if (parent) {
-            parent[key] = value;
-        }
-    }
-
+    
     onRangeParamChange(value: string, event: any) {
         try{
         var s = this.state.stateSettings;
@@ -68,10 +52,10 @@ export default class ScatterSettings extends React.Component<IScatterSettingsPro
       }
     }
 
-    render(){
+    renderChildren(){
         var { id, dependencies, actions, props, title, subtitle, size, theme, type } = this.state.stateSettings;
         return(
-          <BaseSettings fonticon={"bubble_chart"} settings={this.props.settings} shouldSave={this.props.shouldSave} >
+          <span className="md-cell md-cell--bottom  md-cell--12 md-grid">
               <TextField
                             id="props.xDataKey"
                             label="xDataKey"
@@ -122,7 +106,7 @@ export default class ScatterSettings extends React.Component<IScatterSettingsPro
                               />
                       </div>
                   </div>
-          </BaseSettings>
+          </span>
             
         );
     }

@@ -10,16 +10,21 @@ import SelectField from 'react-md/lib/SelectFields';
 
 import SettingsActions from '../../actions/SettingsActions';
 
-interface IBaseSettingsProps{
-    settings: IElement,
+export interface IBaseSettingsProps {
     shouldSave: boolean,
-    fonticon: string
+    settings: IElement
 }
-export interface IBaseSettingsState{ 
-    stateSettings:IElement //we need to persist the changes in state until a save is requested
+export interface IBaseSettingsState { 
+    shouldSave: boolean,
+    stateSettings: IElement //we need to persist the changes in state until a save is requested
 }
 
-export default class BaseSettings extends React.Component<IBaseSettingsProps,IBaseSettingsState>{
+export abstract class BaseSettings extends React.Component<IBaseSettingsProps,IBaseSettingsState> {
+
+    //require derived classes to implement
+    abstract icon: string;
+    abstract renderChildren();
+    
     constructor(props: IBaseSettingsProps) {
         super(props);
 
@@ -28,11 +33,13 @@ export default class BaseSettings extends React.Component<IBaseSettingsProps,IBa
         this.componentDidUpdate =  this.componentDidUpdate.bind(this);
         this.onParamSelectChange = this.onParamSelectChange.bind(this);
         this.updateProperty = this.updateProperty.bind(this);
+        this.renderChildren = this.renderChildren.bind(this);
+        this.state = {
+          stateSettings: props.settings,
+          shouldSave: false
+        };
     }
-    
-    state:IBaseSettingsState ={
-        stateSettings:this.props.settings
-    }
+
     componentDidUpdate(prevProps, prevState){
         if(this.props.shouldSave){
             this.save();
@@ -40,7 +47,6 @@ export default class BaseSettings extends React.Component<IBaseSettingsProps,IBa
     }
 
     save() {
-
         //tell the parents save ended
         SettingsActions.saveSettingsCompleted();
     }
@@ -87,7 +93,7 @@ export default class BaseSettings extends React.Component<IBaseSettingsProps,IBa
         var { id, props, title, subtitle, size, type,  } = this.state.stateSettings;
         return(
             <Card>
-                <CardTitle title={type} avatar={<Avatar random icon={<FontIcon>{this.props.fonticon}</FontIcon>} />}/>
+                <CardTitle title={type} avatar={<Avatar random icon={<FontIcon>{this.icon}</FontIcon>} />}/>
                   <div className="md-grid">
                         <TextField
                             id="id"
@@ -142,9 +148,9 @@ export default class BaseSettings extends React.Component<IBaseSettingsProps,IBa
                                 
                             </div>
                         </div>
-                        {this.props.children}
+                        {this.renderChildren()}
                     </div>
             </Card>
         );
     }
-}
+};
