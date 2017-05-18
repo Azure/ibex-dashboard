@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import ApplicationInsightsConnection from './application-insights';
-import MongoDBConnection from './mongodb';
+import CosmosDBConnection from './cosmos-db';
 import { IConnection } from './Connection';
 
-var connectionTypes = [ ApplicationInsightsConnection, MongoDBConnection];
+var connectionTypes = [ ApplicationInsightsConnection, CosmosDBConnection];
 
 var connections: IDict<IConnection> = {};
 connectionTypes.forEach(connectionType => {
