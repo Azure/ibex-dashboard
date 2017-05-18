@@ -123,12 +123,11 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
   }
 
   private errorToMessage(error: any): string {
-    const exception = error as Error;
-    if (exception == null) {
+    if (!(error instanceof Error)) {
       return error;
     }
 
-    const message = exception.message;
+    const message = (error as Error).message;
     if (message === '[object ProgressEvent]') {
       return 'There is a problem connecting to the internet.';
     }
