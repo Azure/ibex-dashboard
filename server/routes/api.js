@@ -341,7 +341,7 @@ router.post('/cosmosdb/:id', (req, res) => {
   }, (err, doc) => {
     if (err) {
       console.log(err);
-      return this.failure(err);
+      return res.send({ error: err });
     }
     res.send(doc);
   });
