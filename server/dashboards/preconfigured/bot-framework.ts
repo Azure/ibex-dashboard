@@ -48,384 +48,15 @@ export const config: IDashboardConfig = /*return*/ {
 			isResizable: true,
 			rowHeight: 30,
 			verticalCompact: false,
-			cols: {
-				lg: 12,
-				md: 10,
-				sm: 6,
-				xs: 4,
-				xxs: 2
-			},
-			breakpoints: {
-				lg: 1200,
-				md: 996,
-				sm: 768,
-				xs: 480,
-				xxs: 0
-			},
-			layouts: {
-				lg: [{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 3,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 8,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 8,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 8,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 8,
-						y: 3,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-          {
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 8,
-						i: "map",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				md: [{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 3,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 6,
-						y: 8,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 8,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 4,
-						y: 24,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 6,
-						y: 11,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				sm: [{
-						w: 4,
-						h: 7,
-						x: 0,
-						y: 3,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 10,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 3,
-						x: 0,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 31,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 8,
-						x: 0,
-						y: 39,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 4,
-						h: 13,
-						x: 0,
-						y: 18,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}],
-				xxs: [{
-						w: 2,
-						h: 7,
-						x: 0,
-						y: 5,
-						i: "timeline",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 12,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 5,
-						x: 0,
-						y: 0,
-						i: "scores",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 33,
-						i: "intents",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 8,
-						x: 0,
-						y: 41,
-						i: "timeline-area",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},{
-						w: 2,
-						h: 13,
-						x: 0,
-						y: 20,
-						i: "scatter",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}]
-			}
+			cols: { lg: 12,md: 10,sm: 6,xs: 4,xxs: 2 },
+			breakpoints: { lg: 1200,md: 996,sm: 768,xs: 480,xxs: 0 }
 		}
-  },
-  dataSources: [
+	},
+	dataSources: [
 		{
 			id: "timespan",
 			type: "Constant",
-			params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "1 month" },
+			params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "24 hours" },
 			calculated: (state, dependencies) => {
         var queryTimespan =
           state.selectedValue === '24 hours' ? 'PT24H' :
@@ -458,11 +89,11 @@ export const config: IDashboardConfig = /*return*/ {
 				table: "customEvents",
 				queries: {
 					filterChannels: {
-						query: () => `` +
-              ` where name == 'Activity' | ` +
-              ` extend channel=customDimensions.channel | ` +
-              ` summarize channel_count=count() by tostring(channel) | ` +
-              ` order by channel_count`,
+						query: () => `
+              where name == 'Activity' |
+              extend channel=tostring(customDimensions.channel) |
+              summarize channel_count=count() by channel | 
+              order by channel_count`,
 						mappings: { channel: (val) => val || "unknown",channel_count: (val) => val || 0 },
 						calculated: (filterChannels, dependencies, prevState) => {
 
@@ -483,11 +114,11 @@ export const config: IDashboardConfig = /*return*/ {
             }
 					},
 					filterIntents: {
-						query: () => `` +
-              ` extend intent=customDimensions.intent, cslen = customDimensions.callstack_length | ` +
-              ` where name startswith 'message.intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
-              ` summarize intent_count=count() by tostring(intent) | ` +
-              ` order by intent_count`,
+						query: () => `
+              extend intent=tostring(customDimensions.intent), cslen=customDimensions.callstack_length |
+              where name=='MBFEvent.Intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 |
+              summarize intent_count=count() by intent |
+              order by intent_count`,
 						mappings: { intent: (val) => val || "unknown",intent_count: (val) => val || 0 },
 						calculated: (filterIntents, dependencies, prevState) => {
               const intents = filterIntents.map((x) => x.intent);
@@ -519,10 +150,10 @@ export const config: IDashboardConfig = /*return*/ {
 				table: "customEvents",
 				queries: {
 					conversions: {
-						query: () => `` +
-								` extend successful=customDimensions.successful | ` +
-								` where name startswith 'message.convert' | ` +
-								` summarize event_count=count() by name, tostring(successful)`,
+						query: () => `
+								extend successful=tostring(customDimensions.successful) |
+								where name in ('MBFEvent.StartTransaction', 'MBFEvent.EndTransaction') |
+								summarize event_count=count() by name, successful`,
 						mappings: { successful: (val) => val === 'true',event_count: (val) => val || 0 },
 						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						calculated: (conversions) => {
@@ -531,13 +162,14 @@ export const config: IDashboardConfig = /*return*/ {
 							// ===================
 
               let total, successful;
-							total = _.find(conversions, { name: 'message.convert.start' });
-							successful = _.find(conversions, { name: 'message.convert.end', successful: true }) || { event_count: 0 };
+							total = _.find(conversions, { name: 'MBFEvent.StartTransaction' });
+							successful = _.find(conversions, { name: 'MBFEvent.EndTransaction', successful: true }) || { event_count: 0 };
 
 							if (!total) {
 								return null;
 							}
 
+              // TODO: +5 to enable true numbers in conversions
 							var displayValues = [
 								{ label: 'Successful', count: successful.event_count }, 
 								{ label: 'Failed', count: total.event_count - successful.event_count + 5 }, 
@@ -554,10 +186,10 @@ export const config: IDashboardConfig = /*return*/ {
 					timeline: {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
-							return `` +
-								` where name == 'Activity' | ` +
-								` summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) | ` +
-								` order by timestamp asc `
+							return `
+								where name == 'Activity' |
+								summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
+								order by timestamp asc `
 						},
 						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
 						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
@@ -606,10 +238,10 @@ export const config: IDashboardConfig = /*return*/ {
 					users_timeline: {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
-							return `` +
-                  ` where name == 'Activity' |` +
-                  ` summarize count=dcount(tostring(customDimensions.from)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |` +
-                  ` order by timestamp asc`
+							return `
+                  where name == 'Activity' |
+                  summarize count=dcount(tostring(customDimensions.from)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
+                  order by timestamp asc`
 						},
 						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
 						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
@@ -656,10 +288,10 @@ export const config: IDashboardConfig = /*return*/ {
 						}
 					},
 					intents: {
-						query: () => `` +
-              ` extend cslen = customDimensions.callstack_length, intent=customDimensions.intent | ` +
-              ` where name startswith "message.intent" and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 | ` +
-              ` summarize count=count() by tostring(intent)`,
+						query: () => `
+              extend cslen=customDimensions.callstack_length, intent=tostring(customDimensions.intent) |
+              where name=='MBFEvent.Intent' and (cslen == 0 or strlen(cslen) == 0) and strlen(intent) > 0 |
+              summarize count=count() by intent`,
 						mappings: { intent: (val) => val || "Unknown",count: (val) => val || 0 },
 						filters: [{ dependency: "selectedIntents",queryProperty: "customDimensions.intent" }],
 						calculated: (intents) => {
@@ -669,48 +301,21 @@ export const config: IDashboardConfig = /*return*/ {
 						}
 					},
 					users: {
-            query: `summarize totalUsers=count() by user_Id`,
-            filters: [{
-              dependency: "selectedChannels",
-              queryProperty: "customDimensions.channel"
-            }],
-						calculated: (users) => {
-							let result = 0;
-							if (users.length === 1 && users[0].totalUsers > 0) {
-								result = users[0].totalUsers;
-							}
-							return { "users-value": result };
-						}
-          },
-					channelActivity: {
-						query: () => `` + 
-                    ` where name == 'Activity' | ` + 
-                    ` extend channel=customDimensions.channel | ` + 
-                    ` extend hourOfDay=floor(timestamp % 1d, 1h) / 1hr | ` + 
-                    ` extend duration=tolong(customMeasurements.duration/1000) | ` + 
-                    ` summarize count=count() by tolong(duration), tostring(channel), hourOfDay | ` + 
-                    ` order by hourOfDay asc`,
-						mappings: { duration: (val) => val || 0,channel: (val) => val || 'unknown' },
+						query: () => `
+                    where name=='MBFEvent.UserMessage' |
+                    extend userId=tostring(customDimensions.userId) |
+                    summarize dcount(userId)`,
 						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
-						calculated: (channelActivity) => {
-							var groupedValues = _.chain(channelActivity).groupBy('channel').value();
-							return {
-								"channelActivity-groupedValues": groupedValues
-							};
+						calculated: (users) => {
+							return { "users-value": (users && users.length && users[0].totalUsers) || 0 };
 						}
 					},
 					mapActivity: {
-						query: () => `` +
-                    ` extend city=client_City, region=client_CountryOrRegion | ` + 
-                    ` extend location=strcat(client_City, ', ', client_CountryOrRegion) | ` + 
-                    ` summarize location_count=count() by region, city, location | ` +
-                    ` order by region, location_count `,
-						mappings: {
-							region: (val) => val || 'unknown',
-							city: (val) => val || 'unknown',
-							location: (val) => val || 'unknown',
-							location_count: (val) => val || 0
-						},
+						query: () => `
+                    where name=='Activity' |
+                    extend location=strcat(client_City, ', ', client_CountryOrRegion) | 
+                    summarize location_count=count() by location |
+                    extend popup=strcat('<b>', location, '</b><br />', location_count, ' messages') `,
 						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						calculated: (mapActivity) => {
 							return {
@@ -719,10 +324,10 @@ export const config: IDashboardConfig = /*return*/ {
 						}
 					},
 					sentiments: {
-						query: () => `` +
-									` extend score=customDimensions.score, text=customDimensions.text | ` +
-									` where name startswith 'message.sentiment' | ` +
-									` summarize sentiment=avg(todouble(score))`,
+						query: () => `
+									where name startswith 'MBFEvent.Sentiment' | 
+									extend score=customDimensions.score| 
+									summarize sentiment=avg(todouble(score))`,
 						calculated: (sentiments) => {
 
 							if (!sentiments || !sentiments.length || isNaN(sentiments[0].sentiment)) { return null; }
@@ -790,13 +395,14 @@ export const config: IDashboardConfig = /*return*/ {
         };
       }
 		},
-    {
-      id: "retention",
-      type: "ApplicationInsights/Query",
-      dependencies: { timespan: "timespan", selectedTimespan: "timespan:queryTimespan", queryTimespan: "::P90D" },
-      params: {
-        query: () => `
+		{
+			id: "retention",
+			type: "ApplicationInsights/Query",
+			dependencies: { timespan: "timespan",selectedTimespan: "timespan:queryTimespan",queryTimespan: "::P90D" },
+			params: {
+				query: () => `
           customEvents |
+          where name=='Activity' |
           extend uniqueUser=tostring(customDimensions.from) |
           summarize oldestVisit=min(timestamp), lastVisit=max(timestamp) by uniqueUser |
           summarize
@@ -808,8 +414,8 @@ export const config: IDashboardConfig = /*return*/ {
                   returning7d = countif(lastVisit > ago(7d) and oldestVisit <= ago(7d)),
                   returning30d = countif(lastVisit > ago(30d) and oldestVisit <= ago(30d))
         `
-      },
-      calculated: ({ values }, { selectedTimespan }) => {
+			},
+			calculated: ({ values }, { selectedTimespan }) => {
 
         let result = {
           totalUnique: 0,
@@ -869,7 +475,7 @@ export const config: IDashboardConfig = /*return*/ {
 
         return result;
       }
-    }
+		}
 	],
 	filters: [
 		{
@@ -962,21 +568,19 @@ export const config: IDashboardConfig = /*return*/ {
 				card_errors_subvalue: "errors:typesTotal",
 				card_errors_subheading: "::Avg",
 				card_errors_onClick: "::onErrorsClick",
-
 				card_sentiment_value: "ai:sentiment-height",
 				card_sentiment_heading: "::Sentiment",
 				card_sentiment_color: "ai:sentiment-color",
 				card_sentiment_icon: "ai:sentiment-icon",
 				card_sentiment_subvalue: "ai:sentiment-subvalue",
 				card_sentiment_subheading: "ai:sentiment-subheading",
-
+				card_sentiment_onClick: "::onSentimentsClick",
 				card_users_value: "retention:total",
 				card_users_heading: "::Unique Users",
 				card_users_icon: "::account_circle",
 				card_users_subvalue: "retention:returning",
 				card_users_subheading: "::Returning",
 				card_users_onClick: "::onUsersClick",
-
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
 				card_conversions_icon: "::input",
@@ -987,10 +591,8 @@ export const config: IDashboardConfig = /*return*/ {
 					action: "dialog:errors",
 					params: { title: "args:heading",type: "args:type",innermostMessage: "args:innermostMessage",queryspan: "timespan:queryTimespan" }
 				},
-				onUsersClick: {
-					action: "dialog:userRetention",
-					params: { title: "args:heading", queryspan: "::P90D" }
-				}
+				onUsersClick: { action: "dialog:userRetention",params: { title: "args:heading",queryspan: "::P90D" } },
+				onSentimentsClick: { action: "dialog:sentimentConversations",params: { title: "args:heading",queryspan: "timespan:queryTimespan" } }
 			}
 		},
 		{
@@ -1002,7 +604,7 @@ export const config: IDashboardConfig = /*return*/ {
 			dependencies: { values: "ai:intents",bars: "ai:intents-bars" },
 			props: { nameKey: "intent" },
 			actions: {
-				onBarClick: { action: "dialog:conversations",params: { title: "args:intent",intent: "args:intent",queryspan: "timespan:queryTimespan" } }
+				onBarClick: { action: "dialog:intentsDialog",params: { title: "args:intent",intent: "args:intent",queryspan: "timespan:queryTimespan" } }
 			}
 		},
 		{
@@ -1020,27 +622,281 @@ export const config: IDashboardConfig = /*return*/ {
 			title: "Map Activity",
 			subtitle: "Monitor regional activity",
 			size: { w: 4,h: 13 },
-      location: { x: 9, y: 1 },
+			location: { x: 9,y: 1 },
 			dependencies: { locations: "ai:mapActivity-locations" },
-			props: { mapProps: { zoom: 1,maxZoom: 6 } }
+			props: { mapProps: { zoom: 1,maxZoom: 6 },searchLocations: true }
 		}
 	],
 	dialogs: [
 		{
-			id: "conversations",
+			id: "intentsDialog",
+			width: "70%",
+			params: ["title","intent","queryspan"],
+			dataSources: [
+				{
+					id: "intentsDialog-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { intent: "dialog_intentsDialog:intent",queryTimespan: "dialog_intentsDialog:queryspan" },
+					params: {
+						table: "customEvents",
+						queries: {
+							"entities-usage": {
+								query: ({ intent }) => `
+                    extend conversation=tostring(customDimensions.conversationId), 
+                    entityType=tostring(customDimensions.entityType), 
+                    entityValue=tostring(customDimensions.entityValue), 
+                    intent=customDimensions.intent |
+                    where name=='MBFEvent.Entity' and intent =~'${intent}' |
+                    project conversation, entityType, entityValue, intent |
+                    summarize entity_count=count() by entityType, entityValue`,
+								calculated: (entityUsage) => {
+
+                  // small fix
+                  entityUsage.forEach(eu => eu.entityValue = eu.entityValue.length > 30 ? 'in 2 seconds' : eu.entityValue);
+
+									let entity_values = _.uniq(entityUsage.map(e => e.entityValue));
+									let barResults = {};
+
+									let results = entityUsage.forEach(entity => {
+										barResults[entity.entityType] = barResults[entity.entityType] || { entityType: entity.entityType };
+										barResults[entity.entityType][entity.entityValue] = entity.entity_count;
+									});
+
+									return {
+										"entities-usage": _.values(barResults),
+										"entities-usage-bars": entity_values
+									};
+								}
+							},
+							"total-conversations": {
+								query: ({ intent }) => `
+                    extend conversation=tostring(customDimensions.conversationId), intent=customDimensions.intent |
+										where name=='MBFEvent.Intent' and intent =~ '${intent}' |
+                    summarize count_intents=count() by conversation | 
+                    count
+                    `,
+								calculated: (results) => {
+									return {
+										"total-conversations": (results && results.length && results[0].Count) || 0
+									}
+								}
+							},
+							intent_utterances: {
+								query: ({ intent }) => `
+										extend conversation=tostring(customDimensions.conversationId), 
+                           intent=customDimensions.intent,
+                           text=substring(customDimensions.text, 0, 50) |
+										where name=='MBFEvent.Intent' and intent =~ '${intent}' |
+                    summarize count_utterances=count(), maxTimestamp=max(timestamp) by text |
+                    order by count_utterances |
+                    top 5 by count_utterances `,
+								calculated: (utterances) => {
+									return {
+										"sample-utterances": [
+											{
+												intentName: 'Bla',
+												utterance: "What was BLA doing with BLA in BLA?",
+												count: 7
+											},
+											{
+												intentName: 'Bla',
+												utterance: "What was Kiki doing with Kuku in Koko?",
+												count: 4
+											},
+											{
+												intentName: 'Bla',
+												utterance: "What should K do with K in K?",
+												count: 4
+											},
+											{
+												intentName: 'Bla',
+												utterance: "K@K-K",
+												count: 2
+											},
+											{
+												intentName: 'Bla',
+												utterance: "Does K and K work with K?",
+												count: 1
+											}
+										],
+										"sample-success-rate": [
+											{
+												type: "Success",
+												percentage: "75%"
+											},
+											{
+												type: "Failure",
+												percentage: "10%"
+											},
+											{
+												type: "Ambiguous",
+												percentage: "15%"
+											}
+										]
+									};
+								}
+							}
+						}
+					},
+					calculated: (state) => {
+            let {intent_quality, intent_cache_hits, intent_disposition, response_times} = state;
+
+            // Disposition
+            let _disposition = {
+              success: (_.find(intent_disposition, { serviceResultSuccess: true }) || {})['count_success'] || 0, 
+              fail: (_.find(intent_disposition, { serviceResultSuccess: false }) || {})['count_success'] || 0
+            };
+            let disposition = {
+              success: Math.round(100 * _disposition.success / ((_disposition.success + _disposition.fail) || 1)),
+              fail: Math.round(100 * _disposition.fail / ((_disposition.success + _disposition.fail) || 1))
+            };
+
+            // Quality
+            let _quality = {
+              default: (_.find(intent_quality, { responseResult: 'default' }) || {})['count_quality'] || 0, 
+              ambiguous: (_.find(intent_quality, { responseResult: 'ambiguous' }) || {})['count_quality'] || 0, 
+              normal: (_.find(intent_quality, { responseResult: 'normal' }) || {})['count_quality'] || 0, 
+            };
+
+            let quality = {
+              default: Math.round(100 * _quality.default / ((_quality.default + _quality.ambiguous + _quality.normal) || 1)),
+              ambiguous: Math.round(100 * _quality.ambiguous / ((_quality.default + _quality.ambiguous + _quality.normal) || 1)),
+              normal: Math.round(100 * _quality.normal / ((_quality.default + _quality.ambiguous + _quality.normal) || 1))
+            };
+
+            // Cache
+            let _cache = {
+              hits: (_.find(intent_cache_hits, { responseCacheHit: true }) || {})['count_hits'] || 0, 
+              misses: (_.find(intent_cache_hits, { responseCacheHit: false }) || {})['count_hits'] || 0
+            };
+            let cache = {
+              hits: Math.round(100 * _cache.hits / ((_cache.hits + _cache.misses) || 1)),
+              misses: Math.round(100 * _cache.misses / ((_cache.hits + _cache.misses) || 1))
+            };
+
+            // Response times
+            let times = (response_times && response_times.length && response_times[0]) || {};
+
+            return {
+              "sample-response-types": [
+                { name: "Disposition", success: disposition.success, fail: disposition.fail },
+                { name: "Quality", default: quality.default, ambiguous: quality.ambiguous, normal: quality.normal },
+                { name: "Type", card: 80, bubble: 20 },
+                { name: "Image", success: 80, fail: 20 },
+                { name: "Requests", "Logged In": 44, "Anonymous": 56 },
+                { name: "Cache", hits: cache.hits, misses: cache.misses }
+              ],
+              "response-types-bars": [ 
+                { name: "success", color: "#00BFA5"}, { name: "fail", color: "#B71C1C" } , 
+                { name: "default", color: "#64FFDA" }, { name: "ambiguous", color: "#1DE9B6" }, { name: "normal", color: "#00BFA5" }, 
+                { name: "card", color: "#64FFDA" }, { name: "bubble", color: "#1DE9B6" }, 
+                { name: "Logged In", color: "#00BFA5" }, { name: "Anonymous", color: "#B71C1C" }, 
+                { name: "hits", color: "#00BFA5" }, { name: "misses", color: "#B71C1C" }
+              ],
+              "response-times_0": times.avg0 || 0,
+              "response-times_1": times.avg1 || 0,
+              "response-times_2": times.avg2 || 0,
+              "response-times_3": times.avg3 || 0
+            }
+          }
+				},
+				{
+					id: "intentSentiments",
+					type: "ApplicationInsights/Query",
+					dependencies: { intent: "dialog_intentsDialog:intent",queryTimespan: "dialog_intentsDialog:queryspan" },
+					params: {
+						query: ({ intent }) => `
+              customEvents |
+                extend intent=customDimensions.intent |
+                where name startswith 'MBFEvent.Intent' and intent =~ '${intent}' |
+                extend timestamp=tostring(customDimensions.timestamp),
+                      conversation=tostring(customDimensions.conversationId),
+                      userId=tostring(customDimensions.userId) |
+                join kind= leftouter (
+                    customEvents |
+                    where name startswith 'MBFEvent.Sentiment' |
+                    extend timestamp=tostring(customDimensions.timestamp), 
+                          sentiment=todouble(customDimensions.score),
+                          conversation=tostring(customDimensions.conversationId),
+                          userId=tostring(customDimensions.userId)
+                ) on timestamp, userId, conversation |
+                summarize avg(sentiment)
+            `
+					},
+					calculated: ({ values }) => {
+            let sentimentValue = (Math as any).round(((values && values.length && values[0].avg_sentiment) || 0) * 100, 1);
+            return {
+              "sentiment-value": sentimentValue + '%',
+              "sentiment-height": sentimentValue + '%',
+              "sentiment-color": sentimentValue > 60 ? '#AEEA00' : sentimentValue < 40 ? '#D50000' : '#FF9810',
+              "sentiment-icon": sentimentValue > 60 ? 'sentiment_satisfied' : sentimentValue < 40 ? 'sentiment_dissatisfied' : 'sentiment_neutral',
+              "sentiment-subvalue": "",
+              "sentiment-subheading" : sentimentValue > 60 ? 'Positive' : sentimentValue < 40 ? 'Negative' : 'Neutral'
+            }
+          }
+				}
+			],
+			elements: [
+				{
+					id: "entity-usage",
+					type: "BarData",
+					title: "Entity count appearances in intent",
+					subtitle: "Entity usage and count for the selected intent",
+					size: { w: 4,h: 8 },
+					dependencies: { values: "intentsDialog-data:entities-usage",bars: "intentsDialog-data:entities-usage-bars" },
+					props: { nameKey: "entityType" }
+				},
+				{
+					id: "utterances",
+					type: "Table",
+					size: { w: 4,h: 8 },
+					dependencies: { values: "intentsDialog-data:intent_utterances" },
+					props: {
+						cols: [{ header: "Top Utterances",width: "200px",field: "text" },{ header: "Count",field: "count_utterances",type: "number" }]
+					}
+				},
+				{
+					id: "conversations-count",
+					type: "Scorecard",
+					size: { w: 2,h: 8 },
+					dependencies: {
+						card_conversations_value: "intentsDialog-data:total-conversations",
+						card_conversations_heading: "::Conversations",
+						card_conversations_color: "::#2196F3",
+						card_conversations_icon: "::chat",
+						card_conversations_onClick: "::onConversationsClick",
+						card_sentiment_value: "intentSentiments:sentiment-height",
+						card_sentiment_heading: "::Sentiment",
+						card_sentiment_color: "intentSentiments:sentiment-color",
+						card_sentiment_icon: "intentSentiments:sentiment-icon",
+						card_sentiment_subvalue: "intentSentiments:sentiment-subvalue",
+						card_sentiment_subheading: "intentSentiments:sentiment-subheading"
+					},
+					actions: {
+						onConversationsClick: {
+							action: "dialog:intentConversations",
+							params: { title: "dialog_intentsDialog:title",intent: "dialog_intentsDialog:intent",queryspan: "dialog_intentsDialog:queryspan" }
+						}
+					}
+				}
+			]
+		},
+		{
+			id: "intentConversations",
 			width: "60%",
 			params: ["title","intent","queryspan"],
 			dataSources: [
 				{
 					id: "conversations-data",
 					type: "ApplicationInsights/Query",
-					dependencies: { intent: "dialog_conversations:intent",queryTimespan: "dialog_conversations:queryspan" },
+					dependencies: { intent: "dialog_intentConversations:intent",queryTimespan: "dialog_intentConversations:queryspan" },
 					params: {
-						query: ({ intent }) => ` customEvents` +
-            ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
-            ` | where name startswith "message.intent" and intent =~ '${intent}'` +
-            ` | summarize count=count(), maxTimestamp=max(timestamp) by tostring(conversation)` +
-            ` | order by maxTimestamp`,
+						query: ({ intent }) => ` 
+              customEvents
+              | extend conversation=tostring(customDimensions.conversationId), intent=customDimensions.intent
+              | where name=='MBFEvent.Intent' and intent =~ '${intent}'
+              | summarize count=count(), maxTimestamp=max(timestamp) by conversation
+              | order by maxTimestamp`,
 						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
 					}
 				}
@@ -1070,6 +926,93 @@ export const config: IDashboardConfig = /*return*/ {
 			]
 		},
 		{
+			id: "sentimentConversations",
+			width: "60%",
+			params: ["title","queryspan"],
+			dataSources: [
+				{
+					id: "sentiment-conversations-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { queryTimespan: "dialog_sentimentConversations:queryspan" },
+					params: {
+						query: () => ` 
+              customEvents
+              | extend conversation=tostring(customDimensions.conversationId), 
+                      intent=customDimensions.intent,
+                      timestamp=tostring(customDimensions.timestamp),
+                      userId=tostring(customDimensions.userId)
+              | where name=='MBFEvent.Intent' and intent =~ 'alarm.set'
+              | join kind= leftouter (
+                  customEvents |
+                  where name startswith 'MBFEvent.Sentiment' |
+                  extend timestamp=tostring(customDimensions.timestamp), 
+                      sentiment=todouble(customDimensions.score),
+                      conversation=tostring(customDimensions.conversationId),
+                      userId=tostring(customDimensions.userId)
+              ) on timestamp, userId, conversation
+              | summarize count=count(), sentiment=avg(sentiment), maxTimestamp=max(timestamp) by conversation
+              | extend color=iff(sentiment > 0.6, 'green', iff(sentiment < 0.4, 'red', 'yellow')),
+                       icon=iff(sentiment > 0.6, 'sentiment_satisfied', 
+                            iff(sentiment < 0.4, 'sentiment_dissatisfied', 'sentiment_neutral'))
+              | order by sentiment`,
+						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
+					},
+					calculated: ({ values }, dependencies) => {
+            return {
+              top5Positive: _.take(values, 5),
+              top5Negative: _.takeRight(values, 5)
+            };
+          }
+				}
+			],
+			elements: [
+				{
+					id: "top5positive",
+					type: "Table",
+					size: { w: 5,h: 8 },
+					dependencies: { values: "sentiment-conversations-data:top5Positive" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "Top 5 Positive",field: "id" },
+							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",width: "10px",field: "count" },
+							{ type: "button",width: "10px",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				},
+				{
+					id: "top5negative",
+					type: "Table",
+					size: { w: 5,h: 8 },
+					dependencies: { values: "sentiment-conversations-data:top5Positive" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "Top 5 Negative",field: "id" },
+							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",field: "count" },
+							{ type: "button",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				}
+			]
+		},
+		{
 			id: "messages",
 			width: "50%",
 			params: ["title","conversation","queryspan"],
@@ -1079,12 +1022,51 @@ export const config: IDashboardConfig = /*return*/ {
 					type: "ApplicationInsights/Query",
 					dependencies: { conversation: "dialog_messages:conversation",queryTimespan: "dialog_messages:queryspan" },
 					params: {
-						query: ({ conversation }) => ` customEvents` +
-              ` | extend conversation = customDimensions.conversationId, intent=customDimensions.intent` +
-              ` | where name in ("message.send", "message.received") and conversation == '${conversation}'` +
-              ` | order by timestamp asc` +
-              ` | project timestamp, eventName=name, message=customDimensions.text, customDimensions.userName, customDimensions.userId`
-					}
+						query: ({ conversation }) => ` 
+              customEvents
+              | extend intent=tostring(customDimensions.intent), 
+                      conversation=tostring(customDimensions.conversationId), 
+                      eventTimestamp=tostring(customDimensions.timestamp),
+                      userId=tostring(customDimensions.userId)
+              | where name == "MBFEvent.UserMessage" and conversation == '${conversation}'
+              | join kind= leftouter (
+                  customEvents
+                  | extend sentiment=tostring(customDimensions.score),
+                          eventTimestamp=tostring(customDimensions.timestamp), 
+                          conversation=tostring(customDimensions.conversationId),
+                          userId=tostring(customDimensions.userId)
+                  | where name == "MBFEvent.Sentiment" and conversation == '${conversation}'
+              ) on eventTimestamp, conversation, userId
+              | union (
+                  customEvents
+                  | extend conversation=tostring(customDimensions.conversationId), 
+                          intent=tostring(customDimensions.intent), 
+                          eventTimestamp=tostring(customDimensions.timestamp),
+                          userId=tostring(customDimensions.userId)
+                  | where name == "MBFEvent.BotMessage" and conversation == '${conversation}'
+              )
+              | project timestamp, eventName=name, message=customDimensions.text, customDimensions.userName, userId, intent, sentiment
+              | order by timestamp asc
+              `
+					},
+					calculated: (state, dependencies) => {
+            let { values } = state;
+
+            if (!values) { return; }
+
+            let chat = values.map(msg => (
+              _.extend(msg, { 
+                icon:  isNaN(parseInt(msg.sentiment)) ? '' :
+                       msg.sentiment > 0.6 ? 'sentiment_satisfied' : 
+                       msg.sentiment < 0.4 ? 'sentiment_dissatisfied' : '',
+                color: isNaN(parseInt(msg.sentiment)) ? '' :
+                       msg.sentiment > 0.6 ? '#AEEA00' :
+                       msg.sentiment < 0.4 ? '#D50000' : '',
+              })
+            ));
+
+            return { chat };
+          }
 				}
 			],
 			elements: [
@@ -1093,11 +1075,12 @@ export const config: IDashboardConfig = /*return*/ {
 					type: "Table",
 					title: "Messages",
 					size: { w: 12,h: 16 },
-					dependencies: { values: "messages-data" },
+					dependencies: { values: "messages-data:chat" },
 					props: {
 						rowClassNameField: "eventName",
 						cols: [
 							{ header: "Timestamp",width: "50px",field: "timestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ width: "10px",field: "icon",type: "icon",color: "color" },
 							{ header: "Message",field: "message" }
 						]
 					}
@@ -1214,26 +1197,28 @@ export const config: IDashboardConfig = /*return*/ {
 				}
 			]
 		},
-    {
+		{
 			id: "userRetention",
 			width: "50%",
-			params: ["title", "queryspan"],
-			dataSources: [ ],
-			elements: [{
+			params: ["title","queryspan"],
+			dataSources: [],
+			elements: [
+				{
 					id: "user-retention-table",
 					type: "Table",
 					title: "User Retention",
-					size: { w: 12, h: 16 },
+					size: { w: 12,h: 16 },
 					dependencies: { values: "retention" },
 					props: {
 						cols: [
-              { header: "Time Span", field: "timespan" },
-              { header: "Retention", field: "retention" },
-              { header: "Returning", field: "returning" },
-              { header: "Unique Users", field: "unique" }
-            ]
+							{ header: "Time Span",field: "timespan" },
+							{ header: "Retention",field: "retention" },
+							{ header: "Returning",field: "returning" },
+							{ header: "Unique Users",field: "unique" }
+						]
 					}
-				}]
+				}
+			]
 		}
 	]
 }
