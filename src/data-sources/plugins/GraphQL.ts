@@ -39,10 +39,11 @@ export default class GraphQL extends DataSourcePlugin<IGraphQLParams> {
     const { query, variables } = params;
 
     return dispatch => {
-      request(serviceUrl, {
+      request('/graphql/query', {
         method: 'POST',
         json: true,
         body: {
+          serviceUrl: serviceUrl,
           query: query,
           variables: variables
         }
