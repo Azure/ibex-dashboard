@@ -47,8 +47,9 @@ export default class GraphQL extends DataSourcePlugin<IGraphQLParams> {
           query: query,
           variables: variables
         }
-      },      (error, json) => {
-        if (error) {
+      },      (err, json) => {
+        const error = err || (json['errors'] && json['errors'][0]);
+        if (error || json['errors']) {
           console.log(error);
           return this.failure(error);
         }
