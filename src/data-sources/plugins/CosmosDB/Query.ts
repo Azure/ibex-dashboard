@@ -62,7 +62,7 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
     const params = this._props.params;
     const query: string = this.compileQuery(params.query, dependencies);
 
-    const url = `/api/cosmosdb/${dashboardId}`;
+    const url = `/cosmosdb/dashboard/${dashboardId}`;
     const body = {
       verb: 'POST',
       databaseId: params.databaseId,
@@ -81,8 +81,11 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
         if (error || !json.Documents) {
           throw new Error(error);
         }
+        let documents = json.Documents;
+        // NB: CosmosDB prefixes certain keys with '$' which will be removed for the returned result.
+        this.remap(documents);
         let returnedResults = {
-          values: json.Documents || null
+          values: documents || null
         };
         return dispatch(returnedResults);
       });
@@ -105,5 +108,32 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
   }
 
   private validateParams(params: IQueryParams): void {
+  }
+
+  // Helper methods to strip dollar sign from JSON key names 
+  private remap(json: any) {
+    if (typeof json === 'object') {
+      return this.remapObject(json);
+    } else if (Array.isArray(json)) {
+      return this.remapArray(json);
+    } else {
+      return json;
+    }
+  }
+
+  private remapArray(arr: any[]) {
+    arr.map(this.remap);
+  }
+
+  private remapObject(obj: Object) {
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      this.remap(value);
+      if (key.startsWith('$')) {
+        const newKey = key.substr(1);
+        Object.defineProperty(obj, newKey, Object.getOwnPropertyDescriptor(obj, key));
+        delete obj[key];
+      }
+    });
   }
 }
