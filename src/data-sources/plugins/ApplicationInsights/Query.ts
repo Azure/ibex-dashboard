@@ -98,56 +98,59 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     var url = `${appInsightsUri}/${appId}/query?timespan=${queryTimespan}`;
 
     return (dispatch) => {
-      request(url, {
-        method: 'POST',
-        json: true,
-        headers: {
-          'x-api-key': apiKey
-        },
-        body: {
-          query
-        }
-      },
-      (error, json) => {
-        if (error) return this.failure(error);
-        if (json.error) {
-          return json.error.code === 'PathNotFoundError' ? 
-            this.failure(new Error(
-              `There was a problem getting results from Application Insights. Make sure the connection string is food.
-               ${JSON.stringify(json)}`)) : 
-            this.failure(json.error);
-        }
-
-        // Check if result is valid
-        let tables = this.mapAllTables(json, mappings);
-        let resultStatus: IQueryStatus[] = tables[tables.length - 1];
-        if (!resultStatus || !resultStatus.length) {
-          return dispatch(json);
-        }
-
-        // Map tables to appropriate results
-        var resultTables = tables.filter((aTable, idx) => {
-          return idx < resultStatus.length && resultStatus[idx].Kind === 'QueryResult';
-        });
-
-        let returnedResults = {
-          values: (resultTables.length && resultTables[0]) || null
-        };
-
-        tableNames.forEach((aTable: string, idx: number) => {
-          returnedResults[aTable] = resultTables.length > idx ? resultTables[idx] : null;
-          // Get state for filter selection
-          const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
-          // Extracting calculated values
-          let calc = queries[aTable].calculated;
-          if (typeof calc === 'function') {
-            var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
-            Object.assign(returnedResults, additionalValues);
+      request(
+        url, 
+        {
+          method: 'POST',
+          json: true,
+          headers: {
+            'x-api-key': apiKey
+          },
+          body: {
+            query
           }
-        });
+        }, 
+        (error, json) => {
+          if (error) { return this.failure(error); }
+          if (json.error) {
+            return json.error.code === 'PathNotFoundError' ? 
+              this.failure(new Error(
+                `There was a problem getting results from Application Insights. Make sure the connection string is food.
+                ${JSON.stringify(json)}`)) : 
+              this.failure(json.error);
+          }
 
-        return dispatch(returnedResults);
-      });
+          // Check if result is valid
+          let tables = this.mapAllTables(json, mappings);
+          let resultStatus: IQueryStatus[] = tables[tables.length - 1];
+          if (!resultStatus || !resultStatus.length) {
+            return dispatch(json);
+          }
+
+          // Map tables to appropriate results
+          var resultTables = tables.filter((aTable, idx) => {
+            return idx < resultStatus.length && resultStatus[idx].Kind === 'QueryResult';
+          });
+
+          let returnedResults = {
+            values: (resultTables.length && resultTables[0]) || null
+          };
+
+          tableNames.forEach((aTable: string, idx: number) => {
+            returnedResults[aTable] = resultTables.length > idx ? resultTables[idx] : null;
+            // Get state for filter selection
+            const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
+            // Extracting calculated values
+            let calc = queries[aTable].calculated;
+            if (typeof calc === 'function') {
+              var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
+              Object.assign(returnedResults, additionalValues);
+            }
+          });
+
+          return dispatch(returnedResults);
+        }
+      );
     };
   }
 

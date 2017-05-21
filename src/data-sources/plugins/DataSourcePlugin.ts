@@ -125,7 +125,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
   private errorToMessage(error: any): string {
     if (!(error instanceof Error)) {
 
-      if (typeof error === 'object') return JSON.stringify(error);
+      if (typeof error === 'object') { return JSON.stringify(error); }
 
       return error;
     }
