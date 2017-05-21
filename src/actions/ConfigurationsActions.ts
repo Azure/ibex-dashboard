@@ -142,7 +142,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     switch (objectType) {
       case 'object': {
 
-        if (obj === null) return result = 'null';
+        if (obj === null) { return result = 'null'; }
 
         // Iterating through all values in object
         let objectValue = '';

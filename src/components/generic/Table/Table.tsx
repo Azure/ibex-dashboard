@@ -118,10 +118,10 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           return <span style={style}>{moment(value[col.field]).format('MMM-DD HH:mm:ss')}</span>;
 
         case 'number':
-          return <span style={style}>{utils.kmNumber(value[col.field])}</span>
+          return <span style={style}>{utils.kmNumber(value[col.field])}</span>;
 
         case 'ago':
-          return <span style={style}>{utils.ago(value[col.field])}</span>
+          return <span style={style}>{utils.ago(value[col.field])}</span>;
 
         default:
           if (col.secondaryField !== undefined) {

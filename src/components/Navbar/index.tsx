@@ -61,7 +61,7 @@ export default class Navbar extends React.Component<any, any> {
         title = name;
         toolbarTitle = !dashboard.logo ? name : (
           <span>
-            <span className='title-logo'><img src={dashboard.logo} /></span>
+            <span className="title-logo"><img src={dashboard.logo} /></span>
             <span>{name}</span>
           </span>
         );

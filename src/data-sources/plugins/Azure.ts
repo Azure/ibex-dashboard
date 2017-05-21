@@ -40,7 +40,7 @@ export default class Azure extends DataSourcePlugin<IAzureParams> {
   updateDependencies(dependencies: any) {
     let emptyDependency = false;
     Object.keys(this._props.dependencies).forEach((key) => {
-      if(typeof dependencies[key] === 'undefined') emptyDependency = true;
+      if (typeof dependencies[key] === 'undefined') { emptyDependency = true; }
     });
 
     // If one of the dependencies is not supplied, do not run the query
@@ -73,23 +73,24 @@ export default class Azure extends DataSourcePlugin<IAzureParams> {
     }
 
     return (dispatch) => {
-      request('/azure/query', {
-        method: 'POST',
-        json: true,
-        body: {
-          servicePrincipalId, servicePrincipalKey, servicePrincipalDomain, subscriptionId,
-          options: {
-            url: `/subscriptions/${subscriptionId}/${type}?api-version=${apiVersion}`
+      request(
+        '/azure/query', 
+        {
+          method: 'POST',
+          json: true,
+          body: {
+            servicePrincipalId, servicePrincipalKey, servicePrincipalDomain, subscriptionId,
+            options: {
+              url: `/subscriptions/${subscriptionId}/${type}?api-version=${apiVersion}`
+            }
           }
-        }
-      }, (error, json) => {
-        if (error) {
-          console.log(error);
-          return this.failure(error);
-        }
+        }, 
+        (error, json) => {
+          if (error) { return this.failure(error); }
 
-        return dispatch({ values: json });
-      });
+          return dispatch({ values: json });
+        }
+      );
     };
   }
 
@@ -106,7 +107,7 @@ export default class Azure extends DataSourcePlugin<IAzureParams> {
 
     // if (params.query) {
     //   if (params.table || params.queries) {
-    //     throw new Error('Application Insights query should either have { query } or { table, queries } under params.');
+    //     throw new Error('AI query should either have { query } or { table, queries } under params.');
     //   }
     //   if (typeof params.query !== 'string' && typeof params.query !== 'function') {
     //     throw new Error('{ query } param should either be a function or a string.');

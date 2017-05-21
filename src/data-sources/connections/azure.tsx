@@ -28,18 +28,22 @@ class AzureConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
     let { connection } = this.props;
     connection = connection || {};
 
+    let servicePrincipalUrl = 
+      'https://docs.microsoft.com/en-us/azure/azure-resource-manager/' + 
+      'resource-group-create-service-principal-portal';
+
     return (
       <div>
         <h2 style={{ float: 'left', padding: 9 }}>Azure Connection</h2>
         <InfoDrawer 
           width={300} 
-          title='Authentication'
-          buttonIcon='help'
-          buttonTooltip='Click here to learn more about authentications'
+          title="Authentication"
+          buttonIcon="help"
+          buttonTooltip="Click here to learn more about authentications"
         >
           <div>
             Follow the instructions
-            in <a href='https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' target='_blank'>this link</a> to
+            in <a href={servicePrincipalUrl} target="_blank">this link</a> to
             get <b>Service Principal ID</b> and <b>Service Principal Key</b>
             <hr/>
             This setup will creates credential for the dashboard to query resources from Azure.
@@ -84,6 +88,6 @@ class AzureConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
         />
         
       </div>
-    )
+    );
   }
 }

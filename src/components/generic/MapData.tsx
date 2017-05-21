@@ -40,7 +40,7 @@ interface IMapDataProps extends IGenericProps {
   mapProps: any;
   props: {
     searchLocations: boolean;
-  }
+  };
 };
 
 interface IMapDataState extends IGenericState {
@@ -69,12 +69,12 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
     L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.0.2/dist/images/';
   }
 
-  compareMarkers(markers1, markers2): boolean { 
+  compareMarkers(markers1: any[], markers2: any[]): boolean { 
 
-    if (markers1 == markers2) return true;
-    if (!markers1 || ! markers2) return false;
-    if (markers1.length != markers2.length) return false;
-    return _.isEqualWith(markers1, markers2, (a, b) => a.lat == b.lat && a.lng == b.lng);
+    if (markers1 == markers2) { return true; } /* tslint:disable-line */
+    if (!markers1 || !markers2) { return false; }
+    if (markers1.length !== markers2.length) { return false; }
+    return _.isEqualWith(markers1, markers2, (a, b) => a.lat === b.lat && a.lng === b.lng);
   }
 
   shouldComponentUpdate(nextProps: any, nextState: any) {

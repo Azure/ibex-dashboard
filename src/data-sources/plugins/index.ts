@@ -4,4 +4,4 @@ import Azure from './Azure';
 export default {
   ApplicationInsightsQuery,
   Azure
-}
+};
