@@ -34,6 +34,7 @@
     "material-colors": "^1.2.5",
     "moment": "^2.18.0",
     "morgan": "^1.8.1",
+    "ms-rest-azure": "^2.1.2",
     "passport": "^0.3.2",
     "passport-azure-ad": "^3.0.5",
     "react": "^15.4.2",

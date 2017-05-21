@@ -111,7 +111,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     return { error };
   }
 
-  private getScript(source: string, callback?: () => void): void {
+  private getScript(source: string, callback?: () => void): boolean {
     let script: any = document.createElement('script');
     let prior = document.getElementsByTagName('script')[0];
     script.async = 1;
@@ -127,6 +127,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     };
 
     script.src = source;
+    return true;
   }
 
   /**
@@ -141,6 +142,8 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     
     switch (objectType) {
       case 'object': {
+
+        if (obj === null) { return result = 'null'; }
 
         // Iterating through all values in object
         let objectValue = '';

@@ -1,7 +1,7 @@
 return {
 	id: "basic_sample",
 	name: "Basic Sample",
-	icon: "dashboard",
+	icon: "extension",
 	url: "basic_sample",
 	description: "A basic sample to see how data is connected to graphs",
 	preview: "/images/bot-framework-preview.png",
