@@ -2,7 +2,7 @@ import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 import { appInsightsUri } from '../../data-sources/plugins/ApplicationInsights/common';
 
 import { mockRequests } from '../mocks/application-insights/requests';
-import dataSourcesMock from '../mocks/application-insights/dataSources';
+import dashboardMock from '../mocks/application-insights/dashboard';
 
 describe('Data Source: Application Insights: Query', () => {
 
@@ -11,8 +11,8 @@ describe('Data Source: Application Insights: Query', () => {
   beforeAll(() => {
 
     mockRequests();
-    DataSourceConnector.createDataSources({ dataSources: dataSourcesMock }, {});
-    dataSources.timespan.action.updateDependencies();
+    DataSourceConnector.createDataSources(dashboardMock, dashboardMock.config.connections);
+    dataSources = DataSourceConnector.getDataSources();
   });
 
   it ('Query for 30 months with data rows', function (done) {

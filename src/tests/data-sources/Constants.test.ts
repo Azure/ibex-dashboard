@@ -4,15 +4,19 @@ import dataSourceMock from '../mocks/dataSource';
 
 describe('Data Source: Constant', () => {
 
-  let dataSources: IDataSourceDictionary = {};
+  let dataSources: IDataSourceDictionary;
 
-  beforeAll(() => {
+  beforeAll((done) => {
     DataSourceConnector.createDataSources({ dataSources: [ dataSourceMock ]}, {});
+    dataSources = DataSourceConnector.getDataSources();
+
+    // Waiting for all defered functions to complete their execution
+    setTimeout(done, 1000);
   });
 
   it ('Check basic data == 3 rows', () => {
 
-    expect(dataSources).toHaveProperty('data');
+    expect(dataSources).toHaveProperty('data');;
     expect(dataSources.data).toHaveProperty('store');
     expect(dataSources.data).toHaveProperty('action');
     expect(dataSources.data.store).toHaveProperty('state');
