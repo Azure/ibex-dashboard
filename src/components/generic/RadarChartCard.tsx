@@ -49,12 +49,12 @@ export default class RadarChartCard extends GenericComponent<IRadarProps, IRadar
     const domain = 100;
 
     const data05 = [
-      { subject: 'Math', "NFL": 120, "NBA": 110, fullMark: domain },
-      { subject: 'Chinese', "NFL": 98, "NBA": 30, fullMark: domain },
-      { subject: 'English', "NFL": 86, "NBA": 130, fullMark: domain },
-      { subject: 'Geography', "NFL": 110, "NBA": 95, fullMark: domain },
-      { subject: 'Physics', "NFL": 102, "NBA": 90, fullMark: domain },
-      { subject: 'History', "NFL": 65, "NBA": 85, fullMark: domain },
+      { subject: 'Math', 'NFL': 120, 'NBA': 110, fullMark: domain },
+      { subject: 'Chinese', 'NFL': 98, 'NBA': 30, fullMark: domain },
+      { subject: 'English', 'NFL': 86, 'NBA': 130, fullMark: domain },
+      { subject: 'Geography', 'NFL': 110, 'NBA': 95, fullMark: domain },
+      { subject: 'Physics', 'NFL': 102, 'NBA': 90, fullMark: domain },
+      { subject: 'History', 'NFL': 65, 'NBA': 85, fullMark: domain },
     ];
 
     return (
