@@ -124,17 +124,18 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           return <span style={style}>{utils.ago(value[col.field])}</span>
 
         default:
-          if (col.secondaryField !== undefined)
+          if (col.secondaryField !== undefined) {
             return (
               <div className="table" style={style}>
                 <span className="primary">{value[col.field]}</span>
                 <span className="secondary">{value[col.secondaryField]}</span>
               </div>
             );
-          else
+          } else {
             return <span style={style}>{value[col.field]}</span>;
+          }
       }
-    }
+    };
 
     const rows = pageValues.map((value, ri) => (
       <TableRow
