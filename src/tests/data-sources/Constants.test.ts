@@ -1,17 +1,13 @@
-import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
-
-import dataSourceMock from '../mocks/dataSource';
+import { IDataSourceDictionary } from '../../data-sources';
+import { setupTests } from '../utils/setup';
+import dashboardMock from '../mocks/dashboards/constants';
 
 describe('Data Source: Constant', () => {
 
   let dataSources: IDataSourceDictionary;
 
   beforeAll((done) => {
-    DataSourceConnector.createDataSources({ dataSources: [ dataSourceMock ]}, {});
-    dataSources = DataSourceConnector.getDataSources();
-
-    // Waiting for all defered functions to complete their execution
-    setTimeout(done, 1000);
+    dataSources = setupTests(dashboardMock, done);
   });
 
   it ('Check basic data == 3 rows', () => {

@@ -9,7 +9,7 @@ import Table from '../../components/generic/Table';
 import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 
 //import dataSourceMock from '../mocks/dataSource';
-import dashboardMock from '../mocks/table';
+import dashboardMock from '../mocks/dashboards/table';
 
 describe('Table', () => {
 
@@ -39,14 +39,14 @@ describe('Table', () => {
     expect(progress.length).toBe(1);
   });
 
-  it('Rows == 3', () => {
+  it('Rows == 4', () => {
     let rows = TestUtils.scryRenderedComponentsWithType(table, TableRow);
     expect(rows.length).toBe(4);
   });
 
-  it('Rows == 25', () => {
+  it('Rows == 0', () => {
     dataSources['samples'].action.updateDependencies({
-      data_for_table: []
+      values: []
     });
     let rows = TestUtils.scryRenderedComponentsWithType(table, TableRow);
     expect(rows.length).toBe(1);

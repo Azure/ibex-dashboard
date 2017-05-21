@@ -1,9 +1,10 @@
-var someJsonValues = [
-      { id: 1, count: 2 },
-      { id: 2, count: 0 }
-    ];
+let someJsonValues = [
+  { id: 1, count: 2 },
+  { id: 2, count: 0 }
+];
 
-export default {
+import dashboard from './dashboard';
+dashboard.dataSources.push({
   id: 'data',
   type: 'Constant',
   params: {
@@ -14,4 +15,6 @@ export default {
     someJsonValues.push({ id: 3, count: 10 });
     return { someJsonValues };
   }
-}
+});
+
+export default dashboard;

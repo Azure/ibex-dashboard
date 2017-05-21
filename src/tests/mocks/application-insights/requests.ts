@@ -1,5 +1,5 @@
 import * as nock from 'nock';
-import dashboardMock from './dashboard';
+import dashboardMock from '../dashboards/application-insights';
 import query24HResponseMock from './query.24h.mock';
 import query30DResponseMock from './query.30d.mock';
 import { appInsightsUri } from '../../../data-sources/plugins/ApplicationInsights/common';
