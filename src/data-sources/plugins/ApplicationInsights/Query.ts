@@ -107,11 +107,15 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
         body: {
           query
         }
-      },      (error, json) => {
-        if (error) {
-          // tslint:disable-next-line:no-console
-          console.log(error);
-          return this.failure(error);
+      },
+      (error, json) => {
+        if (error) return this.failure(error);
+        if (json.error) {
+          return json.error.code === 'PathNotFoundError' ? 
+            this.failure(new Error(
+              `There was a problem getting results from Application Insights. Make sure the connection string is food.
+               ${JSON.stringify(json)}`)) : 
+            this.failure(json.error);
         }
 
         // Check if result is valid
