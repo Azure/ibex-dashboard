@@ -115,7 +115,12 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     let script: any = document.createElement('script');
     let prior = document.getElementsByTagName('script')[0];
     script.async = 1;
-    prior.parentNode.insertBefore(script, prior);
+
+    if (prior) {
+      prior.parentNode.insertBefore(script, prior);
+    } else {
+      document.getElementsByTagName('body')[0].appendChild(script);
+    }
 
     script.onload = script.onreadystatechange = (_, isAbort) => {
       if (isAbort || !script.readyState || /loaded|complete/.test(script.readyState) ) {
