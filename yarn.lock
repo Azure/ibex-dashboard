@@ -5261,7 +5261,7 @@ tslint-react@^2.0.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/tslint-react/-/tslint-react-2.5.0.tgz#94cd6143f6ae825c47f242c5146fc89caeadeae2"
 
-tslint@^4.0.2:
+tslint@^4.0.0, tslint@^4.0.2:
   version "4.5.1"
   resolved "https://registry.yarnpkg.com/tslint/-/tslint-4.5.1.tgz#05356871bef23a434906734006fc188336ba824b"
   dependencies:
