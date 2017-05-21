@@ -1,8 +1,8 @@
 import * as nock from 'nock';
-import dashboardMock from '../dashboards/application-insights';
+import dashboardMock from '../../dashboards/application-insights';
 import query24HResponseMock from './query.24h.mock';
 import query30DResponseMock from './query.30d.mock';
-import { appInsightsUri } from '../../../data-sources/plugins/ApplicationInsights/common';
+import { appInsightsUri } from '../../../../data-sources/plugins/ApplicationInsights/common';
 
 const { appId, apiKey } = dashboardMock.config.connections['application-insights'];
 
