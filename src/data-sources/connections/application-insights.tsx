@@ -28,18 +28,19 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
     let { connection } = this.props;
     connection = connection || {};
 
+    // tslint:disable:max-line-length
     return (
       <div>
         <h2 style={{ float: 'left', padding: 9 }}>Application Insights</h2>
         <InfoDrawer 
           width={300} 
-          title='Authentication'
-          buttonIcon='help'
-          buttonTooltip='Click here to learn more about authentications'
+          title="Authentication"
+          buttonIcon="help"
+          buttonTooltip="Click here to learn more about authentications"
         >
           <div>
             Follow the instructions
-            in <a href='https://dev.int.applicationinsights.io/documentation/Authorization/API-key-and-App-ID' target='_blank'>this link</a> to
+            in <a href="https://dev.int.applicationinsights.io/documentation/Authorization/API-key-and-App-ID" target="_blank">this link</a> to
             get <b>Application ID</b> and <b>Api Key</b>
             <hr/>
             This setup will creates credential for the dashboard to query telemetry information from Application Insights.
@@ -64,6 +65,7 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
           onChange={this.onParamChange}
         />
       </div>
-    )
+    );
+    // tslint:enable:max-line-length
   }
 }

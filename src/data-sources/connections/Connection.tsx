@@ -8,7 +8,7 @@ interface IConnection {
 
 interface IConnectionProps {
   connection: any;
-  onParamChange: (connectionKey, paramId, paramValue) => void;
+  onParamChange: (connectionKey: string, paramId: string, paramValue: string) => void;
 }
 
 abstract class ConnectionEditor<T1 extends IConnectionProps, T2> extends React.Component<T1, T2> {

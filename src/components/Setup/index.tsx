@@ -51,6 +51,7 @@ export default class Setup extends React.Component<any, ISetupState> {
   }
 
   validateEmail(email: string): boolean {
+    // tslint:disable-next-line:max-line-length
     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(email);
   }
@@ -65,7 +66,7 @@ export default class Setup extends React.Component<any, ISetupState> {
         this.setState({ admins });
         e.target.value = '';
       } else {
-        this.setState({ validEmail: false })
+        this.setState({ validEmail: false });
       }
       return false;
     }
@@ -75,7 +76,7 @@ export default class Setup extends React.Component<any, ISetupState> {
   }
 
   onSave () {
-    SetupActions.save({
+    var setupConfig = {
       admins: this.state.admins,
       stage: this.state.stage,
       enableAuthentication: this.state.enableAuthentication,
@@ -83,9 +84,8 @@ export default class Setup extends React.Component<any, ISetupState> {
       redirectUrl: this.state.redirectUrl,
       clientID: this.state.clientID,
       clientSecret: this.state.clientSecret
-    }, () => {
-      window.location.replace('/');
-    });
+    };
+    SetupActions.save(setupConfig, () => { window.location.replace('/'); });
   }
 
   onCancel () {
@@ -102,15 +102,15 @@ export default class Setup extends React.Component<any, ISetupState> {
     }
   }
 
-  onSwitchAuthenticationEnables (checked) {
+  onSwitchAuthenticationEnables(checked: boolean) {
     this.setState({ enableAuthentication: checked });
   };
 
-  onSwitchAllowHttp (checked) {
+  onSwitchAllowHttp(checked: boolean) {
     this.setState({ allowHttp: checked });
   };
 
-  onFieldChange (value: string, e: any) {
+  onFieldChange(value: string, e: any) {
     let state = {};
     state[e.target.id] = value;
     this.setState(state);
@@ -138,6 +138,7 @@ export default class Setup extends React.Component<any, ISetupState> {
       />
     ));
 
+    // tslint:disable:max-line-length
     return (
       <div style={{ width: '100%' }}>
         <Switch
@@ -149,13 +150,13 @@ export default class Setup extends React.Component<any, ISetupState> {
         />
         <InfoDrawer 
           width={300} 
-          title='Authentication'
-          buttonIcon='help'
-          buttonTooltip='Click here to learn more about authentications'
+          title="Authentication"
+          buttonIcon="help"
+          buttonTooltip="Click here to learn more about authentications"
         >
           <div>
             Follow the instructions
-            in <a href='https://auth0.com/docs/connections/enterprise/azure-active-directory' target='_blank'>this link</a> to
+            in <a href="https://auth0.com/docs/connections/enterprise/azure-active-directory" target="_blank">this link</a> to
             get <b>Client ID</b> and <b>Client Secret</b>
             <hr/>
             Once you set up authentication, the first user you will log in with, will become the administrator.
@@ -166,7 +167,7 @@ export default class Setup extends React.Component<any, ISetupState> {
 
         <br />
         {
-          enableAuthentication && 
+          enableAuthentication && (
             <div>
               <Switch
                 id="allowHttp" 
@@ -215,11 +216,12 @@ export default class Setup extends React.Component<any, ISetupState> {
                 defaultValue={clientSecret}
                 onChange={this.onFieldChange}
               />
-            </div>
+            </div>)
         }
         <Button flat primary label="Save &amp; Apply" onClick={this.onSave}>save</Button>
         <Button flat primary label="Cancel" onClick={this.onCancel}>undo</Button>
       </div>
     );
+    // tslint:enable:max-line-length
   }
 }

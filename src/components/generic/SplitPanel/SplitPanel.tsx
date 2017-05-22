@@ -135,7 +135,7 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
 
     return (
       <Card>
-        <div style={style.lhs} className='split-view'>
+        <div style={style.lhs} className="split-view">
           <List>
             {listItems}
           </List>
