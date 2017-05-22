@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import * as _ from 'lodash';
 import Button from 'react-md/lib/Buttons/Button';
 import Toolbar from 'react-md/lib/Toolbars';
 import Dialog from 'react-md/lib/Dialogs';
@@ -16,7 +16,6 @@ import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 
 interface ISettingsButtonState {
-  shouldSave: boolean;
   showSettingsDialog:boolean;
   activeConfigView:string;
   dashboard?: IDashboardConfig;
@@ -37,7 +36,6 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   };
 
   state: ISettingsButtonState = {
-    shouldSave: false,
     showSettingsDialog: false,
     activeConfigView: this.ConfigurationViews.ApplicationInsights,
     dashboard: null
@@ -46,8 +44,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   constructor(props: ISettingsButtonProps) {
     super(props);
 
-    this.save = this.save.bind(this);
-    this.doneSaving = this.doneSaving.bind(this);
+    
     this.onSettingsButtonClicked = this.onSettingsButtonClicked.bind(this);
     this.onSettingsDialogSaveClick = this.onSettingsDialogSaveClick.bind(this);
     this.onSettingsDialogCancelClick = this.onSettingsDialogCancelClick.bind(this);
@@ -55,8 +52,6 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     this.onStoreChange = this.onStoreChange.bind(this);
     this.onConfigDialogViewChange = this.onConfigDialogViewChange.bind(this);
     this.chooseComponentToDisplay =  this.chooseComponentToDisplay.bind(this);
-
-    //ConfigurationsActions.loadConfiguration();
   }
 
    
@@ -66,13 +61,11 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
       
       //initialize the dashboard state
       var configStorteState = ConfigurationsStore.getState();
-      this.setState({dashboard:configStorteState.dashboard});
+      //never work on the original object, to allow cancel.
+      var clonedDashboard = _.cloneDeep(configStorteState.dashboard);
+      this.setState({dashboard:clonedDashboard});
 
-      //update the dashbaord state on change
-      ConfigurationsStore.listen(state => {
-        var configStorteState = ConfigurationsStore.getState();
-        this.setState({dashboard:configStorteState.dashboard});
-      });
+
   }
   
   componentWillUnmount() {
@@ -92,20 +85,19 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     }
   }
 
-  save() {
-    this.setState({ shouldSave: true });
-  }
-
-  doneSaving() {
-    this.setState({ shouldSave: false });
-  }
+  
   
   onSettingsButtonClicked() {
     this.setState({ showSettingsDialog: true });
   }
 
   onSettingsDialogSaveClick() {
-      this.save();
+      var dashboard = this.state.dashboard;
+      var that = this;
+      setTimeout(function(){
+        ConfigurationsActions.saveConfiguration(dashboard);
+        that.onChildSaveCompleted();
+      },100);
   }
 
   onSettingsDialogCancelClick() {
@@ -113,7 +105,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   }
 
   onChildSaveCompleted() {
-    this.setState({ showSettingsDialog: false, shouldSave: false });
+    this.setState({ showSettingsDialog: false});
     this.props.onUpdateLayout();
   }
 
@@ -123,18 +115,18 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   ///Display component based on user selection from dropdown menue
   chooseComponentToDisplay() {
-    let { shouldSave } = this.state;
+    
     var elementsSettings:IElementsContainer = this.state.dashboard;
 
     switch(this.state.activeConfigView){
 
       case this.ConfigurationViews.ApplicationInsights:{
-        return (<Config standaloneView={false} shouldSave={shouldSave} />)
+        return (<Config standaloneView={false} />)
       }
       
       case this.ConfigurationViews.DataSources: {
         return (
-          <ElementsSettings ElementsSettings={elementsSettings} shouldSave={shouldSave}  />
+          <ElementsSettings ElementsSettings={elementsSettings} />
         );
       }
       
@@ -149,7 +141,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   render() {
 
-    let { shouldSave,showSettingsDialog } = this.state;
+    let { showSettingsDialog } = this.state;
     var elementsSettings:IElementsContainer = this.state.dashboard;
     const titleMenu = (
       <SelectField
@@ -180,11 +172,11 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                         <Tabs tabId="settings-tabs">
                           <Tab label={this.ConfigurationViews.ApplicationInsights}>
                             <div className="md-cell md-cell--6">
-                              <Config standaloneView={false} shouldSave={shouldSave} />
+                              <Config standaloneView={false}  />
                             </div>
                           </Tab>
                           <Tab label={this.ConfigurationViews.Elements}>
-                            <ElementsSettings ElementsSettings={elementsSettings} shouldSave={shouldSave}  />
+                            <ElementsSettings ElementsSettings={elementsSettings}   />
                           </Tab>
                           <Tab label={this.ConfigurationViews.DataSources}>
                             <h1>{this.ConfigurationViews.DataSources} - is not implemented yet</h1>

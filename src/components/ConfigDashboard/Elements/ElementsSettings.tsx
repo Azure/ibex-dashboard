@@ -13,8 +13,7 @@ import ElementSettingsFactory from './ElementSettingsFactory';
 import {IElementSettingsFactory,SettingsItem} from './IElementSettingsFactory';
 
 interface IElementsSettingsProps{
-    ElementsSettings: IElementsContainer,
-    shouldSave: boolean
+    ElementsSettings: IElementsContainer
 }
 interface IElementsSettingsState{ 
   selectedSettings:SettingsItem
@@ -49,7 +48,7 @@ export default class ElementsSettings extends React.Component<IElementsSettingsP
         this.setState({ selectedSettings: item });
     }
     renderSettings() {
-      var shouldSave = this.props.shouldSave;
+      
         
         //create settings element based on the 3 params
         let elem = ElementSettingsFactoryManager.getFactory().getSettingsByType(this.state.selectedSettings);
