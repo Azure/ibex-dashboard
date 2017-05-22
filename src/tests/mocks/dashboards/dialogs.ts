@@ -1,7 +1,6 @@
-import base from './dashboard';
+import { createDashboard } from './utils';
 
-let dashboard = JSON.parse(JSON.stringify(base));
-
+let dashboard = createDashboard();
 dashboard.dialogs.push({
   id: "conversations",
   width: '60%',
