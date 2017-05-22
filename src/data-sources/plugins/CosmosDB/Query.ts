@@ -16,7 +16,7 @@ interface IQueryParams {
 
 export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
   type = 'CosmosDB-Query';
-  defaultProperty = 'values';
+  defaultProperty = 'Documents';
   connectionType = connectionType.type;
 
   constructor(options: IOptions<IQueryParams>, connections: IDict<IStringDictionary>) {
@@ -85,7 +85,9 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
         // NB: CosmosDB prefixes certain keys with '$' which will be removed for the returned result.
         this.remap(documents);
         let returnedResults = {
-          values: documents || null
+          'Documents': documents || [],
+          '_count': json._count || 0,
+          '_rid': json._rid || undefined
         };
         return dispatch(returnedResults);
       });
