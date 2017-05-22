@@ -4,6 +4,8 @@ import * as _ from 'lodash';
 import Toolbar from 'react-md/lib/Toolbars';
 import Button from 'react-md/lib/Buttons';
 import Dialog from 'react-md/lib/Dialogs';
+import Divider from 'react-md/lib/Dividers';
+
 import { Spinner } from '../Spinner';
 
 import * as ReactGridLayout from 'react-grid-layout';
@@ -15,6 +17,7 @@ import ElementConnector from '../ElementConnector';
 import { loadDialogsFromDashboard } from '../generic/Dialogs';
 import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } from './DownloadFile';
 
+import SettingsButton from '../ConfigDashboard/SettingsButton';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 import VisibilityStore from '../../stores/VisibilityStore';
@@ -39,6 +42,7 @@ interface IDashboardState {
   currentBreakpoint?: string;
   layouts?: ILayouts;
   grid?: any;
+  askConfig?:boolean;
   visibilityFlags?: IDict<boolean>;
   infoVisible?: boolean;
   infoHtml?: string;
@@ -49,6 +53,8 @@ interface IDashboardProps {
 }
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
+ 
+ 
 
   layouts = {};
 
@@ -62,6 +68,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     mounted: false,
     layouts: {},
     grid: null,
+    askConfig: false,
     visibilityFlags: {},
     infoVisible: false,
     infoHtml: '',
@@ -72,18 +79,18 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     this.onBreakpointChange = this.onBreakpointChange.bind(this);
     this.onLayoutChange = this.onLayoutChange.bind(this);
-    this.onEditDashboard = this.onEditDashboard.bind(this);
+    this.onConfigDashboard = this.onConfigDashboard.bind(this);
     this.toggleEditMode = this.toggleEditMode.bind(this);
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
     this.onDeleteDashboardApprove = this.onDeleteDashboardApprove.bind(this);
     this.onDeleteDashboardCancel = this.onDeleteDashboardCancel.bind(this);
+    this.onUpdateLayout = this.onUpdateLayout.bind(this);
     this.onOpenInfo = this.onOpenInfo.bind(this);
     this.onCloseInfo = this.onCloseInfo.bind(this);
     this.onExport = this.onExport.bind(this);
     this.onCloseExport = this.onCloseExport.bind(this);
     this.onClickDownloadFile = this.onClickDownloadFile.bind(this);
     this.onChangeDownloadFormat = this.onChangeDownloadFormat.bind(this);
-
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
     });
@@ -156,9 +163,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   }
 
-  onEditDashboard() {
-    let { dashboard } = this.props;
-    window.location.replace(`/dashboard/${dashboard.id}/config`);
+  onConfigDashboard() {
+    //window.location.replace('/dashboard/config');
+    //opena dialog lightbox instead
+    this.setState({ askConfig: true });
   }
 
   toggleEditMode() {
@@ -177,6 +185,15 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ askDelete: false });
   }
 
+  onConfigDashboardCancel() {
+    this.setState({ askConfig: false });
+  }
+
+  
+  onUpdateLayout(){
+    this.setState({ editMode: !this.state.editMode });
+    this.setState({ editMode: !this.state.editMode });
+  }
   onOpenInfo(html: string) {
     this.setState({ infoVisible: true, infoHtml: html });
   }
@@ -190,6 +207,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     let downloadFiles: IDownloadFile[] = createDownloadFiles(data);
     downloadFiles.sort((a, b) => {
       return a.source === b.source ? a.filename > b.filename ? 1 : -1 : a.source > b.source ? 1 : -1 ;
+  
+
+  
+
     });
     this.setState({ askDownload: true, downloadFiles: downloadFiles });
   }
@@ -214,7 +235,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   render() {
 
     let { dashboard } = this.props;
-    var { currentBreakpoint, grid, editMode, askDelete, askDownload, downloadFiles, downloadFormat } = this.state;
+    var { currentBreakpoint, grid, editMode, askDelete,askDownload, downloadFiles, downloadFormat, askConfig } = this.state;
     var { infoVisible, infoHtml } = this.state;
     var layout = this.state.layouts[currentBreakpoint];
 
@@ -234,31 +255,29 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     // Actions to perform on an active dashboard
     let toolbarActions = [
       (
-       <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
+       <span><Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
         play_for_work
-      </Button>
+      </Button></span>
       ), 
       (
-      <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
+      <span><Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
         info
-      </Button>
+      </Button></span>
       ), (
-      <Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>
+      <span><Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>
         edit
-      </Button>
+      </Button></span>
       ), (
-      <Button key="settings" icon tooltipLabel="Connections" onClick={this.onEditDashboard}>
-        settings_applications
-      </Button>
+      <SettingsButton onUpdateLayout={this.onUpdateLayout}/>
       )
     ];
 
     if (editMode) {
       toolbarActions.push(
-        <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+        <span><Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button></span>
       );
     }
-
+    
     const fileAvatar = (downloadFormat === 'json') ? 
       <Avatar suffix="red" icon={<FontIcon>insert_drive_file</FontIcon>} /> 
       : <Avatar suffix="green" icon={<FontIcon>description</FontIcon>} /> ;
@@ -376,6 +395,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
             Are you sure you want to permanently delete this dashboard?
           </p>
         </Dialog>
+        
+
       </div>
     );
   }

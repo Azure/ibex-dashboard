@@ -12,14 +12,21 @@ import connections from '../../data-sources/connections';
 import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
 
+
+import SettingsStore from '../../stores/SettingsStore';
+import SettingsActions from '../../actions/SettingsActions';
+
 interface IConfigDashboardState {
   connections: IDictionary;
   error: string;
+  
 }
 
 interface IConfigDashboardProps {
   dashboard: IDashboardConfig;
   connections: IDictionary;
+  standaloneView:boolean;
+  shouldSave: boolean;
 }
 
 export default class ConfigDashboard extends React.Component<IConfigDashboardProps, IConfigDashboardState> {
@@ -29,15 +36,23 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     error: null
   };
 
+  
   constructor(props: any) {
     super(props);
 
     this.onSave = this.onSave.bind(this);
     this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
-    this.onCancel = this.onCancel.bind(this);
+
+    ConfigurationsActions.loadConfiguration();
   }
 
-  onParamChange(connectionKey: string, paramKey: string, value: any) {
+  componentDidUpdate(prevProps, prevState){
+    if(this.props.shouldSave){
+      this.onSave();
+    }
+  }
+
+  onParamChange(connectionKey, paramKey, value) {
     let { connections } = this.state;
     connections[connectionKey] = connections[connectionKey] || {};
     connections[connectionKey][paramKey] = value;
@@ -63,26 +78,46 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     }
 
     ConfigurationsActions.saveConfiguration(dashboard);
+
+    //tell the parents save ended
+    SettingsActions.saveSettingsCompleted();
   }
 
   onSaveGoToDashboard() {
     this.onSave();
+    if(this.props.standaloneView){
 
-    let { dashboard } = this.props;
-    
-    setTimeout(
-      () => {
-        window.location.replace(`/dashboard/${dashboard.id}`);
-      }, 
-      2000
-    );
+      //why is there a timer here and not a callback?
+      setTimeout(() => {
+        this.redirectToHomepageIfStandalone();    
+      }, 2000);
+    }
   }
 
   onCancel() {
-    let { dashboard } = this.props;
+    this.redirectToHomepageIfStandalone();    
     window.location.replace(`/dashboard/${dashboard.id}`); 
   }
 
+  redirectToHomepageIfStandalone(){
+    if(this.props.standaloneView){
+        window.location.replace('/dashboard');
+    }
+  }
+
+  displayToolbarIfStandalone() {
+    if (this.props.standaloneView) {
+      return (
+        <div>
+          <Button flat primary label="Save" onClick={this.onSave}>save</Button>
+          <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
+          <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
+        </div>
+      );
+    } else {
+      return (<span />);
+    }
+  }
   render() {
 
     if (!this.props.dashboard) {
@@ -126,11 +161,9 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
             );
           }
         })}
-
-        <br/>
-        <Button flat primary label="Save" onClick={this.onSave}>save</Button>
-        <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
-        <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
+        
+        {this.displayToolbarIfStandalone()}
+        
       </div>
     );
   }
