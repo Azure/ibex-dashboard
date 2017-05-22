@@ -21,6 +21,7 @@ export interface ITableColumnProps {
   width?: string | number;
   type?: ColType;
   click?: string;
+  color?: string;
 }
 
 export interface ITableProps extends IGenericProps {
@@ -96,14 +97,16 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
 
     let renderColumn = (col: ITableColumnProps, value: any): JSX.Element => {
+      let style = { color: col.color ? value[col.color] : null };
       switch (col.type) {
 
         case 'icon':
-          return <FontIcon>{col.value || value[col.field]}</FontIcon>;
+          return <FontIcon style={style}>{col.value || value[col.field]}</FontIcon>;
 
         case 'button':
           return (
             <Button
+              style={style}
               icon={true}
               onClick={this.onButtonClick.bind(this, col, value)}
             >
@@ -112,26 +115,27 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
           );
 
         case 'time':
-          return <span>{moment(value[col.field]).format('MMM-DD HH:mm:ss')}</span>;
+          return <span style={style}>{moment(value[col.field]).format('MMM-DD HH:mm:ss')}</span>;
 
         case 'number':
-          return <span>{utils.kmNumber(value[col.field])}</span>
+          return <span style={style}>{utils.kmNumber(value[col.field])}</span>;
 
         case 'ago':
-          return <span>{utils.ago(value[col.field])}</span>
+          return <span style={style}>{utils.ago(value[col.field])}</span>;
 
         default:
-          if (col.secondaryField !== undefined)
+          if (col.secondaryField !== undefined) {
             return (
-              <div className="table">
+              <div className="table" style={style}>
                 <span className="primary">{value[col.field]}</span>
                 <span className="secondary">{value[col.secondaryField]}</span>
               </div>
             );
-          else
-            return <span>{value[col.field]}</span>;
+          } else {
+            return <span style={style}>{value[col.field]}</span>;
+          }
       }
-    }
+    };
 
     const rows = pageValues.map((value, ri) => (
       <TableRow

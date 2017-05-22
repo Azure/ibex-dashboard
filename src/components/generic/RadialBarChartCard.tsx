@@ -65,8 +65,8 @@ export default class RadialBarChartCard extends GenericComponent<IRadarProps, IR
             outerRadius="80%"
             data={data}
           >
-            <RadialBar startAngle={90} endAngle={-270} minAngle={15} label background clockWise={true} dataKey='uv' />
-            <Legend iconSize={10} width={120} height={140} layout='vertical' verticalAlign='middle' align="right" />
+            <RadialBar startAngle={90} endAngle={-270} minAngle={15} label background clockWise={true} dataKey="uv" />
+            <Legend iconSize={10} width={120} height={140} layout="vertical" verticalAlign="middle" align="right" />
             <Tooltip />
           </RadialBarChart>
         </ResponsiveContainer>

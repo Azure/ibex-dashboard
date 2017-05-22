@@ -36,8 +36,7 @@ export class DataSourceConnector {
     }
 
     // Dynamically load the plugin from the plugins directory
-    var pluginPath = './plugins/' + config.type;
-    var PluginClass = require(pluginPath);
+    var PluginClass = require('./plugins/' + config.type);
     var plugin: any = new PluginClass.default(config, connections);
 
     // Creating actions class
@@ -65,45 +64,6 @@ export class DataSourceConnector {
     });
 
     DataSourceConnector.initializeDataSources();
-  }
-
-  private static connectDataSource(sourceDS: IDataSource) {
-    // Connect sources and dependencies
-    sourceDS.store.listen((state) => {
-
-      Object.keys(this.dataSources).forEach(checkDSId => {
-        var checkDS = this.dataSources[checkDSId];
-        var dependencies = checkDS.plugin.getDependencies() || {};
-
-        let connected = _.find(_.keys(dependencies), dependencyKey => {
-          let dependencyValue = dependencies[dependencyKey] || '';
-          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
-        })
-
-        if (connected) {
-
-          // Todo: add check that all dependencies are met
-          checkDS.action.updateDependencies.defer(state);
-        }
-      });
-
-      // Checking visibility flags
-      let visibilityState = VisibilityStore.getState() || {};
-      let flags = visibilityState.flags || {};
-      let updatedFlags = {};
-      let shouldUpdate = false;
-      Object.keys(flags).forEach(visibilityKey => {
-        let keyParts = visibilityKey.split(':');
-        if (keyParts[0] === sourceDS.id) {
-          updatedFlags[visibilityKey] = sourceDS.store.getState()[keyParts[1]];
-          shouldUpdate = true;
-        }
-      });
-
-      if (shouldUpdate) {
-        (<any>VisibilityActions.setFlags).defer(updatedFlags);
-      }
-    });
   }
 
   static initializeDataSources() {
@@ -174,7 +134,7 @@ export class DataSourceConnector {
     });
 
     if (updateVisibility) {
-      (<any>VisibilityActions.setFlags).defer(visibilityFlags);
+      (VisibilityActions.setFlags as any).defer(visibilityFlags);
     }
 
     return result;
@@ -219,10 +179,49 @@ export class DataSourceConnector {
     return this.dataSources[name];
   }
 
-  private static createActionClass(plugin: IDataSourcePlugin) : any {
+  private static connectDataSource(sourceDS: IDataSource) {
+    // Connect sources and dependencies
+    sourceDS.store.listen((state) => {
+
+      Object.keys(this.dataSources).forEach(checkDSId => {
+        var checkDS = this.dataSources[checkDSId];
+        var dependencies = checkDS.plugin.getDependencies() || {};
+
+        let connected = _.find(_.keys(dependencies), dependencyKey => {
+          let dependencyValue = dependencies[dependencyKey] || '';
+          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
+        });
+
+        if (connected) {
+
+          // Todo: add check that all dependencies are met
+          checkDS.action.updateDependencies.defer(state);
+        }
+      });
+
+      // Checking visibility flags
+      let visibilityState = VisibilityStore.getState() || {};
+      let flags = visibilityState.flags || {};
+      let updatedFlags = {};
+      let shouldUpdate = false;
+      Object.keys(flags).forEach(visibilityKey => {
+        let keyParts = visibilityKey.split(':');
+        if (keyParts[0] === sourceDS.id) {
+          updatedFlags[visibilityKey] = sourceDS.store.getState()[keyParts[1]];
+          shouldUpdate = true;
+        }
+      });
+
+      if (shouldUpdate) {
+        (VisibilityActions.setFlags as any).defer(updatedFlags);
+      }
+    });
+  }
+
+  private static createActionClass(plugin: IDataSourcePlugin): any {
     class NewActionClass {
       constructor() {}
-    };
+    }
 
     plugin.getActions().forEach(action => {
 

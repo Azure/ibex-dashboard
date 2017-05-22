@@ -51,6 +51,7 @@ export default class Navbar extends React.Component<any, any> {
     try { pathname = window.location.pathname; } catch (e) { }
 
     let navigationItems = [];
+    let toolbarTitle = null;
 
     (dashboards || []).forEach((dashboard, index) => {
       let name = dashboard.name || null;
@@ -58,6 +59,12 @@ export default class Navbar extends React.Component<any, any> {
       let active = pathname === url;
       if (!title && active && name) {
         title = name;
+        toolbarTitle = !dashboard.logo ? name : (
+          <span>
+            <span className="title-logo"><img src={dashboard.logo} /></span>
+            <span>{name}</span>
+          </span>
+        );
       }
 
       navigationItems.push(
@@ -156,7 +163,7 @@ export default class Navbar extends React.Component<any, any> {
             mobileDrawerType={drawerType}
             tabletDrawerType={drawerType}
             desktopDrawerType={drawerType}
-            toolbarTitle={title}
+            toolbarTitle={toolbarTitle}
             toolbarActions={toolbarActions}
           >
             {children}

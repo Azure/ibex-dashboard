@@ -2,9 +2,10 @@ import * as React from 'react';
 
 import ApplicationInsightsConnection from './application-insights';
 import BotFrameworkConnection from './bot-framework';
+import AzureConnection from './azure';
 import { IConnection } from './Connection';
 
-var connectionTypes = [ ApplicationInsightsConnection, BotFrameworkConnection ];
+var connectionTypes = [ ApplicationInsightsConnection, AzureConnection, BotFrameworkConnection ];
 
 var connections: IDict<IConnection> = {};
 connectionTypes.forEach(connectionType => {

@@ -57,7 +57,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
           json: true,
           body: { script: 'return ' + script }
         }, 
-        (error: any, json: any) => {
+              (error: any, json: any) => {
 
           if (error || (json && json.errors)) {
             return this.failure(error || json.errors);
@@ -95,7 +95,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
           json: true,
           body: { script: 'return ' + stringDashboard }
         }, 
-        (error: any, json: any) => {
+              (error: any, json: any) => {
 
           if (error) {
             return this.failure(error);
@@ -111,11 +111,16 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     return { error };
   }
 
-  private getScript(source: string, callback?: () => void): void {
+  private getScript(source: string, callback?: () => void): boolean {
     let script: any = document.createElement('script');
     let prior = document.getElementsByTagName('script')[0];
     script.async = 1;
-    prior.parentNode.insertBefore(script, prior);
+
+    if (prior) {
+      prior.parentNode.insertBefore(script, prior);
+    } else {
+      document.getElementsByTagName('body')[0].appendChild(script);
+    }
 
     script.onload = script.onreadystatechange = (_, isAbort) => {
       if (isAbort || !script.readyState || /loaded|complete/.test(script.readyState) ) {
@@ -127,6 +132,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     };
 
     script.src = source;
+    return true;
   }
 
   /**
@@ -135,12 +141,14 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
    */
   private objectToString(obj: Object, indent: number = 0, lf: boolean = false): string {
     
-    let result = ''; //(lf ? '\n' : '') + '\t'.repeat(indent);
+    let result = ''; // (lf ? '\n' : '') + '\t'.repeat(indent);
     let sind = '\t'.repeat(indent);
     let objectType = (Array.isArray(obj) && 'array') || typeof obj;
     
     switch (objectType) {
       case 'object': {
+
+        if (obj === null) { return result = 'null'; }
 
         // Iterating through all values in object
         let objectValue = '';
@@ -258,7 +266,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         calculated = calculated.substr('function(){return'.length, calculated.length - 'function(){return'.length - 1);
         eval('dataSource.calculated = ' + calculated); /* tslint:disable-line */
       }
-    })
+    });
   }
 }
 

@@ -72,8 +72,15 @@ export default class SimpleRadialBarChartCard extends GenericComponent<IRadarPro
             barSize={10}
             data={data}
           >
-            <RadialBar minAngle={15} label background clockWise={true} dataKey='uv' />
-            <Legend iconSize={10} width={120} height={140} layout='vertical' verticalAlign='middle' wrapperStyle={style} />
+            <RadialBar minAngle={15} label background clockWise={true} dataKey="uv" />
+            <Legend
+              iconSize={10}
+              width={120}
+              height={140}
+              layout="vertical"
+              verticalAlign="middle"
+              wrapperStyle={style}
+            />
           </RadialBarChart>
         </ResponsiveContainer>
       </Card>
