@@ -1,45 +1,25 @@
 const express = require('express');
-const path = require('path');
 const request = require('xhr-request');
 const router = new express.Router();
 const crypto = require('crypto');
 
-const paths = require('./api').paths, 
-      getFileContents = require('./api').getFileContents,
-      isValidFile = require('./api').isValidFile, 
-      getField = require('./api').getField;
+router.post('/query', (req, res) => {
+  const { host, key, verb, resourceType, databaseId, collectionId, query, parameters } = req.body;
 
-router.post('/dashboard/:id', (req, res) => {
-  const { id } = req.params;
-  const { privateDashboard } = paths();
-  const dashboardPath = path.join(privateDashboard, id + '.private.js');
-  const fileContents = getFileContents(dashboardPath);
-  if (!isValidFile(dashboardPath)) {
-    return res.send({ error: new Error('Failed to get dashboard') });
-  }
-
-  let docdb = getField(/("?cosmos-db"?:\s*)({.*?})/im, fileContents);
-  if (docdb.startsWith("{") && docdb.endsWith("}")) {
-    docdb = JSON.parse(docdb.replace(/(\s*?{\s*?|\s*?,\s*?)(['"])?([a-zA-Z0-9]+)(['"])?:/g, '$1"$3":'));
-  }
-  if (!docdb.key || !docdb.host) {
-    console.error('Missing CosmosDB host/key config');
-    return this.failure('CosmosDB host/key config required');
+  if ( !host || !key || !verb || !resourceType || !databaseId || !collectionId || !query ) {
+    console.log('Invalid request parameters');
+    return res.send({ error: 'Invalid request parameters' });
   }
 
   const date = new Date().toUTCString();
-  const verb = req.body.verb;
-  const resourceType = req.body.resourceType; //'docs';
-  const resourceLink = `dbs/${req.body.databaseId}/colls/${req.body.collectionId}`; //req.body.resourceLink;
-  const masterKey = docdb.key;
-  const auth = getAuthorizationTokenUsingMasterKey(verb, resourceType, resourceLink, date, masterKey);
+  const resourceLink = `dbs/${databaseId}/colls/${collectionId}`;
+  const auth = getAuthorizationTokenUsingMasterKey(verb, resourceType, resourceLink, date, key);
 
   let cosmosQuery = {
-    query: req.body.query,
-    parameters: req.body.parameters,
+    query: query,
+    parameters: parameters || [],
   };
 
-  const host = docdb.host;
   const url = `https://${host}.documents.azure.com/${resourceLink}/docs`;
 
   request(url, {

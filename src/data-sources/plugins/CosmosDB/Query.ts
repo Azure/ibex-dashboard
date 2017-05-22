@@ -52,18 +52,13 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
       };
     }
 
-    // Get Dashboard Id
-    const paths = location.pathname.split('/');
-    if (paths.length !== 3) {
-      throw Error('Expected location pathname:' + paths);
-    }
-    const dashboardId = paths[paths.length - 1];
-
     const params = this._props.params;
     const query: string = this.compileQuery(params.query, dependencies);
 
-    const url = `/cosmosdb/dashboard/${dashboardId}`;
+    const url = `/cosmosdb/query`;
     const body = {
+      host: host,
+      key: key,
       verb: 'POST',
       databaseId: params.databaseId,
       collectionId: params.collectionId,

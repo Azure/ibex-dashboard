@@ -292,9 +292,5 @@ router.post('/setup', (req, res) => {
 });
 
 module.exports = {
-  router,
-  paths,
-  getFileContents,
-  isValidFile,
-  getField
+  router
 }
