@@ -50,7 +50,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
     if (connectionsMissing) {
       return (
-        <ConfigDashboard dashboard={dashboard} connections={connections} standaloneView={true} shouldSave={true} />
+        <ConfigDashboard dashboardId={dashboard.id} connections={connections} standaloneView={true} />
       );
     }
 
