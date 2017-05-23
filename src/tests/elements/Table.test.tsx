@@ -26,7 +26,7 @@ describe('Table', () => {
     table = TestUtils.renderIntoDocument(<Table {...(atts as any)} />);
     TestUtils.isElementOfType(table, 'div');
 
-    setTimeout(done, 100);
+    setTimeout(done, 10);
   })
 
   it('Render inside a Card', () => {
