@@ -33,28 +33,38 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
     let { connection } = this.props;
     connection = connection || {};
 
-    // tslint:disable:max-line-length
+    let accessApiUri = 'https://dev.int.applicationinsights.io/documentation/Authorization/API-key-and-App-ID';
+
     return (
       <Card>
-          <CardTitle title={"Application Insights"} avatar={<Avatar icon={<FontIcon>receipt</FontIcon>} />} style={{float:'left'}}/>
-          <QueryTester apiKey={connection['apiKey']} applicationID={connection['appId']} buttonStyle={{float:"right", margin:10}} />
+          <CardTitle 
+            title="Application Insights" 
+            avatar={<Avatar icon={<FontIcon>receipt</FontIcon>} />} 
+            style={{ float: 'left'}}
+          />
+          <QueryTester 
+            apiKey={connection['apiKey']} 
+            applicationID={connection['appId']} 
+            buttonStyle={{ float: 'right', margin: 10 }} 
+          />
           <InfoDrawer 
             width={300} 
-            title='Authentication'
-            buttonIcon='help'
-            buttonTooltip='Click here to learn more about authentications'
+            title="Authentication"
+            buttonIcon="help"
+            buttonTooltip="Click here to learn more about authentications"
           >
             <div>
               Follow the instructions
-              in <a href='https://dev.int.applicationinsights.io/documentation/Authorization/API-key-and-App-ID' target='_blank'>this link</a> to
+              in <a href={accessApiUri} target="_blank">this link</a> to
               get <b>Application ID</b> and <b>Api Key</b>
               <hr/>
-              This setup will creates credential for the dashboard to query telemetry information from Application Insights.
+              This setup will creates credential for the dashboard to query telemetry 
+              information from Application Insights.
             </div>
           </InfoDrawer>
           <TextField
             id="appId"
-            label={'Application ID'}
+            label="Application ID"
             defaultValue={connection['appId'] || ''}
             lineDirection="center"
             placeholder="Fill in Application ID"
@@ -63,16 +73,14 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
           />
           <TextField
             id="apiKey"
-            label={'API Key'}
+            label="API Key"
             defaultValue={connection['apiKey'] || ''}
             lineDirection="center"
             placeholder="Fill in API Key"
             className="md-cell md-cell--bottom"
             onChange={this.onParamChange}
           />
-          
       </Card>
     );
-    // tslint:enable:max-line-length
   }
 }

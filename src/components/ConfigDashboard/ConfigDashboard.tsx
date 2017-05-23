@@ -11,30 +11,24 @@ import connections from '../../data-sources/connections';
 
 import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
-
-
 import SettingsStore from '../../stores/SettingsStore';
 import SettingsActions from '../../actions/SettingsActions';
 
-interface IConfigDashboardState {
-  connections: IDictionary;
-  error: string;
-  
-}
-
 interface IConfigDashboardProps {
   connections: IDictionary;
-  standaloneView:boolean;
-  dashboardId:string;
+  standaloneView: boolean;
+  dashboardId: string;
+}
+
+interface IConfigDashboardState {
+  connections: IDictionary;
 }
 
 export default class ConfigDashboard extends React.Component<IConfigDashboardProps, IConfigDashboardState> {
 
   state: IConfigDashboardState = {
-    connections: {},
-    error: null
+    connections: {}
   };
-
   
   constructor(props: any) {
     super(props);
@@ -46,25 +40,20 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     this.state.connections = this.props.connections;
   }
 
-
   onParamChange(connectionKey: string, paramKey: string, value: any) {
     let { connections } = this.state;
     connections[connectionKey] = connections[connectionKey] || {};
     connections[connectionKey][paramKey] = value;
   }
 
-  onSave() {
-    
-  }
+  onSave() { }
 
   onSaveGoToDashboard() {
     this.onSave();
-    if(this.props.standaloneView){
 
-      //why is there a timer here and not a callback?
-      setTimeout(() => {
-        this.redirectToHomepageIfStandalone();    
-      }, 2000);
+    if (this.props.standaloneView) {
+      // Todo: why is there a timer here and not a callback?
+      setTimeout(this.redirectToHomepageIfStandalone, 2000);
     }
   }
 
@@ -72,31 +61,26 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     this.redirectToHomepageIfStandalone();    
   }
 
-  redirectToHomepageIfStandalone(){
-    if(this.props.standaloneView){
-      let { dashboardId} = this.props;
-        window.location.replace(`/dashboard/${dashboardId}`); 
+  redirectToHomepageIfStandalone() {
+    if (this.props.standaloneView) {
+      let { dashboardId } = this.props;
+      window.location.replace(`/dashboard/${dashboardId}`); 
     }
   }
 
   displayToolbarIfStandalone() {
-    if (this.props.standaloneView) {
-      return (
-        <div>
-          <Button flat primary label="Save" onClick={this.onSave}>save</Button>
-          <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
-          <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
-        </div>
-      );
-    } else {
-      return null;
-    }
+    if (!this.props.standaloneView) { return null; }
+
+    return (
+      <div>
+        <Button flat primary label="Save" onClick={this.onSave}>save</Button>
+        <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
+        <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
+      </div>
+    );
   }
   render() {
-
-    
-
-    let { error,connections } = this.state;
+    let { connections } = this.state;
 
     return (
       <div style={{ width: '100%' }}>

@@ -31,6 +31,10 @@ import Avatar from 'react-md/lib/Avatars';
 import Subheader from 'react-md/lib/Subheaders';
 import Divider from 'react-md/lib/Dividers';
 
+interface IDashboardProps {
+  dashboard?: IDashboardConfig;
+}
+
 interface IDashboardState {
   editMode?: boolean;
   askDelete?: boolean;
@@ -41,20 +45,14 @@ interface IDashboardState {
   currentBreakpoint?: string;
   layouts?: ILayouts;
   grid?: any;
-  askConfig?:boolean;
+  askConfig?: boolean;
   visibilityFlags?: IDict<boolean>;
   infoVisible?: boolean;
   infoHtml?: string;
 }
 
-interface IDashboardProps {
-  dashboard?: IDashboardConfig;
-}
-
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
  
- 
-
   layouts = {};
 
   state = {
@@ -139,32 +137,30 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     // Waiting for breakpoint to change
     let currentBreakpoint = this.state.currentBreakpoint;
-    setTimeout(() => {
+    setTimeout(
+      () => {
+        if (currentBreakpoint !== this.state.currentBreakpoint) { return; }
 
-      if (currentBreakpoint !== this.state.currentBreakpoint) { return; }
+        var breakpoint = this.state.currentBreakpoint;
+        var newLayouts = this.state.layouts;
+        newLayouts[breakpoint] = layout;
+        this.setState({
+          layouts: newLayouts
+        });
 
-      var breakpoint = this.state.currentBreakpoint;
-      var newLayouts = this.state.layouts;
-      newLayouts[breakpoint] = layout;
-      this.setState({
-        layouts: newLayouts
-      });
+        // Saving layout to API
+        let { dashboard } = this.props;
+        dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
+        dashboard.config.layout.layouts[breakpoint] = layout;
 
-      // Saving layout to API
-      let { dashboard } = this.props;
-      dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
-      dashboard.config.layout.layouts[breakpoint] = layout;
-
-      if (this.state.editMode) {
-        ConfigurationsActions.saveConfiguration(dashboard);
-      }
-    },         500);
-
+        if (this.state.editMode) {
+          ConfigurationsActions.saveConfiguration(dashboard);
+        }
+      },
+      500);
   }
 
   onConfigDashboard() {
-    //window.location.replace('/dashboard/config');
-    //opena dialog lightbox instead
     this.setState({ askConfig: true });
   }
 
@@ -187,9 +183,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   onConfigDashboardCancel() {
     this.setState({ askConfig: false });
   }
-
   
-  onUpdateLayout(){
+  onUpdateLayout() {
     this.setState({ editMode: !this.state.editMode });
     this.setState({ editMode: !this.state.editMode });
   }
@@ -206,10 +201,6 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     let downloadFiles: IDownloadFile[] = createDownloadFiles(data);
     downloadFiles.sort((a, b) => {
       return a.source === b.source ? a.filename > b.filename ? 1 : -1 : a.source > b.source ? 1 : -1 ;
-  
-
-  
-
     });
     this.setState({ askDownload: true, downloadFiles: downloadFiles });
   }
@@ -234,9 +225,18 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   render() {
 
     let { dashboard } = this.props;
-    var { currentBreakpoint, grid, editMode, askDelete,askDownload, downloadFiles, downloadFormat, askConfig } = this.state;
-    var { infoVisible, infoHtml } = this.state;
-    var layout = this.state.layouts[currentBreakpoint];
+    let { 
+      currentBreakpoint, 
+      grid, 
+      editMode, 
+      askDelete,
+      askDownload, 
+      downloadFiles, 
+      downloadFormat, 
+      askConfig 
+    } = this.state;
+    let { infoVisible, infoHtml } = this.state;
+    let layout = this.state.layouts[currentBreakpoint];
 
     if (!grid) {
       return null;
@@ -273,7 +273,9 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     if (editMode) {
       toolbarActions.push(
-        <span><Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button></span>
+        <span>
+          <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+        </span>
       );
     }
     
@@ -394,8 +396,6 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
             Are you sure you want to permanently delete this dashboard?
           </p>
         </Dialog>
-        
-
       </div>
     );
   }

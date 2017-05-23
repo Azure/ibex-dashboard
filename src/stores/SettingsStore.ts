@@ -2,13 +2,13 @@ import alt, { AbstractStoreModel } from '../alt';
 
 import settingsActions from '../actions/SettingsActions';
 
-interface ISettingsStoreState {
-  isSavingSettings:boolean;
+export interface ISettingsStoreState {
+  isSavingSettings: boolean;
 }
 
 class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements ISettingsStoreState {
 
-  isSavingSettings:boolean;
+  isSavingSettings: boolean;
 
   constructor() {
     super();
