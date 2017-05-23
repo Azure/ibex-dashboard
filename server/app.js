@@ -8,6 +8,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const authRouter = require('./routes/auth');
 const apiRouter = require('./routes/api');
+const cosmosDBRouter = require('./routes/cosmos-db');
 const azureRouter = require('./routes/azure');
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 app.use(authRouter.authenticationMiddleware('/auth', '/api/setup'));
 app.use('/auth', authRouter.router);
 app.use('/api', apiRouter.router);
+app.use('/cosmosdb', cosmosDBRouter.router);
 app.use('/azure', azureRouter.router);
 
 app.use(express.static(path.resolve(__dirname, '..', 'build')));

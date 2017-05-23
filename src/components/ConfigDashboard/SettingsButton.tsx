@@ -101,7 +101,6 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
         ConfigurationsActions.loadConfiguration();
         ConfigurationsActions.loadDashboard(dashboard.id);
         this.setState({ showSettingsDialog: false});
-        //that.onChildSaveCompleted();
       },100);
   }
 
@@ -110,8 +109,6 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   }
 
   onChildSaveCompleted() {
-    this.setState({ showSettingsDialog: false});
-    this.props.onUpdateLayout();
   }
 
   onConfigDialogViewChange(newValue, newActiveIndex, event){
