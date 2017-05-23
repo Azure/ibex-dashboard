@@ -3,9 +3,9 @@ import { setupTests } from '../utils/setup';
 import { appInsightsUri } from '../../data-sources/plugins/ApplicationInsights/common';
 
 import { mockRequests } from '../mocks/requests/application-insights';
-import dashboardMock from '../mocks/dashboards/application-insights';
+import dashboardMock from '../mocks/dashboards/application-insights-forked';
 
-describe('Data Source: Application Insights: Query', () => {
+describe('Data Source: Application Insights: Forked Query', () => {
 
   let dataSources: IDataSourceDictionary = {};
 
@@ -27,11 +27,12 @@ describe('Data Source: Application Insights: Query', () => {
     return new Promise((resolve, reject) => {
       var stateUpdate = (state => {
         try {
-          expect(state).toHaveProperty('values');
+          expect(state).toHaveProperty('array1');
+          expect(state).toHaveProperty('array1-calc');
+          expect(state).toHaveProperty('array2');
+          expect(state).not.toHaveProperty('array2-calc');
           expect(state.values).toHaveLength(15);
-          expect(state.values[0]).toHaveProperty('name', 'name: message.received');
-          expect(state.values[0]).toHaveProperty('rowname', 'RowName: name: message.received');
-          expect(state.values[0]).toHaveProperty('rowindex', 'RowIndex: 0');
+          expect(state.values[0]).toHaveProperty('name', 'message.received');
           return resolve();
         } catch (e) {
           return reject(e);
@@ -49,7 +50,10 @@ describe('Data Source: Application Insights: Query', () => {
     return new Promise((resolve, reject) => {
       var stateUpdate = (state => {
         try {
-          expect(state).toHaveProperty('values');
+          expect(state).toHaveProperty('array1');
+          expect(state).toHaveProperty('array1-calc');
+          expect(state).toHaveProperty('array2');
+          expect(state).not.toHaveProperty('array2-calc');
           expect(state.values).toHaveLength(0);
           return resolve();
         } catch (e) {
@@ -61,4 +65,5 @@ describe('Data Source: Application Insights: Query', () => {
       dataSources.events.store.listen(stateUpdate);
     });
   });
+
 });
