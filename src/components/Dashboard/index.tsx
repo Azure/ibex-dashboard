@@ -4,7 +4,6 @@ import * as _ from 'lodash';
 import Toolbar from 'react-md/lib/Toolbars';
 import Button from 'react-md/lib/Buttons';
 import Dialog from 'react-md/lib/Dialogs';
-import Divider from 'react-md/lib/Dividers';
 
 import { Spinner } from '../Spinner';
 
