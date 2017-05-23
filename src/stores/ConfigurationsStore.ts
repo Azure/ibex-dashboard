@@ -134,6 +134,17 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
       }
     });
 
+    // Enter any connections listed in config.connections, but not filled in
+    Object.keys(dashboard.config.connections).forEach(key => {
+      let connection = dashboard.config.connections[key];
+      if (!(key in requiredParameters)) {
+        var connectionType = connections[key];
+        requiredParameters[key] = {};
+        requiredParameters[key]['editor'] = connectionType.editor;
+        connectionType.params.forEach(param => { requiredParameters[key][param] = connection[param]; });
+      }
+    });
+
     return requiredParameters;
   }
 }
