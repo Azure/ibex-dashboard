@@ -7,7 +7,7 @@ import Card from '../Card';
 
 import * as L from 'leaflet';
 import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
-import { MarkerClusterGroup } from 'react-leaflet-markercluster';
+import MarkerClusterGroup from 'react-leaflet-markercluster';
 import { EsriProvider } from 'leaflet-geosearch';
 
 const styles = {
