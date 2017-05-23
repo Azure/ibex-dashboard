@@ -23,10 +23,9 @@ interface IConfigDashboardState {
 }
 
 interface IConfigDashboardProps {
-  dashboard: IDashboardConfig;
   connections: IDictionary;
   standaloneView:boolean;
-  shouldSave: boolean;
+  dashboardId:string;
 }
 
 export default class ConfigDashboard extends React.Component<IConfigDashboardProps, IConfigDashboardState> {
@@ -42,28 +41,23 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
 
     this.onSave = this.onSave.bind(this);
     this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
-
-    ConfigurationsActions.loadConfiguration();
+    this.redirectToHomepageIfStandalone = this.redirectToHomepageIfStandalone.bind(this);
+    this.state.connections = this.props.connections;
+    //ConfigurationsActions.loadConfiguration();
   }
 
-  componentDidUpdate(prevProps, prevState){
-    if(this.props.shouldSave){
-      this.onSave();
-    }
-  }
 
   onParamChange(connectionKey, paramKey, value) {
     let { connections } = this.state;
     connections[connectionKey] = connections[connectionKey] || {};
     connections[connectionKey][paramKey] = value;
-    this.setState({ connections });
+    //this.setState({ connections });
   }
 
   onSave() {
-    let { dashboard } = this.props;
-    let { connections } = this.state;
+    /*let { connections } = this.state;
 
-    if (!dashboard.config.connections) {
+    if (!this.props.connections) {
       dashboard.config.connections = connections;
 
     } else {
@@ -80,7 +74,7 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
     ConfigurationsActions.saveConfiguration(dashboard);
 
     //tell the parents save ended
-    SettingsActions.saveSettingsCompleted();
+    SettingsActions.saveSettingsCompleted();*/
   }
 
   onSaveGoToDashboard() {
@@ -96,12 +90,12 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
 
   onCancel() {
     this.redirectToHomepageIfStandalone();    
-    window.location.replace(`/dashboard/${dashboard.id}`); 
   }
 
   redirectToHomepageIfStandalone(){
     if(this.props.standaloneView){
-        window.location.replace('/dashboard');
+      let { dashboardId} = this.props;
+        window.location.replace(`/dashboard/${dashboardId}`); 
     }
   }
 
@@ -120,12 +114,9 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
   }
   render() {
 
-    if (!this.props.dashboard) {
-      return null;
-    }
+    
 
-    let { connections } = this.props;
-    let { error } = this.state;
+    let { error,connections } = this.state;
 
     return (
       <div style={{ width: '100%' }}>

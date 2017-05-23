@@ -29,7 +29,7 @@ interface ISettingsButtonProps {
 export default class SettingsButton extends React.Component<ISettingsButtonProps, ISettingsButtonState> {
   
   ConfigurationViews = {
-    ApplicationInsights:'Application Insights',
+    ApplicationConnections:'Application Connections',
     Elements: 'Elements',
     DataSources: 'Data Sources',
     Filters: 'Filters'
@@ -37,7 +37,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   state: ISettingsButtonState = {
     showSettingsDialog: false,
-    activeConfigView: this.ConfigurationViews.ApplicationInsights,
+    activeConfigView: this.ConfigurationViews.ApplicationConnections,
     dashboard: null
   };
 
@@ -52,6 +52,12 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     this.onStoreChange = this.onStoreChange.bind(this);
     this.onConfigDialogViewChange = this.onConfigDialogViewChange.bind(this);
     this.chooseComponentToDisplay =  this.chooseComponentToDisplay.bind(this);
+
+     //initialize the dashboard state
+      var configStorteState = ConfigurationsStore.getState();
+      //never work on the original object, to allow cancel.
+      var clonedDashboard = _.cloneDeep(configStorteState.dashboard);
+      this.state.dashboard = clonedDashboard;
   }
 
    
@@ -59,11 +65,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   componentDidMount() {
       SettingsStore.listen(this.onStoreChange);
       
-      //initialize the dashboard state
-      var configStorteState = ConfigurationsStore.getState();
-      //never work on the original object, to allow cancel.
-      var clonedDashboard = _.cloneDeep(configStorteState.dashboard);
-      this.setState({dashboard:clonedDashboard});
+     
 
 
   }
@@ -96,7 +98,10 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
       var that = this;
       setTimeout(function(){
         ConfigurationsActions.saveConfiguration(dashboard);
-        that.onChildSaveCompleted();
+        ConfigurationsActions.loadConfiguration();
+        ConfigurationsActions.loadDashboard(dashboard.id);
+        this.setState({ showSettingsDialog: false});
+        //that.onChildSaveCompleted();
       },100);
   }
 
@@ -120,8 +125,9 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
     switch(this.state.activeConfigView){
 
-      case this.ConfigurationViews.ApplicationInsights:{
-        return (<Config standaloneView={false} />)
+      case this.ConfigurationViews.ApplicationConnections:{
+        var s = ConfigurationsStore.getState();
+        return (<Config standaloneView={false} dashbaord={s.dashboard} connections={s.connections} />)
       }
       
       case this.ConfigurationViews.DataSources: {
@@ -141,14 +147,14 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   render() {
 
-    let { showSettingsDialog } = this.state;
+    let { dashboard,showSettingsDialog } = this.state;
     var elementsSettings:IElementsContainer = this.state.dashboard;
     const titleMenu = (
       <SelectField
         key="titleMenu"
         id="titles"
-        menuItems={[this.ConfigurationViews.ApplicationInsights,this.ConfigurationViews.DataSources,this.ConfigurationViews.Elements ,this.ConfigurationViews.Filters]}
-        defaultValue={this.ConfigurationViews.ApplicationInsights}
+        menuItems={[this.ConfigurationViews.ApplicationConnections,this.ConfigurationViews.DataSources,this.ConfigurationViews.Elements ,this.ConfigurationViews.Filters]}
+        defaultValue={this.ConfigurationViews.ApplicationConnections}
         onChange={this.onConfigDialogViewChange}
       />);
 
@@ -170,9 +176,9 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                     
                       <TabsContainer colored panelClassName="md-grid">
                         <Tabs tabId="settings-tabs">
-                          <Tab label={this.ConfigurationViews.ApplicationInsights}>
+                          <Tab label={this.ConfigurationViews.ApplicationConnections}>
                             <div className="md-cell md-cell--6">
-                              <Config standaloneView={false}  />
+                              <Config standaloneView={false} dashboardId={dashboard.id} connections={dashboard.config.connections} />
                             </div>
                           </Tab>
                           <Tab label={this.ConfigurationViews.Elements}>
