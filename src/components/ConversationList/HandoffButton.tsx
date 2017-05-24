@@ -19,17 +19,41 @@ export default class Handoff extends React.Component<IHandoffProps, any> {
     // Should pull the dl secret from bot config
     let directlineSecret = 'RIwzhEOaDNk.cwA.n-s.qfG-5Vv9jD9TznQfXTR8d1dsgJRDBfSzl-B7svxhe5o';
 
-    // Needs to be bot url, do we get that in config?
-    request('http://ef2a2407.ngrok.io/api/conversations', 
-    {
+    // Trigger handover through api/conversations endpoint
+    // request('http://45c1a1a0.ngrok.io/api/conversations', 
+    // {
+    //   method: 'POST',
+    //   json: true,
+    //   body: { 'conversationId': convoData.conversation.id},
+    //   headers: { 'Authorization': 'Bearer ' + directlineSecret},
+    // }, 
+    // function (err: any, data: any) {
+    //   if (err) { throw err; }
+    // });
+
+    // Trigger handover through directline operator command
+    request('https://directline.botframework.com/v3/directline/conversations', {
       method: 'POST',
       json: true,
-      body: { 'conversationId': convoData.conversation.id},
-      headers: { 'Authorization': 'Bearer ' + directlineSecret},
-    }, 
-    function (err: any, data: any) {
-      if (err) { throw err; }
+      headers: { 'Authorization': 'Bearer ' + directlineSecret },
+    }, function (err, data) {
+      if (err) throw err
+
+      console.log('got result: ', data)
+
+      const conversationurl = `https://directline.botframework.com/v3/directline/conversations/${data.conversationId}/activities`;
+
+      request(conversationurl, {
+        method: 'POST',
+        json: true,
+        body: { "type": "message", "from": { "id": "Operator", "name": "Operator" }, "text": "Ibex Hand Off Init", "sourceEvent": convoData },
+        headers: { 'Authorization': `Bearer ${data.token}` },
+      }, function (err, data) {
+        if (err) throw err
+        console.log('got result: ', data)
+      })
     });
+
   }
 
   render() {
