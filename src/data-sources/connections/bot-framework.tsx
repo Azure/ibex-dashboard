@@ -6,7 +6,7 @@ import Checkbox from 'react-md/lib/SelectionControls/Checkbox';
 
 export default class BotFrameworkConnection implements IConnection {
   type = 'bot-framework';
-  params = ['directLine'];
+  params = ['directLine','conversationsEndpoint'];
   editor = BotFrameworkEditor;
 }
 
@@ -37,9 +37,16 @@ class BotFrameworkEditor extends ConnectionEditor<IConnectionProps, any> {
           <div>
             <span>More about </span>
             <a href="https://dev.botframework.com" target="_blank">Bot Framework</a>
-            <hr />
-            <span>More about </span>
+            <span> and </span>
             <a href="https://docs.botframework.com/en-us/restapi/directline3/#navtitle" target="_blank">Direct Line</a>
+            <hr />
+            <p>Notes</p>
+            <ul>
+              <li>
+                <h6>Conversations Endpoint</h6>
+                <p>Is very similar to the Bot Messaging Endpoint except it ends with '/api/conversations'.</p>
+              </li>
+            </ul>
           </div>
         </InfoDrawer>
         <TextField
@@ -48,6 +55,15 @@ class BotFrameworkEditor extends ConnectionEditor<IConnectionProps, any> {
           defaultValue={connection['directLine'] || ''}
           lineDirection="center"
           placeholder="Fill in Direct Line secret"
+          className="md-cell md-cell--bottom"
+          onChange={this.onParamChange}
+        />
+        <TextField
+          id="conversationsEndpoint"
+          label={'Conversations Endpoint'}
+          defaultValue={connection['conversationsEndpoint'] || ''}
+          lineDirection="center"
+          placeholder="Fill in Conversations Endpoint"
           className="md-cell md-cell--bottom"
           onChange={this.onParamChange}
         />
