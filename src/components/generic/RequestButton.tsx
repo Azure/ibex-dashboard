@@ -3,10 +3,20 @@ import { GenericComponent, IGenericProps, IGenericState } from './GenericCompone
 import Button from 'react-md/lib/Buttons';
 import * as request from 'xhr-request';
 
+enum Method {
+  GET,
+  POST,
+  PUT,
+  DELETE
+}
+
 interface IRequestButtonProps extends IGenericProps {
   props: {
     url: ((dependencies: any) => string) | string;
+    method?: Method;
+    link?: boolean;
     icon?: string;
+    once?: boolean;
     buttonProps?: { [key: string]: Object };
   };
   theme?: string[];
@@ -15,6 +25,7 @@ interface IRequestButtonProps extends IGenericProps {
 interface IRequestButtonState extends IGenericState {
   body: Object | string;
   headers: Object;
+  disabled: boolean;
 }
 
 export default class RequestButton extends GenericComponent<IRequestButtonProps, IRequestButtonState> {
@@ -32,15 +43,31 @@ export default class RequestButton extends GenericComponent<IRequestButtonProps,
   }
 
   onClick(event: any) {
-    let { url } = this.props.props;
+    let { url, link } = this.props.props;
     url = this.compileURL(url, this.state);
-    this.request(url);
+    if (link) {
+      return this.open(url);
+    }
+    return this.request(url);
+  }
+
+  open(url: string) {
+    const { once } = this.props.props;
+    window.open(url);
+    if (once) {
+      this.setState({ 'disabled': true });
+    }
   }
 
   request(url: string) {
+    const { once } = this.props.props;
     const { body, headers } = this.state;
+    let { method } = this.props.props;
+    if (method === undefined) {
+      method = Method.GET;
+    }
     request(url, {
-      method: 'POST',
+      method: method.toString(),
       json: true,
       body: body,
       headers: headers,
@@ -48,7 +75,9 @@ export default class RequestButton extends GenericComponent<IRequestButtonProps,
       if (err) {
         throw err;
       }
-      this.setState({ 'disabled': true });
+      if (once) {
+        this.setState({ 'disabled': true });
+      }
     }.bind(this));
   }
 

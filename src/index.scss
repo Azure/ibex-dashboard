@@ -171,10 +171,10 @@ h2, .md-subheading-2 {
     }
   }
 
-  .message-send { 
+  .message-send, tr.Customer { 
     background-color: $md-blue-50;
 
-    td.message {
+    td.message, td.text {
       text-align: right;
     }
   }

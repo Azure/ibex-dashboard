@@ -6,7 +6,7 @@ import Checkbox from 'react-md/lib/SelectionControls/Checkbox';
 
 export default class BotFrameworkConnection implements IConnection {
   type = 'bot-framework';
-  params = ['directLine','conversationsEndpoint'];
+  params = ['directLine', 'conversationsEndpoint', 'webchatEndpoint'];
   editor = BotFrameworkEditor;
 }
 
@@ -40,21 +40,25 @@ class BotFrameworkEditor extends ConnectionEditor<IConnectionProps, any> {
             <span> and </span>
             <a href="https://docs.botframework.com/en-us/restapi/directline3/#navtitle" target="_blank">Direct Line</a>
             <hr />
-            <p>Notes</p>
+            <h3>Localhost development</h3>
             <ul>
               <li>
                 <h6>Conversations Endpoint</h6>
-                <p>Is very similar to the Bot Messaging Endpoint except it ends with '/api/conversations'.</p>
+                <pre>https://********.ngrok.io/api/messages</pre>
+              </li>
+              <li>
+                <h6>Webchat (Agent) Endpoint</h6>
+                <pre>http://localhost:3978/webchat</pre>
               </li>
             </ul>
           </div>
         </InfoDrawer>
         <TextField
           id="directLine"
-          label={'Direct Line secret'}
+          label={'Direct Line secret key'}
           defaultValue={connection['directLine'] || ''}
           lineDirection="center"
-          placeholder="Fill in Direct Line secret"
+          placeholder="Fill in Direct Line secret key"
           className="md-cell md-cell--bottom"
           onChange={this.onParamChange}
         />
@@ -63,7 +67,16 @@ class BotFrameworkEditor extends ConnectionEditor<IConnectionProps, any> {
           label={'Conversations Endpoint'}
           defaultValue={connection['conversationsEndpoint'] || ''}
           lineDirection="center"
-          placeholder="Fill in Conversations Endpoint"
+          placeholder="Conversations Endpoint"
+          className="md-cell md-cell--bottom"
+          onChange={this.onParamChange}
+        />
+        <TextField
+          id="webchatEndpoint"
+          label={'Webchat (Agent) Endpoint'}
+          defaultValue={connection['webchatEndpoint'] || ''}
+          lineDirection="center"
+          placeholder="Webchat Endpoint"
           className="md-cell md-cell--bottom"
           onChange={this.onParamChange}
         />

@@ -59,7 +59,12 @@ export default class BotFrameworkDirectLine extends DataSourcePlugin<IQueryParam
         if (error) {
           throw new Error(error);
         }
-        return dispatch(json); // returns conversationId, token, expires_in, streamUrl, referenceGrammarId
+        // export connection values required by generics
+        json['conversationsEndpoint'] = connection.conversationsEndpoint;
+        json['webchatEndpoint'] = connection.webchatEndpoint;
+        json['directLine'] = connection.directLine;
+        // returns conversationId, token, expires_in, streamUrl, referenceGrammarId
+        return dispatch(json); 
       });
     };
   }
