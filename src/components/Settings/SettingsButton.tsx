@@ -11,10 +11,10 @@ import FontIcon from 'react-md/lib/FontIcons';
 
 import { ToastActions } from '../Toast';
 
-import ConfigDashboard from './ConfigDashboard';
+import ConnectionsSettings from './ConnectionsSettings';
+import ElementsSettings from './ElementsSettings';
 import SettingsStore, { ISettingsStoreState } from '../../stores/SettingsStore';
 import SettingsActions from '../../actions/SettingsActions';
-import ElementsSettings from './Elements/ElementsSettings';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore, { IConfigurationsStoreState } from '../../stores/ConfigurationsStore';
 
@@ -30,7 +30,7 @@ interface ISettingsButtonProps {
 }
 
 const VIEWS = {
-  Connections: 'Application Connections',
+  Connections: 'Connections',
   Elements: 'Elements',
   DataSources: 'Data Sources',
   Filters: 'Filters'
@@ -48,8 +48,8 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     super(props);
 
     this.onSettingsButtonClicked = this.onSettingsButtonClicked.bind(this);
-    this.onSettingsDialogSaveClick = this.onSettingsDialogSaveClick.bind(this);
-    this.onSettingsDialogCancelClick = this.onSettingsDialogCancelClick.bind(this);
+    this.onSave = this.onSave.bind(this);
+    this.onCancel = this.onCancel.bind(this);
     this.onSettingsStoreChange = this.onSettingsStoreChange.bind(this);
     this.onConfigurationChange = this.onConfigurationChange.bind(this);
     this.onSelectView = this.onSelectView.bind(this);
@@ -69,6 +69,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
   onConfigurationChange(state: IConfigurationsStoreState) {
 
+    // Only update the state if the dashboard was not set already
     if (!this.state.dashboard) {
       let { dashboard } = state;
       
@@ -98,16 +99,13 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
     this.setState({ showSettingsDialog: true });
   }
 
-  onSettingsDialogSaveClick() {
+  onSave() {
     let { dashboard } = this.state;
 
     ConfigurationsActions.saveConfiguration(dashboard);
-    ConfigurationsActions.loadConfiguration();
-    ConfigurationsActions.loadDashboard(dashboard.id);
-    this.setState({ showSettingsDialog: false});
   }
 
-  onSettingsDialogCancelClick() {
+  onCancel() {
     this.setState({ showSettingsDialog: false });
   }
 
@@ -142,23 +140,21 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
         </Button>
         <Dialog
           id="settingsForm"
+          title="Edit Dashboard Settings"
           visible={showSettingsDialog}
           dialogStyle={{ width: '90%', height: '90%', 'overflow-y': 'auto' }}
           className="dialog-toolbar-no-padding"
           modal
           actions={[
-            { onClick: this.onSettingsDialogSaveClick, primary: true, label: 'Save', },
-            { onClick: this.onSettingsDialogCancelClick, primary: false, label: 'Cancel' }
+            { onClick: this.onSave, primary: true, label: 'Save', },
+            { onClick: this.onCancel, primary: false, label: 'Cancel' }
           ]}
         >
           <TabsContainer colored panelClassName="md-grid">
             <Tabs tabId="settings-tabs">
               <Tab label={VIEWS.Connections}>
                 <div className="md-cell md-cell--6">
-                  <ConfigDashboard 
-                    connections={dashboard.config.connections} 
-                    standaloneView={false}  
-                  />          
+                  <ConnectionsSettings connections={dashboard.config.connections} />          
                 </div>
               </Tab>
               <Tab label={VIEWS.Elements}>

@@ -1,8 +1,6 @@
 import * as React from 'react';
 
 import ConfigDashboard from '../components/ConfigDashboard';
-import ConfigurationsActions from '../actions/ConfigurationsActions';
-import ConfigurationsStore from '../stores/ConfigurationsStore';
 
 export default class Config extends React.Component<any, any> {
 

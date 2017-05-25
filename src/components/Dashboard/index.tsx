@@ -16,7 +16,7 @@ import ElementConnector from '../ElementConnector';
 import { loadDialogsFromDashboard } from '../generic/Dialogs';
 import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } from './DownloadFile';
 
-import SettingsButton from '../ConfigDashboard/SettingsButton';
+import { SettingsButton } from '../Settings';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 import VisibilityStore from '../../stores/VisibilityStore';

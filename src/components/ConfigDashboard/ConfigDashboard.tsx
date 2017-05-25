@@ -16,8 +16,8 @@ import SettingsActions from '../../actions/SettingsActions';
 
 interface IConfigDashboardProps {
   connections: IDictionary;
-  standaloneView: boolean;
-  dashboardId: string;
+  standaloneView?: boolean;
+  dashboardId?: string;
 }
 
 interface IConfigDashboardState {

@@ -12,17 +12,6 @@ export default class CosmosDBConnection implements IConnection {
 
 class CosmosDBConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
 
-  constructor(props: IConnectionProps) {
-    super(props);
-    this.onParamChange = this.onParamChange.bind(this);
-  }
-
-  onParamChange(value: string, event: any) {
-    if (typeof this.props.onParamChange === 'function') {
-      this.props.onParamChange('cosmos-db', event.target.id, value);
-    }
-  }
-
   render() {
     let { connection } = this.props;
     // connection = connection || {'ssl':true };

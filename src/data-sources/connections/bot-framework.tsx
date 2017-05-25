@@ -12,17 +12,6 @@ export default class BotFrameworkConnection implements IConnection {
 
 class BotFrameworkEditor extends ConnectionEditor<IConnectionProps, any> {
 
-  constructor(props: IConnectionProps) {
-    super(props);
-    this.onParamChange = this.onParamChange.bind(this);
-  }
-
-  onParamChange(value: string, event: any) {
-    if (typeof this.props.onParamChange === 'function') {
-      this.props.onParamChange('bot-framework', event.target.id, value);
-    }
-  }
-
   render() {
     let { connection } = this.props;
     return (
