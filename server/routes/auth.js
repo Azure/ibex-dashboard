@@ -71,9 +71,10 @@ function initializePassport() {
       issuer: configSetup.issuer
     },
     function(iss, sub, profile, accessToken, refreshToken, done) {
-      console.log(`passport arguments: ${arguments}`);
-
+      
       profile.email = profile.email || profile.upn;
+
+      console.log(`passport profile: ${profile.email}`);
 
       if (!profile.email) {
         return done(new Error("No email found"), null);
@@ -145,10 +146,6 @@ router.get('/account', (req, res) => {
 function addAuthRoutes() {
 
   router.get('/login',
-    (req, res, next) => {
-      console.log('aaa');
-      return next();
-    },
     passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/login' }),
     function(req, res) {
       console.info('Login was called in the Sample');
@@ -200,8 +197,9 @@ function addAuthRoutes() {
   });
 }
 if (authEnabled) { 
-  console.log(`Registering auth routes`);
+  console.log(`Registering auth routes...`);
   addAuthRoutes(); 
+  console.log(`Auth routes registered.`);
 }
 
 /** 
