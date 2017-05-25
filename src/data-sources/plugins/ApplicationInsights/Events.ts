@@ -1,22 +1,18 @@
-
-//import * as request from 'request';
+// import * as request from 'request';
 import * as _ from 'lodash';
 import {DataSourcePlugin, IDataSourceOptions} from '../DataSourcePlugin';
-//import ActionsCommon from './actions-common';
+// import ActionsCommon from './actions-common';
 import { appInsightsUri } from './common';
 
-declare var process : any;
+declare var proces: any;
 
 interface IEventsConfig {
-  /** @type {string} */
-  timespan;
+  timespan: string;
 }
 
 interface IEventsParams {
-  /** @type {string} */
-  query;
-  /** @type {(string|object)[]} mappings */
-  mappings;
+  query: string;
+  mappings: (string|object)[];
 }
 
 export default class ApplicationInsightsEvents extends DataSourcePlugin<IEventsParams> {
@@ -34,12 +30,7 @@ export default class ApplicationInsightsEvents extends DataSourcePlugin<IEventsP
     // }
   }
 
-  /**
-   * update - called when dependencies are created
-   * @param {object} dependencies
-   * @param {function} callback
-   */
-  updateDependencies(dependencies, callback) {
+  updateDependencies(dependencies: IDictionary, callback: (result: any) => void) {
 
     // var {
     //   timespan,
@@ -75,7 +66,7 @@ export default class ApplicationInsightsEvents extends DataSourcePlugin<IEventsP
     //   });
   }
 
-  updateSelectedValues(dependencies, callback) {
+  updateSelectedValues(dependencies: IDictionary, callback: (result: any) => void) {
     
   }
 }

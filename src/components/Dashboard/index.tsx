@@ -272,7 +272,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
           if (prevSection !== '') {
             downloadItems.push(<Divider key={item.source + '_' + index} className="md-cell md-cell--12" />);
           }
-          downloadItems.push(<Subheader primaryText={item.source} key={item.source + index} className="md-cell md-cell--12" />);
+          downloadItems.push(
+            <Subheader primaryText={item.source} key={item.source + index} className="md-cell md-cell--12" />);
         }
         downloadItems.push(
           <ListItem

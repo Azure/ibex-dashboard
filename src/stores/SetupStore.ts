@@ -51,9 +51,7 @@ class SetupStore extends AbstractStoreModel<ISetupStoreState> implements ISetupS
     this.loaded = true;
     this.saveSuccess = true;
 
-    setTimeout(() => {
-      this.saveSuccess = false;
-    }, 500);
+    setTimeout(() => { this.saveSuccess = false; }, 500);
   }
 }
 

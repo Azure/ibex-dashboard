@@ -75,15 +75,15 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
     c.ey = c.my;
     c.textAnchor = 'start';
 
+    var text = compact
+    ? [<text key={0} x={cx} y={cy} dy={-15} textAnchor="middle" fill={fill} style={{ fontWeight: 500 }}>{name}</text>,
+       <text key={1} x={cx} y={cy} dy={3} textAnchor="middle" fill={fill}>{`${value} ${entityType}`}</text>,
+       <text key={2} x={cx} y={cy} dy={25} textAnchor="middle" fill="#999">{`(${(percent * 100).toFixed(2)}%)`}</text>]
+    : [<text key={3} x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{name}</text>];
+
     return (
       <g>
-        {compact && [
-          <text key={0} x={cx} y={cy} dy={-15} textAnchor="middle" fill={fill} style={{ fontWeight: 500 }}>{name}</text>,
-          <text key={1} x={cx} y={cy} dy={3} textAnchor="middle" fill={fill}>{`${value} ${entityType}`}</text>,
-          <text key={2} x={cx} y={cy} dy={25} textAnchor="middle" fill="#999">{`(${(percent * 100).toFixed(2)}%)`}</text>
-        ] || [
-            <text key={3} x={cx} y={cy} dy={8} textAnchor="middle" fill={fill}>{name}</text>,
-          ]}
+        {text}
         <Sector
           cx={cx}
           cy={cy}
