@@ -46,6 +46,7 @@ export default class Home extends React.Component<any, IHomeState> {
     redirectUrl: '',
     clientID: '',
     clientSecret: '',
+    issuer: '',
     loaded: false,
 
     templates: [],

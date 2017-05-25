@@ -279,8 +279,6 @@ router.post('/setup', (req, res) => {
   }
 
   var content = (req.body && req.body.json) || '';
-  console.dir(content);
-
   fs.writeFile(path.join(__dirname, '..', 'config', 'setup.private.json'), content, err => {
     if (err) {
       console.error(err);

@@ -21,8 +21,9 @@ if (fs.existsSync(path.join(__dirname, '..', 'config', 'setup.private.json'))) {
 let users = [];
 function findByEmail(email, fn) {
   for (var i = 0, len = users.length; i < len; i++) {
-    var user = users[i];
-  console.info('we are using user: ', user);
+    let user = users[i];
+    
+    console.info(`Current logged in user: ${user}`);
     if (user.email === email) {
       return fn(null, user);
     }
@@ -66,15 +67,18 @@ function initializePassport() {
       skipUserProfile: configAuth.skipUserProfile,
       responseType: configAuth.responseType,
       responseMode: configAuth.responseMode,
-      validateIssuer: configAuth.validateIssuer
+      validateIssuer: configAuth.validateIssuer,
+      issuer: configSetup.issuer
     },
     function(iss, sub, profile, accessToken, refreshToken, done) {
+      console.log(`passport arguments: ${arguments}`);
 
       profile.email = profile.email || profile.upn;
 
       if (!profile.email) {
         return done(new Error("No email found"), null);
       }
+
       // asynchronous verification, for effect...
       process.nextTick(function () {
         findByEmail(profile.email, function(err, user) {
@@ -141,7 +145,11 @@ router.get('/account', (req, res) => {
 function addAuthRoutes() {
 
   router.get('/login',
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+    (req, res, next) => {
+      console.log('aaa');
+      return next();
+    },
+    passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/login' }),
     function(req, res) {
       console.info('Login was called in the Sample');
       res.redirect('/');
@@ -154,7 +162,7 @@ function addAuthRoutes() {
   //   provider will redirect the user back to this application at
   //   /auth/openid/return
   router.get('/openid',
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+    passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/login' }),
     function(req, res) {
       console.info('Authentication was called in the Sample');
       res.redirect('/');
@@ -166,7 +174,7 @@ function addAuthRoutes() {
   //   login page.  Otherwise, the primary route function function will be called,
   //   which, in this example, will redirect the user to the home page.
   router.get('/openid/return',
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+    passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/login' }),
     function(req, res) {
       console.info('We received a return from AzureAD.');
       res.redirect(redirectPath || '/');
@@ -179,7 +187,7 @@ function addAuthRoutes() {
   //   login page.  Otherwise, the primary route function function will be called,
   //   which, in this example, will redirect the user to the home page.
   router.post('/openid/return',
-    passport.authenticate('azuread-openidconnect', { failureRedirect: '/login' }),
+    passport.authenticate('azuread-openidconnect', { failureRedirect: '/auth/login' }),
     function(req, res) {
       console.info('We received a return from AzureAD.');
       res.redirect(redirectPath || '/');
@@ -191,7 +199,10 @@ function addAuthRoutes() {
     res.redirect('/');
   });
 }
-if (authEnabled) { addAuthRoutes(); }
+if (authEnabled) { 
+  console.log(`Registering auth routes`);
+  addAuthRoutes(); 
+}
 
 /** 
  * Adding all authentication middleware on process start.
