@@ -3,5 +3,5 @@
 	"validateIssuer": true,
 	"skipUserProfile": false,
 	"responseType": "id_token code",
-	"responseMode": "query"
+	"responseMode": "form_post"
  }
