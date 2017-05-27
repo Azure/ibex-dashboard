@@ -41,10 +41,10 @@ class BotFrameworkEditor extends ConnectionEditor<IConnectionProps, any> {
             <a href="https://docs.botframework.com/en-us/restapi/directline3/#navtitle" target="_blank">Direct Line</a>
             <hr />
             <h3>Localhost development</h3>
-            <ul>
+            <ul className="aligned">
               <li>
                 <h6>Conversations Endpoint</h6>
-                <pre>https://********.ngrok.io/api/messages</pre>
+                <pre>https://********.ngrok.io/api/conversations</pre>
               </li>
               <li>
                 <h6>Webchat (Agent) Endpoint</h6>
