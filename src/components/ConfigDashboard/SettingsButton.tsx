@@ -143,7 +143,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
         <Dialog
           id="settingsForm"
           visible={showSettingsDialog}
-          dialogStyle={{ width: '90%', height: '90%', 'overflow-y': 'auto' }}
+          dialogStyle={{ width: '90%', height: '90%', overflowY: 'auto' }}
           className="dialog-toolbar-no-padding"
           modal
           actions={[

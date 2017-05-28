@@ -107,7 +107,7 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
             block
             paddedBlock
             rows={4}
-            value={response}
+            defaultValue={response}
             disabled
             inputStyle={{ 'max-height': responseHeight }}
           />

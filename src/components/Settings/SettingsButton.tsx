@@ -19,8 +19,9 @@ import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore, { IConfigurationsStoreState } from '../../stores/ConfigurationsStore';
 
 interface ISettingsButtonState {
-  showSettingsDialog: boolean;
-  activeView: string;
+  showSettingsDialog?: boolean;
+  activeView?: string;
+  isSaveInProgress?: boolean;
   dashboard?: IDashboardConfig;
 }
 
@@ -78,21 +79,19 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
       
       this.setState({ dashboard: clonedDashboard });
     }
+
+    if (this.state.isSaveInProgress) {
+      this.setState({ 
+        isSaveInProgress: false // ,
+        // showSettingsDialog: false
+      });
+
+      window.location.reload();
+    }
   }
 
   onSettingsStoreChange(state: ISettingsStoreState) {
 
-    if (!state.isSavingSettings) {
-      // since we are passing parts of dashbaord by ref, and the cild elements 
-      // just completed to update the data into it, we can safly save it with all the new changes.
-      let { dashboard } = this.state;
-
-      setTimeout(
-        () => {
-          ConfigurationsActions.saveConfiguration(dashboard);
-        },
-        100);
-    }
   }
 
   onSettingsButtonClicked() {
@@ -102,6 +101,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
   onSave() {
     let { dashboard } = this.state;
 
+    this.setState({ isSaveInProgress: true });
     ConfigurationsActions.saveConfiguration(dashboard);
   }
 
@@ -142,7 +142,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
           id="settingsForm"
           title="Edit Dashboard Settings"
           visible={showSettingsDialog}
-          dialogStyle={{ width: '90%', height: '90%', 'overflow-y': 'auto' }}
+          dialogStyle={{ width: '90%', height: '90%', overflowY: 'auto' }}
           className="dialog-toolbar-no-padding"
           modal
           actions={[

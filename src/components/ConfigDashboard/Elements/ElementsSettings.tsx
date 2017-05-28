@@ -71,12 +71,14 @@ export default class ElementsSettings extends React.Component<IElementsSettingsP
 
     renderMenu() {
       var selectedItem = this.state.selectedSettings;
-        var items = this.getItemsFromSettings().map(item => (
+        var items = this.getItemsFromSettings().map((item, idx) => (
           <ListItem 
-          primaryText={item.id } 
-          onClick={this.onMenuClick.bind(this, item)} 
-          className={_.isEqual(selectedItem,item)?"active-item":""} 
-          active={_.isEqual(selectedItem,item)} />
+            key={idx}
+            primaryText={item.id } 
+            onClick={this.onMenuClick.bind(this, item)} 
+            className={_.isEqual(selectedItem,item)?"active-item":""} 
+            active={_.isEqual(selectedItem,item)} 
+          />
         ));
         return(
             <List className="md-cell md-paper md-paper--1 md-cell--top md-cell--left md-cell--2 vertical-menu">
