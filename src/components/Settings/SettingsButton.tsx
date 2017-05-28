@@ -158,7 +158,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                 </div>
               </Tab>
               <Tab label={VIEWS.Elements}>
-                <ElementsSettings ElementsSettings={dashboard} />
+                <ElementsSettings settings={dashboard} />
               </Tab>
               <Tab label={VIEWS.DataSources}>
                 <h1>{VIEWS.DataSources} - is not implemented yet</h1>

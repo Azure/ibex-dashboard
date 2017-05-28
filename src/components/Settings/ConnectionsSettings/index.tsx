@@ -51,7 +51,10 @@ export default class ConnectionsSettings extends React.Component<IConfigDashboar
             let EditorClass = connectionsDefinitions[connectionKey].editor;
             return (
               <div key={connectionKey}>
-                <EditorClass connection={connections[connectionKey]} onParamChange={this.onParamChange.bind(this, connectionKey)} />
+                <EditorClass 
+                  connection={connections[connectionKey]} 
+                  onParamChange={this.onParamChange.bind(this, connectionKey)} 
+                />
               </div>
             );
           } else {

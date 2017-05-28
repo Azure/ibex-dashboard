@@ -4,13 +4,13 @@ import * as _ from 'lodash';
 import FontIcon from 'react-md/lib/FontIcons';
 import TextField from 'react-md/lib/TextFields';
 import SelectField from 'react-md/lib/SelectFields';
+
 import { BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
 import ArrayInput from '../../common/ArrayInput';
 import { ToastActions } from '../../Toast';
 
 export default class ScatterSettings extends BaseSettings {
 
-  // abstract members implementation
   icon = 'bubble_chart';
 
   constructor(props: IBaseSettingsProps) {
@@ -21,8 +21,8 @@ export default class ScatterSettings extends BaseSettings {
   }
   
   onParamChange(value: string, event: any) {
-    var { stateSettings } = this.state;
-    var id = event.target.id;
+    let { stateSettings } = this.state;
+    let id = event.target.id;
 
     this.updateProperty(stateSettings, id, value);
     this.setState({ stateSettings });
@@ -30,7 +30,7 @@ export default class ScatterSettings extends BaseSettings {
 
   onParamSelectChange(newValue: string, newActiveIndex: number, event: any) {
 
-    // a little hacking to get the id of the parent, 
+    // A little hacking to get the id of the parent, 
     // because event does not contain the outer element, but only the inner li
     let { stateSettings } = this.state;
     let cur = event.target;
@@ -41,7 +41,7 @@ export default class ScatterSettings extends BaseSettings {
 
     if (cur) {
       cur = cur.querySelector('input');
-      var id = cur.id;
+      let id = cur.id;
       this.updateProperty(stateSettings, id, newValue);
       this.setState({ stateSettings });
     }

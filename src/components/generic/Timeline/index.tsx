@@ -1,14 +1,16 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import Card from '../Card';
+import Card from '../../Card';
 
 import Button from 'react-md/lib/Buttons/Button';
 
-import colors from '../colors';
+import colors from '../../colors';
 var { ThemeColors } = colors;
+
+import settings from './Settings';
 
 interface ITimelineProps extends IGenericProps {
   theme?: string[];
@@ -21,6 +23,8 @@ interface ITimelineState extends IGenericState {
 }
 
 export default class Timeline extends GenericComponent<ITimelineProps, ITimelineState> {
+
+  static editor = settings;
 
   dateFormat(time: string) {
     return moment(time).format('MMM-DD');

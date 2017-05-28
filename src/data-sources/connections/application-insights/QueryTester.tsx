@@ -111,14 +111,16 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
             disabled
             inputStyle={{ 'max-height': responseHeight }}
           />
-          <div style={
-            { 
-              width: '100%', 
-              position: 'absolute', 
-              top: 130, 
-              left: 0, 
-              display: loadingData ? 'block' : 'none'
-            }}
+          <div 
+            style={
+              { 
+                width: '100%', 
+                position: 'absolute', 
+                top: 130, 
+                left: 0, 
+                display: loadingData ? 'block' : 'none'
+              }
+            }
           >
             <CircularProgress id="testerProgress" />
           </div>

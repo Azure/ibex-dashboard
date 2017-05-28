@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
-import Card from '../Card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
 import * as _ from 'lodash';
 import * as moment from 'moment';
 
-import colors from '../colors';
-var { ThemeColors } = colors;
+import Card from '../../Card';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+import colors from '../../colors';
+const { ThemeColors } = colors;
+
+import settings from './Settings';
 
 interface IBarProps extends IGenericProps {
   props: {
@@ -24,6 +26,8 @@ interface IBarState extends IGenericState {
 }
 
 export default class BarData extends GenericComponent<IBarProps, IBarState> {
+
+  static editor = settings;
 
   state = {
     values: [],

@@ -1,14 +1,17 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as moment from 'moment';
 import * as _ from 'lodash';
 import { AreaChart, Area as AreaFill, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Tooltip, ResponsiveContainer, Legend, defs } from 'recharts';
-import Card from '../Card';
+import Card from '../../Card';
 import Switch from 'react-md/lib/SelectionControls/Switch';
-import './generic.css';
-import colors from '../colors';
+import colors from '../../colors';
 var { ThemeColors } = colors;
+
+import '../generic.css';
+
+import AreaSettings from './Settings';
 
 interface IAreaProps extends IGenericProps {
   theme?: string[];
@@ -25,15 +28,17 @@ interface IAreaState extends IGenericState {
 
 export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
+  static editor = AreaSettings;
+
   static defaultProps = {
     isStacked: true
   };
 
-  dateFormat(time: string) {
+  dateFormat(time: string): string {
     return moment(time).format('MMM-DD');
   }
 
-  hourFormat(time: string) {
+  hourFormat(time: string): string {
     return moment(time).format('HH:mm');
   }
 

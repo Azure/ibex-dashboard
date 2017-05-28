@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import FontIcon from 'react-md/lib/FontIcons';
 import Switch from 'react-md/lib/SelectionControls/Switch';
 
-import {BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
+import { BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
 
 export default class AreaSettings extends BaseSettings {
 
@@ -30,7 +30,9 @@ export default class AreaSettings extends BaseSettings {
   }
 
   renderChildren() {
-    var { id, dependencies, actions, props, title, subtitle, size, theme, type } = this.state.stateSettings;
+    
+    let { id, dependencies, actions, props, title, subtitle, size, theme, type } = this.state.stateSettings;
+    
     return (
       <span >
         <span className="md-cell md-cell--bottom  md-cell--6">

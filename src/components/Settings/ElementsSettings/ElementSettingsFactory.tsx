@@ -1,49 +1,20 @@
 import * as React from 'react';
 
-import PieSettings from './PieSettings';
-import TimelineSettings from './TimelineSettings';
-import BarDataSettings from './BarDataSettings';
-import AreaSettings from './AreaSettings';
-import ScatterSettings from './ScatterSettings';
+import plugins from '../../generic/plugins';
 
-export class SettingsItem {
-  public type:string;
-  public id:string;
-  public settings:any;
-}
+export default class ElementSettingsFactory {
 
-export interface IElementSettingsFactory {
-  getSettingsByType(item: SettingsItem): JSX.Element;
-  getSettingsItems(elements: any): SettingsItem[];
-}
+  static uniqueId = 0;
 
-export default class ElementSettingsFactory implements IElementSettingsFactory {
+  static getSettingsEditor(element: IElement): JSX.Element {
 
-  getSettingsByType(item: SettingsItem): JSX.Element {
+    if (!element) { return null; }
 
-    let settingsPlugins = {
-      PieData:PieSettings,
-      Timeline:TimelineSettings,
-      BarData:BarDataSettings,
-      Area:AreaSettings,
-      Scatter:ScatterSettings
-    };
-
-    let SettingsReactElement = settingsPlugins[item.type];
-    if(SettingsReactElement) {
-      return <SettingsReactElement settings={item.settings} />;
+    let ReactElementClass = plugins[element.type];
+    if (ReactElementClass.editor) {
+      let SettingsEditor = ReactElementClass.editor;
+      return <SettingsEditor key={ElementSettingsFactory.uniqueId++} settings={element} />;
     }
-
     return null;
-  }
-
-  getSettingsItems(elements: IElement[]): SettingsItem[] {
-    return elements.map(item => (
-      {
-        type:item.type,
-        id:item.id,
-        settings:item
-      }
-    ));
   }
 }

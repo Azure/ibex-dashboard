@@ -1,12 +1,16 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 import * as moment from 'moment';
 import * as _ from 'lodash';
+
+import Card from '../../Card';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import { ScatterChart, Scatter as ScatterLine, XAxis, YAxis, ZAxis, CartesianGrid } from 'recharts';
 import { Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import Card from '../Card';
-import colors from '../colors';
-var { ThemeColors } = colors;
+
+import colors from '../../colors';
+const { ThemeColors } = colors;
+
+import settings from './Settings';
 
 interface IScatterProps extends IGenericProps {
   theme?: string[];
@@ -17,10 +21,11 @@ interface IScatterProps extends IGenericProps {
 }
 
 interface IScatterState extends IGenericState {
-
 }
 
 export default class Scatter extends GenericComponent<IScatterProps, IScatterState> {
+
+  static editor = settings;
 
   static defaultProps = {
     xDataKey: 'x',
