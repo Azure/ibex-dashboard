@@ -9,15 +9,14 @@ import { BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../comm
 import ArrayInput from '../../common/ArrayInput';
 import { ToastActions } from '../../Toast';
 
-export default class ScatterSettings extends BaseSettings<IBaseSettingsState> {
+export default class ScorecardSettings extends BaseSettings {
 
-  icon = 'bubble_chart';
+  icon = 'timelapse';
 
   constructor(props: IBaseSettingsProps) {
     super(props);
 
     this.onParamChange = this.onParamChange.bind(this);
-    this.onRangeParamChange = this.onRangeParamChange.bind(this);
   }
   
   onParamChange(value: string, event: any) {
@@ -26,20 +25,6 @@ export default class ScatterSettings extends BaseSettings<IBaseSettingsState> {
 
     this.updateProperty(stateSettings, id, value);
     this.setState({ stateSettings });
-  }
-  
-  onRangeParamChange(value: string, event: any) {
-
-    try {
-      let { stateSettings } = this.state;
-      let idx = _.toNumber(_.replace(event.target.id, 'props.zRange.', ''));
-      stateSettings.props.zRange[idx] = _.toNumber(value);
-
-      this.setState({ stateSettings });
-
-    } catch (e) {
-      ToastActions.showText('onRangeParamChange failed to update value. ' + e);
-    }
   }
 
   renderChildren() {

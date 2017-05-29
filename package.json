@@ -31,6 +31,7 @@
     "leaflet-geosearch": "^2.2.0",
     "leaflet.markercluster": "^1.0.5",
     "lodash": "^4.17.4",
+    "lodash.throttle": "^4.1.1",
     "material-colors": "^1.2.5",
     "moment": "^2.18.0",
     "morgan": "^1.8.1",

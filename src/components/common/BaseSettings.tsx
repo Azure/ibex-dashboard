@@ -21,7 +21,7 @@ export interface IBaseSettingsState {
   stateSettings: IElement; // we need to persist the changes in state until a save is requested
 }
 
-export abstract class BaseSettings extends React.Component<IBaseSettingsProps, IBaseSettingsState> {
+export abstract class BaseSettings<TState extends IBaseSettingsState> extends React.Component<IBaseSettingsProps, TState> {
 
   // require derived classes to implement
   abstract icon: string;
@@ -31,19 +31,43 @@ export abstract class BaseSettings extends React.Component<IBaseSettingsProps, I
     super(props);
 
     this.onParamChange = this.onParamChange.bind(this);
-    this.onShowLegendChange = this.onShowLegendChange.bind(this);
     this.componentDidUpdate =  this.componentDidUpdate.bind(this);
     this.onParamSelectChange = this.onParamSelectChange.bind(this);
     this.updateProperty = this.updateProperty.bind(this);
     this.renderChildren = this.renderChildren.bind(this);
 
-    this.state = {
+    this.setState({ 
       stateSettings: props.settings,
       shouldSave: false
-    };
+    });
   }
 
-  componentDidUpdate(prevProps: IBaseSettingsProps, prevState: IBaseSettingsState) {
+  protected getProperty(property: string, defaultValue: any = null): any {
+    let { stateSettings } = this.state;
+    let arr = property.split('.');
+    let obj = stateSettings;
+    let parent = obj;
+
+    while (arr.length && (obj = obj && obj[arr.shift()])) { }
+    
+    if (typeof obj !== 'undefined') { return obj; }
+    
+    return defaultValue;
+  }
+
+  protected updateProperty(property: string, value: any): void {
+    let { stateSettings } = this.state;
+    let arr = property.split('.');
+    let object: any = stateSettings;
+    let parent: any;
+    let key: string;
+
+    while (arr.length && (parent = object) && (key = arr.shift()) && (object = object[key])) { }
+    if (parent) { parent[key] = value; }
+    this.setState({ stateSettings });
+  }
+
+  componentDidUpdate(prevProps: IBaseSettingsProps, prevState: TState) {
     if (this.props.shouldSave) {
       this.save();
     }
@@ -64,7 +88,6 @@ export abstract class BaseSettings extends React.Component<IBaseSettingsProps, I
 
     // a little hacking to get the id of the parent, 
     // because event does not contain the outer element, but only the inner li
-    let { stateSettings } = this.state;
     let cur = event.target;
 
     while (cur && !cur.classList.contains('ddl')) {
@@ -74,24 +97,8 @@ export abstract class BaseSettings extends React.Component<IBaseSettingsProps, I
     if (cur) {
       cur = cur.querySelector('input');
       var id = cur.id;
-      this.updateProperty(stateSettings, id, newValue);
-      this.setState({ stateSettings });
+      this.updateProperty(id, newValue);
     }
-  }
-  
-  onShowLegendChange(checked: boolean) {
-    let { stateSettings } = this.state;
-    stateSettings.props.showLegend = checked;
-    this.setState({ stateSettings });
-  }
-
-  updateProperty(object: any, property: string, value: any) {
-    let arr = property.split('.');
-    let parent: any;
-    let key: string;
-
-    while (arr.length && (parent = object) && (key = arr.shift()) && (object = object[key])) { }
-    if (parent) { parent[key] = value; }
   }
 
   render() {

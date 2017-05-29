@@ -4,9 +4,9 @@ import * as _ from 'lodash';
 import FontIcon from 'react-md/lib/FontIcons';
 import Switch from 'react-md/lib/SelectionControls/Switch';
 
-import { BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
+import { BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettings';
 
-export default class AreaSettings extends BaseSettings {
+export default class AreaSettings extends BaseSettings<IBaseSettingsState> {
 
   // abstract members implementation
   icon = 'flip_to_front';

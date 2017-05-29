@@ -3,11 +3,11 @@ import * as React from 'react';
 import FontIcon from 'react-md/lib/FontIcons';
 import TextField from 'react-md/lib/TextFields';
 
-import  {BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettingsComponent';
+import  {BaseSettings, IBaseSettingsProps, IBaseSettingsState } from '../../common/BaseSettings';
 
 import settings from './Settings';
 
-export default class BarDataSettings extends BaseSettings {
+export default class BarDataSettings extends BaseSettings<IBaseSettingsState> {
     
   editor = settings;
 
