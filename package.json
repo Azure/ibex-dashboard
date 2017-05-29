@@ -17,7 +17,7 @@
     "node-sass": "^4.5.0",
     "npm-run-all": "^4.0.2",
     "react-addons-test-utils": "^15.4.2",
-    "react-scripts-ts": "1.1.6",
+    "react-scripts-ts": "1.4",
     "tslint": "^4.0.0"
   },
   "dependencies": {
@@ -57,6 +57,7 @@
     "server:start": "yarn start",
     "client:start": "react-scripts-ts start",
     "start:dev": "npm-run-all -p css:watch server:start client:start",
+    "coverage": "react-scripts-ts test --env=jsdom --coverage --collectCoverageFrom=src/**/*.{ts,tsx} --collectCoverageFrom=!src/**/*.d.ts",
     "start": "node server",
     "build": "yarn css:build && react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom"

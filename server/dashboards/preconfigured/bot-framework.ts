@@ -824,7 +824,7 @@ export const config: IDashboardConfig = /*return*/ {
             `
 					},
 					calculated: ({ values }) => {
-            let sentimentValue = (Math as any).round(((values && values.length && values[0].avg_sentiment) || 0) * 100, 1);
+            let sentimentValue = Math.round(((values && values.length && values[0].avg_sentiment) || 0) * 100, 1);
             return {
               "sentiment-value": sentimentValue + '%',
               "sentiment-height": sentimentValue + '%',

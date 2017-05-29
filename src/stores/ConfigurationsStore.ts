@@ -5,7 +5,7 @@ import connections from '../data-sources/connections';
 import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
 import configurationActions from '../actions/ConfigurationsActions';
 
-interface IConfigurationsStoreState {
+export interface IConfigurationsStoreState {
   dashboard: IDashboardConfig;
   dashboards: IDashboardConfig[];
   template: IDashboardConfig;
@@ -106,9 +106,11 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
   private getConnections(dashboard: IDashboardConfig): any {
     let requiredParameters = {};
     let dataSources = DataSourceConnector.getDataSources();
+
+    // Go over all data sources and ensure connections are filled in
     _.values(dataSources).forEach(dataSource => {
 
-      // If no connection requirements were set, return
+      // If no connection requirements were set, do nothing
       let connectionTypeName = dataSource.plugin.connectionType;
       if (!connectionTypeName) {
         return;
@@ -120,7 +122,6 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
 
       var connectionType = connections[connectionTypeName];
       requiredParameters[connectionTypeName] = {};
-      requiredParameters[connectionTypeName]['editor'] = connectionType.editor;
       connectionType.params.forEach(param => { requiredParameters[connectionTypeName][param] = null; });
 
       // Connection type is already defined - check params
@@ -140,7 +141,6 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
       if (!(key in requiredParameters)) {
         var connectionType = connections[key];
         requiredParameters[key] = {};
-        requiredParameters[key]['editor'] = connectionType.editor;
         connectionType.params.forEach(param => { requiredParameters[key][param] = connection[param]; });
       }
     });
