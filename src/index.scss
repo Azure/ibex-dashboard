@@ -230,3 +230,26 @@ h2, .md-subheading-2 {
     font-weight: 600;
   }
 }
+
+
+/*================*/
+/* Dialogs with toolbar */
+/*================*/
+
+.dialog-toolbar-no-padding .md-dialog-content--padded{
+  padding: 0px;
+}
+.dialog-toolbar-no-padding footer{
+  position: absolute;
+  bottom:0px;
+  right:0px;
+  width:100%;
+}
+
+
+.vertical-menu .active-item{
+  background: $md-cyan-500;
+}
+.vertical-menu .md-text--theme-primary{
+  color: $md-cyan-50;
+}

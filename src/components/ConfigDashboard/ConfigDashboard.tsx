@@ -11,86 +11,76 @@ import connections from '../../data-sources/connections';
 
 import ConnectionsStore from '../../stores/ConnectionsStore';
 import ConnectionsActions from '../../actions/ConnectionsActions';
-
-interface IConfigDashboardState {
-  connections: IDictionary;
-  error: string;
-}
+import SettingsStore from '../../stores/SettingsStore';
+import SettingsActions from '../../actions/SettingsActions';
 
 interface IConfigDashboardProps {
-  dashboard: IDashboardConfig;
+  connections: IDictionary;
+  standaloneView?: boolean;
+  dashboardId?: string;
+}
+
+interface IConfigDashboardState {
   connections: IDictionary;
 }
 
 export default class ConfigDashboard extends React.Component<IConfigDashboardProps, IConfigDashboardState> {
 
   state: IConfigDashboardState = {
-    connections: {},
-    error: null
+    connections: {}
   };
-
+  
   constructor(props: any) {
     super(props);
 
     this.onSave = this.onSave.bind(this);
-    this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
     this.onCancel = this.onCancel.bind(this);
+    this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
+    this.redirectToHomepageIfStandalone = this.redirectToHomepageIfStandalone.bind(this);
+    this.state.connections = this.props.connections;
   }
 
   onParamChange(connectionKey: string, paramKey: string, value: any) {
     let { connections } = this.state;
     connections[connectionKey] = connections[connectionKey] || {};
     connections[connectionKey][paramKey] = value;
-    this.setState({ connections });
   }
 
-  onSave() {
-    let { dashboard } = this.props;
-    let { connections } = this.state;
-
-    if (!dashboard.config.connections) {
-      dashboard.config.connections = connections;
-
-    } else {
-      _.keys(connections).forEach(connectionKey => {
-
-        if (!dashboard.config.connections[connectionKey]) {
-          dashboard.config.connections[connectionKey] = connections[connectionKey];
-        } else {
-          _.extend(dashboard.config.connections[connectionKey], connections[connectionKey]);
-        }
-      });
-    }
-
-    ConfigurationsActions.saveConfiguration(dashboard);
-  }
+  onSave() { }
 
   onSaveGoToDashboard() {
     this.onSave();
 
-    let { dashboard } = this.props;
-    
-    setTimeout(
-      () => {
-        window.location.replace(`/dashboard/${dashboard.id}`);
-      }, 
-      2000
-    );
+    if (this.props.standaloneView) {
+      // Todo: why is there a timer here and not a callback?
+      setTimeout(this.redirectToHomepageIfStandalone, 2000);
+    }
   }
 
   onCancel() {
-    let { dashboard } = this.props;
-    window.location.replace(`/dashboard/${dashboard.id}`); 
+    this.redirectToHomepageIfStandalone();    
   }
 
-  render() {
-
-    if (!this.props.dashboard) {
-      return null;
+  redirectToHomepageIfStandalone() {
+    if (this.props.standaloneView) {
+      let { dashboardId } = this.props;
+      window.location.replace(`/dashboard/${dashboardId}`); 
     }
+  }
 
-    let { connections } = this.props;
-    let { error } = this.state;
+  displayToolbarIfStandalone() {
+    if (!this.props.standaloneView) { return null; }
+
+    return (
+      <div>
+        <Button flat primary label="Save" onClick={this.onSave}>save</Button>
+        <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
+        <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
+      </div>
+    );
+  }
+  render() {
+    let { connections } = this.state;
 
     return (
       <div style={{ width: '100%' }}>
@@ -126,11 +116,9 @@ export default class ConfigDashboard extends React.Component<IConfigDashboardPro
             );
           }
         })}
-
-        <br/>
-        <Button flat primary label="Save" onClick={this.onSave}>save</Button>
-        <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
-        <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
+        
+        {this.displayToolbarIfStandalone()}
+        
       </div>
     );
   }
