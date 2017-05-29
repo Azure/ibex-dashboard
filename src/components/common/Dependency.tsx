@@ -11,7 +11,7 @@ interface IDependencyProps {
   id: string;
   label?: string;
   defaultValue?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: string, event: UIEvent) => void;
 }
 
 interface IDependencyState {
@@ -73,10 +73,10 @@ export default class Dependency extends React.Component<IDependencyProps, IDepen
 
   throttledSearch(searchTerm: string) { }
 
-  onChange(searchTerm: string) {
+  onChange(searchTerm: string, event: UIEvent) {
 
     if (this.props.onChange) {
-      this.props.onChange(searchTerm);
+      this.props.onChange(searchTerm, event);
     }
 
     return this.throttledSearch(searchTerm);

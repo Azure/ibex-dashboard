@@ -8,7 +8,7 @@ import FontIcon from 'react-md/lib/FontIcons';
 import { GenericComponent, IGenericProps } from '../GenericComponent';
 import utils from '../../../utils';
 
-//import settings from './Settings';
+import settings from './Settings';
 
 const styles = {
   chevron: {
@@ -29,7 +29,7 @@ interface IScorecardProps extends IGenericProps {
 
 export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
-  //static editor = settings;
+  static editor = settings;
 
   constructor(props: IScorecardProps) {
     super(props);

@@ -10,20 +10,10 @@ export default class PieSettings extends BaseSettings<IBaseSettingsState> {
 
   icon = 'pie_chart';
 
-  constructor(props: IBaseSettingsProps) {
-    super(props);
-
-    this.onShowLegendChange = this.onShowLegendChange.bind(this);
-  }
-  
-  onShowLegendChange(checked: boolean) {
-    let { stateSettings } = this.state;
-    stateSettings.props.showLegend = checked;
-    this.setState({ stateSettings });
-  }
-
   renderChildren() {
-    let { id, dependencies, actions, props, title, subtitle, size, theme, type } = this.state.stateSettings;
+    let { settings } = this.props;
+    let { id, dependencies, actions, props, title, subtitle, size, theme, type } = settings;
+
     return (
       <span className="md-cell md-cell--bottom  md-cell--6">
         <div className="md-grid">
@@ -33,8 +23,8 @@ export default class PieSettings extends BaseSettings<IBaseSettingsState> {
               id="props.showLegend" 
               name="props.showLegend" 
               label="Show legend" 
-              checked={props.showLegend} 
-              onChange={this.onShowLegendChange} 
+              defaultChecked={props.showLegend} 
+              onChange={this.onParamChange} 
             />
           </span>
         </div>
