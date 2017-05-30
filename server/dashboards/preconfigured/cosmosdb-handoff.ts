@@ -44,18 +44,18 @@ export const config: IDashboardConfig = /*return*/ {
   },
   filters: [
     {
-      type: "TextFilter",
-      title: "Timespan",
-      dependencies: { selectedValue: "timespan", values: "timespan:values" },
-      actions: { onChange: "timespan:updateSelectedValue" },
+      type: 'TextFilter',
+      title: 'Timespan',
+      dependencies: { selectedValue: 'timespan', values: 'timespan:values' },
+      actions: { onChange: 'timespan:updateSelectedValue' },
       first: true
     }
   ],
   dataSources: [
     {
-      id: "timespan",
-      type: "Constant",
-      params: { values: ["24 hours", "1 week", "1 month", "3 months"], selectedValue: "1 month" },
+      id: 'timespan',
+      type: 'Constant',
+      params: { values: ['24 hours', '1 week', '1 month', '3 months'], selectedValue: '1 month' },
       calculated: (state, dependencies) => {
         var queryTimespan =
           state.selectedValue === '24 hours' ? 'PT24H' :
@@ -70,25 +70,19 @@ export const config: IDashboardConfig = /*return*/ {
       }
     },
     {
-      id: "directLine",
-      type: "BotFramework/DirectLine",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
-      calculated: (response) => {
-        return response;
-      }
-    },
-    {
-      id: "botConversations",
-      type: "CosmosDB/Query",
-      dependencies: { timespan: "timespan", queryTimespan: "timespan:queryTimespan" },
+      id: 'botConversations',
+      type: 'CosmosDB/Query',
+      dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
       params: {
-        databaseId: "admin",
-        collectionId: "conversations",
+        databaseId: 'admin',
+        collectionId: 'conversations',
         query: () => `SELECT * FROM conversations c WHERE (c.state = 0 OR c.state = 1) ORDER BY c.state`,
         parameters: []
       },
       calculated: (result) => {
-
+        if (!Array.isArray(result.Documents)) {
+          return null;
+        }
         const values = result.Documents.reduce((a, c) => {
           const lastMessageIndex = c.transcript.reverse().findIndex(x => x.from !== 'Bot');
           const value = {
@@ -109,47 +103,48 @@ export const config: IDashboardConfig = /*return*/ {
   ],
   elements: [
     {
-      id: "conversations",
-      type: "Table",
-      title: "Recent Conversations",
-      subtitle: "Monitor bot communications",
+      id: 'conversations',
+      type: 'Table',
+      title: 'Recent Conversations',
+      subtitle: 'Monitor bot communications',
       size: { w: 12, h: 12 },
-      dependencies: { values: "botConversations:values" },
+      dependencies: { values: 'botConversations:values' },
       props: {
         cols: [
-          { header: "Timestamp", field: "timestamp", type: "time", format: "MMM-DD HH:mm:ss" },
-          { header: "Last Message", field: "lastMessage" },
-          { header: "Username", field: "username" },
-          { header: "Status", field: "icon", type: "icon" },
-          { type: "button", value: "chat", click: "openTranscriptsDialog" }
+          { header: 'Timestamp', field: 'timestamp', type: 'time', format: 'MMM-DD HH:mm:ss' },
+          { header: 'Last Message', field: 'lastMessage' },
+          { header: 'Username', field: 'username' },
+          { header: 'Status', field: 'icon', type: 'icon' },
+          { type: 'button', value: 'chat', click: 'openTranscriptsDialog' }
         ]
       },
       actions: {
         openTranscriptsDialog: {
-          action: "dialog:transcripts",
-          params: { title: "args:username", conversationId: "args:conversationId", queryspan: "timespan:queryTimespan" }
+          action: 'dialog:transcripts',
+          params: { title: 'args:username', conversationId: 'args:conversationId', queryspan: 'timespan:queryTimespan' }
         }
       }
     }
   ],
   dialogs: [
     {
-      id: "transcripts",
-      width: "60%",
-      params: ["title", "conversationId", "queryspan"],
+      id: 'transcripts',
+      width: '60%',
+      params: ['title', 'conversationId', 'queryspan'],
       dataSources: [
         {
-          id: "transcripts-data",
-          type: "CosmosDB/Query",
+          id: 'transcripts-data',
+          type: 'CosmosDB/Query',
           dependencies: {
-            conversationId: "dialog_transcripts:conversationId",
-            secret: "directLine:directLine",
-            queryTimespan: "dialog_transcripts:queryspan"
+            conversationId: 'dialog_transcripts:conversationId',
+            queryTimespan: 'dialog_transcripts:queryspan',
+            secret: 'bot-framework.directLine'
           },
           params: {
-            databaseId: "admin",
-            collectionId: "conversations",
-            query: ({ conversationId }) => `SELECT * FROM conversations c WHERE (c.customer.conversation['$id'] = '${conversationId}')`,
+            databaseId: 'admin',
+            collectionId: 'conversations',
+            query: ({ conversationId }) => `SELECT * FROM conversations c 
+              WHERE (c.customer.conversation['$id'] = '${conversationId}')`,
             parameters: []
           },
           calculated: (result, dependencies) => {
@@ -159,7 +154,7 @@ export const config: IDashboardConfig = /*return*/ {
 
             let values = [];
             let customer = null;
-            let body = '';
+            let body = {};
             let headers = {};
             let disabled = false;
             const { secret } = dependencies;
@@ -181,52 +176,55 @@ export const config: IDashboardConfig = /*return*/ {
       ],
       elements: [
         {
-          id: "transcripts-button",
-          type: "RequestButton",
-          title: "Transfer to Agent",
+          id: 'transcripts-button',
+          type: 'RequestButton',
+          title: 'Transfer to Agent',
           size: { w: 2, h: 1 },
           location: { x: 0, y: 0 },
           dependencies: {
-            conversationId: "directLine:conversationId",
-            body: "transcripts-data:body",
-            headers: "transcripts-data:headers",
-            disabled: "transcripts-data:disabled",
-            conversationsEndpoint: "directLine:conversationsEndpoint"
+            body: 'transcripts-data:body',
+            headers: 'transcripts-data:headers',
+            disabled: 'transcripts-data:disabled',
+            conversationsEndpoint: 'bot-framework.conversationsEndpoint'
           },
           props: {
             url: ({ conversationsEndpoint }) => `${conversationsEndpoint}`,
-            method: "POST",
+            method: 'POST',
             once: true,
-            icon: "person",
+            icon: 'person',
             buttonProps: { iconBefore: false, primary: true }
           }
         },
         {
-          id: "agent-button",
-          type: "RequestButton",
-          title: "Open Webchat",
+          id: 'agent-button',
+          type: 'RequestButton',
+          title: 'Open Webchat',
           size: { w: 2, h: 1 },
           location: { x: 2, y: 0 },
-          dependencies: { token: "directLine:token", webchatEndpoint: "directLine:webchatEndpoint" },
+          dependencies: { 
+            token: 'bot-framework.directLine', 
+            webchatEndpoint: 'bot-framework.webchatEndpoint',
+            dependsOn: 'transcripts-data:disabled'
+          },
           props: {
             url: ({ token, webchatEndpoint }) => `${webchatEndpoint}/?s=${token}`,
             link: true,
-            icon: "open_in_new",
+            icon: 'open_in_new',
             buttonProps: { iconBefore: false, secondary: true }
           }
         },
         {
-          id: "transcripts-list",
-          type: "Table",
-          title: "Transcripts",
+          id: 'transcripts-list',
+          type: 'Table',
+          title: 'Transcripts',
           size: { w: 12, h: 11 },
           location: { x: 0, y: 1 },
-          dependencies: { values: "transcripts-data:values" },
+          dependencies: { values: 'transcripts-data:values' },
           props: {
-            rowClassNameField: "from",
+            rowClassNameField: 'from',
             cols: [
-              { header: "Timestamp", field: "timestamp", type: "time", format: "MMM-DD HH:mm:ss", width: "50px" },
-              { header: "Text", field: "text" }
+              { header: 'Timestamp', field: 'timestamp', type: 'time', format: 'MMM-DD HH:mm:ss', width: '50px' },
+              { header: 'Text', field: 'text' }
             ]
           }
         }
