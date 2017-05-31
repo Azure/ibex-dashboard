@@ -171,7 +171,6 @@ export default class Home extends React.Component<any, IHomeState> {
   render() {
     let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
     let { infoVisible, infoHtml } = this.state;
-    console.log(selectedTemplateId, this.state.creationState, this.state);
 
     if (!redirectUrl) {
       redirectUrl = window.location.protocol + '//' + window.location.host + '/auth/openid/return';
