@@ -11,6 +11,7 @@ import { Link } from 'react-router';
 import Chip from 'react-md/lib/Chips';
 import Menu from 'react-md/lib/Menus/Menu';
 import MenuButton from 'react-md/lib/Menus/MenuButton';
+import Button from 'react-md/lib/Buttons';
 
 import AccountStore from '../../stores/AccountStore';
 import AccountActions from '../../actions/AccountActions';
@@ -82,31 +83,31 @@ export default class Navbar extends React.Component<any, any> {
       );
     });
 
-    if (!title) {
+    if (!toolbarTitle) {
       switch (window.location.pathname) {
         case '/':
-          title = 'Create Dashboard';
+          toolbarTitle = 'Create Dashboard';
           break;
 
         case '/about':
-          title = 'Help';
+          toolbarTitle = 'Help';
           break;
 
         case '/dashboard':
-          title = 'Dashboard';
+          toolbarTitle = 'Dashboard';
           break;
 
         case '/dashboard/config':
-          title = 'Dashboard Configuration';
+          toolbarTitle = 'Dashboard Configuration';
           break;
 
         case '/setup':
-          title = 'Setup Authentication';
+          toolbarTitle = 'Setup Authentication';
           break;
 
         default:
 
-          title = 'Ibex Dashboard';
+          toolbarTitle = 'Ibex Dashboard';
           break;
       }
     }
@@ -114,7 +115,14 @@ export default class Navbar extends React.Component<any, any> {
     const drawerType = navigationItems.length > 0 ?
       NavigationDrawer.DrawerTypes.TEMPORARY_MINI : NavigationDrawer.DrawerTypes.TEMPORARY;
 
-    const toolbarActions = (
+    const toolbarActions = [(
+      <Button
+          icon 
+          tooltipLabel="Create Dashboard"
+          href="/"
+          component={Link}
+      >add_box
+      </Button>), (
       <MenuButton
         id="vert-menu"
         icon
@@ -137,13 +145,6 @@ export default class Navbar extends React.Component<any, any> {
             )
         }
         <ListItem
-          primaryText="Create Dashboard"
-          href="/"
-          active={pathname === '/'}
-          component={Link}
-          leftIcon={<FontIcon>add_box</FontIcon>}
-        />
-        <ListItem
           primaryText="Setup Authentication"
           href="/setup"
           active={pathname === '/setup'}
@@ -151,7 +152,7 @@ export default class Navbar extends React.Component<any, any> {
           leftIcon={<FontIcon>lock</FontIcon>}
         />
       </MenuButton>
-    );
+      )];
 
     return (
       <div>
@@ -170,7 +171,7 @@ export default class Navbar extends React.Component<any, any> {
           </NavigationDrawer>
         ) : (
             <div>
-              <Toolbar title={title} actions={toolbarActions} colored />
+              <Toolbar title={toolbarTitle} actions={toolbarActions} colored />
               <div className="md-grid">
                 {children}
               </div>
