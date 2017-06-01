@@ -1,11 +1,14 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps } from './GenericComponent';
+import * as _ from 'lodash';
+
 import { Media } from 'react-md/lib/Media';
 import { Card } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
-import * as _ from 'lodash';
 
-import utils from '../../utils';
+import { GenericComponent, IGenericProps } from '../GenericComponent';
+import utils from '../../../utils';
+
+import settings from './Settings';
 
 const styles = {
   chevron: {
@@ -25,6 +28,8 @@ interface IScorecardProps extends IGenericProps {
 }
 
 export default class Scorecard extends GenericComponent<IScorecardProps, any> {
+
+  static editor = settings;
 
   constructor(props: IScorecardProps) {
     super(props);
