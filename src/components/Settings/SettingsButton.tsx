@@ -13,6 +13,7 @@ import { ToastActions } from '../Toast';
 
 import ConnectionsSettings from './ConnectionsSettings';
 import ElementsSettings from './ElementsSettings';
+import DatasourceSettings from './DatasourceSettings';
 import SettingsStore, { ISettingsStoreState } from '../../stores/SettingsStore';
 import SettingsActions from '../../actions/SettingsActions';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
@@ -161,7 +162,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                 <ElementsSettings settings={dashboard} />
               </Tab>
               <Tab label={VIEWS.DataSources}>
-                <h1>{VIEWS.DataSources} - is not implemented yet</h1>
+                <h1><DatasourceSettings settings={dashboard} /></h1>
               </Tab>
               <Tab label={VIEWS.Filters}>
                 <h1>{VIEWS.Filters} - is not implemented yet</h1>
