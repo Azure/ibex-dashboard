@@ -19,11 +19,20 @@ const styles = {
   card: {
     minWidth: 400,
     height: 200,
-    marginTop: 40,
+    marginTop: 50,
   },
   image: {
-    filter: 'opacity(30%)'
+    filter: 'opacity(30%) grayscale(70%)'
   },
+  fabs: {
+    position: 'absolute',
+    bottom: '50px',
+    right: '10px',
+    zIndex: 1,
+  },
+  primaryFab: {
+    marginLeft: '2px'
+  }
 };
 
 interface IHomeState extends ISetupConfig {
@@ -181,24 +190,17 @@ export default class Home extends React.Component<any, IHomeState> {
           <Media>
             <img src={temp.preview} role="presentation" style={styles.image} />
             <MediaOverlay>
-              <CardTitle title={temp.name} subtitle={temp.description} >
-                <Button
-                  icon
-                  onClick={this.onOpenInfo.bind(this, temp.html)}
-                  className="md-cell--right"
-                >
-                  info
-                </Button>
-                <Button
-                  icon
-                  onClick={this.onNewTemplateSelected.bind(this, temp.id)}
-                  className="md-cell--right"
-                >
-                  add_circle_outline
-                </Button>
-              </CardTitle>
+              <CardTitle title={temp.name} subtitle={temp.description} />
             </MediaOverlay>
           </Media>
+          <CardActions style={styles.fabs}>
+            <Button floating secondary onClick={this.onOpenInfo.bind(this, temp.html || '<p>No info available</p>')}>
+              info
+            </Button>
+            <Button floating primary onClick={this.onNewTemplateSelected.bind(this, temp.id)} style={styles.primaryFab}>
+              add_circle_outline
+            </Button>
+          </CardActions>
         </Card>
       </div>
     ));
@@ -231,8 +233,8 @@ export default class Home extends React.Component<any, IHomeState> {
           dialogStyle={{ width: '50%' }}
           modal
           actions={[
-            { onClick: this.onNewTemplateSave, primary: false, label: 'Create', },
-            { onClick: this.onNewTemplateCancel, primary: true, label: 'Cancel' }
+            { onClick: this.onNewTemplateCancel, primary: false, label: 'Cancel' },
+            { onClick: this.onNewTemplateSave, primary: true, label: 'Create', },
           ]}
         >
           <TextField
