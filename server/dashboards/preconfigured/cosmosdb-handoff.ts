@@ -138,7 +138,7 @@ export const config: IDashboardConfig = /*return*/ {
           dependencies: {
             conversationId: 'dialog_transcripts:conversationId',
             queryTimespan: 'dialog_transcripts:queryspan',
-            secret: 'bot-framework.directLine'
+            secret: 'connection:bot-framework.directLine'
           },
           params: {
             databaseId: 'admin',
@@ -185,7 +185,7 @@ export const config: IDashboardConfig = /*return*/ {
             body: 'transcripts-data:body',
             headers: 'transcripts-data:headers',
             disabled: 'transcripts-data:disabled',
-            conversationsEndpoint: 'bot-framework.conversationsEndpoint'
+            conversationsEndpoint: 'connection:bot-framework.conversationsEndpoint'
           },
           props: {
             url: ({ conversationsEndpoint }) => `${conversationsEndpoint}`,
@@ -202,8 +202,8 @@ export const config: IDashboardConfig = /*return*/ {
           size: { w: 2, h: 1 },
           location: { x: 2, y: 0 },
           dependencies: { 
-            token: 'bot-framework.directLine', 
-            webchatEndpoint: 'bot-framework.webchatEndpoint',
+            token: 'connection:bot-framework.directLine', 
+            webchatEndpoint: 'connection:bot-framework.webchatEndpoint',
             dependsOn: 'transcripts-data:disabled'
           },
           props: {

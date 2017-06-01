@@ -98,18 +98,19 @@ export class DataSourceConnector {
       }
 
       // Checking if this is a config value
-      if (dependency.indexOf('.') > 0) {
+      if (dependency.startsWith('connection:')) {
+        const connection = dependency.substr(dependency.indexOf(':') + 1);
         const ds: IDataSource = this.dataSources[Object.keys(this.dataSources)[0]];
         if ( !ds.plugin.hasOwnProperty('connections')) {
           throw new Error('Tried to resolve connections reference path, but couldn\'t find any connections.');
         }
         const connections = ds.plugin['connections'];
-        const path = dependency.split('.');
+        const path = connection.split('.');
         if (path.length !== 2) {
-          throw new Error('Expected dot reference path consisting of 2 components.');
+          throw new Error('Expected connection reference dot path consisting of 2 components.');
         }
         if ( !connections.hasOwnProperty(path[0]) || !connections[path[0]].hasOwnProperty(path[1])) {
-          throw new Error('Unable to resolve reference path:' + dependency);
+          throw new Error('Unable to resolve connection reference path:' + connection);
         }
         result.dependencies[key] = connections[path[0]][path[1]];
         return;
