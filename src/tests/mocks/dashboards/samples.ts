@@ -1,4 +1,6 @@
-import dashboard from './dashboard';
+import { createDashboard } from "./utils";
+
+let dashboard = createDashboard();
 dashboard.dataSources.push({
   id: "samples",
   type: "Sample",

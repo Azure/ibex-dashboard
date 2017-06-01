@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import DashboardComponent from '../components/Dashboard';
-import ConfigDashboard from '../components/ConfigDashboard';
+import { SetupDashboard } from '../components/Settings';
 
 import ConfigurationsActions from '../actions/ConfigurationsActions';
 import ConfigurationsStore from '../stores/ConfigurationsStore';
@@ -50,7 +50,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
 
     if (connectionsMissing) {
       return (
-        <ConfigDashboard dashboard={dashboard} connections={connections} />
+        <SetupDashboard dashboard={dashboard} connections={connections} />
       );
     }
 

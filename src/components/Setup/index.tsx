@@ -71,7 +71,7 @@ export default class Setup extends React.Component<any, ISetupState> {
 
   checkEmailValue(e: any) {
 
-    this.setState({ editedEmail: e.target.value })
+    this.setState({ editedEmail: e.target.value });
 
     if (e.key === 'Enter') {
 
@@ -132,7 +132,11 @@ export default class Setup extends React.Component<any, ISetupState> {
         return ToastActions.addToast({ text: 'Fill in client secret', action: null }); 
       }
       if (!this.state.allowHttp && redirectUrl.startsWith('http:')) { 
-        return ToastActions.addToast({ text: 'Redirect url should start with https or enable http redirects', action: null }); 
+        return ToastActions.addToast(
+          { 
+            text: 'Redirect url should start with https or enable http redirects', 
+            action: null 
+          }); 
       }
     }
   

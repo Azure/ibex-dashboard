@@ -79,12 +79,21 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
   }
 
   componentWillUpdate(nextProps: any, nextState: any) {
-    var { groups } = nextState;
+    let { groups } = nextState;
+    let self = this;
     if (!this.state.groups && groups && groups.length > 0) {
       // automatically select first group list item
-      window.requestAnimationFrame(() => {
-        this.handleClick(groups[0], 0);
-      });
+      try {
+        if (typeof window.requestAnimationFrame === 'function') {
+          window.requestAnimationFrame(() => {
+            self.handleClick(groups[0], 0);
+          });
+        } else {
+          window.setTimeout(() => self.handleClick(groups[0], 0), 100);
+        }
+      } catch (e) {
+        console.error(e); /* tslint:disable-line */
+      }
     }
   }
 
