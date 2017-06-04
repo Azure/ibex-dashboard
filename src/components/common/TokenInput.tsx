@@ -16,11 +16,11 @@ interface ITokenInputState {
   newToken: any;
 };
 
-export default class TokenInput extends React.Component<ITokenInputProps, ITokenInputState>{
+export default class TokenInput extends React.Component<ITokenInputProps, ITokenInputState> {
 
   state: ITokenInputState = {
     newToken: ''
-  }
+  };
 
   constructor(props: ITokenInputProps) {
     super(props);
@@ -34,10 +34,12 @@ export default class TokenInput extends React.Component<ITokenInputProps, IToken
     _.remove(tokens, function (x: String) {
       return x === token;
     });
-    this.props.onTokensChanged();
+    if (this.props.onTokensChanged) {
+      this.props.onTokensChanged();
+    }
   }
 
-  onNewTokenChange(newData) {
+  onNewTokenChange(newData: any) {
     this.setState({ newToken: newData });
   }
 
@@ -48,7 +50,9 @@ export default class TokenInput extends React.Component<ITokenInputProps, IToken
       this.setState({
         newToken: ''
       });
-      this.props.onTokensChanged();
+      if (this.props.onTokensChanged) {
+        this.props.onTokensChanged();
+      }
     }
   }
 
