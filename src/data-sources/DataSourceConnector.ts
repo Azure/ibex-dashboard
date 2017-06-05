@@ -100,11 +100,16 @@ export class DataSourceConnector {
       // Checking if this is a config value
       if (dependency.startsWith('connection:')) {
         const connection = dependency.substr(dependency.indexOf(':') + 1);
-        const ds: IDataSource = this.dataSources[Object.keys(this.dataSources)[0]];
-        if ( !ds.plugin.hasOwnProperty('connections')) {
+        if ( Object.keys(DataSourceConnector.dataSources).length < 1 ) {
+          throw new Error('Connection error, couldn\'t find any data sources.');
+        }
+        // Selects first data source to get connections 
+        const dataSource: IDataSource = DataSourceConnector.dataSources[
+          Object.keys(DataSourceConnector.dataSources)[0]];
+        if ( !dataSource || !dataSource.plugin.hasOwnProperty('connections')) {
           throw new Error('Tried to resolve connections reference path, but couldn\'t find any connections.');
         }
-        const connections = ds.plugin['connections'];
+        const connections = dataSource.plugin['connections'];
         const path = connection.split('.');
         if (path.length !== 2) {
           throw new Error('Expected connection reference dot path consisting of 2 components.');

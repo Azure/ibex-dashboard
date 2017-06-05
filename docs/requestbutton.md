@@ -33,7 +33,7 @@ Define `props` as follows:
 | `url`| `string | function` | Static url string, or a function with string injection
 | `link`| `boolean` | Opens url in new window if set to `true`
 | `method`| `string` | Send request using 'GET', 'POST', 'PUT', or 'DELETE'. Default is 'GET'
-| `once`| `boolean` | Only allows button to be clicked once if set to `true`
+| `disableAfterFirstClick`| `boolean` | Only allows button to be clicked once if set to `true`
 | `icon`| `string` | [Material design icon name](https://material.io/icons/) (use underscores instead of spaces)
 | `buttonProps`| `string` | For additional [react-md Button props](https://react-md.mlaursen.com/components/buttons?tab=1)
 

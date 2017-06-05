@@ -1,7 +1,10 @@
+// external
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
-import Button from 'react-md/lib/Buttons';
 import * as request from 'xhr-request';
+// react-md
+import Button from 'react-md/lib/Buttons';
+// internal
+import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 
 enum Method {
   GET,
@@ -16,7 +19,7 @@ interface IRequestButtonProps extends IGenericProps {
     method?: Method;
     link?: boolean;
     icon?: string;
-    once?: boolean;
+    disableAfterFirstClick?: boolean;
     buttonProps?: { [key: string]: Object };
   };
   theme?: string[];
@@ -28,6 +31,7 @@ interface IRequestButtonState extends IGenericState {
   disabled: boolean;
 }
 
+// A button that opens a url in new window, or sends a request. 
 export default class RequestButton extends GenericComponent<IRequestButtonProps, IRequestButtonState> {
 
   state = {
@@ -48,19 +52,19 @@ export default class RequestButton extends GenericComponent<IRequestButtonProps,
     if (link) {
       return this.open(url);
     }
-    return this.request(url);
+    return this.sendRequest(url);
   }
 
   open(url: string) {
-    const { once } = this.props.props;
+    const { disableAfterFirstClick } = this.props.props;
     window.open(url);
-    if (once) {
+    if (disableAfterFirstClick) {
       this.setState({ 'disabled': true });
     }
   }
 
-  request(url: string) {
-    const { once } = this.props.props;
+  sendRequest(url: string) {
+    const { disableAfterFirstClick } = this.props.props;
     const { body, headers } = this.state;
     let { method } = this.props.props;
     if (method === undefined) {
@@ -75,7 +79,7 @@ export default class RequestButton extends GenericComponent<IRequestButtonProps,
       if (err) {
         throw err;
       }
-      if (once) {
+      if (disableAfterFirstClick) {
         this.setState({ 'disabled': true });
       }
     }.bind(this));

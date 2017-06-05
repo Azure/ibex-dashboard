@@ -73,8 +73,14 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
         json: true,
         body: body,
       },      (error, json) => {
-        if (error || !json.Documents) {
+        if (error) {
           throw new Error(error);
+        }
+        if (json.code || json.message) {
+          throw new Error( json.code + '\nCosmos DB query error: ' + json.message );
+        }
+        if (!json.Documents) {
+          return dispatch();
         }
         let documents = json.Documents;
         // NB: CosmosDB prefixes certain keys with '$' which will be removed for the returned result.

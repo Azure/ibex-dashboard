@@ -57,15 +57,15 @@ export const config: IDashboardConfig = /*return*/ {
       type: 'Constant',
       params: { values: ['24 hours', '1 week', '1 month', '3 months'], selectedValue: '1 month' },
       calculated: (state, dependencies) => {
-        var queryTimespan =
-          state.selectedValue === '24 hours' ? 'PT24H' :
-            state.selectedValue === '1 week' ? 'P7D' :
-              state.selectedValue === '1 month' ? 'P30D' :
+        let { selectedValue } = state;
+        let queryTimespan =
+          selectedValue === '24 hours' ? 'PT24H' :
+            selectedValue === '1 week' ? 'P7D' :
+              selectedValue === '1 month' ? 'P30D' :
                 'P90D';
-        var granularity =
-          state.selectedValue === '24 hours' ? '5m' :
-            state.selectedValue === '1 week' ? '1d' : '1d';
-
+        let granularity =
+          selectedValue === '24 hours' ? '5m' :
+            selectedValue === '1 week' ? '1d' : '1d';
         return { queryTimespan, granularity };
       }
     },
@@ -83,21 +83,26 @@ export const config: IDashboardConfig = /*return*/ {
         if (!Array.isArray(result.Documents)) {
           return null;
         }
-        const values = result.Documents.reduce((a, c) => {
-          const lastMessageIndex = c.transcript.reverse().findIndex(x => x.from !== 'Bot');
+        const values = result.Documents.reduce((destArray, currentValue) => {
+          if (!currentValue.customer || !currentValue.customer.id || !currentValue.customer.conversation || 
+              !currentValue.customer.conversation.id || !currentValue.customer.user || !currentValue.transcript) {
+            console.warn('Unexpected Document data, missing key properties.', currentValue);
+            return;
+          }
+          const lastMessage = currentValue.transcript.reverse().find(x => x.from !== 'Bot');
           const value = {
-            userId: c.customer.id,
-            conversationId: c.customer.conversation.id,
-            username: c.customer.user.name,
-            timestamp: c.transcript[lastMessageIndex].timestamp,
-            lastMessage: c.transcript[lastMessageIndex].text || '',
-            icon: c.state === 1 ? 'perm_identity' : 'memory',
+            userId: currentValue.customer.id,
+            conversationId: currentValue.customer.conversation.id,
+            username: currentValue.customer.user.name || 'Unknown',
+            timestamp: lastMessage.timestamp,
+            lastMessage: lastMessage.text || '',
+            icon: currentValue.state === 1 ? 'perm_identity' : 'memory',
           };
-          a.push(value);
-          return a;
+          destArray.push(value);
+          return destArray;
         }, []);
 
-        return { result, 'values': values };
+        return { result, values };
       }
     }
   ],
@@ -143,8 +148,8 @@ export const config: IDashboardConfig = /*return*/ {
           params: {
             databaseId: 'admin',
             collectionId: 'conversations',
-            query: ({ conversationId }) => `SELECT * FROM conversations c 
-              WHERE (c.customer.conversation['$id'] = '${conversationId}')`,
+            query: ({ conversationId }) => `
+              SELECT * FROM conversations c WHERE (c.customer.conversation['$id'] = '${conversationId}')`,
             parameters: []
           },
           calculated: (result, dependencies) => {
@@ -160,17 +165,14 @@ export const config: IDashboardConfig = /*return*/ {
             const { secret } = dependencies;
 
             if (result.Documents.length === 1) {
-              values = result.Documents[0].transcript || [];
-              customer = result.Documents[0].customer;
-              disabled = result.Documents[0].state !== 0 ? true : false;
-              body = {
-                'conversationId': customer.conversation.id,
-              };
-              headers = {
-                'Authorization': `Bearer ${secret}`
-              };
+              let document = result.Documents[0];
+              values = document.transcript || [];
+              customer = document.customer;
+              disabled = document.state !== 0 ? true : false;
+              body = { 'conversationId': customer.conversation.id, };
+              headers = { 'Authorization': `Bearer ${secret}` };
             }
-            return { 'values': values, 'customer': customer, 'headers': headers, 'body': body, 'disabled': disabled };
+            return { values, customer, headers, body, disabled };
           }
         }
       ],
@@ -188,9 +190,9 @@ export const config: IDashboardConfig = /*return*/ {
             conversationsEndpoint: 'connection:bot-framework.conversationsEndpoint'
           },
           props: {
-            url: ({ conversationsEndpoint }) => `${conversationsEndpoint}`,
+            url: ({conversationsEndpoint}) => `${conversationsEndpoint}`,
             method: 'POST',
-            once: true,
+            disableAfterFirstClick: true,
             icon: 'person',
             buttonProps: { iconBefore: false, primary: true }
           }

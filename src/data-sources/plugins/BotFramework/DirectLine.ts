@@ -5,6 +5,8 @@ import BotFrameworkConnection from '../../connections/bot-framework';
 
 let connectionType = new BotFrameworkConnection();
 
+const DIRECT_LINE_URL = 'https://directline.botframework.com/v3/directline/conversations';
+
 interface IQueryParams {
   calculated?: (results: any) => object;
 }
@@ -39,7 +41,7 @@ export default class BotFrameworkDirectLine extends DataSourcePlugin<IQueryParam
     }
 
     // Validate connection
-    let connection = this.getConnection();
+    let connection = this.getConnection() || {};
     let { directLine } = connection;
     if (!connection || !directLine) {
       return (dispatch) => {
@@ -47,15 +49,14 @@ export default class BotFrameworkDirectLine extends DataSourcePlugin<IQueryParam
       };
     }
 
-    const url = 'https://directline.botframework.com/v3/directline/conversations';
-    const auth = `Bearer ${directLine}`;
+    const bearerToken = `Bearer ${directLine}`;
 
     return (dispatch) => {
-      request(url, {
+      request(DIRECT_LINE_URL, {
         method: 'POST',
         json: true,
-        headers: { 'Authorization' : auth }
-      },      (error, json) => {
+        headers: { 'Authorization' : bearerToken }
+      },      (error: any, json: any) => {
         if (error) {
           throw new Error(error);
         }
@@ -67,7 +68,7 @@ export default class BotFrameworkDirectLine extends DataSourcePlugin<IQueryParam
 
   updateSelectedValues(dependencies: IDictionary, selectedValues: any) {
     if (Array.isArray(selectedValues)) {
-      return Object.assign(dependencies, { 'selectedValues': selectedValues });
+      return Object.assign(dependencies, { selectedValues });
     } else {
       return Object.assign(dependencies, { ... selectedValues });
     }
