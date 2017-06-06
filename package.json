@@ -4,7 +4,8 @@
   "private": true,
   "proxy": "http://localhost:4000/",
   "engines": {
-    "npm": "5.0.0"
+    "node": ">= 6.9.1",
+    "npm": ">= 5.0.0"
   },
   "devDependencies": {
     "@types/alt": "^0.16.32",
