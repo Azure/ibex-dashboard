@@ -8,6 +8,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const authRouter = require('./routes/auth');
 const apiRouter = require('./routes/api');
+const graphQLRouter = require('./routes/graphql');
 const cosmosDBRouter = require('./routes/cosmos-db');
 const azureRouter = require('./routes/azure');
 
@@ -32,6 +33,7 @@ app.use('/auth', authRouter.router);
 app.use('/api', apiRouter.router);
 app.use('/cosmosdb', cosmosDBRouter.router);
 app.use('/azure', azureRouter.router);
+app.use('/graphql', graphQLRouter.router)
 
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
