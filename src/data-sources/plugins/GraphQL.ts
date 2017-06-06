@@ -35,8 +35,8 @@ export default class GraphQL extends DataSourcePlugin<IGraphQLParams> {
       return dispatch => dispatch();
     }
 
-    const params = this.getParams();
-    const query = params.query;
+    const params = this.getParams() || ({} as IGraphQLParams);
+    const query = params.query || '';
     const variables = dependencies['variables'] || params.variables;
 
     return dispatch => {
