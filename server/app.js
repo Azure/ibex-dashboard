@@ -31,12 +31,9 @@ app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 app.use(authRouter.authenticationMiddleware('/auth', '/api/setup'));
 app.use('/auth', authRouter.router);
 app.use('/api', apiRouter.router);
-<<<<<<< HEAD
 app.use('/cosmosdb', cosmosDBRouter.router);
 app.use('/azure', azureRouter.router);
-=======
 app.use('/graphql', graphQLRouter.router)
->>>>>>> Add layer of indirection when querying GraphQL
 
 app.use(express.static(path.resolve(__dirname, '..', 'build')));
 
