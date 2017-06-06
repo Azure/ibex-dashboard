@@ -19,7 +19,7 @@ class GraphQLConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
 
   onParamChange(value: string, event: any) {
     if (typeof this.props.onParamChange === 'function') {
-      this.props.onParamChange('graphql', event.target.id, value);
+      this.props.onParamChange(event.target.id, value);
     }
   }
 
