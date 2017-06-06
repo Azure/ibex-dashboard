@@ -15,23 +15,23 @@ const styles = {
     width: '100%',
     height: '100%',
     position: 'relative',
-  },
+  } as React.CSSProperties,
   wrapper: {
     width: '100%',
     height: '100%',
     position: 'absolute',
-  },
+  } as React.CSSProperties,
   center: {
     width: '50px',
     height: '50px',
     position: 'relative',
     top: 'calc(50% - 80px)',
     left: 'calc(50% - 25px)',
-  },
+  } as React.CSSProperties,
   spinner: {
     margin: 0,
     padding: 0,
-  }
+  } as React.CSSProperties
 };
 
 const provider = new EsriProvider(); // does the search from address to lng and lat 

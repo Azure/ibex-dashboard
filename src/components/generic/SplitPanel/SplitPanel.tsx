@@ -1,7 +1,8 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as _ from 'lodash';
 import * as moment from 'moment';
+
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import { Card, CardText } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
@@ -22,12 +23,12 @@ const style = {
     height: 'calc(100vh - 148px)',
     overflow: 'scroll',
     borderRight: 'solid 1px #eee',
-  },
+  } as React.CSSProperties,
   rhs: {
     float: 'right',
     width: '80%',
     minHeight: 'calc(100vh - 148px)',
-  }
+  } as React.CSSProperties
 };
 
 export interface ISplitViewProps extends ITableProps {
