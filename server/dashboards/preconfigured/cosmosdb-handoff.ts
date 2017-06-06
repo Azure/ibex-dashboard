@@ -149,7 +149,8 @@ export const config: IDashboardConfig = /*return*/ {
             databaseId: 'admin',
             collectionId: 'conversations',
             query: ({ conversationId }) => `
-              SELECT * FROM conversations c WHERE (c.customer.conversation['$id'] = '${conversationId}')`,
+              SELECT * FROM conversations c 
+              WHERE (c.customer.conversation['$id'] = '${conversationId}')`,
             parameters: []
           },
           calculated: (result, dependencies) => {
