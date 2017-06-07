@@ -167,12 +167,14 @@ export default class Navbar extends React.Component<any, any> {
       </MenuButton>
       )];
 
-    if (noTemplates && !dashboards) {
+    if (noTemplates && !dashboards && window.location.pathname !== '/setup') {
       children = (
         <div>
           <h1>There's seems to be a problem</h1>
-          <span>If you are running locally, 
-            ensure to first open http://localhost:4000 and then http://localhost:3000.</span>
+          <span>If you are running locally, ensure to first open </span>
+          <a target="_blank" href="http://localhost:4000">http://localhost:4000</a>
+          <span> and then </span>
+          <a href="http://localhost:3000">http://localhost:3000</a>.
         </div>
       );
     }

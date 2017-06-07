@@ -48,6 +48,8 @@ export default class Setup extends React.Component<any, ISetupState> {
     this.addAdminEmail = this.addAdminEmail.bind(this);
     this.onAddAdminClick = this.onAddAdminClick.bind(this);
     this.addAdminEmailChange = this.addAdminEmailChange.bind(this);
+    this.redirectOut = this.redirectOut.bind(this);
+    this.areDefaultValues = this.areDefaultValues.bind(this);
   }
 
   updateSetupState(state: ISetupStoreState) {
@@ -162,11 +164,15 @@ export default class Setup extends React.Component<any, ISetupState> {
       clientSecret: this.state.clientSecret,
       issuer: this.state.issuer
     };
-    SetupActions.save(setupConfig, () => { window.location.replace('/'); });
+    SetupActions.save(setupConfig, () => { this.redirectOut(); });
   }
 
   onCancel () {
-    SetupActions.load();
+    this.redirectOut(); 
+  }
+
+  redirectOut() {
+    window.location.replace('/'); 
   }
 
   onRemoveAdmin(admin: string) {
@@ -193,6 +199,18 @@ export default class Setup extends React.Component<any, ISetupState> {
     this.setState(state);
   }
 
+  // is it an empty configuration file?
+  areDefaultValues() {
+    return (
+      (this.state.admins == null || this.state.admins.length === 0)
+      && !this.state.allowHttp
+      && !this.state.clientID
+      && !this.state.clientSecret
+      && !this.state.enableAuthentication
+      && !this.state.issuer
+    );
+  }
+
   render() {
 
     let { admins, loaded, validEmail, enableAuthentication, 
@@ -215,6 +233,7 @@ export default class Setup extends React.Component<any, ISetupState> {
         avatar={<Avatar random>{admin.length && admin[0] || '?'}</Avatar>}
         removable
         onClick={this.onRemoveAdmin.bind(this, admin)}
+      
       />
     ));
 
@@ -323,7 +342,12 @@ export default class Setup extends React.Component<any, ISetupState> {
               />
             </div>)
         }
-        
+        <Button flat primary label="Apply" onClick={this.onSave}>save</Button>
+        { 
+          !this.areDefaultValues() && (
+            <Button flat primary label="Cancel" onClick={this.onCancel}>undo</Button>
+          )
+        }
       </div>
     );
     // tslint:enable:max-line-length
