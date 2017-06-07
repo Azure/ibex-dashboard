@@ -56,7 +56,7 @@ export const config: IDashboardConfig = /*return*/ {
     {
       id: "timespan",
       type: "Constant",
-      params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "24 hours" },
+      params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "1 month" },
       calculated: (state, dependencies) => {
         var queryTimespan =
           state.selectedValue === '24 hours' ? 'PT24H' :
