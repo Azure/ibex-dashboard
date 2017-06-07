@@ -45,8 +45,21 @@ export default class Navbar extends React.Component<any, any> {
     });
   }
 
+  componentDidMount() {
+    // Checking if running locally and authentication is activated
+    // This is a mitigation that handles authentication in local environment
+    // that relies on two ports and redirections.
+    if (window.location.port === '3000' && window.location.hostname === 'localhost') {
+      setTimeout(() => {
+        if (!window['dashboardTemplates']) {
+          this.setState({ noTemplates: true });
+        }
+      }, 5000);
+    }
+  }
+
   render() {
-    let { dashboards } = this.state;
+    let { dashboards, noTemplates } = this.state;
     let { children, title } = this.props;
     let pathname = '/';
     try { pathname = window.location.pathname; } catch (e) { }
@@ -153,6 +166,18 @@ export default class Navbar extends React.Component<any, any> {
         />
       </MenuButton>
       )];
+
+    if (noTemplates && !dashboards && window.location.pathname !== '/setup') {
+      children = (
+        <div>
+          <h1>There's seems to be a problem</h1>
+          <span>If you are running locally, ensure to first open </span>
+          <a target="_blank" href="http://localhost:4000">http://localhost:4000</a>
+          <span> and then </span>
+          <a href="http://localhost:3000">http://localhost:3000</a>.
+        </div>
+      );
+    }
 
     return (
       <div>
