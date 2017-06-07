@@ -56,7 +56,7 @@ export const config: IDashboardConfig = /*return*/ {
     {
       id: "timespan",
       type: "Constant",
-      params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "24 hours" },
+      params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "1 month" },
       calculated: (state, dependencies) => {
         var queryTimespan =
           state.selectedValue === '24 hours' ? 'PT24H' :
@@ -97,6 +97,8 @@ export const config: IDashboardConfig = /*return*/ {
             mappings: { channel: (val) => val || "unknown",channel_count: (val) => val || 0 },
             calculated: (filterChannels, dependencies, prevState) => {
 
+              if (!filterChannels) { return; }
+
               // This code is meant to fix the following scenario:
               // When "Timespan" filter changes, to "channels-selected" variable
               // is going to be reset into an empty set.
@@ -121,6 +123,9 @@ export const config: IDashboardConfig = /*return*/ {
               order by intent_count`,
             mappings: { intent: (val) => val || "unknown",intent_count: (val) => val || 0 },
             calculated: (filterIntents, dependencies, prevState) => {
+
+              if (!filterIntents) { return; }
+
               const intents = filterIntents.map((x) => x.intent);
               let selectedValues = [];
               if (prevState['intents-selected'] !== undefined) {

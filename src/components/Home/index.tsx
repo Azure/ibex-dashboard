@@ -5,7 +5,6 @@ import { Card, CardTitle, CardActions, CardText } from 'react-md/lib/Cards';
 import Media, { MediaOverlay } from 'react-md/lib/Media';
 import Dialog from 'react-md/lib/Dialogs';
 import TextField from 'react-md/lib/TextFields';
-import { Link } from 'react-router';
 
 import SetupActions from '../../actions/SetupActions';
 import SetupStore from '../../stores/SetupStore';

@@ -42,6 +42,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
     super(props);
 
     this.onPieEnter = this.onPieEnter.bind(this);
+    this.renderActiveShape = this.renderActiveShape.bind(this);
   }
 
   onPieEnter(data: any, index: number) {
@@ -148,7 +149,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
               fill="#8884d8"
               onMouseEnter={this.onPieEnter}
               activeIndex={this.state.activeIndex}
-              activeShape={this.renderActiveShape.bind(this)}
+              activeShape={this.renderActiveShape}
               paddingAngle={0}
               {...pieProps}
             >
