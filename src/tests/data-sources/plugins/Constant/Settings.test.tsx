@@ -1,5 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import Card from 'react-md/lib/Cards/Card';
+
 import { setupTests } from '../../../utils/setup';
 import * as TestUtils from 'react-addons-test-utils';
 import { DataSourceConnector, IDataSourceDictionary } from '../../../../data-sources';
@@ -23,9 +25,14 @@ describe('testing data-source settings component', () => {
     if (ReactElementClass && ReactElementClass.editor) {
       let SettingsEditor: any = ReactElementClass.editor;
       constantds = TestUtils.renderIntoDocument(<SettingsEditor settings={element} />);
-      
+      TestUtils.isElementOfType(constantds, 'div');
+      setTimeout(done, 10);
     }
     
+  });
+  it('Render inside a Card', () => {
+    let card = TestUtils.scryRenderedComponentsWithType(constantds, Card);
+    expect(card).toHaveLength(1);
   });
 
 });
