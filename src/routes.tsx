@@ -6,7 +6,6 @@ import NotFound from './pages/NotFound';
 import About from './pages/About';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
-import Config from './pages/Config';
 import Setup from './pages/Setup';
 
 export default (
@@ -16,7 +15,6 @@ export default (
     <Route path="/about" component={About} />
     <Route path="/dashboard" component={Dashboard} />
     <Route path="/dashboard/:id" component={Dashboard}/>
-    <Route path="/dashboard/:id/config" component={Config} />
     <Route path="/setup" component={Setup} />
     <Route path="*" component={NotFound} />
   </Route>

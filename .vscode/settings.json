@@ -8,5 +8,11 @@
   "editor.detectIndentation": false,
   "editor.rulers": [
     120
-  ]
+  ],
+  "search.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+    "**/build": true,
+    "**/coverage": true
+  }
 }

@@ -43,14 +43,18 @@ class SetupStore extends AbstractStoreModel<ISetupStoreState> implements ISetupS
   }
   
   load(setupConfig: ISetupConfig) {
-    this.admins = setupConfig.admins;
-    this.stage = setupConfig.stage;
-    this.enableAuthentication = setupConfig.enableAuthentication;
-    this.allowHttp = setupConfig.allowHttp;
-    this.redirectUrl = setupConfig.redirectUrl;
-    this.clientID = setupConfig.clientID;
-    this.clientSecret = setupConfig.clientSecret;
-    this.issuer = setupConfig.issuer;
+
+    if (setupConfig) {
+      this.admins = setupConfig.admins;
+      this.stage = setupConfig.stage;
+      this.enableAuthentication = setupConfig.enableAuthentication;
+      this.allowHttp = setupConfig.allowHttp;
+      this.redirectUrl = setupConfig.redirectUrl;
+      this.clientID = setupConfig.clientID;
+      this.clientSecret = setupConfig.clientSecret;
+      this.issuer = setupConfig.issuer;
+    }
+    
     this.loaded = true;
     this.saveSuccess = true;
 

@@ -82,8 +82,8 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
 
     if (this.state.isSaveInProgress) {
       this.setState({ 
-        isSaveInProgress: false // ,
-        // showSettingsDialog: false
+        isSaveInProgress: false,
+        showSettingsDialog: false
       });
 
       window.location.reload();

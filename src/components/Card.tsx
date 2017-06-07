@@ -4,7 +4,7 @@ import { Card, CardTitle } from 'react-md/lib/Cards';
 import TooltipFontIcon from './TooltipFontIcon';
 import Button from 'react-md/lib/Buttons';
 
-export default ({children = null, title = '', subtitle = ''}) => {
+export default ({children = {}, title = '', subtitle = ''}) => {
   const titleNode = <span key={0}>{title}</span>;
   const tooltipNode = (
     <TooltipFontIcon 
