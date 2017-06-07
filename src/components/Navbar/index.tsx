@@ -50,11 +50,14 @@ export default class Navbar extends React.Component<any, any> {
     // This is a mitigation that handles authentication in local environment
     // that relies on two ports and redirections.
     if (window.location.port === '3000' && window.location.hostname === 'localhost') {
-      setTimeout(() => {
-        if (!window['dashboardTemplates']) {
-          this.setState({ noTemplates: true });
-        }
-      }, 5000);
+      setTimeout(
+        () => {
+          if (!window['dashboardTemplates']) {
+            this.setState({ noTemplates: true });
+          }
+        }, 
+        5000
+      );
     }
   }
 
