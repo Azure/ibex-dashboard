@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 import FontIcon from 'react-md/lib/FontIcons';
 import injectTooltip from 'react-md/lib/Tooltips';
 
@@ -23,14 +22,14 @@ const TooltipFontIcon = injectTooltip(({
 ));
 
 TooltipFontIcon.propTypes = {
-  children: PropTypes.string.isRequired,
-  className: PropTypes.string,
-  iconClassName: PropTypes.string,
-  tooltip: PropTypes.node,
-  forceIconFontSize: PropTypes.bool,
-  forceIconSize: PropTypes.number,
-  style: PropTypes.object,
-  iconStyle: PropTypes.object
+  children: React.PropTypes.string.isRequired,
+  className: React.PropTypes.string,
+  iconClassName: React.PropTypes.string,
+  tooltip: React.PropTypes.node,
+  forceIconFontSize: React.PropTypes.bool,
+  forceIconSize: React.PropTypes.number,
+  style: React.PropTypes.object,
+  iconStyle: React.PropTypes.object
 };
 
 export default TooltipFontIcon;
