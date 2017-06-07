@@ -92,3 +92,33 @@
 .table > .secondary {
 	color: grey;
 }
+
+/* Sentiment */
+
+.sentiment_very_dissatisfied {
+  color: red !important;
+}
+
+.sentiment_dissatisfied {
+  color: orange !important;
+}
+
+.sentiment_neutral {
+  color: grey !important;
+}
+
+.sentiment_satisfied {
+  color: yellow !important;
+}
+
+.sentiment_very_satisfied {
+  color: green !important;
+}
+
+.error_outline {
+  color: lightgrey !important;
+}
+
+.tooltip {
+  visibility: visible !important;
+}
