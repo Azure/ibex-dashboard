@@ -4,5 +4,7 @@ export default {
   'ApplicationInsights/Query': 'ApplicationInsights/Query',
   'CosmosDB/Query': 'CosmosDB/Query',
   'Azure': 'Azure',
-  'Constant': 'Constant/index'
+  'Constant': 'Constant/index',
+  'Sample': 'Sample',
+  'BotFrameworkDirectLine': 'BotFramework/DirectLine',
 };
