@@ -7,7 +7,7 @@ import { setupTests } from '../../../utils/setup';
 import * as TestUtils from 'react-addons-test-utils';
 import { DataSourceConnector, IDataSourceDictionary } from '../../../../data-sources';
 import plugins from '../../../../data-sources/plugins';
-import { BaseDatasourceSettings, IBaseSettingsProps, IBaseSettingsState } 
+import { BaseDataSourceSettings, IBaseSettingsProps, IBaseSettingsState } 
                 from '../../../../components/common/BaseDatasourceSettings';
 
 import ConstantDatasourceSettings from '../../../../data-sources/plugins/Constant/Settings'
@@ -33,8 +33,8 @@ describe('testing data-source settings component', () => {
       let settingsEditor: any = TestUtils.renderIntoDocument(<SettingsEditor settings={element} />);
       let elements = TestUtils.scryRenderedComponentsWithType(settingsEditor, SelectField);
       expect(elements.length).toBeGreaterThan(0);
-
-      expect(elements[0].state.activeLabel).toEqual(element.params['selectedValue']);
+      var s:any = elements[0].state;
+      expect(s.activeLabel).toEqual(element.params['selectedValue']);
     }
   });
 

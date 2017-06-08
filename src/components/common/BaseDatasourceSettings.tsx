@@ -18,11 +18,16 @@ export interface IBaseSettingsProps {
 export interface IBaseSettingsState { 
 }
 
-export abstract class BaseDatasourceSettings<T extends IBaseSettingsState> 
+/**
+ * This base class encapsules shared methods for all types of data sources
+ */
+export abstract class BaseDataSourceSettings<T extends IBaseSettingsState> 
                       extends React.Component<IBaseSettingsProps, T> {
 
-  // require derived classes to implement
+  // an icon to be displayed when selecting the specific data source settings in the settings dialog
   abstract icon: string;
+
+  // Implement this menthod with your desired UI implementation. 
   abstract renderChildren();
   
   constructor(props: IBaseSettingsProps) {
@@ -35,6 +40,10 @@ export abstract class BaseDatasourceSettings<T extends IBaseSettingsState>
     this.renderChildren = this.renderChildren.bind(this);
   }
 
+  /**
+   * A helper method for finding an object by a given dot notation string representation.
+   * e.g: data.size.x
+   */
   protected getProperty(property: string, defaultValue: any = null): any {
     let { settings } = this.props;
     let arr = property.split('.');
@@ -48,6 +57,10 @@ export abstract class BaseDatasourceSettings<T extends IBaseSettingsState>
     return defaultValue;
   }
 
+  /**
+   * A helper method for updaing an object by a given dot notation string representation.
+   * e.g: data.size.x
+   */
   protected updateProperty(property: string, value: any): void {
     let { settings } = this.props;
     let arr = property.split('.');
@@ -59,13 +72,9 @@ export abstract class BaseDatasourceSettings<T extends IBaseSettingsState>
     if (parent) { parent[key] = value; }
   }
 
-  save() {
-    // tell the parents save ended
-    SettingsActions.saveSettingsCompleted();
-  }
-
-  onParamChange(value: string, event: any) {
-    this.updateProperty(event.target.id, value);
+  onParamChange(value: string, event: UIEvent) {
+    var t: any = event.target;
+    this.updateProperty(t.id, value);
   }
 
   onParamSelectChange(newValue: string, newActiveIndex: number, event: any) {

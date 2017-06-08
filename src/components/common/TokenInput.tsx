@@ -16,6 +16,9 @@ interface ITokenInputState {
   newToken: any;
 };
 
+/**
+ * This is a UI for editing a string array.
+ */
 export default class TokenInput extends React.Component<ITokenInputProps, ITokenInputState> {
 
   state: ITokenInputState = {
@@ -30,13 +33,12 @@ export default class TokenInput extends React.Component<ITokenInputProps, IToken
   }
 
   removeToken(token: any) {
-    var tokens = this.props.tokens;
-    _.remove(tokens, function (x: String) {
-      return x === token;
-    });
+    let tokens = this.props.tokens;
+    _.remove(tokens, x => x === token);
     if (this.props.onTokensChanged) {
       this.props.onTokensChanged();
     }
+    this.setState(this.state); // foce the component to update
   }
 
   onNewTokenChange(newData: any) {
@@ -45,8 +47,9 @@ export default class TokenInput extends React.Component<ITokenInputProps, IToken
 
   addToken() {
     if (this.state.newToken) {
-      var arr = this.props.tokens;
-      arr.push(this.state.newToken);
+      let {tokens} = this.props;
+      tokens = tokens || [];
+      tokens.push(this.state.newToken);
       this.setState({
         newToken: ''
       });

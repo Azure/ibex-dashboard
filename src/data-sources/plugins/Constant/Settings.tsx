@@ -11,10 +11,10 @@ import SelectField from 'react-md/lib/SelectFields';
 
 import TokenInput from '../../../components/common/TokenInput';
 
-import { BaseDatasourceSettings, IBaseSettingsProps, IBaseSettingsState } 
+import { BaseDataSourceSettings, IBaseSettingsProps, IBaseSettingsState } 
                 from '../../../components/common/BaseDatasourceSettings';
 
-export default class ConstantDatasourceSettings extends BaseDatasourceSettings<IBaseSettingsState> {
+export default class ConstantDatasourceSettings extends BaseDataSourceSettings<IBaseSettingsState> {
 
   icon = 'chrome_reader_mode';
   state = {
@@ -32,18 +32,22 @@ export default class ConstantDatasourceSettings extends BaseDatasourceSettings<I
 
   selectedTokenChange(newValue: any) {
     this.setState({ selectedToken: newValue });
-    this.props.settings.params['selectedValue'] = newValue;
+    if (this.props.settings && this.props.settings.params) {
+      this.props.settings.params['selectedValue'] = newValue;
+    }
   }
 
   onTokensChanged() {
     var tokens = this.props.settings.params['values'];
     var selected = this.state.selectedToken;
 
-    if (!_.find(tokens, function (x: any) {
-      return x === selected;
-    })) {
+    if (!_.find(tokens, x => x === selected)) {
       // the selected value was removed, thus, we set it to default
-      this.setState({ selectedToken: tokens[0] });
+      if (tokens.lenght > 0) {
+        this.setState({ selectedToken: tokens[0] });
+      } else {
+        this.setState({ selectedToken: '' });
+      }
     }
   }
 
@@ -51,30 +55,30 @@ export default class ConstantDatasourceSettings extends BaseDatasourceSettings<I
     let { selectedToken } = this.state;
     let tokens = this.props.settings.params['values'];
     return (
-        <span className="md-cell md-cell--bottom  md-cell--12">
-          <div className="md-grid">
-            <span className="md-cell--3 md-cell--middle">
-              <span className="md-caption" style={{padding: 5}}>values:</span>
-            </span>
-            <span className="md-cell--9 md-cell--bottom">
-            <TokenInput tokens={tokens} zDepth={0} onTokensChanged={this.onTokensChanged} />
+      <span className="md-cell md-cell--bottom  md-cell--12">
+        <div className="md-grid">
+          <span className="md-cell--3 md-cell--middle">
+            <span className="md-caption" style={{padding: 5}}>values:</span>
           </span>
-          </div>
-          <div className="md-grid">
-            <span className="md-cell--3 md-cell--middle">
-              <span className="md-caption" style={{padding: 5}}>selected value:</span>
-            </span>
-            <span className="md-cell--9 md-cell--bottom">
-              <SelectField
-                id="selectedValue"
-                value={selectedToken}
-                menuItems={tokens}
-                className="md-cell"
-                onChange={this.selectedTokenChange}
-              />
-            </span>
-          </div>
+          <span className="md-cell--9 md-cell--bottom">
+          <TokenInput tokens={tokens} zDepth={0} onTokensChanged={this.onTokensChanged} />
         </span>
+        </div>
+        <div className="md-grid">
+          <span className="md-cell--3 md-cell--middle">
+            <span className="md-caption" style={{padding: 5}}>selected value:</span>
+          </span>
+          <span className="md-cell--9 md-cell--bottom">
+            <SelectField
+              id="selectedValue"
+              value={selectedToken}
+              menuItems={tokens}
+              className="md-cell"
+              onChange={this.selectedTokenChange}
+            />
+          </span>
+        </div>
+      </span>
     );
   }
 }
