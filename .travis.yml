@@ -1,0 +1,16 @@
+language:
+  node_js
+
+node_js:
+  - "7"
+
+install:
+  - yarn install
+  - yarn run css:build
+
+env:
+  - YARN_COMMAND="lint"
+  - YARN_COMMAND="test"
+
+script:
+  - CI=true yarn $YARN_COMMAND
