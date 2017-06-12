@@ -9,6 +9,7 @@ install:
 
 env:
   - NPM_COMMAND="lint"
+  - NPM_COMMAND="test"
 
 script:
-  - npm run $NPM_COMMAND
+  - CI=true npm run $NPM_COMMAND
