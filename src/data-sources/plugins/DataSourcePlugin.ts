@@ -31,7 +31,7 @@ export interface IDataSourcePlugin {
   };
 
   bind (actionClass: any): void;
-  updateDependencies (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
+  _updateDependencies (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
   getDependencies(): { [ key: string]: string };
   getDependables(): string[];
   getActions(): string[];
@@ -70,11 +70,16 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.calculated = options.calculated || {};
 
     this.updateDependencies = this.updateDependencies.bind(this);
+    this._updateDependencies = this._updateDependencies.bind(this);
     this.updateSelectedValues = this.updateSelectedValues.bind(this);
     this.getCalculated = this.getCalculated.bind(this);
   }
 
-  abstract updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void;
+  updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void {
+    return this._updateDependencies(dependencies, args, callback);
+  }
+
+  abstract _updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void;
   abstract updateSelectedValues (dependencies: IDictionary, selectedValues: any, callback: (result: any) => void): void;
 
   bind (actionClass: any) {
