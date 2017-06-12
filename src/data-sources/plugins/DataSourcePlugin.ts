@@ -53,9 +53,11 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     dependables: [],
     actions: [ 'updateDependencies', 'failure', 'updateSelectedValues' ],
     params: <T> {},
-    calculated: {}
+    calculated: {},
+    autoUpdateIntervalMs: -1,
   };
 
+  private updateDependenciesInterval: number | NodeJS.Timer;
   private lastDependencies: IDictionary;
   private lastArgs: IDictionary;
   private lastCallback: (result: any) => void;
@@ -72,14 +74,23 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.actions.push.apply(props.actions, options.actions || []);
     props.params = <T> (options.params || {});
     props.calculated = options.calculated || {};
+    props.autoUpdateIntervalMs = options.autoUpdateIntervalMs || -1;
 
     this.updateDependencies = this.updateDependencies.bind(this);
     this._updateDependencies = this._updateDependencies.bind(this);
     this.updateSelectedValues = this.updateSelectedValues.bind(this);
     this.getCalculated = this.getCalculated.bind(this);
+
+    this.updateDependenciesInterval = props.autoUpdateIntervalMs <= 0 ? -1 :
+      setInterval(() => this.updateDependencies(this.lastDependencies, this.lastArgs, this.lastCallback),
+                  props.autoUpdateIntervalMs);
   }
 
   updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void {
+    if (dependencies == null && args == null && callback == null) {
+      return;
+    }
+
     const returnValue = this._updateDependencies(dependencies, args, callback);
     this.lastDependencies = dependencies;
     this.lastArgs = args;
