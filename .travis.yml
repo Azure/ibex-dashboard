@@ -9,8 +9,8 @@ install:
   - yarn run css:build
 
 env:
-  - NPM_COMMAND="lint"
-  - NPM_COMMAND="test"
+  - YARN_COMMAND="lint"
+  - YARN_COMMAND="test"
 
 script:
-  - CI=true npm run $NPM_COMMAND
+  - CI=true yarn $YARN_COMMAND
