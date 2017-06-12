@@ -6,9 +6,11 @@ node_js:
 
 install:
   - yarn install
+  - yarn run css:build
 
 env:
-  - NPM_COMMAND="lint"
+  - YARN_COMMAND="lint"
+  - YARN_COMMAND="test"
 
 script:
-  - npm run $NPM_COMMAND
+  - CI=true yarn $YARN_COMMAND
