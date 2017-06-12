@@ -56,6 +56,10 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     calculated: {}
   };
 
+  private lastDependencies: IDictionary;
+  private lastArgs: IDictionary;
+  private lastCallback: (result: any) => void;
+
   /**
    * @param {DataSourcePlugin} options - Options object
    */
@@ -76,7 +80,11 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
   }
 
   updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void {
-    return this._updateDependencies(dependencies, args, callback);
+    const returnValue = this._updateDependencies(dependencies, args, callback);
+    this.lastDependencies = dependencies;
+    this.lastArgs = args;
+    this.lastCallback = callback;
+    return returnValue;
   }
 
   abstract _updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void;
