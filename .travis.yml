@@ -6,6 +6,7 @@ node_js:
 
 install:
   - yarn install
+  - yarn build
 
 env:
   - NPM_COMMAND="lint"
