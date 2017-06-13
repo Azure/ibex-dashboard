@@ -9,6 +9,7 @@ install:
 
 script:
   - .travis/ci.sh
+  - .travis/coverage.sh
 
 after_success:
   - .travis/push.sh
