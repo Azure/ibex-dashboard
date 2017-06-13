@@ -9,3 +9,6 @@ install:
 
 script:
   - .travis/ci.sh
+
+after_success:
+  - .travis/push.sh
