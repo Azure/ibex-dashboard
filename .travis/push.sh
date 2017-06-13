@@ -12,7 +12,7 @@ log() {
 
 ensure_preconditions_met() {
   if [ "${TRAVIS_BRANCH}" != "${TARGET_BRANCH}" ]; then
-    log "Build is targetting ${TRAVIS_BRANCH}, not ${TARGET_BRANCH}"
+    log "Build is targeting ${TRAVIS_BRANCH}, not ${TARGET_BRANCH}"
     log "Skipping creation of production build"
     exit 0
   fi
