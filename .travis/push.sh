@@ -4,16 +4,30 @@ set -euo pipefail
 
 readonly GITHUB_ORG="${GITHUB_ORG:-CatalystCode}"
 readonly GITHUB_REPO="${GITHUB_REPO:-ibex-dashboard}"
-readonly TARGET_BRANCH="${TARGET_BRANCH:-ibex-version-1.0}"
+readonly TARGET_BRANCH="${TARGET_BRANCH:-master}"
+readonly SOURCE_BRANCH="${SOURCE_BRANCH:-ibex-version-1.0}"
+
+readonly AUTOCOMMIT_NAME="Travis CI"
+readonly AUTOCOMMIT_EMAIL="travis@travis-ci.org"
 
 log() {
   echo "$@" >&2
 }
 
 ensure_preconditions_met() {
-  if [ "${TRAVIS_BRANCH}" != "${TARGET_BRANCH}" ]; then
-    log "Build is targeting ${TRAVIS_BRANCH}, not ${TARGET_BRANCH}"
+  if [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ]; then
+    log "Job is CI for a push, skipping creation of production build"
+    exit 0
+  fi
+  if [ "${TRAVIS_BRANCH}_${TRAVIS_PULL_REQUEST_BRANCH}" != "${TARGET_BRANCH}_${SOURCE_BRANCH}" ]; then
     log "Skipping creation of production build"
+    log "We only create production builds for pull requests from '${SOURCE_BRANCH}' to '${TARGET_BRANCH}'"
+    log "but this pull request is from '${TRAVIS_PULL_REQUEST BRANCH}' to '${TRAVIS_BRANCH}'"
+    exit 0
+  fi
+  if git show HEAD | grep -q "Author: ${AUTOCOMMIT_NAME} <${AUTOCOMMIT_EMAIL}>"; then
+    log "Skipping creation of production build"
+    log "Last commit already included a new production build"
     exit 0
   fi
   if [ -z "${GITHUB_TOKEN}" ]; then
@@ -28,8 +42,8 @@ create_production_build() {
 }
 
 setup_git() {
-  git config user.name "Travis CI"
-  git config user.email "travis@travis-ci.org"
+  git config user.name "${AUTOCOMMIT_NAME}"
+  git config user.email "${AUTOCOMMIT_EMAIL}"
   git remote add origin-travis "https://${GITHUB_TOKEN}@github.com/${GITHUB_ORG}/${GITHUB_REPO}.git"
 }
 
