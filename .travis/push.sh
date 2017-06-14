@@ -48,13 +48,13 @@ setup_git() {
 }
 
 commit_build_files() {
-  git checkout "${TARGET_BRANCH}"
+  git checkout "${SOURCE_BRANCH}"
   git add --all build
   echo -e "Travis build: ${TRAVIS_BUILD_NUMBER}\n\nhttps://travis-ci.org/${GITHUB_ORG}/${GITHUB_REPO}/builds/${TRAVIS_BUILD_ID}" | git commit --file -
 }
 
 push_to_github() {
-  git push origin-travis "${TARGET_BRANCH}:${TARGET_BRANCH}"
+  git push origin-travis "${SOURCE_BRANCH}:${SOURCE_BRANCH}"
 }
 
 ensure_preconditions_met
