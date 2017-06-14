@@ -12,4 +12,5 @@ script:
   - .travis/coverage.sh
 
 after_success:
+  - .travis/build.sh
   - .travis/push.sh

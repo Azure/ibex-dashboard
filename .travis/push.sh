@@ -23,10 +23,6 @@ ensure_preconditions_met() {
   fi
 }
 
-create_production_build() {
-  CI="" yarn build
-}
-
 setup_git() {
   git config user.name "Travis CI"
   git config user.email "travis@travis-ci.org"
@@ -44,7 +40,6 @@ push_to_github() {
 }
 
 ensure_preconditions_met
-create_production_build
 setup_git
 commit_build_files
 push_to_github

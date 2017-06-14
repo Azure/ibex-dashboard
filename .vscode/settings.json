@@ -14,5 +14,6 @@
     "**/node_modules": true,
     "**/build": true,
     "**/coverage": true
-  }
+  },
+  "git.ignoreLimitWarning": true
 }
