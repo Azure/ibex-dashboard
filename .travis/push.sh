@@ -4,6 +4,7 @@ set -euo pipefail
 
 readonly GITHUB_ORG="${GITHUB_ORG:-CatalystCode}"
 readonly GITHUB_REPO="${GITHUB_REPO:-ibex-dashboard}"
+readonly PR_BRANCH="${PR_BRANCH:-ibex-version-1.0}"
 readonly TARGET_BRANCH="${TARGET_BRANCH:-master}"
 
 log() {
@@ -34,13 +35,13 @@ setup_git() {
 }
 
 commit_build_files() {
-  git checkout "${TARGET_BRANCH}"
+  git checkout "${PR_BRANCH}"
   git add --all build
   echo -e "Travis build: ${TRAVIS_BUILD_NUMBER}\n\nhttps://travis-ci.org/${GITHUB_ORG}/${GITHUB_REPO}/builds/${TRAVIS_BUILD_ID}" | git commit --file -
 }
 
 push_to_github() {
-  git push origin-travis "${TARGET_BRANCH}:${TARGET_BRANCH}"
+  git push origin-travis "${PR_BRANCH}:${PR_BRANCH}"
 }
 
 ensure_preconditions_met
