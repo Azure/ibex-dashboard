@@ -142,6 +142,7 @@ h2, .md-subheading-2 {
 
 .md-data-table {
 
+
   &.table-compact {
     .md-table-column--header {
       height: 47px;
@@ -156,13 +157,13 @@ h2, .md-subheading-2 {
   }
 
   .md-table-row {
-      .md-btn--icon {
-        color: $md-secondary-color;
-        height: 30px;
-        padding: 3px 0 10px 0;
-        width: 30px;
-        visibility: hidden;
-      }
+    .md-btn--icon {
+      color: $md-secondary-color;
+      height: 30px;
+      padding: 3px 0 10px 0;
+      width: 30px;
+      visibility: hidden;
+    }
 
     &:hover {
       .md-btn--icon {
@@ -171,11 +172,49 @@ h2, .md-subheading-2 {
     }
   }
 
-  .message-send, tr.Customer { 
+  td.message {
+    span {
+      width: 100%;
+      word-wrap: break-word;
+      white-space: normal;
+    }
+  }
+
+  .MBFEvent-BotMessage, tr.Customer { 
     background-color: $md-blue-50;
 
     td.message, td.text {
       text-align: right;
+    }
+  }
+
+  tr.intent td.message .indicator {
+    //background-color: $md-red-50;
+
+    display:inline-block;
+    width: .5em;
+    height: .8em;
+    position:relative;
+
+    &:before,
+    &:after {
+      display:block;
+      content:"";
+      width:10px;
+      height:0em;
+      border-style:solid;
+      position:absolute;
+    }
+    &:before {
+      top: 2px;
+      right:0;
+      border-width:.4em 0 .4em .4em;
+      border-color:transparent transparent transparent $md-secondary-color;    
+    }
+    &:after {
+      left:0;
+      border-width:.4em 0 .4em .4em;
+      border-color:transparent transparent transparent transparent;    
     }
   }
 }
