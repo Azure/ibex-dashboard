@@ -26,11 +26,6 @@ ensure_preconditions_met() {
     log "but this pull request is from '${TRAVIS_PULL_REQUEST BRANCH}' to '${TRAVIS_BRANCH}'"
     exit 0
   fi
-  if git show HEAD | grep -q "Author: ${AUTOCOMMIT_NAME} <${AUTOCOMMIT_EMAIL}>"; then
-    log "Skipping creation of production build"
-    log "Last commit already included a new production build"
-    exit 0
-  fi
   if [ -z "${GITHUB_TOKEN}" ]; then
     log "GITHUB_TOKEN not set: won't be able to push production build"
     log "Please configure the token in .travis.yml or the Travis UI"
