@@ -9,6 +9,7 @@ readonly SOURCE_BRANCH="${SOURCE_BRANCH:-ibex-version-1.0}"
 
 readonly AUTOCOMMIT_NAME="Travis CI"
 readonly AUTOCOMMIT_EMAIL="travis@travis-ci.org"
+readonly AUTOCOMMIT_BRANCH="temp"
 
 log() {
   echo "$@" >&2
@@ -48,12 +49,13 @@ setup_git() {
 }
 
 commit_build_files() {
+  git checkout -b "${AUTOCOMMIT_BRANCH}"
   git add --all build
   echo -e "Travis build: ${TRAVIS_BUILD_NUMBER}\n\nhttps://travis-ci.org/${GITHUB_ORG}/${GITHUB_REPO}/builds/${TRAVIS_BUILD_ID}" | git commit --file -
 }
 
 push_to_github() {
-  git push origin-travis "HEAD:${SOURCE_BRANCH}"
+  git push origin-travis "${AUTOCOMMIT_BRANCH}:${SOURCE_BRANCH}"
 }
 
 ensure_preconditions_met
