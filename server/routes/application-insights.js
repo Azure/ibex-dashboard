@@ -4,10 +4,8 @@ const router = new express.Router();
 
 const host = 'api.applicationinsights.io';
 
-router.post('/:appId/query', (req, res) => {
-  const apiKey = req.headers['x-api-key'];
-  const { appId } = req.params;
-  const { query } = req.body;
+router.post('/query', (req, res) => {
+  const { apiKey, appId, query } = req.body;
   const queryTimespan = req.query['timespan'];
 
   if (!apiKey || !appId) {

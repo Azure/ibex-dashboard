@@ -1,6 +1,5 @@
 import { IDataSourceDictionary } from '../../data-sources';
 import { setupTests } from '../utils/setup';
-import { appInsightsUri } from '../../data-sources/plugins/ApplicationInsights/common';
 
 import { mockRequests } from '../mocks/requests/application-insights';
 import dashboardMock from '../mocks/dashboards/application-insights-forked';

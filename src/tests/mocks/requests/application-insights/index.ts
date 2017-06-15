@@ -11,19 +11,15 @@ const { appId, apiKey } = dashboardMock.config.connections['application-insights
  */
 function mockRequests() {
 
-  nock(appInsightsUri, {
-    reqheaders: {
-      "x-api-key": apiKey
-    }
-  })
-    .post(`/${appId}/query?timespan=PT24H`)
-    .delay(100)
-    .reply(200, query24HResponseMock)
-    .post(`/${appId}/query?timespan=P30D`)
-    .delay(100)
-    .reply(200, query30DResponseMock);
-
+  nock(appInsightsUri)
+  .post(`/query?timespan=PT24H`)
+  .delay(100)
+  .reply(200, query24HResponseMock)
+  .post(`/query?timespan=P30D`)
+  .delay(100)
+  .reply(200, query30DResponseMock);
 }
+
 export {
   mockRequests
 };
