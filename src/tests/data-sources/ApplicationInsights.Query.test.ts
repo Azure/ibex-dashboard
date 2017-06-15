@@ -16,7 +16,6 @@ describe('Data Source: Application Insights: Query', () => {
   });
 
   it ('Query for 30 days with data rows', () => {
-    
     expect(dataSources).toHaveProperty('events');
     expect(dataSources.timespan).toHaveProperty('store');
     expect(dataSources.events).toHaveProperty('store');
