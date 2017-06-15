@@ -24,7 +24,7 @@ return {
 						h: 3,
 						x: 0,
 						y: 0,
-						i: "scorecardTranscripts",
+						i: "scorecardAvgScore",
 						minW: undefined,
 						maxW: undefined,
 						minH: undefined,
@@ -39,7 +39,7 @@ return {
 						h: 8,
 						x: 1,
 						y: 5,
-						i: "pie_sample1",
+						i: "timeline_hits",
 						minW: undefined,
 						maxW: undefined,
 						minH: undefined,
@@ -69,7 +69,54 @@ return {
 						h: 3,
 						x: 9,
 						y: 0,
-						i: "scorecard_sample1",
+						i: "scorecard_total_hits",
+						minW: undefined,
+						maxW: undefined,
+						minH: undefined,
+						maxH: undefined,
+						moved: false,
+						static: false,
+						isDraggable: undefined,
+						isResizable: undefined
+					}
+				],
+				lg: [
+					{
+						w: 1,
+						h: 3,
+						x: 10,
+						y: 3,
+						i: "scorecardAvgScore",
+						minW: undefined,
+						maxW: undefined,
+						minH: undefined,
+						maxH: undefined,
+						moved: false,
+						static: false,
+						isDraggable: undefined,
+						isResizable: undefined
+					},
+					{
+						w: 5,
+						h: 8,
+						x: 0,
+						y: 0,
+						i: "timeline_hits",
+						minW: undefined,
+						maxW: undefined,
+						minH: undefined,
+						maxH: undefined,
+						moved: false,
+						static: false,
+						isDraggable: undefined,
+						isResizable: undefined
+					},
+					{
+						w: 5,
+						h: 8,
+						x: 5,
+						y: 0,
+						i: "pie_sample2",
 						minW: undefined,
 						maxW: undefined,
 						minH: undefined,
@@ -82,9 +129,9 @@ return {
 					{
 						w: 1,
 						h: 3,
-						x: 0,
-						y: 8,
-						i: "scorecard_sample2",
+						x: 10,
+						y: 0,
+						i: "scorecard_total_hits",
 						minW: undefined,
 						maxW: undefined,
 						minH: undefined,
@@ -99,7 +146,7 @@ return {
 		}
 	},
 	dataSources: [
-    {
+		{
 			id: "timespan",
 			type: "Constant",
 			params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "1 month" },
@@ -130,11 +177,69 @@ return {
                 | where score >0
                 | summarize avg=bin(avg(score)*100,1) `,
 						calculated: (avgscore) => {
-              console.log(avgscore);
               return { 
                 'avg-score-value': ''+ avgscore[0].avg+'%',
                 'avg-score-color': avgscore[0].avg>=80? '#4caf50' : (avgscore[0].avg>60? '#FFc107' : '#F44336'),
                 'avg-score-icon': avgscore[0].avg>=80? 'sentiment_very_satisfied' : (avgscore[0].avg>60? 'sentiment_satisfied' : 'sentiment_dissatisfied')
+              };
+            }
+					},
+					totalHits: {
+						query: () => `
+                where name == 'MBFEvent.QNAEvent'
+                | summarize hits=count() `,
+						calculated: (hits) => {
+              return { 
+                'score-hits': hits[0].hits
+              };
+            }
+					},
+					scoreHits: {
+						query: () => `
+                where name == 'MBFEvent.QNAEvent'
+                | summarize hits=count() by bin(timestamp,1d) 
+                | order by timestamp asc `,
+						mappings: { hits: (val) => val || 0 },
+						calculated: (timeline, dependencies) => {
+              // Timeline handling
+              // =================
+
+              let _timeline = {};
+              let _channels = {};
+              let { timespan } = dependencies;
+              let channel = 'hits';
+
+              timeline.forEach(row => {
+                var { timestamp, hits } = row;
+                var timeValue = (new Date(timestamp)).getTime();
+
+                if (!_timeline[timeValue]) _timeline[timeValue] = {
+                  time: (new Date(timestamp)).toUTCString()
+                };
+
+                if (!_channels[channel]) _channels[channel] = {
+                  name: channel,
+                  value: 0
+                };
+                
+                _timeline[timeValue][channel] = hits;
+                _channels[channel].value += hits;
+              });
+
+              var channels = Object.keys(_channels);
+              var channelUsage = _.values(_channels);
+              var timelineValues = _.map(_timeline, value => {
+                channels.forEach(channel => {
+                  if (!value[channel]) value[channel] = 0;
+                });
+                return value;
+              });
+
+              return {
+                "timeline-hits-graphData": timelineValues,
+                "timeline-hits-channelUsage": channelUsage,
+                "timeline-hits-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
+                "timeline-hits-channels": channels
               };
             }
 					}
@@ -160,8 +265,8 @@ return {
 			dependencies: { selectedValue: "timespan",values: "timespan:values" },
 			actions: { onChange: "timespan:updateSelectedValue" },
 			first: true
-		},
-  ],
+		}
+	],
 	elements: [
 		{
 			id: "scorecardAvgScore",
@@ -171,13 +276,12 @@ return {
 			dependencies: { value: "ai:avg-score-value",color: "ai:avg-score-color",icon: "ai:avg-score-icon" }
 		},
 		{
-			id: "pie_sample1",
-			type: "PieData",
-			title: "Pie Sample 1",
-			subtitle: "Description of pie sample 1",
+			id: "timeline_hits",
+			type: "Timeline",
+			title: "Hit Rate",
+			subtitle: "How many questions were asked per timeframe",
 			size: { w: 5,h: 8 },
-			dependencies: { values: "samples:data_for_pie" },
-			props: { showLegend: true }
+			dependencies: { values: "ai:timeline-hits-graphData",lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
 		},
 		{
 			id: "pie_sample2",
@@ -189,19 +293,11 @@ return {
 			props: { showLegend: true,compact: true }
 		},
 		{
-			id: "scorecard_sample1",
+			id: "scorecard_total_hits",
 			type: "Scorecard",
-			title: "Value",
+			title: "Total hits",
 			size: { w: 1,h: 3 },
-			dependencies: { value: "samples:scorecard_data_value",color: "::#2196F3",icon: "::av_timer" }
-		},
-		{
-			id: "scorecard_sample2",
-			type: "Scorecard",
-			title: "Same Value",
-			size: { w: 1,h: 3 },
-			dependencies: { value: "samples:scorecard_data_value",color: "::#2196F3",icon: "::av_timer",subvalue: "samples:scorecard_data_subvalue" },
-			props: { subheading: "Value #2" }
+			dependencies: { value: "ai:score-hits",color: "::#2196F3",icon: "::av_timer" }
 		}
 	],
 	dialogs: []
