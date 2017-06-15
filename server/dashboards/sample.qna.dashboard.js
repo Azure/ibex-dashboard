@@ -123,18 +123,18 @@ return {
 			params: {
 				table: "customEvents",
 				queries: {
-					transcripts: {
+					avgScore: {
 						query: () => `
-                where name == 'Transcript'
-                | extend customerName=tostring(customDimensions.customerName), text=tostring(customDimensions.text), userTime=tostring(customDimensions.timestamp), state=toint(customDimensions.state), agentName=tostring(customDimensions.agentName), from=tostring(customDimensions.from)  
-                | project from, text, customerName, agentName, state, userTime 
-                | order by userTime asc `,
-						mappings: { agentName: (val) => val === '' },
-						calculated: (transcripts) => {
-              console.log('transcripts', transcripts);
-              return {
-                'transcripts-date': transcripts, 
-                'transcripts-value': transcripts.length 
+                where name == 'MBFEvent.QNAEvent'
+                | extend score=todouble(customDimensions.score)  
+                | where score >0
+                | summarize avg=bin(avg(score)*100,1) `,
+						calculated: (avgscore) => {
+              console.log(avgscore);
+              return { 
+                'avg-score-value': ''+ avgscore[0].avg+'%',
+                'avg-score-color': avgscore[0].avg>=80? '#4caf50' : (avgscore[0].avg>60? '#FFc107' : '#F44336'),
+                'avg-score-icon': avgscore[0].avg>=80? 'sentiment_very_satisfied' : (avgscore[0].avg>60? 'sentiment_satisfied' : 'sentiment_dissatisfied')
               };
             }
 					}
@@ -164,11 +164,11 @@ return {
   ],
 	elements: [
 		{
-			id: "scorecardTranscripts",
+			id: "scorecardAvgScore",
 			type: "Scorecard",
-			title: "Value",
+			title: "Avg Score",
 			size: { w: 1,h: 3 },
-			dependencies: { value: "ai:transcripts-value",color: "::#2196F3",icon: "::av_timer" }
+			dependencies: { value: "ai:avg-score-value",color: "ai:avg-score-color",icon: "ai:avg-score-icon" }
 		},
 		{
 			id: "pie_sample1",
