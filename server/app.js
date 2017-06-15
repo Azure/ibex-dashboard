@@ -6,6 +6,9 @@ const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const cors = require('cors');
+const { graphqlExpress, graphiqlExpress } = require('graphql-server-express');
+const { schema } = require('./apollo/schema');
 const authRouter = require('./routes/auth');
 const apiRouter = require('./routes/api');
 const graphQLRouter = require('./routes/graphql');
@@ -24,6 +27,11 @@ app.use(cookieParser());
 app.use(expressSession({ secret: 'keyboard cat', resave: true, saveUninitialized: false }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); 
+
+// Setup apollo
+app.use('*', cors({ origin: '*' }));
+app.use('/apollo', bodyParser.json(), graphqlExpress({ schema }));
+app.use('/apollo-explorer', graphiqlExpress({ endpointURL: '/apollo' }));
 
 // Setup logger
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] :response-time ms'));
