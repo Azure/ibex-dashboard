@@ -54,7 +54,7 @@ return {
 						h: 8,
 						x: 5,
 						y: 13,
-						i: "pie_sample2",
+						i: "channels",
 						minW: undefined,
 						maxW: undefined,
 						minH: undefined,
@@ -116,7 +116,7 @@ return {
 						h: 8,
 						x: 5,
 						y: 0,
-						i: "pie_sample2",
+						i: "channels",
 						minW: undefined,
 						maxW: undefined,
 						minH: undefined,
@@ -242,6 +242,56 @@ return {
                 "timeline-hits-channels": channels
               };
             }
+					},
+          users_timeline: {
+						query: (dependencies) => {
+              var { granularity } = dependencies;
+              return `
+                  where name == 'MBFEvent.QNAEvent' |
+                  summarize count=dcount(tostring(customDimensions.userName)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
+                  order by timestamp asc`
+            },
+						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
+						calculated: (timeline, dependencies) => {
+              // Timeline handling
+              // =================
+
+              let _timeline = {};
+              let _channels = {};
+              let { timespan } = dependencies;
+
+              timeline.forEach(row => {
+                var { channel, timestamp, count } = row;
+                var timeValue = (new Date(timestamp)).getTime();
+
+                if (!_timeline[timeValue]) _timeline[timeValue] = {
+                  time: (new Date(timestamp)).toUTCString()
+                };
+                if (!_channels[channel]) _channels[channel] = {
+                  name: channel,
+                  value: 0
+                };
+
+                _timeline[timeValue][channel] = count;
+                _channels[channel].value += count;
+              });
+
+              var channels = Object.keys(_channels);
+              var channelUsage = _.values(_channels);
+              var timelineValues = _.map(_timeline, value => {
+                channels.forEach(channel => {
+                  if (!value[channel]) value[channel] = 0;
+                });
+                return value;
+              });
+
+              return {
+                "timeline-users-graphData": timelineValues,
+                "timeline-users-channelUsage": channelUsage,
+                "timeline-users-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
+                "timeline-users-channels": channels
+              };
+            }
 					}
 				}
 			}
@@ -283,14 +333,14 @@ return {
 			size: { w: 5,h: 8 },
 			dependencies: { values: "ai:timeline-hits-graphData",lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
 		},
-		{
-			id: "pie_sample2",
+    {
+			id: "channels",
 			type: "PieData",
-			title: "Pie Sample 2",
-			subtitle: "Hover on the values to see the difference from sample 1",
+			title: "Channel Usage (Users)",
+			subtitle: "Total users sent per channel",
 			size: { w: 5,h: 8 },
-			dependencies: { values: "samples:data_for_pie" },
-			props: { showLegend: true,compact: true }
+			dependencies: { values: "ai:timeline-users-channelUsage" },
+			props: { showLegend: false,compact: true }
 		},
 		{
 			id: "scorecard_total_hits",
