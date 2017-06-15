@@ -14,7 +14,7 @@ describe('Data Source: Application Insights: Forked Query', () => {
     dataSources = setupTests(dashboardMock);
   });
 
-  it ('Query for 30 months with data rows', () => {
+  it ('Query for 30 days with data rows', () => {
     
     expect(dataSources).toHaveProperty('events');
     expect(dataSources.timespan).toHaveProperty('store');
