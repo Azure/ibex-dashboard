@@ -97,11 +97,12 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
     return (dispatch) => {
       request(
-        `${appInsightsUri}/query?timespan=${queryTimespan}`,
+        `${appInsightsUri}/query`,
         {
           method: 'POST',
           json: true,
           body: {
+            queryTimespan,
             appId,
             apiKey,
             query,

@@ -8,14 +8,14 @@ const { appId, apiKey } = dashboardMock.config.connections['application-insights
 
 function mock24hoursAppInsightsRequest() {
   nock(appInsightsUri)
-  .post(`/query?timespan=PT24H`)
+  .post(`/query`)
   .delay(100)
   .reply(200, query24HResponseMock)
 }
 
 function mock30daysAppInsightsRequest() {
   nock(appInsightsUri)
-  .post(`/query?timespan=P30D`)
+  .post(`/query`)
   .delay(100)
   .reply(200, query30DResponseMock);
 }

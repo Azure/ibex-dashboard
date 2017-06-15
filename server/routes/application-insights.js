@@ -5,8 +5,7 @@ const router = new express.Router();
 const host = 'api.applicationinsights.io';
 
 router.post('/query', (req, res) => {
-  const { apiKey, appId, query } = req.body;
-  const queryTimespan = req.query['timespan'];
+  const { apiKey, appId, query, queryTimespan } = req.body;
 
   if (!apiKey || !appId) {
     return res.send({ error: 'Invalid request parameters' });
