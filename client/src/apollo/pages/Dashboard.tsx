@@ -9,14 +9,12 @@ makeExecutableSchema({ typeDefs });
 const networkInterface = createNetworkInterface({ uri: 'http://localhost:4000/apollo' });
 const client = new ApolloClient({ networkInterface: networkInterface });
 
-const q = `customEvents | take 10`;
-
 class Dashboard extends React.Component<any, any> {
   render() {
     return (
       <ApolloProvider client={client}>
         <div>
-          <ApplicationInsightsQueryTester query={q} />
+          <ApplicationInsightsQueryTester />
         </div>
       </ApolloProvider>
     );

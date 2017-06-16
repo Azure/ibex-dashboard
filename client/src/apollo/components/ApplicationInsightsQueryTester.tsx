@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { gql, graphql } from 'react-apollo';
 import { appId, apiKey } from '../../data-sources/plugins/ApplicationInsights/common';
 import QueryRenderer, { IQueryRendererProps } from './QueryRenderer';
@@ -14,12 +15,12 @@ interface IQueryResults {
   AI: { body: any };
 }
 
-export interface IApplicationInsightsQueryTesterProps {
+interface IQueryRendererWithDataProps {
   query: string;
 }
 
-export const ApplicationInsightsQueryTester =
-graphql<IQueryResults, IApplicationInsightsQueryTesterProps, IQueryRendererProps>(query, {
+const QueryRendererWithData =
+graphql<IQueryResults, IQueryRendererWithDataProps, IQueryRendererProps>(query, {
   options: (ownProps) => { return { variables: { query: ownProps.query, appId, apiKey } }; },
   props: ({ ownProps, data }) => {
     return {
@@ -30,3 +31,28 @@ graphql<IQueryResults, IApplicationInsightsQueryTesterProps, IQueryRendererProps
     } as IQueryRendererProps;
   },
 })(QueryRenderer);
+
+interface IApplicationInsightsQueryTesterState {
+  query: string;
+}
+
+export class ApplicationInsightsQueryTester extends React.Component<{}, IApplicationInsightsQueryTesterState> {
+  state = {
+    query: '',
+  };
+
+  render() {
+    return (
+      <div className="ApplicationInsightsQueryTester">
+        <input className="ApplicationInsightsQueryTester-query" onChange={this.onChange} placeholder="Query..." />
+        {this.state.query && <QueryRendererWithData query={this.state.query} />}
+      </div>
+    );
+  }
+
+  onChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      query: ev.target.value,
+    });
+  }
+}
