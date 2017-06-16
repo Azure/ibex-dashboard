@@ -146,7 +146,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
         {
           cols.map((col, ci) => (
             <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>
-              <span className="indicator"></span>{renderColumn(col, value)}
+              <span className="indicator" />{renderColumn(col, value)}
             </TableColumn>
           ))
         }
