@@ -6,7 +6,7 @@ type AIResponse {
 }
 
 type Query {
-  AI(query:String!): AIResponse
+  AI(query:String!,appId:String!,apiKey:String!): AIResponse
 }
 `;
 
