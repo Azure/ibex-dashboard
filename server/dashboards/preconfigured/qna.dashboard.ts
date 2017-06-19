@@ -1,148 +1,41 @@
-return {
+/// <reference path="../../../src/types.d.ts"/>
+import * as _ from 'lodash';
+
+// The following line is important to keep in that format so it can be rendered into the page
+export const config: IDashboardConfig = /*return*/ {
 	id: "qna",
 	name: "Sample QnA Maker dashboard",
-	icon: "extension",
+	icon: "chat",
 	url: "qna",
 	description: "Sample QnA Maker dashboard",
 	preview: "/images/bot-framework-preview.png",
-	html: `<h1>Sample QnA Maker dashboard</h1>`,
+	html: `<div>
+    <h1>Sample QnA Maker dashboard</h1>
+    <p>Displays QnA Maker service usage metrics.</p> 
+    <h3><a href="https://qnamaker.ai" target="_blank">What's QnA Make Service?</a></h3>
+    <h3>Requirements</h3>
+    <p>To send the QnA Maker service data to Applications Insight it's necessary to use the <a href="https://www.npmjs.com/package/botbuilder-cognitiveservices" target="_blank">botbuilder-cognitiveservices</a> on the bot and override the
+    <b>defaultWaitNextMessage(session, qnaMakerResult)</b> function to call the <b>trackQNAEvent(context, userQuery, kbQuestion, kbAnswer, score)</b> function of the 
+    <a href="https://www.npmjs.com/package/botbuilder-instrumentation" target="_blank">botbuilder-instrumentation</a>
+    <p>That will enable the bot to send additional telemetries to Application Insight with the QnA Maker service information
+    </p>
+    <p>
+      <span>Refer to the </span>
+      <span>
+        <a href="https://github.com/CatalystCode/ibex-dashboard/blob/master/docs/bot-framework.md" target="_blank">
+          bot-framework
+        </a> docs for setup instructions.</span>
+    </p>
+  </div>`, // info about how to configure QnA and how to use botbuilder-instrumentation
 	config: {
-		connections: {
-			"application-insights": { appId: "a7f243d7-1754-4bd3-9f93-5fec7aa20009",apiKey: "rauayprkvjoppi5ckhzze70wv6m7sv02vkmoa8kn" }
-		},
+		connections: {},
 		layout: {
 			isDraggable: true,
 			isResizable: true,
 			rowHeight: 30,
 			verticalCompact: false,
 			cols: { lg: 12,md: 10,sm: 6,xs: 4,xxs: 2 },
-			breakpoints: { lg: 1200,md: 996,sm: 768,xs: 480,xxs: 0 },
-			layouts: {
-				md: [
-					{
-						w: 1,
-						h: 3,
-						x: 0,
-						y: 0,
-						i: "scorecardAvgScore",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-					{
-						w: 5,
-						h: 8,
-						x: 1,
-						y: 5,
-						i: "timeline_hits",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-					{
-						w: 5,
-						h: 8,
-						x: 5,
-						y: 13,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-					{
-						w: 1,
-						h: 3,
-						x: 9,
-						y: 0,
-						i: "scorecard_total_hits",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}
-				],
-				lg: [
-					{
-						w: 1,
-						h: 3,
-						x: 10,
-						y: 3,
-						i: "scorecardAvgScore",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-					{
-						w: 5,
-						h: 8,
-						x: 0,
-						y: 0,
-						i: "timeline_hits",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-					{
-						w: 5,
-						h: 8,
-						x: 5,
-						y: 0,
-						i: "channels",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					},
-					{
-						w: 1,
-						h: 3,
-						x: 10,
-						y: 0,
-						i: "scorecard_total_hits",
-						minW: undefined,
-						maxW: undefined,
-						minH: undefined,
-						maxH: undefined,
-						moved: false,
-						static: false,
-						isDraggable: undefined,
-						isResizable: undefined
-					}
-				]
-			}
+			breakpoints: { lg: 1200,md: 996,sm: 768,xs: 480,xxs: 0 }
 		}
 	},
 	dataSources: [
@@ -174,13 +67,17 @@ return {
 						query: () => `
                 where name == 'MBFEvent.QNAEvent'
                 | extend score=todouble(customDimensions.score)  
-                | where score >0
-                | summarize avg=bin(avg(score)*100,1) `,
+                | where score > 0
+                | summarize avg=bin(avg(score) * 100, 1) `,
 						calculated: (avgscore) => {
               return { 
-                'avg-score-value': ''+ avgscore[0].avg+'%',
-                'avg-score-color': avgscore[0].avg>=80? '#4caf50' : (avgscore[0].avg>60? '#FFc107' : '#F44336'),
-                'avg-score-icon': avgscore[0].avg>=80? 'sentiment_very_satisfied' : (avgscore[0].avg>60? 'sentiment_satisfied' : 'sentiment_dissatisfied')
+                'avg-score-value': avgscore[0].avg + '%',
+                'avg-score-color': avgscore[0].avg >= 80 ? '#4caf50' : 
+                                    (avgscore[0].avg > 60 ? '#FFc107' : '#F44336'),
+                'avg-score-icon': avgscore[0].avg >= 80 ? 'sentiment_very_satisfied' : 
+                                    (avgscore[0].avg > 60 ? 
+                                      'sentiment_satisfied' : 
+                                      'sentiment_dissatisfied')
               };
             }
 					},
@@ -244,14 +141,14 @@ return {
             }
 					},
           users_timeline: {
-						query: (dependencies) => {
-              var { granularity } = dependencies;
-              return `
-                  where name == 'MBFEvent.QNAEvent' |
-                  summarize count=dcount(tostring(customDimensions.userName)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
-                  order by timestamp asc`
-            },
-						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
+						query: ({ granularity }) => `
+                  where name == 'MBFEvent.QNAEvent'
+                  | extend userName=tostring(customDimensions.userName)
+                  | summarize count=dcount(userName) by bin(timestamp, ${granularity}),
+                            name, channel=tostring(customDimensions.channel)
+                  | order by timestamp asc
+            `,
+						mappings: { channel: (val) => val || "unknown" ,count: (val) => val || 0 },
 						calculated: (timeline, dependencies) => {
               // Timeline handling
               // =================
@@ -292,18 +189,21 @@ return {
                 "timeline-users-channels": channels
               };
             }
-					}
-				}
-			}
-		},
-		{
-			id: "samples",
-			type: "Sample",
-			params: {
-				samples: {
-					data_for_pie: [{ name: "value1",value: 60 },{ name: "value2",value: 10 },{ name: "value3",value: 30 }],
-					scorecard_data_value: 3000000,
-					scorecard_data_subvalue: 4000
+					},
+          questions: {
+            query: () => `
+              extend userQuery=tostring(customDimensions.userQuery),
+                     question=tostring(customDimensions.kbQuestion),
+                     kbAnswer=tostring(customDimensions.kbAnsert),
+                     score=toint(customDimensions.score),
+                     timestamp=tostring(timestamp)
+              | where name=='MBFEvent.QNAEvent'
+              | project timestamp , userQuery , question , kbAnswer , score
+              | summarize counter=count(userQuery) by question
+              | order by counter desc`,
+            mappings: { question: val =>  val || "Unknown", counter: val => val || 0 },
+            calculated: questions => ({"questions-bars": [ 'counter']})
+          }
 				}
 			}
 		}
@@ -319,19 +219,12 @@ return {
 	],
 	elements: [
 		{
-			id: "scorecardAvgScore",
-			type: "Scorecard",
-			title: "Avg Score",
-			size: { w: 1,h: 3 },
-			dependencies: { value: "ai:avg-score-value",color: "ai:avg-score-color",icon: "ai:avg-score-icon" }
-		},
-		{
 			id: "timeline_hits",
 			type: "Timeline",
 			title: "Hit Rate",
 			subtitle: "How many questions were asked per timeframe",
 			size: { w: 5,h: 8 },
-			dependencies: { values: "ai:timeline-hits-graphData",lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
+			dependencies: { values: "ai:timeline-hits-graphData", lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
 		},
     {
 			id: "channels",
@@ -340,7 +233,14 @@ return {
 			subtitle: "Total users sent per channel",
 			size: { w: 5,h: 8 },
 			dependencies: { values: "ai:timeline-users-channelUsage" },
-			props: { showLegend: false,compact: true }
+			props: { showLegend: true }
+		},
+    {
+			id: "scorecardAvgScore",
+			type: "Scorecard",
+			title: "Avg Score",
+			size: { w: 1,h: 3 },
+			dependencies: { value: "ai:avg-score-value",color: "ai:avg-score-color",icon: "ai:avg-score-icon" }
 		},
 		{
 			id: "scorecard_total_hits",
@@ -348,7 +248,16 @@ return {
 			title: "Total hits",
 			size: { w: 1,h: 3 },
 			dependencies: { value: "ai:score-hits",color: "::#2196F3",icon: "::av_timer" }
-		}
+		},
+    {
+      id: "qna_questions",
+      type: "BarData",
+      title: "QnA Graph",
+      subtitle: "QnA hits per question",
+      size: { w: 12,h: 8 },
+      dependencies: { values: "ai:questions", bars: "ai:questions-bars" },
+      props: { nameKey: "question" },
+    }
 	],
 	dialogs: []
 }
