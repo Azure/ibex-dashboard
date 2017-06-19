@@ -1,8 +1,11 @@
 import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
 import SelectField from 'react-md/lib/SelectFields';
+import TextFilterSettings from '../../filters/TextFilter/Settings'
 
 export default class TextFilter extends GenericComponent<any, any> {
+  
+  static editor = TextFilterSettings;
 
   static defaultProps = {
     title: 'Select'

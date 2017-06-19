@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { GenericComponent } from './GenericComponent';
+import MenuFilterSettings from '../../filters/MenuFilter/Settings'
 import Button from 'react-md/lib/Buttons';
 import Portal from 'react-md/lib/Helpers/Portal';
 import AccessibleFakeButton from 'react-md/lib/Helpers/AccessibleFakeButton';
@@ -45,6 +46,8 @@ const classNames = {
 
 export default class MenuFilter extends GenericComponent<any, any> {
 
+  static editor = MenuFilterSettings;
+  
   static defaultProps = {
     title: '',
     subtitle: 'Select filter',
