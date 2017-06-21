@@ -158,6 +158,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                   <ConnectionsSettings connections={dashboard.config.connections} />          
                 </div>
               </Tab>
+              {/* For now, we are deprecating the settings view
               <Tab label={VIEWS.Elements}>
                 <ElementsSettings settings={dashboard} />
               </Tab>
@@ -166,7 +167,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
               </Tab>
               <Tab label={VIEWS.Filters}>
                 <h1>{VIEWS.Filters} - is not implemented yet</h1>
-              </Tab>
+              </Tab>*/}
             </Tabs>
           </TabsContainer>
         </Dialog>  
