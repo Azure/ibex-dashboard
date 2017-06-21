@@ -11,5 +11,6 @@ RUN npm install
 
 # Bundle app source
 COPY . /usr/src/app
+ENV PORT=$PORT
 EXPOSE 80
 CMD [ "npm", "start" ]
