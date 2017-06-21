@@ -183,7 +183,7 @@ export default class Home extends React.Component<any, IHomeState> {
       return null;
     }
 
-    let templateCards = templates.map((temp, index) => (
+    let createCard = (temp, index) => (
       <div key={index} className="md-cell" style={styles.card}>
         <Card className="md-block-centered" key={index} >
           <Media>
@@ -202,10 +202,22 @@ export default class Home extends React.Component<any, IHomeState> {
           </CardActions>
         </Card>
       </div>
-    ));
+    );
+
+    // Finding featured
+    let featuredCards = templates
+                          .filter(temp => temp.id === 'bot_analytics_dashboard' || temp.id === 'bot_analytics_inst')
+                          .map(createCard);
+    let templateCards = templates.map(createCard);
 
     return (
       <div>
+        <h1>Bot Analytics</h1>
+        <div className="md-grid">
+          {featuredCards}
+        </div>
+
+        <h1>All Dashboards</h1>
         <div className="md-grid">
           {templateCards}
         </div>

@@ -146,7 +146,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
         {
           cols.map((col, ci) => (
             <TableColumn key={ci} className={this.fixClassName(col.field || col.value)}>
-              {renderColumn(col, value)}
+              <span className="indicator" />{renderColumn(col, value)}
             </TableColumn>
           ))
         }
@@ -158,7 +158,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
 
     return (
       <Card className={hideBorders ? 'hide-borders' : ''}>
-        <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination">
+        <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination" responsive={false}>
           <TableHeader>
             <TableRow>
               {cols.map((col, i) => (

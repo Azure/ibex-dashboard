@@ -3,19 +3,19 @@ import * as _ from 'lodash';
 
 // The following line is important to keep in that format so it can be rendered into the page
 export const config: IDashboardConfig = /*return*/ {
-	  id: 'bot_analytics_dashboard',
-  name: 'Bot Analytics Basic Dashboard',
+	  id: 'bot_analytics_inst',
+  name: 'Bot Analytics Instrumented Dashboard',
   icon: "dashboard",
-  url: "bot_analytics_dashboard",
+  url: "bot_analytics_inst",
   description: 'Microsoft Bot Framework based analytics',
   preview: '/images/bot-framework-preview.png',
 	html: `<div>
-				<h1>Bot Analytics Dashboard</h1>
+				<h1>Bot Analytics Instrumented Dashboard</h1>
 				<h2>Additional features</h2>
 				<ul>
-					<li>Modes
+					<li>Instrumentation
 						<ul>
-							<li>Allows fast switching between different views</li>
+							<li>Using this view, enables better and deeper analytics based on instrumention plugins</li>
 						</ul>
 					</li>
 				</ul>
@@ -90,7 +90,7 @@ export const config: IDashboardConfig = /*return*/ {
 				queries: {
 					filterChannels: {
 						query: () => `
-              where name == 'Activity' |
+              where name == 'MBFEvent.UserMessage' |
               extend channel=tostring(customDimensions.channel) |
               summarize channel_count=count() by channel | 
               order by channel_count`,
@@ -158,7 +158,7 @@ export const config: IDashboardConfig = /*return*/ {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
 							return `
-								where name == 'Activity' |
+								where name == 'MBFEvent.UserMessage' |
 								summarize count=count() by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
 								order by timestamp asc `
 						},
@@ -210,8 +210,8 @@ export const config: IDashboardConfig = /*return*/ {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
 							return `
-                  where name == 'Activity' |
-                  summarize count=dcount(tostring(customDimensions.from)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
+                  where name == 'MBFEvent.UserMessage' |
+                  summarize count=dcount(tostring(customDimensions.userId)) by bin(timestamp, ${granularity}), name, channel=tostring(customDimensions.channel) |
                   order by timestamp asc`
 						},
 						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
@@ -317,7 +317,7 @@ export const config: IDashboardConfig = /*return*/ {
 					},
 					mapActivity: {
 						query: () => `
-                    where name=='Activity' |
+                    where name=='MBFEvent.UserMessage' |
                     extend location=strcat(client_City, ', ', client_CountryOrRegion) | 
                     summarize location_count=count() by location |
                     extend popup=strcat('<b>', location, '</b><br />', location_count, ' messages') `,
@@ -470,8 +470,8 @@ export const config: IDashboardConfig = /*return*/ {
 			params: {
 				query: () => `
           customEvents |
-          where name=='Activity' |
-          extend uniqueUser=tostring(customDimensions.from) |
+          where name=='MBFEvent.UserMessage' |
+          extend uniqueUser=tostring(customDimensions.userId) |
           summarize oldestVisit=min(timestamp), lastVisit=max(timestamp) by uniqueUser |
           summarize
                   totalUnique = dcount(uniqueUser),
