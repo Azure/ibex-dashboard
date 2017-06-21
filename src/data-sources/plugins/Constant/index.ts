@@ -1,6 +1,7 @@
 
 import * as _ from 'lodash';
-import {DataSourcePlugin, IOptions} from './DataSourcePlugin';
+import {DataSourcePlugin, IOptions} from '../DataSourcePlugin';
+import ConstantDatasourceSettings from './Settings';
 
 interface IConstantParams {
   values: Array<string>;
@@ -8,7 +9,8 @@ interface IConstantParams {
 }
 
 export default class Constant extends DataSourcePlugin<IConstantParams> {
-
+  
+  static editor = ConstantDatasourceSettings;
   type = 'Constant';
   defaultProperty = 'selectedValue';
 
