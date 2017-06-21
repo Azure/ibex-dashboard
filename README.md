@@ -24,6 +24,12 @@ This is an application insights based project that displays a bots analytics das
 Since application insights API doesn't support ARM yet, we need to manually [create an API Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID) for the application insights service.
 Once you created the api key, copy and paste it into the **Dashboard settings screen**.
 
+## Deploy With Docker
+
+1. `docker build -t **image name** .`
+2. `docker run -d -e PORT=80 **image name** `
+3. Docker image is also available at Docker Hub - `docker pull catalystcode/ibex-dashboard`
+
 ## Create new API Key and Application ID
 
 The following steps explain how to connect **Application Insights** bot with your bot and your dashboard:
