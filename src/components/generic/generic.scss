@@ -93,6 +93,16 @@
 	color: grey;
 }
 
+td.text {
+  white-space: normal;
+}
+
+td.summary {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Sentiment */
 
 .sentiment_very_dissatisfied {
