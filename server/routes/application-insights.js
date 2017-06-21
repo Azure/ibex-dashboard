@@ -25,7 +25,6 @@ router.post('/query', (req, res) => {
     json: true,
   }, (err, result) => {
     if (err) {
-      console.log(err);
       return res.send({ error: err });
     }
     res.send(result);
