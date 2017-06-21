@@ -8,7 +8,7 @@ router.post('/query', (req, res) => {
   const { apiKey, appId, query, queryTimespan } = req.body;
 
   if (!apiKey || !appId) {
-    return res.send({ error: 'Invalid request parameters' });
+    return res.send({ error: 'Invalid request parameters: API key and app ID are required' });
   }
 
   let url = `https://${host}/beta/apps/${appId}/query`;
