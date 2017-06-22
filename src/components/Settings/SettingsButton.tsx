@@ -17,7 +17,6 @@ import SettingsStore, { ISettingsStoreState } from '../../stores/SettingsStore';
 import SettingsActions from '../../actions/SettingsActions';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore, { IConfigurationsStoreState } from '../../stores/ConfigurationsStore';
-import FiltersSettings from '../../filters/Settings';
 
 interface ISettingsButtonState {
   showSettingsDialog?: boolean;
