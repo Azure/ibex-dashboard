@@ -67,7 +67,7 @@ export default class Detail extends GenericComponent<IDetailProps, IDetailState>
     });
 
     return (
-      <Card>
+      <Card className="hide-borders">
         {lists}
       </Card>
     );
