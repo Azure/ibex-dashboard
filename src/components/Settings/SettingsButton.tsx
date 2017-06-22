@@ -165,7 +165,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                 <h1>{VIEWS.DataSources} - is not implemented yet</h1>
               </Tab>
               <Tab label={VIEWS.Filters}>
-                <FiltersSettings settings={dashboard} />
+                <h1>{VIEWS.DataSources} - is not implemented yet</h1>
               </Tab>
             </Tabs>
           </TabsContainer>
