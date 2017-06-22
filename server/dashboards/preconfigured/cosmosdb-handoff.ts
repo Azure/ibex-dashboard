@@ -98,20 +98,24 @@ export const config: IDashboardConfig = /*return*/ {
             query: () => `where name == 'Transcript'
               | extend conversationId=tostring(customDimensions.userConversationId), 
                 customerName=tostring(customDimensions.customerName), 
-                userTime=tostring(customDimensions.timestamp) 
-              | project conversationId, customerName, timestamp, userTime, customDimensions
+                timestamp=todatetime(customDimensions.timestamp) 
+              | project conversationId, customerName, timestamp, customDimensions
               | order by timestamp desc
-              | summarize transcripts_count=count(userTime), 
+              | summarize transcripts_count=count(timestamp), 
                 transcripts=makelist(customDimensions) by customerName, conversationId
               | project conversationId, customerName, transcripts_count, transcripts`,
             calculated: (transcripts) => {
               const listTranscripts = transcripts.reduce((destArray, currentValue) => {
                 const transcriptsArray = JSON.parse(currentValue.transcripts);
-                const lastMessage = transcriptsArray.find(x => x.from !== 'Bot');
+                if (!Array.isArray(transcriptsArray)) {
+                  return destArray;
+                }
+                const lastMessage = transcriptsArray.find(x => x.from === 'Customer');
                 if (!lastMessage) {
                   return destArray;
                 }
-                const lastSentimentScore = lastMessage.sentimentScore || 0.5;
+                const lastSentimentScore = parseFloat(lastMessage.sentimentScore) || 0.5;
+                const lastState = parseInt(transcriptsArray[0].state);
                 const value = {
                   userId: lastMessage.customerId,
                   conversationId: lastMessage.customerConversationId,
@@ -124,7 +128,8 @@ export const config: IDashboardConfig = /*return*/ {
                       lastSentimentScore < 0.4 ? 'sentiment_dissatisfied' :
                         lastSentimentScore < 0.6 ? 'sentiment_neutral' :
                           lastSentimentScore < 0.8 ? 'sentiment_satisfied' : 'sentiment_very_satisfied',
-                  icon: lastMessage.state === 1 ? 'perm_identity' : 'memory',
+                  icon: lastState === 0 ? 'memory' :  
+                    lastState === 2 ? 'perm_identity' : 'more_horiz',
                 };
                 destArray.push(value);
                 return destArray;
@@ -156,10 +161,20 @@ export const config: IDashboardConfig = /*return*/ {
               const avgTimeWaiting = times.reduce((a, c) => a + c, 0) / times.length;
               const maxTimeWaiting = Math.max(...times);
               const minTimeWaiting = Math.min(...times);
+              const timeFormat = (secs) => {
+                const time = new Date(secs * 1000);
+                let t = time.getSeconds() + 's';
+                if (time.getHours() > 0 && time.getMinutes() > 0) {
+                  t = time.getHours() + 'h ' + time.getMinutes() + 'm';
+                } else if (time.getMinutes() > 0) {
+                  t = time.getMinutes() + 'm';
+                }
+                return t;
+              };
               return {
-                'transcriptsAverageTimeWaiting-value': avgTimeWaiting.toFixed(1),
-                'transcriptsLongestTimeWaiting-value': maxTimeWaiting.toFixed(1),
-                'transcriptsShortestTimeWaiting-value': minTimeWaiting.toFixed(1),
+                'transcriptsAverageTimeWaiting-value': isFinite(avgTimeWaiting) ? timeFormat(avgTimeWaiting) : '-',
+                'transcriptsLongestTimeWaiting-value': isFinite(avgTimeWaiting) ? timeFormat(maxTimeWaiting) : '-',
+                'transcriptsShortestTimeWaiting-value': isFinite(avgTimeWaiting) ? timeFormat(minTimeWaiting) : '-',
               };
             }
           },
@@ -226,15 +241,23 @@ export const config: IDashboardConfig = /*return*/ {
           },
 
           customerTranscripts: {
-            query: () => `where name == 'Transcript'
-              | summarize 
-                maxState=max(toint(customDimensions.state)) 
-                by customerConversationId=tostring(customDimensions.userConversationId), 
-                customerName=tostring(customDimensions.customerName)`,
+            query: () => `where name == 'Transcript' 
+              | extend customerId=tostring(customDimensions.customerId) 
+              | extend state=toint(customDimensions.state) 
+              | extend timestamp=todatetime(customDimensions.timestamp) 
+              | project customerId, timestamp, state
+              | order by timestamp desc
+              | summarize transcripts_count=count(customerId), timestamps=makelist(timestamp) by customerId, state 
+              | project customerId, state, transcripts_count, timestamp=timestamps[0]
+              | summarize count(customerId), 
+                totals=makelist(transcripts_count), 
+                states=makelist(state), 
+                timestamps=makelist(timestamp) by customerId
+              | project customerId, state=toint(states[0]), transcripts_count=toint(totals[0]), timestamp=timestamps[0]`,
             calculated: (customerTranscripts) => {
-              const bot = customerTranscripts.filter((e) => e.maxState === 0);
-              const waiting = customerTranscripts.filter((e) => e.maxState === 1);
-              const agent = customerTranscripts.filter((e) => e.maxState === 2);
+              const bot = customerTranscripts.filter((customer) => customer.state === 0);
+              const waiting = customerTranscripts.filter((customer) => customer.state === 1);
+              const agent = customerTranscripts.filter((customer) => customer.state === 2);
               return {
                 'customerTotal-value': customerTranscripts.length,
                 'customerBot-value': bot.length,
