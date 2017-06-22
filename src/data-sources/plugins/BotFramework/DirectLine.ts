@@ -27,7 +27,7 @@ export default class BotFrameworkDirectLine extends DataSourcePlugin<IQueryParam
    * @param {object} dependencies
    * @param {function} callback
    */
-  updateDependencies(dependencies: any) {
+  updateDependenciesInternal(dependencies: any) {
     let emptyDependency = false;
     Object.keys(this._props.dependencies).forEach((key) => {
       if (typeof dependencies[key] === 'undefined') { emptyDependency = true; }
