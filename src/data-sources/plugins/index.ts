@@ -11,5 +11,5 @@ export default {
   'Azure': Azure,
   'Constant': Constant,
   'BotFramework/DirectLine': BotFrameworkDirectLine,
-  'Sample': Sample
+  'Sample': Sample,
 };

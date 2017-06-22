@@ -31,7 +31,7 @@ export interface IDataSourcePlugin {
   };
 
   bind (actionClass: any): void;
-  updateDependenciesInternal (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
+  dependenciesUpdated (dependencies: IDictionary, args: IDictionary, callback: () => void): void;
   getDependencies(): { [ key: string]: string };
   getDependables(): string[];
   getActions(): string[];
@@ -77,7 +77,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.autoUpdateIntervalMs = options.autoUpdateIntervalMs || -1;
 
     this.updateDependencies = this.updateDependencies.bind(this);
-    this.updateDependenciesInternal = this.updateDependenciesInternal.bind(this);
+    this.dependenciesUpdated = this.dependenciesUpdated.bind(this);
     this.updateSelectedValues = this.updateSelectedValues.bind(this);
     this.getCalculated = this.getCalculated.bind(this);
 
@@ -91,14 +91,14 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
       return;
     }
 
-    const returnValue = this.updateDependenciesInternal(dependencies, args, callback);
+    const returnValue = this.dependenciesUpdated(dependencies, args, callback);
     this.lastDependencies = dependencies;
     this.lastArgs = args;
     this.lastCallback = callback;
     return returnValue;
   }
 
-  abstract updateDependenciesInternal (dependencies: IDictionary, args: IDictionary,
+  abstract dependenciesUpdated (dependencies: IDictionary, args: IDictionary,
                                        callback: (result: any) => void): void;
   abstract updateSelectedValues (dependencies: IDictionary, selectedValues: any, callback: (result: any) => void): void;
 

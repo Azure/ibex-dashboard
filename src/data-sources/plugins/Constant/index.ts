@@ -31,7 +31,7 @@ export default class Constant extends DataSourcePlugin<IConstantParams> {
   /**
    * updateDependencies - called when dependencies are created
    */
-  updateDependenciesInternal(dependencies: IDictionary, args: IDictionary, callback: (result: any) => void) {
+  dependenciesUpdated(dependencies: IDictionary, args: IDictionary, callback: (result: any) => void) {
     var result = _.extend(dependencies, args);
 
     if (typeof callback === 'function') {

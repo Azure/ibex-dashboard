@@ -21,7 +21,7 @@ export default class GraphQL extends DataSourcePlugin<IGraphQLParams> {
     this.validateParams(this._props.params);
   }
 
-  updateDependenciesInternal(dependencies: any) {
+  dependenciesUpdated(dependencies: any) {
     // Ensure dependencies exist
     const isAnyDependencyMissing = Object.keys(this.getDependencies()).some(key => dependencies[key] == null);
     if (isAnyDependencyMissing) {
