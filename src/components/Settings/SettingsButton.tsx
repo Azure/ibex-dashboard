@@ -17,6 +17,7 @@ import SettingsStore, { ISettingsStoreState } from '../../stores/SettingsStore';
 import SettingsActions from '../../actions/SettingsActions';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore, { IConfigurationsStoreState } from '../../stores/ConfigurationsStore';
+import FiltersSettings from '../../filters/Settings';
 
 interface ISettingsButtonState {
   showSettingsDialog?: boolean;
@@ -164,7 +165,7 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
                 <h1>{VIEWS.DataSources} - is not implemented yet</h1>
               </Tab>
               <Tab label={VIEWS.Filters}>
-                <h1>{VIEWS.Filters} - is not implemented yet</h1>
+                <FiltersSettings settings={dashboard} />
               </Tab>
             </Tabs>
           </TabsContainer>
