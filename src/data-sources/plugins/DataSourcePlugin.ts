@@ -98,8 +98,9 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     return returnValue;
   }
 
-  abstract dependenciesUpdated (dependencies: IDictionary, args: IDictionary,
-                                       callback: (result: any) => void): void;
+  abstract dependenciesUpdated (dependencies: IDictionary, 
+                                args: IDictionary,
+                                callback: (result: any) => void): void;
   abstract updateSelectedValues (dependencies: IDictionary, selectedValues: any, callback: (result: any) => void): void;
 
   bind (actionClass: any) {
