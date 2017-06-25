@@ -140,7 +140,7 @@ export const config: IDashboardConfig = /*return*/ {
               };
             }
 					},
-          users_timeline: {
+					users_timeline: {
 						query: ({ granularity }) => `
                   where name == 'MBFEvent.QNAEvent'
                   | extend userName=tostring(customDimensions.userName)
@@ -148,7 +148,7 @@ export const config: IDashboardConfig = /*return*/ {
                             name, channel=tostring(customDimensions.channel)
                   | order by timestamp asc
             `,
-						mappings: { channel: (val) => val || "unknown" ,count: (val) => val || 0 },
+						mappings: { channel: (val) => val || "unknown",count: (val) => val || 0 },
 						calculated: (timeline, dependencies) => {
               // Timeline handling
               // =================
@@ -190,8 +190,8 @@ export const config: IDashboardConfig = /*return*/ {
               };
             }
 					},
-          questions: {
-            query: () => `
+					questions: {
+						query: () => `
               extend userQuery=tostring(customDimensions.userQuery),
                      question=tostring(customDimensions.kbQuestion),
                      kbAnswer=tostring(customDimensions.kbAnsert),
@@ -201,9 +201,9 @@ export const config: IDashboardConfig = /*return*/ {
               | project timestamp , userQuery , question , kbAnswer , score
               | summarize counter=count(userQuery) by question
               | order by counter desc`,
-            mappings: { question: val =>  val || "Unknown", counter: val => val || 0 },
-            calculated: questions => ({"questions-bars": [ 'counter']})
-          }
+						mappings: { question: val =>  val || "Unknown",counter: val => val || 0 },
+						calculated: questions => ({"questions-bars": [ 'counter']})
+					}
 				}
 			}
 		}
@@ -224,9 +224,9 @@ export const config: IDashboardConfig = /*return*/ {
 			title: "Hit Rate",
 			subtitle: "How many questions were asked per timeframe",
 			size: { w: 5,h: 8 },
-			dependencies: { values: "ai:timeline-hits-graphData", lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
+			dependencies: { values: "ai:timeline-hits-graphData",lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
 		},
-    {
+		{
 			id: "channels",
 			type: "PieData",
 			title: "Channel Usage (Users)",
@@ -235,12 +235,21 @@ export const config: IDashboardConfig = /*return*/ {
 			dependencies: { values: "ai:timeline-users-channelUsage" },
 			props: { showLegend: true }
 		},
-    {
+		{
 			id: "scorecardAvgScore",
 			type: "Scorecard",
 			title: "Avg Score",
 			size: { w: 1,h: 3 },
-			dependencies: { value: "ai:avg-score-value",color: "ai:avg-score-color",icon: "ai:avg-score-icon" }
+			dependencies: { 
+        card_sentiment_value: "ai:avg-score-value",
+				card_sentiment_color: "ai:avg-score-color",
+				card_sentiment_icon: "ai:avg-score-icon",
+				card_sentiment_onClick: "::onScoreClick"
+    },
+      actions: { 
+        onScoreClick: {
+          action: "dialog:sentimentConversations", params: { title: "args:heading",queryspan: "timespan:queryTimespan" }}
+        }
 		},
 		{
 			id: "scorecard_total_hits",
@@ -249,15 +258,244 @@ export const config: IDashboardConfig = /*return*/ {
 			size: { w: 1,h: 3 },
 			dependencies: { value: "ai:score-hits",color: "::#2196F3",icon: "::av_timer" }
 		},
-    {
-      id: "qna_questions",
-      type: "BarData",
-      title: "QnA Graph",
-      subtitle: "QnA hits per question",
-      size: { w: 12,h: 8 },
-      dependencies: { values: "ai:questions", bars: "ai:questions-bars" },
-      props: { nameKey: "question" },
-    }
+		{
+			id: "qna_questions",
+			type: "BarData",
+			title: "QnA Graph",
+			subtitle: "QnA hits per question",
+			size: { w: 12,h: 8 },
+			dependencies: { values: "ai:questions",bars: "ai:questions-bars" },
+			props: { nameKey: "question" },
+      actions: {
+				onBarClick: { action: "dialog:questionDialog",params: { title: "args:question",question: "args:question",queryspan: "timespan:queryTimespan" } }
+			}
+		}
 	],
-	dialogs: []
+	dialogs: [
+    {
+			id: "sentimentConversations",
+			width: "60%",
+			params: ["title","queryspan"],
+			dataSources: [
+				{
+					id: "sentiment-conversations-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { queryTimespan: "dialog_sentimentConversations:queryspan" },
+					params: {
+						query: () => `
+              customEvents
+              | extend conversation=tostring(customDimensions.conversationId),
+                      timestamp=tostring(customDimensions.timestamp),
+                      userId=tostring(customDimensions.userId),
+                      sentiment=toint(todouble(customDimensions.score)*100)
+              | where name=='MBFEvent.QNAEvent'
+              | summarize count=count(), sentiment=avg(sentiment), maxTimestamp=max(timestamp) by conversation
+              | extend color=iff(sentiment > 80, 'green', iff(sentiment < 60, 'red', 'yellow')),
+                       icon=iff(sentiment > 80, 'sentiment_satisfied',
+                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_neutral'))
+              | order by sentiment`,
+						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
+					},
+					calculated: ({ values }, dependencies) => {
+            return {
+              top5Positive: _.take(values, 5),
+              top5Negative: _.takeRight(values, 5)
+            };
+          }
+				}
+			],
+			elements: [
+				{
+					id: "top5positive",
+					type: "Table",
+					size: { w: 5,h: 8 },
+					dependencies: { values: "sentiment-conversations-data:top5Positive" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "Top 5 Positive",field: "id" },
+							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",width: "10px",field: "count" },
+							{ type: "button",width: "10px",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				},
+				{
+					id: "top5negative",
+					type: "Table",
+					size: { w: 5,h: 8 },
+					dependencies: { values: "sentiment-conversations-data:top5Positive" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "Top 5 Negative",field: "id" },
+							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",field: "count" },
+							{ type: "button",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				}
+			]
+		},
+    {
+			id: "messages",
+			width: "50%",
+			params: ["title","conversation","queryspan"],
+			dataSources: [
+				{
+					id: "messages-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { conversation: "dialog_messages:conversation",queryTimespan: "dialog_messages:queryspan" },
+					params: {
+						query: ({ conversation }) => `
+              customEvents
+              | extend 
+                      conversation=tostring(customDimensions.conversationId),
+                      timestamp=tostring(customDimensions.timestamp),
+                      userId=tostring(customDimensions.userId),
+                      sentiment=toint(todouble(customDimensions.score)*100),
+                      userQuery=tostring(customDimensions.userQuery),
+                     question=tostring(customDimensions.kbQuestion),
+                     kbAnswer=tostring(customDimensions.kbAnsert)
+              | where name == "MBFEvent.QNAEvent" and conversation == '${conversation}'
+              
+              | project timestamp, userQuery,question,kbAnswer, customDimensions.userName, userId, sentiment
+              | order by timestamp asc
+              `
+					},
+					calculated: (state, dependencies) => {
+            let { values } = state;
+
+            if (!values) { return; }
+
+            let chat = values.map(msg => (
+              _.extend(msg, {
+                icon:  isNaN(parseInt(msg.sentiment)) ? '' :
+                       msg.sentiment > 80 ? 'sentiment_satisfied' :
+                       msg.sentiment < 60 ? 'sentiment_dissatisfied' : '',
+                color: isNaN(parseInt(msg.sentiment)) ? '' :
+                       msg.sentiment > 80 ? '#AEEA00' :
+                       msg.sentiment < 60 ? '#D50000' : '',
+              })
+            ));
+
+            return { chat };
+          }
+				}
+			],
+			elements: [
+				{
+					id: "messages-list",
+					type: "Table",
+					title: "Messages",
+					size: { w: 12,h: 16 },
+					dependencies: { values: "messages-data:chat" },
+					props: {
+						rowClassNameField: "eventName",
+						cols: [
+							{ header: "Timestamp",width: "50px",field: "timestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "User Query",field: "userQuery" },
+              { header: "Detected Question",field: "question" },
+              { header: "KB Answer",field: "kbAnswer" }
+						]
+					}
+				}
+			]
+		},
+    {
+			id: "questionDialog",
+			width: "60%",
+			params: ["title", "question", "queryspan"],
+			dataSources: [
+				{
+					id: "sentiment-conversations-data-question",
+					type: "ApplicationInsights/Query",
+					dependencies: { queryTimespan: "dialog_questionDialog:queryspan",question: "dialog_questionDialog:question" },
+					params: {
+						query: ( {question} ) => `
+              customEvents
+              | extend conversation=tostring(customDimensions.conversationId),
+                      timestamp=tostring(customDimensions.timestamp),
+                      userId=tostring(customDimensions.userId),
+                      sentiment=toint(todouble(customDimensions.score)*100),
+                      question=tostring(customDimensions.kbQuestion)
+              | where name=='MBFEvent.QNAEvent' and question=='${question}'
+              | summarize count=count(), sentiment=avg(sentiment), maxTimestamp=max(timestamp) by conversation
+              | extend color=iff(sentiment > 80, 'green', iff(sentiment < 60, 'red', 'yellow')),
+                       icon=iff(sentiment > 80, 'sentiment_satisfied',
+                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_neutral'))
+              | order by sentiment`,
+						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
+					},
+					calculated: ({ values }, dependencies) => {
+            return {
+              top5Positive: _.take(values, 5),
+              top5Negative: _.takeRight(values, 5)
+            };
+          }
+				}
+			],
+			elements: [
+				{
+					id: "top5positive",
+					type: "Table",
+					size: { w: 5,h: 8 },
+					dependencies: { values: "sentiment-conversations-data-question:top5Positive" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "Top 5 Positive",field: "id" },
+							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",width: "10px",field: "count" },
+							{ type: "button",width: "10px",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				},
+				{
+					id: "top5negative",
+					type: "Table",
+					size: { w: 5,h: 8 },
+					dependencies: { values: "sentiment-conversations-data-question:top5Positive" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "Top 5 Negative",field: "id" },
+							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",field: "count" },
+							{ type: "button",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				}
+			]
+		}
+  ]
 }
