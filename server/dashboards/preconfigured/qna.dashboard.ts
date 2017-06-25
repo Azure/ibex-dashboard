@@ -70,6 +70,9 @@ export const config: IDashboardConfig = /*return*/ {
                 | where score > 0
                 | summarize avg=bin(avg(score) * 100, 1) `,
 						calculated: (avgscore) => {
+              if(!avgscore || avgscore.length==0) {
+                return null;
+              }
               return { 
                 'avg-score-value': avgscore[0].avg + '%',
                 'avg-score-color': avgscore[0].avg >= 80 ? '#4caf50' : 
@@ -85,11 +88,7 @@ export const config: IDashboardConfig = /*return*/ {
 						query: () => `
                 where name == 'MBFEvent.QNAEvent'
                 | summarize hits=count() `,
-						calculated: (hits) => {
-              return { 
-                'score-hits': hits[0].hits
-              };
-            }
+						calculated: hits =>({ 'score-hits': hits[0].hits })
 					},
 					scoreHits: {
 						query: () => `
