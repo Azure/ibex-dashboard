@@ -193,7 +193,7 @@ export const config: IDashboardConfig = /*return*/ {
 						query: () => `
               extend userQuery=tostring(customDimensions.userQuery),
                      question=tostring(customDimensions.kbQuestion),
-                     kbAnswer=tostring(customDimensions.kbAnsert),
+                     kbAnswer=tostring(customDimensions.kbAnswer),
                      score=toint(customDimensions.score),
                      timestamp=tostring(timestamp)
               | where name=='MBFEvent.QNAEvent'
@@ -232,30 +232,28 @@ export const config: IDashboardConfig = /*return*/ {
 			subtitle: "Total users sent per channel",
 			size: { w: 5,h: 8 },
 			dependencies: { values: "ai:timeline-users-channelUsage" },
-			props: { showLegend: true }
+			props: { showLegend: true, entityType: 'messages'  }
 		},
 		{
 			id: "scorecardAvgScore",
 			type: "Scorecard",
 			title: "Avg Score",
-			size: { w: 1,h: 3 },
-			dependencies: { 
-        card_sentiment_value: "ai:avg-score-value",
-				card_sentiment_color: "ai:avg-score-color",
-				card_sentiment_icon: "ai:avg-score-icon",
-				card_sentiment_onClick: "::onScoreClick"
-    },
-      actions: { 
-        onScoreClick: {
-          action: "dialog:sentimentConversations", params: { title: "args:heading",queryspan: "timespan:queryTimespan" }}
-        }
-		},
-		{
-			id: "scorecard_total_hits",
-			type: "Scorecard",
-			title: "Total hits",
-			size: { w: 1,h: 3 },
-			dependencies: { value: "ai:score-hits",color: "::#2196F3",icon: "::av_timer" }
+			size: { w: 2,h: 3 },
+			dependencies: {
+				card_avgscore_value: "ai:avg-score-value",
+				card_avgscore_color: "ai:avg-score-color",
+				card_avgscore_icon: "ai:avg-score-icon",
+				card_avgscore_heading: "::Avg Score",
+				card_avgscore_onClick: "::onScoreClick",
+
+        card_totalhits_value: "ai:score-hits",
+				card_totalhits_color: "::#2196F3",
+				card_totalhits_icon: "::av_timer",
+				card_totalhits_heading: "::Total hits"
+			},
+			actions: {
+				onScoreClick: { action: "dialog:sentimentConversations",params: { title: "args:heading",queryspan: "timespan:queryTimespan" } }
+			}
 		},
 		{
 			id: "qna_questions",
@@ -265,13 +263,16 @@ export const config: IDashboardConfig = /*return*/ {
 			size: { w: 12,h: 8 },
 			dependencies: { values: "ai:questions",bars: "ai:questions-bars" },
 			props: { nameKey: "question" },
-      actions: {
-				onBarClick: { action: "dialog:questionDialog",params: { title: "args:question",question: "args:question",queryspan: "timespan:queryTimespan" } }
+			actions: {
+				onBarClick: {
+					action: "dialog:questionDialog",
+					params: { title: "args:question",question: "args:question",queryspan: "timespan:queryTimespan" }
+				}
 			}
 		}
 	],
 	dialogs: [
-    {
+		{
 			id: "sentimentConversations",
 			width: "60%",
 			params: ["title","queryspan"],
@@ -289,9 +290,9 @@ export const config: IDashboardConfig = /*return*/ {
                       sentiment=toint(todouble(customDimensions.score)*100)
               | where name=='MBFEvent.QNAEvent'
               | summarize count=count(), sentiment=avg(sentiment), maxTimestamp=max(timestamp) by conversation
-              | extend color=iff(sentiment > 80, 'green', iff(sentiment < 60, 'red', 'yellow')),
-                       icon=iff(sentiment > 80, 'sentiment_satisfied',
-                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_neutral'))
+              | extend color=iff(sentiment > 80, '#4caf50', iff(sentiment < 60, '#F44336', '#FFc107')),
+                       icon=iff(sentiment > 80, 'sentiment_very_satisfied',
+                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_satisfied'))
               | order by sentiment`,
 						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
 					},
@@ -350,7 +351,7 @@ export const config: IDashboardConfig = /*return*/ {
 				}
 			]
 		},
-    {
+		{
 			id: "messages",
 			width: "50%",
 			params: ["title","conversation","queryspan"],
@@ -369,7 +370,7 @@ export const config: IDashboardConfig = /*return*/ {
                       sentiment=toint(todouble(customDimensions.score)*100),
                       userQuery=tostring(customDimensions.userQuery),
                      question=tostring(customDimensions.kbQuestion),
-                     kbAnswer=tostring(customDimensions.kbAnsert)
+                     kbAnswer=tostring(customDimensions.kbAnswer)
               | where name == "MBFEvent.QNAEvent" and conversation == '${conversation}'
               
               | project timestamp, userQuery,question,kbAnswer, customDimensions.userName, userId, sentiment
@@ -384,11 +385,11 @@ export const config: IDashboardConfig = /*return*/ {
             let chat = values.map(msg => (
               _.extend(msg, {
                 icon:  isNaN(parseInt(msg.sentiment)) ? '' :
-                       msg.sentiment > 80 ? 'sentiment_satisfied' :
-                       msg.sentiment < 60 ? 'sentiment_dissatisfied' : '',
+                       msg.sentiment > 80 ? 'sentiment_very_satisfied' :
+                       msg.sentiment < 60 ? 'sentiment_dissatisfied' : 'sentiment_satisfied',
                 color: isNaN(parseInt(msg.sentiment)) ? '' :
-                       msg.sentiment > 80 ? '#AEEA00' :
-                       msg.sentiment < 60 ? '#D50000' : '',
+                       msg.sentiment > 80 ? '#4caf50' :
+                       msg.sentiment < 60 ? '#FFc107' : '#F44336',
               })
             ));
 
@@ -409,17 +410,17 @@ export const config: IDashboardConfig = /*return*/ {
 							{ header: "Timestamp",width: "50px",field: "timestamp",type: "time",format: "MMM-DD HH:mm:ss" },
 							{ width: "10px",field: "icon",type: "icon",color: "color" },
 							{ header: "User Query",field: "userQuery" },
-              { header: "Detected Question",field: "question" },
-              { header: "KB Answer",field: "kbAnswer" }
+							{ header: "Detected Question",field: "question" },
+							{ header: "KB Answer",field: "kbAnswer" }
 						]
 					}
 				}
 			]
 		},
-    {
+		{
 			id: "questionDialog",
-			width: "60%",
-			params: ["title", "question", "queryspan"],
+			width: "40%",
+			params: ["title","question","queryspan"],
 			dataSources: [
 				{
 					id: "sentiment-conversations-data-question",
@@ -435,30 +436,30 @@ export const config: IDashboardConfig = /*return*/ {
                       question=tostring(customDimensions.kbQuestion)
               | where name=='MBFEvent.QNAEvent' and question=='${question}'
               | summarize count=count(), sentiment=avg(sentiment), maxTimestamp=max(timestamp) by conversation
-              | extend color=iff(sentiment > 80, 'green', iff(sentiment < 60, 'red', 'yellow')),
+              | extend color=iff(sentiment > 80, '#4caf50', iff(sentiment < 60, '#F44336', '#FFc107')),
                        icon=iff(sentiment > 80, 'sentiment_satisfied',
-                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_neutral'))
-              | order by sentiment`,
+                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_satisfied'))
+              | order by maxTimestamp`,
 						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
 					},
 					calculated: ({ values }, dependencies) => {
             return {
-              top5Positive: _.take(values, 5),
-              top5Negative: _.takeRight(values, 5)
+              top5: _.take(values, 5),
+              totalConversations: values? values.length :0
             };
           }
 				}
 			],
 			elements: [
 				{
-					id: "top5positive",
+					id: "top5",
 					type: "Table",
 					size: { w: 5,h: 8 },
-					dependencies: { values: "sentiment-conversations-data-question:top5Positive" },
+					dependencies: { values: "sentiment-conversations-data-question:top5" },
 					props: {
 						compact: true,
 						cols: [
-							{ header: "Top 5 Positive",field: "id" },
+							{ header: "Top 5 conversations",field: "id" },
 							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
 							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
 							{ header: "Count",width: "10px",field: "count" },
@@ -473,18 +474,70 @@ export const config: IDashboardConfig = /*return*/ {
 					}
 				},
 				{
-					id: "top5negative",
+					id: "scorecard_total_conversation",
+          type: "Scorecard",
+          title: "Conersations",
+          size: { w: 3,h: 3 },
+          dependencies: { 
+            card_avgscore_value: "sentiment-conversations-data-question:totalConversations",
+            card_avgscore_color: "::#2196F3",
+            card_avgscore_icon: "::av_timer",
+            card_avgscore_heading: "::Conversations",
+            card_avgscore_onClick: "::onConversationsClick",
+          },
+          props: { nameKey: "question" },
+          actions: {
+            onConversationsClick: { action: "dialog:questionConversationDialog",params: { title: "args:question", question: "args:question",queryspan: "timespan:queryTimespan" } }
+          }
+				}
+			]
+		},
+    {
+			id: "questionConversationDialog",
+			width: "40%",
+			params: ["title","question","queryspan"],
+			dataSources: [
+				{
+					id: "sentiment-conversations-data-question-all",
+					type: "ApplicationInsights/Query",
+					dependencies: { queryTimespan: "dialog_questionDialog:queryspan",question: "dialog_questionDialog:question" },
+					params: {
+						query: ( {question} ) => `
+              customEvents
+              | extend conversation=tostring(customDimensions.conversationId),
+                      timestamp=tostring(customDimensions.timestamp),
+                      userId=tostring(customDimensions.userId),
+                      sentiment=toint(todouble(customDimensions.score)*100),
+                      question=tostring(customDimensions.kbQuestion)
+              | where name=='MBFEvent.QNAEvent' and question=='${question}'
+              | summarize count=count(), sentiment=avg(sentiment), maxTimestamp=max(timestamp) by conversation
+              | extend color=iff(sentiment > 80, '#4caf50', iff(sentiment < 60, '#F44336', '#FFc107')),
+                       icon=iff(sentiment > 80, 'sentiment_satisfied',
+                            iff(sentiment < 60, 'sentiment_dissatisfied', 'sentiment_satisfied'))
+              | order by maxTimestamp`,
+						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
+					},
+					calculated: ({ values }, dependencies) => {
+            return {
+              conversations: values,
+            };
+          }
+				}
+			],
+			elements: [
+				{
+					id: "conversations-by-questions",
 					type: "Table",
-					size: { w: 5,h: 8 },
-					dependencies: { values: "sentiment-conversations-data-question:top5Positive" },
+					size: { w: 12,h: 16 },
+					dependencies: { values: "sentiment-conversations-data-question-all:conversations" },
 					props: {
 						compact: true,
 						cols: [
-							{ header: "Top 5 Negative",field: "id" },
+							{ header: "Conversations",field: "id" },
 							{ header: null,width: "10px",field: "icon",type: "icon",color: "color" },
 							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
-							{ header: "Count",field: "count" },
-							{ type: "button",value: "chat",click: "openMessagesDialog" }
+							{ header: "Count",width: "10px",field: "count" },
+							{ type: "button",width: "10px",value: "chat",click: "openMessagesDialog" }
 						]
 					},
 					actions: {
@@ -496,5 +549,5 @@ export const config: IDashboardConfig = /*return*/ {
 				}
 			]
 		}
-  ]
+	]
 }
