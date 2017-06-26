@@ -631,6 +631,7 @@ export const config: IDashboardConfig = /*return*/ {
 			dependencies: {
 				card_errors_value: "errors:typesTotal",
 				card_errors_heading: "::Errors",
+        card_errors_tooltip: "::Total errors",
 				card_errors_color: "errors:typesTotal_color",
 				card_errors_icon: "errors:typesTotal_icon",
 				card_errors_subvalue: "errors:typesTotal",
@@ -638,6 +639,7 @@ export const config: IDashboardConfig = /*return*/ {
 				card_errors_onClick: "::onErrorsClick",
 				card_sentiment_value: "ai:sentiment-height",
 				card_sentiment_heading: "::Sentiment",
+        card_sentiment_tooltip: "::Average sentiment",
 				card_sentiment_color: "ai:sentiment-color",
 				card_sentiment_icon: "ai:sentiment-icon",
 				card_sentiment_subvalue: "ai:sentiment-subvalue",
@@ -645,12 +647,14 @@ export const config: IDashboardConfig = /*return*/ {
 				card_sentiment_onClick: "::onSentimentsClick",
 				card_users_value: "retention:total",
 				card_users_heading: "::Users",
+        card_users_tooltip: "::User retention",
 				card_users_icon: "::account_circle",
 				card_users_subvalue: "retention:returning",
 				card_users_subheading: "::Returning",
 				card_users_onClick: "::onUsersClick",
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
+        card_conversions_tooltip: "::Conversion rate",
 				card_conversions_icon: "::input",
 				card_conversions_color: "::#2196F3"
 			},
@@ -1279,7 +1283,7 @@ export const config: IDashboardConfig = /*return*/ {
 					id: "errors-list",
 					type: "SplitPanel",
 					title: "Errors",
-					size: { w: 12,h: 16 },
+					size: { w: 12,h: 14 },
 					dependencies: { groups: "errors-group",values: "errors-selection" },
 					props: {
 						cols: [
@@ -1288,7 +1292,9 @@ export const config: IDashboardConfig = /*return*/ {
 							{ header: "HandledAt",field: "handledAt" },
 							{ type: "button",value: "more",click: "openErrorDetail" }
 						],
-						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" }
+						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" },
+            hideBorders: true,
+            defaultRowsPerPage: 20,
 					},
 					actions: {
 						select: {
@@ -1333,7 +1339,7 @@ export const config: IDashboardConfig = /*return*/ {
 					id: "errordetail-item",
 					type: "Detail",
 					title: "Error detail",
-					size: { w: 12,h: 16 },
+					size: { w: 12,h: 14 },
 					dependencies: { values: "errordetail-data" },
 					props: {
 						cols: [
