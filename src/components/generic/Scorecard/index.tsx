@@ -1,9 +1,9 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 
-import { Media } from 'react-md/lib/Media';
 import { Card } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
+import Tooltip from '../../Tooltip';
 
 import { GenericComponent, IGenericProps } from '../GenericComponent';
 import utils from '../../../utils';
@@ -24,6 +24,7 @@ interface IScorecardProps extends IGenericProps {
     colorPosition?: 'bottom' | 'left';
     subheading?: string;
     onClick?: string;
+    tooltip?: string;
   };
 }
 
@@ -47,7 +48,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
   render() {
     let { values, value, icon, subvalue, color, className } = this.state;
     let { title, props, actions } = this.props;
-    let { subheading, colorPosition, scorecardWidth, onClick } = props;
+    let { subheading, colorPosition, scorecardWidth, onClick, tooltip } = props;
 
     if (_.has(this.state, 'values')) {
       // In case the user defined a "values" parameter
@@ -89,12 +90,10 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
       this.valueToCard(val, idx, className, colorPosition, scorecardWidth));
 
     return (
-      <Card>
-        <Media className="md-card-scorecard">
-          <div className="md-grid--no-spacing">
-            {cards}
-          </div>
-        </Media>
+      <Card className="md-card-scorecard">
+        <div className="md-grid--no-spacing">
+          {cards}
+        </div>
       </Card>
     );
   }
@@ -140,9 +139,15 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
     let cardClassName = `scorecard${onClick ? ' clickable-card' : ''}${colorPosition ? ` color-${colorPosition}` : ''}`;
     return (
-      <div key={idx} className={cardClassName} style={cardstyle} onClick={this.handleClick.bind(this, value)}>
-        {
-          icon && <FontIcon className={className} style={iconStyle}>{icon}</FontIcon>}
+      <Tooltip 
+        key={idx} 
+        className={cardClassName} 
+        style={cardstyle} 
+        onClick={this.handleClick.bind(this, value)} 
+        tooltipLabel={value.tooltip} 
+        tooltipPosition="top"
+      >
+        {icon && <FontIcon className={className} style={iconStyle}>{icon}</FontIcon>}
         <div className="md-headline">{this.shortFormatter(value.value)}</div>
         {drillDownLink}
         {
@@ -154,7 +159,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
             </div>
           )
         }
-      </div>
+      </Tooltip>
     );
   }
 }

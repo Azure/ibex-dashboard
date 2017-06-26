@@ -37,6 +37,11 @@ Define `props` as follows:
 | Property | Type | Description 
 | :--------|:-----|:-----------
 | `cols`| `object[]` | Collection of table column properties  
+| `compact`| `boolean` | Set to `true` to enable compact view
+| `hideBorders`| `boolean` | Set to `true` to hide box shadows
+| `checkboxes`| `boolean` | Set to `true` to enable checkboxes
+| `rowClassNameField`| `string` | Specify row style
+| `defaultRowsPerPage`| `number` | Default number of rows per page
 
 Define `props.cols` as follows:
 

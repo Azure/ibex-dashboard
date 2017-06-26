@@ -10,6 +10,14 @@ import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
+const styles = {
+  autoscroll: {
+    overflow: 'auto'
+  } as React.CSSProperties
+};
+
+const defaultPagination: number[] = [10, 50, 100];
+
 export type ColType = 'text' | 'time' | 'icon' | 'button' | 'ago' | 'number';
 
 export interface ITableColumnProps {
@@ -32,7 +40,8 @@ export interface ITableProps extends IGenericProps {
     rowClassNameField?: string;
     hideBorders?: boolean;
     compact?: boolean;
-    cols: ITableColumnProps[]
+    cols: ITableColumnProps[],
+    defaultRowsPerPage?: number;
   };
 }
 
@@ -48,12 +57,16 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
   state = {
     values: [],
     rowIndex: 0,
-    rowsPerPage: 10,
+    rowsPerPage: this.props.props.defaultRowsPerPage || 10,
+    rowsPerPageItems: defaultPagination,
     currentPage: 1,
   };
 
   constructor(props: ITableProps) {
     super(props);
+
+    this.state.rowsPerPageItems = defaultPagination.find(n => n === this.state.rowsPerPage) ? defaultPagination 
+      : [...defaultPagination, this.state.rowsPerPage].sort((a, b) => a - b) ;
 
     this.onButtonClick = this.onButtonClick.bind(this);
     this.onRowClick = this.onRowClick.bind(this);
@@ -89,8 +102,8 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
   render() {
     const { props } = this.props;
     const { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
-    const { values, rowIndex, rowsPerPage, currentPage } = this.state;
-
+    const { values, rowIndex, rowsPerPage, currentPage, rowsPerPageItems } = this.state;
+    
     if (!values) {
       return <CircularProgress key="loading" id="spinner" />;
     }
@@ -168,7 +181,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     className += compact ? 'table-compact' : '';
 
     return (
-      <Card className={hideBorders ? 'hide-borders' : ''}>
+      <Card className={hideBorders ? 'hide-borders' : ''} style={styles.autoscroll}>
         <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination" responsive={false}>
           <TableHeader>
             <TableRow>
@@ -193,6 +206,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
               onPagination={this.handlePagination}
               rows={totalRows}
               rowsPerPage={rowsPerPage}
+              rowsPerPageItems={rowsPerPageItems}
               page={currentPage}
             />
           ) : null
