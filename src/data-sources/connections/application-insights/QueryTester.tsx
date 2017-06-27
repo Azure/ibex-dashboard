@@ -23,6 +23,15 @@ interface IQueryTesterProps {
   buttonStyle: any;
 }
 
+const styles = {
+  json: { 
+    overflowY: 'scroll', 
+    height: 'calc(100% - 200px)', 
+    width: 'calc(100% - 48px)', 
+    position: 'absolute' 
+  }
+};
+
 export default class QueryTester extends React.Component<IQueryTesterProps, IQueryTesterState> {
 
   state: IQueryTesterState = {
@@ -97,10 +106,7 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
           visible={showDialog} 
           onHide={this.closeDialog} 
           dialogStyle={{ width: '60%', height: '90%' }}
-          disableScrollLocking={true}
-          // getElementById('settingsForm') is used to set the location of dialog under "settingsForm" in the html,
-          // Otherwise the dialog is placed in a wrong position inside the card defintion (under the settings form).
-          renderNode={document.getElementById('settingsForm')}   
+          style={{ zIndex: 99 }}
           title="Query tester"
           actions= {dialogActions}
         >
@@ -113,22 +119,17 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
             onChange={this.onQueryChange}
           />
           <Divider />
-          <div style={{overflowY: 'scroll', height: '75%', width: '100%', position: 'absolute'}}>
+          <div style={styles.json}>
             <JSONTree data={response} theme="default" shouldExpandNode={() => responseExpanded}/>
           </div>
-          <div 
-            style={
-              { 
-                width: '100%', 
-                position: 'absolute', 
-                top: 130, 
-                left: 0, 
-                display: loadingData ? 'block' : 'none'
-              }
-            }
-          >
-            <CircularProgress id="testerProgress" />
-          </div>
+          {
+            loadingData && 
+            (
+              <div style={{ width: '100%', position: 'absolute', top: 130, left: 0 }}>
+                <CircularProgress id="testerProgress" />
+              </div>
+            )
+          }
         </Dialog>  
       </div>
     );
