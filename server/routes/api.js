@@ -290,6 +290,20 @@ router.post('/setup', (req, res) => {
   })
 });
 
+router.post('/import/dashboards', (req, res) => {
+  var content = (req.body && req.body.json) || '';
+  var lowerCaseFileName = req.body.dashboardFileName.toLowerCase();
+
+  var modifiedFileName = lowerCaseFileName + '.private.js'
+  fs.writeFile(path.join(__dirname, '..', 'dashboards', modifiedFileName), req.body.content, err => {
+    if (err) {
+      console.error(err);
+      return res.end(err);
+    }
+    res.send({ res: 'Dashboard imported successfully' });
+  })
+});
+
 module.exports = {
   router
 }
