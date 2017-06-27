@@ -14,7 +14,7 @@ interface IQueryTesterState {
   query: string;
   response: object;
   loadingData: boolean;
-  expandResponse: boolean;
+  responseExpanded: boolean;
 }
 
 interface IQueryTesterProps {
@@ -30,7 +30,7 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
     query: '',
     response: {},
     loadingData: false,
-    expandResponse: true
+    responseExpanded: true
   };
   
   constructor(props: any) {
@@ -53,11 +53,11 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
   }
 
   collapseResponse() {
-    this.setState({ expandResponse: false });
+    this.setState({ responseExpanded: false });
   }
 
   expandResponse() {
-    this.setState({ expandResponse: true });
+    this.setState({ responseExpanded: true });
   }
 
   submitQuery() {
@@ -78,14 +78,14 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
   }
 
   render() {
-    let { showDialog, query, response, loadingData, expandResponse } = this.state;
+    let { showDialog, query, response, loadingData, responseExpanded } = this.state;
 
     const dialogActions = [
             { onClick: this.submitQuery, primary: true, label: 'Run query' },
             { onClick: this.collapseResponse, primary: false, label: 'Collapse', 
-            disabled: _.isEmpty(response) || !expandResponse ? true : false}, 
+            disabled: _.isEmpty(response) || !responseExpanded}, 
             { onClick: this.expandResponse, primary: false, label: 'Expand',
-           disabled: _.isEmpty(response) || expandResponse ? true : false}, 
+           disabled: _.isEmpty(response) || responseExpanded}, 
             { onClick: this.closeDialog, primary: false, label: 'Close'}
           ];
     
@@ -98,6 +98,8 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
           onHide={this.closeDialog} 
           dialogStyle={{ width: '60%', height: '90%' }}
           disableScrollLocking={true}
+          // getElementById('settingsForm') is used to set the location of dialog under "settingsForm" in the html,
+          // Otherwise the dialog is placed in a wrong position inside the card defintion (under the settings form).
           renderNode={document.getElementById('settingsForm')}   
           title="Query tester"
           actions= {dialogActions}
@@ -112,7 +114,7 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
           />
           <Divider />
           <div style={{overflowY: 'scroll', height: '75%', width: '100%', position: 'absolute'}}>
-            <JSONTree data={response} theme="default" shouldExpandNode={() => expandResponse}/>
+            <JSONTree data={response} theme="default" shouldExpandNode={() => responseExpanded}/>
           </div>
           <div 
             style={
