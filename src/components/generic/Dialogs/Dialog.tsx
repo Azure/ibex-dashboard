@@ -132,8 +132,8 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
         title={title}
         focusOnMount={false}
         onHide={this.closeDialog}
-        dialogStyle={{ width: dialogData.width || '80%' }}
-        contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}
+        dialogStyle={{ width: dialogData.width || '80%', overflow: 'auto' }}
+        contentStyle={{ padding: '0' }}
       >
         <ResponsiveReactGridLayout
           {...grid}

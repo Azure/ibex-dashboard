@@ -37,7 +37,7 @@ export default class Azure extends DataSourcePlugin<IAzureParams> {
    * @param {object} dependencies
    * @param {function} callback
    */
-  updateDependencies(dependencies: any) {
+  dependenciesUpdated(dependencies: any) {
     let emptyDependency = false;
     Object.keys(this._props.dependencies).forEach((key) => {
       if (typeof dependencies[key] === 'undefined') { emptyDependency = true; }

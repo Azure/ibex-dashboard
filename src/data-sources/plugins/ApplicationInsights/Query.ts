@@ -40,10 +40,11 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
    * @param {object} dependencies
    * @param {function} callback
    */
-  updateDependencies(dependencies: any) {
+  dependenciesUpdated(dependencies: any) {
     let emptyDependency = false;
     Object.keys(this._props.dependencies).forEach((key) => {
-      if (typeof dependencies[key] === 'undefined') {
+      // we use the 'optional_' naming convention key, to setup an optoinal dependacy.
+      if (!key.startsWith('optional_') && typeof dependencies[key] === 'undefined') {
         emptyDependency = true;
       }
     });
