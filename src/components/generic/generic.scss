@@ -10,7 +10,6 @@
 
 		width: 100px;
 		height: 90px;
-		overflow: hidden;
 		white-space: nowrap;
 		float: left; 
 		margin: 10px 8px 20px;
@@ -91,4 +90,44 @@
 
 .table > .secondary {
 	color: grey;
+}
+
+td.text {
+  white-space: normal;
+}
+
+td.summary {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sentiment */
+
+.sentiment_very_dissatisfied {
+  color: red !important;
+}
+
+.sentiment_dissatisfied {
+  color: orange !important;
+}
+
+.sentiment_neutral {
+  color: grey !important;
+}
+
+.sentiment_satisfied {
+  color: yellow !important;
+}
+
+.sentiment_very_satisfied {
+  color: green !important;
+}
+
+.error_outline {
+  color: lightgrey !important;
+}
+
+.tooltip {
+  visibility: visible !important;
 }

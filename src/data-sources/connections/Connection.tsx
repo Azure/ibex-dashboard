@@ -21,7 +21,8 @@ abstract class ConnectionEditor<T1 extends IConnectionProps, T2> extends React.C
 
   onParamChange(value: string, event: any) {
     if (typeof this.props.onParamChange === 'function') {
-      this.props.onParamChange(event.target.id, value);
+      const trimmedValue = ('' + value).trim();
+      this.props.onParamChange(event.target.id, trimmedValue);
     }
   }
 }
