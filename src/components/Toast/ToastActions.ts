@@ -2,7 +2,7 @@ import alt, { AbstractActions } from '../../alt';
 import { IToast } from './ToastStore';
 
 interface IToastActions {
-  showText(test: string): void;
+  showText(test: string): IToast;
   addToast(toast: IToast): IToast;
   removeToast(): void;
 }
@@ -21,8 +21,8 @@ class ToastActions extends AbstractActions {
     return toast;  
   }
 
-  showText(text: string): void {
-    this.addToast({ text });
+  showText(text: string): IToast {
+    return this.addToast({ text });
   }
 }
 
