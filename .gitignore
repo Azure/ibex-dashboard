@@ -21,3 +21,4 @@ src/**/*.css
 
 # private files
 *.private.*
+!*sample.basic.private.js

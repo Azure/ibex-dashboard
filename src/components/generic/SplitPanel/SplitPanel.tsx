@@ -11,23 +11,24 @@ import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
 import Detail from '../Detail';
 import Table from '../Table';
-import { ITableProps, ITableState } from '../Table/Table';
+import { ITableProps, ITableState, ITableColumnProps } from '../Table/Table';
 import Avatar from 'react-md/lib/Avatars';
 
 import utils from '../../../utils';
 
-const style = {
+const styles = {
   lhs: {
-    position: 'fixed',
+    position: 'absolute',
     width: '20%',
-    height: 'calc(100vh - 148px)',
+    height: '100%',
     overflow: 'scroll',
     borderRight: 'solid 1px #eee',
   } as React.CSSProperties,
   rhs: {
-    float: 'right',
+    position: 'absolute',
     width: '80%',
-    minHeight: 'calc(100vh - 148px)',
+    height: '100%',
+    left: '20%',
   } as React.CSSProperties
 };
 
@@ -36,16 +37,9 @@ export interface ISplitViewProps extends ITableProps {
     checkboxes?: boolean;
     rowClassNameField?: string;
     hideBorders?: boolean;
-    cols: {
-      header?: string;
-      field?: string;
-      secondaryHeader?: string;
-      secondaryField?: string;
-      value?: string;
-      width?: string | number;
-      type?: 'text' | 'time' | 'icon' | 'button';
-      click?: string;
-    }[]
+    compact?: boolean;
+    cols: ITableColumnProps[],
+    defaultRowsPerPage?: number;
     group: {
       field?: string;
       secondaryField?: string;
@@ -99,12 +93,12 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
   }
 
   render() {
-    var { props } = this.props;
-    var { cols, group } = props;
-    var { groups, values } = this.state;
+    const { props } = this.props;
+    const { cols, group, hideBorders, compact } = props;
+    const { groups, values } = this.state;
 
-    var field = group.field || cols[0].field;
-    var countField = group.countField || cols[props.cols.length - 1].field;
+    const field = group.field || cols[0].field;
+    const countField = group.countField || cols[props.cols.length - 1].field;
 
     if (!groups) {
       return <CircularProgress key="loading" id="spinner" />;
@@ -116,8 +110,8 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
       if ( group.secondaryField ) {
         secondaryText = item[group.secondaryField] || '';
       }
-      let badge = item[countField] ? <Avatar>{utils.kmNumber(item[countField])}</Avatar> : null;
-      let active = (i === this.state.selectedIndex) ? true : false;
+      const badge = item[countField] ? <Avatar>{utils.kmNumber(item[countField])}</Avatar> : null;
+      const active = (i === this.state.selectedIndex) ? true : false;
       return (
         <ListItem
           key={i}
@@ -144,16 +138,16 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
       );
 
     return (
-      <Card>
-        <div style={style.lhs} className="split-view">
-          <List>
-            {listItems}
-          </List>
-        </div>
+      <Card className={hideBorders ? 'hide-borders' : ''}>
+          <div style={styles.lhs} className="split-view">
+            <List>
+              {listItems}
+            </List>
+          </div>
 
-        <div style={style.rhs} >
-          {table}
-        </div>
+          <div style={styles.rhs} >
+            {table}
+          </div>
       </Card>
     );
   }

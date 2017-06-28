@@ -2,7 +2,7 @@ import alt from '../alt';
 import * as _ from 'lodash';
 import { IDataSourcePlugin } from './plugins/DataSourcePlugin';
 import DialogsActions from '../components/generic/Dialogs/DialogsActions';
-
+import datasourcePluginsMappings from './plugins/PluginsMapping';
 import VisibilityActions from '../actions/VisibilityActions';
 import VisibilityStore from '../stores/VisibilityStore';
 
@@ -36,7 +36,8 @@ export class DataSourceConnector {
     }
 
     // Dynamically load the plugin from the plugins directory
-    var PluginClass = require('./plugins/' + config.type);
+    var path = datasourcePluginsMappings[config.type];
+    var PluginClass = require('./plugins/' + path);
     var plugin: any = new PluginClass.default(config, connections);
 
     // Creating actions class
