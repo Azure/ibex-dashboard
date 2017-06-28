@@ -33,6 +33,10 @@ ensure_preconditions_met() {
   fi
 }
 
+create_production_build() {
+  yarn build
+}
+
 setup_git() {
   git config user.name "${AUTOCOMMIT_NAME}"
   git config user.email "${AUTOCOMMIT_EMAIL}"

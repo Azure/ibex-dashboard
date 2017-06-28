@@ -42,6 +42,11 @@
     "lodash.throttle": "^4.1.1",
     "material-colors": "^1.2.5",
     "moment": "^2.18.0",
+    "morgan": "^1.8.1",
+    "ms-rest-azure": "^2.1.2",
+    "passport": "^0.3.2",
+    "passport-azure-ad": "^3.0.5",
+    "react-json-tree": "^0.10.9",
     "xhr-request": "^1.0.1"
   },
   "scripts": {
