@@ -9,6 +9,7 @@ interface IConfigurationsActions {
   saveConfiguration(dashboard: IDashboardConfig): any;
   failure(error: any): void;
   submitDashboardFile(content:string, fileName:string): void;
+  convertDashboardToString(dashboard: IDashboardConfig): string;
 }
 
 class ConfigurationsActions extends AbstractActions implements IConfigurationsActions {
@@ -141,6 +142,10 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     };    
   }
 
+  convertDashboardToString(dashboard: IDashboardConfig){
+    return this.objectToString(dashboard);
+  }
+
   failure(error: any) {
     return { error };
   }
@@ -168,6 +173,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     script.src = source;
     return true;
   }
+
 
   /**
    * Convret a json object with functions to string
