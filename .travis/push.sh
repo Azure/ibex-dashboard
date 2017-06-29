@@ -54,7 +54,6 @@ push_to_github() {
 }
 
 ensure_preconditions_met
-create_production_build
 setup_git
 commit_build_files
 push_to_github
