@@ -88,6 +88,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onCloseExport = this.onCloseExport.bind(this);
     this.onClickDownloadFile = this.onClickDownloadFile.bind(this);
     this.onChangeDownloadFormat = this.onChangeDownloadFormat.bind(this);
+    this.onDownloadDashboard = this.onDownloadDashboard.bind(this);
+    
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
     });
@@ -205,6 +207,13 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ askDownload: true, downloadFiles: downloadFiles });
   }
 
+  onDownloadDashboard() {
+    let { dashboard } = this.props;
+    dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
+    let stringDashboard = ConfigurationsActions.convertDashboardToString(dashboard);
+    downloadBlob('return ' + dashboard, 'application/json', dashboard.id.replace(' ','_') + '.private.js');
+  }
+
   onCloseExport(event: any) {
     this.setState({ askDownload: false });
   }
@@ -253,6 +262,11 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     // Actions to perform on an active dashboard
     let toolbarActions = [
+      (
+      <span><Button key="downloadDashboard" icon tooltipLabel="Download Dashboard" onClick={this.onDownloadDashboard}>
+        file_download
+      </Button></span>
+      ),
       (
        <span><Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
         play_for_work
