@@ -299,6 +299,11 @@ ul.aligned {
   color: $md-cyan-50;
 }
 
+#testerForm footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
 
 /*================*/
 /* Code editor    */
@@ -341,3 +346,5 @@ ul.aligned {
 .fail {
   color: red !important;
 }
+
+

@@ -11,7 +11,7 @@ This is an application insights based project that displays a bots analytics das
 1. Clone
 2. [Get an Application Insights App ID and Api Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID)
 
-4. Run `npm run start:dev`
+4. Run `yarn start:dev`
 5. Open **http://localhost:3000/**
 6. Run through setup and afterwards, fill in **API Key** and **Application ID**
 
@@ -23,6 +23,12 @@ This is an application insights based project that displays a bots analytics das
 
 Since application insights API doesn't support ARM yet, we need to manually [create an API Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID) for the application insights service.
 Once you created the api key, copy and paste it into the **Dashboard settings screen**.
+
+## Deploy With Docker
+
+1. `docker build -t **image name** .`
+2. `docker run -d -e PORT=80 **image name** `
+3. Docker image is also available at Docker Hub - `docker pull catalystcode/ibex-dashboard`
 
 ## Create new API Key and Application ID
 
@@ -67,12 +73,13 @@ Thinking about integrating with:
 ```bash
 git clone https://github.com/CatalystCode/ibex-dashboard.git
 cd ibex-dashboard
-npm install
+npm install -g yarn
+yarn
 ```
 
 ### Dev
 ```bash
-npm run start:dev
+yarn start:dev
 ```
 
 ### Test Watcher
@@ -80,12 +87,12 @@ Runs the test watcher in an interactive mode.
 By default, runs tests related to files changes since the last commit.
 
 ```bash
-npm test
+yarn test
 ```
 
 ### Build for Production
 ```bash
-npm run build
+yarn build
 ```
 
 ## What’s Inside?

@@ -7,4 +7,5 @@ export default {
   'Constant': 'Constant/index',
   'Sample': 'Sample',
   'BotFrameworkDirectLine': 'BotFramework/DirectLine',
+  'GraphQL': 'GraphQL',
 };
