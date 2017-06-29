@@ -254,47 +254,59 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     var dialogs = loadDialogsFromDashboard(dashboard);
 
     // Actions to perform on an active dashboard
-    let toolbarActions = [
-      (
-      <span><Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
-        play_for_work
-      </Button></span>
-      ), 
-      (
-      <span><Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
-        info
-      </Button></span>
-      ), 
-      (
-      <span><Button key="edit-grid" icon primary={editMode} tooltipLabel="Edit" onClick={this.toggleEditMode}>
-        edit
-      </Button></span>
-      )
-    ];
+    let toolbarActions = [];
 
-    if (editMode) {
+    if (!editMode) {
       toolbarActions.push(
         (
-        <SettingsButton onUpdateLayout={this.onUpdateLayout}/>
+          <span>
+            <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
+              play_for_work
+            </Button>
+          </span>
         ),
         (
-        <span>
-          <Button 
-            key="edit-json" 
-            icon tooltipLabel="Edit code" 
-            onClick={() => EditorActions.loadDashboard(dashboard.id)}
-          >
-            code
-          </Button>
-        </span>
-        ), 
-        ( 
-        <span>
-          <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
-        </span>
+          <span>
+            <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
+              info
+            </Button>
+          </span>
         )
       );
+    } else {
+      toolbarActions.push(
+        (
+          <SettingsButton onUpdateLayout={this.onUpdateLayout} />
+        ),
+        (
+          <span>
+            <Button
+              key="edit-json"
+              icon tooltipLabel="Edit code"
+              onClick={() => EditorActions.loadDashboard(dashboard.id)}
+            >
+              code
+            </Button>
+          </span>
+        ),
+        (
+          <span>
+            <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+          </span>
+        )
+      );
+      toolbarActions.reverse();
     }
+
+    // Edit toggle button
+    const editLabel = editMode ? 'Finish editing' : 'Edit mode' ;
+    toolbarActions.push(
+      (
+        <span><Button key="edit-grid" icon primary={editMode} tooltipLabel={editLabel} onClick={this.toggleEditMode}>
+          edit
+        </Button></span>
+      )
+    );
     
     const fileAvatar = (downloadFormat === 'json') ? 
       <Avatar suffix="red" icon={<FontIcon>insert_drive_file</FontIcon>} /> 
