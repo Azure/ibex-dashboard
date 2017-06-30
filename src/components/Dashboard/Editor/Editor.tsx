@@ -1,23 +1,21 @@
 import * as React from 'react';
 
-import EditorActions from './EditorActions';
-import EditorStore from './EditorStore';
-
-import ConfigurationsActions from '../../../actions/ConfigurationsActions';
-
 import Dialog from 'react-md/lib/Dialogs';
 import Button from 'react-md/lib/Buttons/Button';
 import Toolbar from 'react-md/lib/Toolbars';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 import SelectField from 'react-md/lib/SelectFields';
 
-import { Toast, ToastActions, IToast } from '../../Toast';
-
 import AceEditor, { EditorProps, Annotation } from 'react-ace';
 import * as brace from 'brace';
 import 'brace/mode/javascript';
 import 'brace/ext/searchbox';
 import 'brace/ext/language_tools';
+
+import EditorActions from './EditorActions';
+import EditorStore from './EditorStore';
+import { Toast, ToastActions, IToast } from '../../Toast';
+import ConfigurationsActions from '../../../actions/ConfigurationsActions';
 
 const themes: string[] = ['github', 'twilight'];
 themes.forEach((theme) => {
@@ -196,7 +194,7 @@ export default class Editor extends React.PureComponent<IEditorProps, IEditorSta
           <AceEditor
             ref={(self) => this.aceEditor = self}
             value={value}
-            onLoad={(self) => self['session'].$worker.on('annotate', (e) => this.onLint(e.data))}
+            onLoad={(editor) => editor['session'].$worker.on('annotate', (e) => this.onLint(e.data))}
             onChange={(newValue) => EditorActions.updateValue(newValue)}
             mode="javascript"
             theme={theme}
