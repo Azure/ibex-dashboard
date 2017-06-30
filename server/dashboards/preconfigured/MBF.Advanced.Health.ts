@@ -118,7 +118,7 @@ export const config: IDashboardConfig = /*return*/ {
               var { granularity } = dependencies;
               return `
                 where recordType == "serviceResult" |
-                summarize count=avg(serviceResultMillisecondsDuration) by bin(timestamp, ${granularity}), service=serviceResultName |
+                summarize count=avg(serviceResultMilliseconds) by bin(timestamp, ${granularity}), service=serviceResultName |
                 order by timestamp asc`;
             },
             calculated: (timeline, dependencies) => {
