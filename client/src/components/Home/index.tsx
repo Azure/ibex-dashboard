@@ -45,7 +45,7 @@ interface IHomeState extends ISetupConfig {
   infoVisible?: boolean;
   infoHtml?: string;
   importVisible?: boolean;
-  file?: any;
+  importedFileContent?: any;
   fileName?: string;
   content?: string;
 }
@@ -194,8 +194,8 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ fileName: value });
   };
 
-  onLoad(file, uploadResult) {
-    const { name, size, type, lastModifiedDate } = file;
+  onLoad(importedFileContent, uploadResult) {
+    const { name, size, type, lastModifiedDate } = importedFileContent;
     this.setState({ fileName: name.substr(0, name.indexOf('.')), content: uploadResult });
   }
 
@@ -206,15 +206,15 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ importVisible: false });
   }
 
-  setFile(file) {
-    this.setState({ file });
+  setFile(importedFileContent) {
+    this.setState({ importedFileContent });
   }
 
   render() {
     let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
     let { infoVisible, infoHtml } = this.state;
     let { importVisible } = this.state;
-    let { file, fileName } = this.state;
+    let { importedFileContent, fileName } = this.state;
 
     if (!redirectUrl) {
       redirectUrl = window.location.protocol + '//' + window.location.host + '/auth/openid/return';
@@ -272,7 +272,7 @@ export default class Home extends React.Component<any, IHomeState> {
         modal
         actions={[
           { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
-          { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !file },
+          { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
         ]}>
         <FileUpload
           id="dashboardDefenitionFile"
@@ -287,7 +287,7 @@ export default class Home extends React.Component<any, IHomeState> {
           label="Dashboard ID"
           value={fileName}
           onChange={this.updateFileName}
-          disabled={!file}
+          disabled={!importedFileContent}
           lineDirection="center"
           placeholder="Choose an ID for the imported dashboard"
         />
