@@ -8,11 +8,10 @@ export const config: IDashboardConfig = /*return*/ {
   icon: "av_timer",
   url: "mbf_advanced_health",
   description: "Bot Framework Advanced Health Dashboard",
-  preview: "/images/bot-framework-preview.png",
-  html: ``,
+  preview: "/images/default.png",
+  html: `POC - Additional info will be added in the future`,
   config: {
-    connections: {
-    },
+    connections: { },
     layout: {
       isDraggable: true,
       isResizable: true,

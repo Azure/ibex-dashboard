@@ -42,6 +42,7 @@ interface IHomeState extends ISetupConfig {
   creationState?: string;
   infoVisible?: boolean;
   infoHtml?: string;
+  infoTitle?: string;
 }
 
 export default class Home extends React.Component<any, IHomeState> {
@@ -64,6 +65,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
     infoVisible: false,
     infoHtml: '',
+    infoTitle: ''
   };
 
   private _fieldId;
@@ -159,8 +161,8 @@ export default class Home extends React.Component<any, IHomeState> {
     ConfigurationActions.createDashboard(dashboard);
   }
 
-  onOpenInfo(html: string) {
-    this.setState({ infoVisible: true, infoHtml: html });
+  onOpenInfo(html: string, title: string) {
+    this.setState({ infoVisible: true, infoHtml: html, infoTitle: title });
   }
 
   onCloseInfo() {
@@ -169,7 +171,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
   render() {
     let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
-    let { infoVisible, infoHtml } = this.state;
+    let { infoVisible, infoHtml, infoTitle } = this.state;
 
     if (!redirectUrl) {
       redirectUrl = window.location.protocol + '//' + window.location.host + '/auth/openid/return';
@@ -185,15 +187,17 @@ export default class Home extends React.Component<any, IHomeState> {
 
     let createCard = (temp, index) => (
       <div key={index} className="md-cell" style={styles.card}>
-        <Card className="md-block-centered" key={index} >
+        <Card 
+          className="md-block-centered" 
+          key={index} 
+          style={{ backgroundImage: `url(${temp.preview})`}} >
           <Media>
-            <img src={temp.preview} role="presentation" style={styles.image} />
             <MediaOverlay>
               <CardTitle title={temp.name} subtitle={temp.description} />
             </MediaOverlay>
           </Media>
           <CardActions style={styles.fabs}>
-            <Button floating secondary onClick={this.onOpenInfo.bind(this, temp.html || '<p>No info available</p>')}>
+            <Button floating secondary onClick={this.onOpenInfo.bind(this, temp.html || '<p>No info available</p>', temp.name)}>
               info
             </Button>
             <Button floating primary onClick={this.onNewTemplateSelected.bind(this, temp.id)} style={styles.primaryFab}>
@@ -224,6 +228,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
         <Dialog
           id="templateInfoDialog"
+          title={infoTitle}
           visible={infoVisible}
           onHide={this.onCloseInfo}
           dialogStyle={{ width: '80%' }}
@@ -231,7 +236,7 @@ export default class Home extends React.Component<any, IHomeState> {
           aria-label="Info"
           focusOnMount={false}
         >
-          <div className="md-grid">
+          <div className="md-grid" style={{ padding: 20 }}>
             {renderHTML(infoHtml)}
           </div>
         </Dialog>

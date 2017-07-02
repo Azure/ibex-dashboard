@@ -8,7 +8,7 @@ export const config: IDashboardConfig = /*return*/ {
   icon: "dashboard",
   url: "graph_types",
   description: 'Display the various graph types in action',
-  preview: '/images/bot-framework-preview.png',
+  preview: '/images/default.png',
   html: ``,
   config: {
     connections: { },
