@@ -141,7 +141,7 @@ router.get('/dashboards/:id*', (req, res) => {
 router.post('/dashboards/:id', (req, res) => {
   let { id } = req.params;
   let { script } = req.body || '';
-
+  
   const { privateDashboard } = paths();
   let dashboardFile = getFileById(privateDashboard, id);
   let filePath = path.join(privateDashboard, dashboardFile);
@@ -287,20 +287,6 @@ router.post('/setup', (req, res) => {
     }
 
     res.end(content);
-  })
-});
-
-router.post('/import/dashboards', (req, res) => {
-  var content = (req.body && req.body.json) || '';
-  var lowerCaseFileName = req.body.dashboardFileName.toLowerCase();
-
-  var modifiedFileName = lowerCaseFileName + '.private.js'
-  fs.writeFile(path.join(__dirname, '..', 'dashboards', modifiedFileName), req.body.content, err => {
-    if (err) {
-      console.error(err);
-      return res.end(err);
-    }
-    res.send({ res: 'Dashboard imported successfully' });
   })
 });
 

@@ -27,10 +27,10 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         content.replace(idRegExPattern, "id: \"" + dashboardId + "\",")
           .replace(urlRegExPatternt, "url: \"" + dashboardId + "\",")
 
-      request('/api/import/dashboards', {
-        method: 'POST',
+      request('/api/dashboards/' + dashboardId, {
+        method: 'PUT',
         json: true,
-        body: { content: updatedContent, dashboardFileName: dashboardId }
+        body: { script: updatedContent }
       },
         (error: any, json: any) => {
 
