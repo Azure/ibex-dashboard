@@ -185,22 +185,30 @@ export default class Home extends React.Component<any, IHomeState> {
       return null;
     }
 
-    let createCard = (temp, index) => (
+    let createCard = (tmpl, index) => (
       <div key={index} className="md-cell" style={styles.card}>
         <Card 
           className="md-block-centered" 
           key={index} 
-          style={{ backgroundImage: `url(${temp.preview})`}} >
+          style={{ backgroundImage: `url(${tmpl.preview})`}} >
           <Media>
             <MediaOverlay>
-              <CardTitle title={temp.name} subtitle={temp.description} />
+              <CardTitle title={tmpl.name} subtitle={tmpl.description} />
             </MediaOverlay>
           </Media>
           <CardActions style={styles.fabs}>
-            <Button floating secondary onClick={this.onOpenInfo.bind(this, temp.html || '<p>No info available</p>', temp.name)}>
+            <Button 
+              floating 
+              secondary 
+              onClick={this.onOpenInfo.bind(this, tmpl.html || '<p>No info available</p>', tmpl.name)}
+            >
               info
             </Button>
-            <Button floating primary onClick={this.onNewTemplateSelected.bind(this, temp.id)} style={styles.primaryFab}>
+            <Button 
+              floating 
+              primary 
+              onClick={this.onNewTemplateSelected.bind(this, tmpl.id)} style={styles.primaryFab}
+            >
               add_circle_outline
             </Button>
           </CardActions>
@@ -209,9 +217,10 @@ export default class Home extends React.Component<any, IHomeState> {
     );
 
     // Finding featured
-    let featuredCards = templates
-                          .filter(temp => temp.id === 'bot_analytics_dashboard' || temp.id === 'bot_analytics_inst')
-                          .map(createCard);
+    let featuredCards = 
+        templates
+          .filter(tmpl => tmpl.id === 'bot_analytics_dashboard' || tmpl.id === 'bot_analytics_inst')
+          .map(createCard);
     let templateCards = templates.map(createCard);
 
     return (
