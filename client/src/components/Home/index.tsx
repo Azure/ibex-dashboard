@@ -270,44 +270,42 @@ export default class Home extends React.Component<any, IHomeState> {
     return (
       <div>
         <h1>Bot Analytics</h1>
-        
+      <div style={{textAlign:"right"}}>
       <Button
-        icon
         tooltipLabel="Import dashboard"
         onClick={this.onOpenImport.bind(this)}
         component={Link}
         label="Import dashboard"
       >file_upload
-      </Button>,
-    <Dialog
-      id="ImportDashboard"
-      visible={importVisible}
-      title="Import dashboard"
-      dialogStyle={{ width: '50%' }}
-      modal
-      actions={[
-        { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
-        { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !file },
-      ]}
-    >
-      <FileUpload
-        id="dashboardDefenitionFile"
-        primary
-        label="Choose File"
-        accept="application/json"
-        onLoadStart={this.setFile}
-        onLoad={this.onLoad}
-      />
-      <TextField
-        id="dashboardFileName"
-        label="Dashboard ID"
-        value={fileName}
-        onChange={this.updateFileName}
-        disabled={!file}
-        lineDirection="center"
-        placeholder="Choose an ID for the imported dashboard"
-      />
-    </Dialog>
+      </Button>
+      <Dialog
+        id="ImportDashboard"
+        visible={importVisible}
+        title="Import dashboard"
+        modal
+        actions={[
+          { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
+          { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !file },
+        ]}>
+        <FileUpload
+          id="dashboardDefenitionFile"
+          primary
+          label="Choose File"
+          accept="application/javascript"
+          onLoadStart={this.setFile}
+          onLoad={this.onLoad}
+        />
+        <TextField
+          id="dashboardFileName"
+          label="Dashboard ID"
+          value={fileName}
+          onChange={this.updateFileName}
+          disabled={!file}
+          lineDirection="center"
+          placeholder="Choose an ID for the imported dashboard"
+        />
+      </Dialog>
+      </div>
         <div className="md-grid">
           {featuredCards}
         </div>
