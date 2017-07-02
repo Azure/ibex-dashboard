@@ -8,8 +8,8 @@ export const config: IDashboardConfig = /*return*/ {
   icon: "equalizer",
   url: "mbf_advanced_analytics",
   description: "Bot Framework Advanced Analytics Dashboard",
-  preview: "/images/bot-framework-preview.png",
-  html: ``,
+  preview: "/images/default.png",
+  html: `POC - Additional info will be added in the future`,
   config: {
     connections: { },
     layout: {

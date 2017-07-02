@@ -7,9 +7,15 @@ export const config: IDashboardConfig = /*return*/ {
   name: "Azure Sample",
   icon: "dashboard",
   url: "azure_sample",
-  description: "A basic azure sample to get connected to resources",
-  preview: "/images/bot-framework-preview.png",
-  html: `Azure sample dashboard`,
+  description: "A basic azure ARM sample",
+  preview: "/images/azure.png",
+  html: `
+    <div>
+      A basic sample to show how to get resources from 
+      <a href='https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-overview' target="_blank">ARM</a> 
+      (Azure) and display them on a dashboard
+    </div>
+  `,
   config: {
     connections: { },
     layout: {
