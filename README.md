@@ -1,4 +1,5 @@
-# Ibex Dashboard
+# Ibex Dashboard [![Inline docs](http://inch-ci.org/github/CatalystCode/ibex-dashboard.svg?branch=master)](http://inch-ci.org/github/CatalystCode/ibex-dashboard)
+
 This is an application insights based project that displays a bots analytics dashboard.
 
 # Preview
@@ -11,9 +12,10 @@ This is an application insights based project that displays a bots analytics das
 1. Clone
 2. [Get an Application Insights App ID and Api Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID)
 
-4. Run `yarn start:dev`
-5. Open **http://localhost:3000/**
-6. Run through setup and afterwards, fill in **API Key** and **Application ID**
+4. Run `cd server; yarn start`
+5. Run `cd client; yarn start`
+6. Open **http://localhost:3000/**
+7. Run through setup and afterwards, fill in **API Key** and **Application ID**
 
 ## Deploy To Azure
 
@@ -73,13 +75,15 @@ Thinking about integrating with:
 ```bash
 git clone https://github.com/CatalystCode/ibex-dashboard.git
 cd ibex-dashboard
-npm install -g yarn
-yarn
+(cd client; npm install -g yarn; yarn)
+(cd server; npm install -g yarn; yarn)
 ```
 
 ### Dev
+
 ```bash
-yarn start:dev
+(cd server; yarn start:dev)
+(cd client; yarn start:dev)
 ```
 
 ### Test Watcher
@@ -87,12 +91,24 @@ Runs the test watcher in an interactive mode.
 By default, runs tests related to files changes since the last commit.
 
 ```bash
+cd client
 yarn test
 ```
 
-### Build for Production
+Alternatively, you can also run the full commands that the Travis CI server
+will run to validate any changes.
+
 ```bash
-yarn build
+.travis/ci.sh
+```
+
+### Build for Production
+Our CI server Travis creates new production builds automatically for changes
+to master. If you need to create a build locally, you can execute the same
+commands as the CI server.
+
+```bash
+.travis/build.sh
 ```
 
 ## What’s Inside?
