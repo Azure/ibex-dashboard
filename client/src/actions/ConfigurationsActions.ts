@@ -174,7 +174,6 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     return true;
   }
 
-
   /**
    * Convret a json object with functions to string
    * @param obj an object with functions to convert to string

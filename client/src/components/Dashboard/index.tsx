@@ -211,7 +211,9 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     let { dashboard } = this.props;
     dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
     let stringDashboard = ConfigurationsActions.convertDashboardToString(dashboard);
-    downloadBlob('return ' + dashboard, 'application/json', dashboard.id.replace(' ','_') + '.private.js');
+    var dashboardName = dashboard.id.replace(/  +/g, ' ');
+    dashboardName = dashboard.id.replace(/  +/g, '_');
+    downloadBlob('return ' + stringDashboard, 'application/json', dashboardName + '.private.js');
   }
 
   onCloseExport(event: any) {
