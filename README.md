@@ -17,9 +17,29 @@ This is an application insights based project that displays a bots analytics das
 
 ## Deploy To Azure
 
+There are 3 ways to deploy to Azure:
+
+
+
+**1. Web App - Automated**
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ftorosent%2Fibex-dashboard%2Fmaster%2Fscripts%2Fdeployment%2Fwebapp%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+
+**2. Web App On Linux - Automated with Docker Hub**
+
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCatalystCode%2Fibex-dashboard%2Fmaster%2Fscripts%2Fdeployment%2Fwebapponlinux%2Fazuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
+
+**3. Manual**
+
 1. Fork this repo (to be able to automatically create github deployment key)
 2. Clone & Deploy:
 3. [Create a new Web App in Azure](https://docs.microsoft.com/en-us/azure/app-service-web/app-service-continuous-deployment)
+
+**Important Note**
 
 Since application insights API doesn't support ARM yet, we need to manually [create an API Key](https://dev.applicationinsights.io/documentation/Authorization/API-key-and-App-ID) for the application insights service.
 Once you created the api key, copy and paste it into the **Dashboard settings screen**.
