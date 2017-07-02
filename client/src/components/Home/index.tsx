@@ -95,6 +95,7 @@ export default class Home extends React.Component<any, IHomeState> {
     this.onSubmitImport = this.onSubmitImport.bind(this);
     this.onLoad = this.onLoad.bind(this);
     this.setFile = this.setFile.bind(this);
+    this.updateFileName = this.updateFileName.bind(this);
   }
 
   updateConfiguration(state: {templates: IDashboardConfig[], template: IDashboardConfig, creationState: string}) {
@@ -189,7 +190,7 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ importVisible: false });
   }
 
-  updateFileName = (value) => {
+  updateFileName(value) {
     this.setState({ fileName: value });
   };
 
@@ -261,7 +262,6 @@ export default class Home extends React.Component<any, IHomeState> {
       <Button
         tooltipLabel="Import dashboard"
         onClick={this.onOpenImport.bind(this)}
-        component={Link}
         label="Import dashboard"
       >file_upload
       </Button>
