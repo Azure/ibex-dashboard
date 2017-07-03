@@ -94,8 +94,19 @@ export default class Editor extends React.PureComponent<IEditorProps, IEditorSta
   }
 
   copy() {
+    if (!document.queryCommandSupported('copy')) {
+      this.toast('Browser not supported');
+      return;
+    }
     const value = this.aceEditor['editor'].getValue();
-    document.execCommand('copy', value);
+    const input = document.createElement('input');
+    input.style.position = 'fixed';
+    input.style.opacity = '0';
+    input.value = value;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
     this.toast('Copied to clipboard');
   }
 
