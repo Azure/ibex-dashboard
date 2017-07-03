@@ -270,7 +270,6 @@ export default class Home extends React.Component<any, IHomeState> {
 
     return (
       <div>
-        <h1>Bot Analytics</h1>
       <div style={{textAlign:"right"}}>
       <Button
         tooltipLabel="Import dashboard"
@@ -306,6 +305,7 @@ export default class Home extends React.Component<any, IHomeState> {
         />
       </Dialog>
       </div>
+      <h1>Bot Analytics</h1>
         <div className="md-grid">
           {featuredCards}
         </div>
