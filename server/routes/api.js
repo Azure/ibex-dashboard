@@ -211,7 +211,7 @@ router.put('/dashboards/:id', (req, res) => {
   });
 });
 
-function getFileById(dir, id, override) {
+function getFileById(dir, id, overwrite) {
   let files = fs.readdirSync(dir) || [];
 
   // Make sure the array only contains files
@@ -231,7 +231,7 @@ function getFileById(dir, id, override) {
     const filePath = path.join(dir, fileName);
     if (isValidFile(filePath)) {
       let dashboardId = undefined;
-      if (override === true) {
+      if (overwrite === true) {
         dashboardId = path.parse(fileName).name;
         if (dashboardId.endsWith('.private')) {
           dashboardId = path.parse(dashboardId).name;
