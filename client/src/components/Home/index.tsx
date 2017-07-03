@@ -48,6 +48,7 @@ interface IHomeState extends ISetupConfig {
   importedFileContent?: any;
   fileName?: string;
   content?: string;
+  infoTitle?: string;
 }
 
 export default class Home extends React.Component<any, IHomeState> {
@@ -70,6 +71,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
     infoVisible: false,
     infoHtml: '',
+    infoTitle: ''
   };
 
   private _fieldId;
@@ -174,8 +176,8 @@ export default class Home extends React.Component<any, IHomeState> {
     ConfigurationsActions.createDashboard(dashboard);
   }
 
-  onOpenInfo(html: string) {
-    this.setState({ infoVisible: true, infoHtml: html });
+  onOpenInfo(html: string, title: string) {
+    this.setState({ infoVisible: true, infoHtml: html, infoTitle: title });
   }
 
   onCloseInfo() {
@@ -215,6 +217,7 @@ export default class Home extends React.Component<any, IHomeState> {
     let { infoVisible, infoHtml } = this.state;
     let { importVisible } = this.state;
     let { importedFileContent, fileName } = this.state;
+    let { infoVisible, infoHtml, infoTitle } = this.state;
 
     if (!redirectUrl) {
       redirectUrl = window.location.protocol + '//' + window.location.host + '/auth/openid/return';
@@ -228,20 +231,30 @@ export default class Home extends React.Component<any, IHomeState> {
       return null;
     }
 
-    let createCard = (temp, index) => (
+    let createCard = (tmpl, index) => (
       <div key={index} className="md-cell" style={styles.card}>
-        <Card className="md-block-centered" key={index} >
+        <Card 
+          className="md-block-centered" 
+          key={index} 
+          style={{ backgroundImage: `url(${tmpl.preview})`}} >
           <Media>
-            <img src={temp.preview} role="presentation" style={styles.image} />
             <MediaOverlay>
-              <CardTitle title={temp.name} subtitle={temp.description} />
+              <CardTitle title={tmpl.name} subtitle={tmpl.description} />
             </MediaOverlay>
           </Media>
           <CardActions style={styles.fabs}>
-            <Button floating secondary onClick={this.onOpenInfo.bind(this, temp.html || '<p>No info available</p>')}>
+            <Button 
+              floating 
+              secondary 
+              onClick={this.onOpenInfo.bind(this, tmpl.html || '<p>No info available</p>', tmpl.name)}
+            >
               info
             </Button>
-            <Button floating primary onClick={this.onNewTemplateSelected.bind(this, temp.id)} style={styles.primaryFab}>
+            <Button 
+              floating 
+              primary 
+              onClick={this.onNewTemplateSelected.bind(this, tmpl.id)} style={styles.primaryFab}
+            >
               add_circle_outline
             </Button>
           </CardActions>
@@ -250,9 +263,10 @@ export default class Home extends React.Component<any, IHomeState> {
     );
 
     // Finding featured
-    let featuredCards = templates
-                          .filter(temp => temp.id === 'bot_analytics_dashboard' || temp.id === 'bot_analytics_inst')
-                          .map(createCard);
+    let featuredCards = 
+        templates
+          .filter(tmpl => tmpl.id === 'bot_analytics_dashboard' || tmpl.id === 'bot_analytics_inst')
+          .map(createCard);
     let templateCards = templates.map(createCard);
 
     return (
@@ -304,6 +318,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
         <Dialog
           id="templateInfoDialog"
+          title={infoTitle}
           visible={infoVisible}
           onHide={this.onCloseInfo}
           dialogStyle={{ width: '80%' }}
@@ -311,7 +326,7 @@ export default class Home extends React.Component<any, IHomeState> {
           aria-label="Info"
           focusOnMount={false}
         >
-          <div className="md-grid">
+          <div className="md-grid" style={{ padding: 20 }}>
             {renderHTML(infoHtml)}
           </div>
         </Dialog>

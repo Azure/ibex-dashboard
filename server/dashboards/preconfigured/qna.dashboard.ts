@@ -8,25 +8,36 @@ export const config: IDashboardConfig = /*return*/ {
 	icon: "chat",
 	url: "qna",
 	description: "Sample QnA Maker dashboard",
-	preview: "/images/bot-framework-preview.png",
-	html: `<div>
-    <h1>Sample QnA Maker dashboard</h1>
-    <p>Displays QnA Maker service usage metrics.</p> 
-    <h3><a href="https://qnamaker.ai" target="_blank">What's QnA Make Service?</a></h3>
-    <h3>Requirements</h3>
-    <p>To send the QnA Maker service data to Applications Insight it's necessary to use the <a href="https://www.npmjs.com/package/botbuilder-cognitiveservices" target="_blank">botbuilder-cognitiveservices</a> on the bot and override the
-    <b>defaultWaitNextMessage(session, qnaMakerResult)</b> function to call the <b>trackQNAEvent(context, userQuery, kbQuestion, kbAnswer, score)</b> function of the 
-    <a href="https://www.npmjs.com/package/botbuilder-instrumentation" target="_blank">botbuilder-instrumentation</a>
-    <p>That will enable the bot to send additional telemetries to Application Insight with the QnA Maker service information
-    </p>
-    <p>
-      <span>Refer to the </span>
-      <span>
-        <a href="https://github.com/CatalystCode/ibex-dashboard/blob/master/docs/bot-framework.md" target="_blank">
-          bot-framework
-        </a> docs for setup instructions.</span>
-    </p>
-  </div>`, // info about how to configure QnA and how to use botbuilder-instrumentation
+	preview: "/images/default.png",
+	html: `
+    <div>
+      <p>Displays <a href="https://qnamaker.ai" target="_blank">QnA Maker service</a> usage metrics.</p> 
+      <h3>Requirements</h3>
+      <p>To send the QnA Maker service data to Applications Insight it's necessary to use the 
+      <a href="https://www.npmjs.com/package/botbuilder-cognitiveservices" target="_blank">botbuilder-cognitiveservices</a> 
+      on the bot and override the
+      <br/>
+      <b>defaultWaitNextMessage(session, qnaMakerResult)</b>
+      <br/>
+      function to call the 
+      <br/>
+      <b>trackQNAEvent(context, userQuery, kbQuestion, kbAnswer, score)</b>
+      <br/>
+      function of the 
+      <br/>
+      <a href="https://www.npmjs.com/package/botbuilder-instrumentation#sending-logs-for-qna-maker-service" target="_blank">botbuilder-instrumentation</a>
+      <br/>
+      <p>That will enable the bot to send additional telemetries to Application Insight with the QnA Maker service information
+      </p>
+      <p>
+        <span>Refer to the </span>
+        <span>
+          <a href="https://github.com/CatalystCode/ibex-dashboard/blob/master/docs/bot-framework.md" target="_blank">
+            bot-framework
+          </a> docs for setup instructions.</span>
+      </p>
+    </div>
+  `,
 	config: {
 		connections: {},
 		layout: {
