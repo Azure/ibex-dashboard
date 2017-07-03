@@ -110,14 +110,14 @@ export const config: IDashboardConfig = /*return*/ {
       type: "ApplicationInsights/Query",
       dependencies: { timespan: "timespan",queryTimespan: "timespan:queryTimespan",granularity: "timespan:granularity" },
       params: {
-        table: "telemetry_import",
+        table: "nflbot_CL",
         queries: {
           timeline: {
             query: (dependencies) => {
               var { granularity } = dependencies;
               return `
                 where recordType == "serviceResult" |
-                summarize count=avg(serviceResultMillisecondsDuration) by bin(timestamp, ${granularity}), service=serviceResultName |
+                summarize count=avg(serviceResultMilliseconds) by bin(timestamp, ${granularity}), service=serviceResultName |
                 order by timestamp asc`;
             },
             calculated: (timeline, dependencies) => {
@@ -284,7 +284,7 @@ export const config: IDashboardConfig = /*return*/ {
           type: "ApplicationInsights/Query",
           dependencies: { intent: "dialog_intentsDialog:intent",queryTimespan: "dialog_intentsDialog:queryspan" },
           params: {
-            table: "telemetry_import",
+            table: "nflbot_CL",
             queries: {
               "total-conversations": {
                 query: ({ intent }) => `
@@ -459,7 +459,7 @@ export const config: IDashboardConfig = /*return*/ {
           type: "ApplicationInsights/Query",
           dependencies: { intent: "dialog_conversations:intent",queryTimespan: "dialog_conversations:queryspan" },
           params: {
-            table: "telemetry_import",
+            table: "nflbot_CL",
             queries: {
               conversations: {
                 query: ({ intent }) => `
