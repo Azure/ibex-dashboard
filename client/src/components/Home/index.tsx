@@ -5,12 +5,14 @@ import { Card, CardTitle, CardActions, CardText } from 'react-md/lib/Cards';
 import Media, { MediaOverlay } from 'react-md/lib/Media';
 import Dialog from 'react-md/lib/Dialogs';
 import TextField from 'react-md/lib/TextFields';
+import FileUpload from 'react-md/lib/FileInputs/FileUpload';
+import { Link } from 'react-router';
 
 import SetupActions from '../../actions/SetupActions';
 import SetupStore from '../../stores/SetupStore';
 
-import ConfigurationActions from '../../actions/ConfigurationsActions';
 import ConfigurationStore from '../../stores/ConfigurationsStore';
+import ConfigurationsActions from '../../actions/ConfigurationsActions';
 
 const renderHTML = require('react-render-html');
 
@@ -42,6 +44,10 @@ interface IHomeState extends ISetupConfig {
   creationState?: string;
   infoVisible?: boolean;
   infoHtml?: string;
+  importVisible?: boolean;
+  importedFileContent?: any;
+  fileName?: string;
+  content?: string;
   infoTitle?: string;
 }
 
@@ -83,6 +89,14 @@ export default class Home extends React.Component<any, IHomeState> {
     this.onCloseInfo = this.onCloseInfo.bind(this);
     this.updateSetup = this.updateSetup.bind(this);
     this.updateConfiguration = this.updateConfiguration.bind(this);
+
+    // import dashboard functionality
+    this.onOpenImport = this.onOpenImport.bind(this);
+    this.onCloseImport = this.onCloseImport.bind(this);
+    this.onSubmitImport = this.onSubmitImport.bind(this);
+    this.onLoad = this.onLoad.bind(this);
+    this.setFile = this.setFile.bind(this);
+    this.updateFileName = this.updateFileName.bind(this);
   }
 
   updateConfiguration(state: {templates: IDashboardConfig[], template: IDashboardConfig, creationState: string}) {
@@ -125,7 +139,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
   onNewTemplateSelected(templateId: string) {
     this.setState({ selectedTemplateId: templateId });
-    ConfigurationActions.loadTemplate(templateId);
+    ConfigurationsActions.loadTemplate(templateId);
   }
 
   onNewTemplateCancel() {
@@ -158,7 +172,7 @@ export default class Home extends React.Component<any, IHomeState> {
     dashboard.icon = createParams.icon;
     dashboard.url = createParams.url;
 
-    ConfigurationActions.createDashboard(dashboard);
+    ConfigurationsActions.createDashboard(dashboard);
   }
 
   onOpenInfo(html: string, title: string) {
@@ -169,8 +183,38 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ infoVisible: false });
   }
 
+  onOpenImport() {
+    this.setState({ importVisible: true });
+  }
+
+  onCloseImport() {
+    this.setState({ importVisible: false });
+  }
+
+  updateFileName(value: string) {
+    this.setState({ fileName: value });
+  };
+
+  onLoad(importedFileContent: any, uploadResult: string) {
+    const { name, size, type, lastModifiedDate } = importedFileContent;
+    this.setState({ fileName: name.substr(0, name.indexOf('.')), content: uploadResult });
+  }
+
+  onSubmitImport() {
+    var dashboardId = this.state.fileName;
+    ConfigurationsActions.submitDashboardFile(this.state.content, dashboardId);
+    
+    this.setState({ importVisible: false });
+  }
+
+  setFile(importedFileContent: string) {
+    this.setState({ importedFileContent });
+  }
+
   render() {
     let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
+    let { importVisible } = this.state;
+    let { importedFileContent, fileName } = this.state;
     let { infoVisible, infoHtml, infoTitle } = this.state;
 
     if (!redirectUrl) {
@@ -225,7 +269,42 @@ export default class Home extends React.Component<any, IHomeState> {
 
     return (
       <div>
-        <h1>Bot Analytics</h1>
+        <div style={{ textAlign: 'right' }}>
+      <Button
+        tooltipLabel="Import dashboard"
+        onClick={this.onOpenImport.bind(this)}
+        label="Import dashboard"
+      >file_upload
+      </Button>
+      <Dialog
+        id="ImportDashboard"
+        visible={importVisible}
+        title="Import dashboard"
+        modal
+        actions={[
+          { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
+          { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
+        ]}>
+        <FileUpload
+          id="dashboardDefenitionFile"
+          primary
+          label="Choose File"
+          accept="application/javascript"
+          onLoadStart={this.setFile}
+          onLoad={this.onLoad}
+        />
+        <TextField
+          id="dashboardFileName"
+          label="Dashboard ID"
+          value={fileName}
+          onChange={this.updateFileName}
+          disabled={!importedFileContent}
+          lineDirection="center"
+          placeholder="Choose an ID for the imported dashboard"
+        />
+      </Dialog>
+      </div>
+      <h1>Bot Analytics</h1>
         <div className="md-grid">
           {featuredCards}
         </div>
