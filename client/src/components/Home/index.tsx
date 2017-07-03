@@ -90,7 +90,6 @@ export default class Home extends React.Component<any, IHomeState> {
     this.updateSetup = this.updateSetup.bind(this);
     this.updateConfiguration = this.updateConfiguration.bind(this);
 
-
     // import dashboard functionality
     this.onOpenImport = this.onOpenImport.bind(this);
     this.onCloseImport = this.onCloseImport.bind(this);
@@ -192,23 +191,23 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ importVisible: false });
   }
 
-  updateFileName(value) {
+  updateFileName(value: string) {
     this.setState({ fileName: value });
   };
 
-  onLoad(importedFileContent, uploadResult) {
+  onLoad(importedFileContent: any, uploadResult: string) {
     const { name, size, type, lastModifiedDate } = importedFileContent;
     this.setState({ fileName: name.substr(0, name.indexOf('.')), content: uploadResult });
   }
 
   onSubmitImport() {
-    var dashboardId = this.state.fileName
+    var dashboardId = this.state.fileName;
     ConfigurationsActions.submitDashboardFile(this.state.content, dashboardId);
     
     this.setState({ importVisible: false });
   }
 
-  setFile(importedFileContent) {
+  setFile(importedFileContent: string) {
     this.setState({ importedFileContent });
   }
 
@@ -270,7 +269,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
     return (
       <div>
-      <div style={{textAlign:"right"}}>
+        <div style={{ textAlign: 'right' }}>
       <Button
         tooltipLabel="Import dashboard"
         onClick={this.onOpenImport.bind(this)}
