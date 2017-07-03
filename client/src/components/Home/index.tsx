@@ -44,11 +44,11 @@ interface IHomeState extends ISetupConfig {
   creationState?: string;
   infoVisible?: boolean;
   infoHtml?: string;
-  infoTitle?: string;
   importVisible?: boolean;
   importedFileContent?: any;
   fileName?: string;
   content?: string;
+  infoTitle?: string;
 }
 
 export default class Home extends React.Component<any, IHomeState> {
@@ -214,9 +214,9 @@ export default class Home extends React.Component<any, IHomeState> {
 
   render() {
     let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
-    let { infoVisible, infoHtml, infoTitle } = this.state;
     let { importVisible } = this.state;
     let { importedFileContent, fileName } = this.state;
+    let { infoVisible, infoHtml, infoTitle } = this.state;
 
     if (!redirectUrl) {
       redirectUrl = window.location.protocol + '//' + window.location.host + '/auth/openid/return';
