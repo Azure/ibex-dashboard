@@ -98,7 +98,7 @@ export default class Editor extends React.PureComponent<IEditorProps, IEditorSta
       this.toast('Browser not supported');
       return;
     }
-    const value = this.aceEditor['editor'].getValue();
+    const {value} = this.state;
     const input = document.createElement('input');
     input.style.position = 'fixed';
     input.style.opacity = '0';
