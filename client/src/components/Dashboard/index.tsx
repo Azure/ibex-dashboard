@@ -175,6 +175,12 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   }
 
   onDeleteDashboardApprove() {
+    let { dashboard } = this.props;
+    if (!dashboard) {
+      console.warn('Dashboard not found. Aborting delete.');
+    }
+    ConfigurationsActions.deleteDashboard(dashboard.id);
+    window.location.href = '/';
     this.setState({ askDelete: false });
   }
 
@@ -399,7 +405,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
         <Dialog
           id="speedBoost"
           visible={askDelete}
-          title="Use Google's location service?"
+          title="Are you sure?"
           aria-labelledby="speedBoostDescription"
           modal
           actions={[
