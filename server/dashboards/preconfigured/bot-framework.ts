@@ -35,7 +35,8 @@ export const config: IDashboardConfig = /*return*/ {
       </p>
     </div>
   `,
-	config: {
+  category: 'Bots',
+  config: {
 		connections: { },
 		layout: {
 			isDraggable: true,

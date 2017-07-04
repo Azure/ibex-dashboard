@@ -16,6 +16,7 @@ export const config: IDashboardConfig = /*return*/ {
       (Azure) and display them on a dashboard
     </div>
   `,
+  category: 'Samples',
   config: {
     connections: { },
     layout: {

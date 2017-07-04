@@ -10,6 +10,7 @@ export const config: IDashboardConfig = /*return*/ {
   description: "Bot Framework Advanced Analytics Dashboard",
   preview: "/images/default.png",
   html: `POC - Additional info will be added in the future`,
+  category: 'Bots - Advanced',
   config: {
     connections: { },
     layout: {
