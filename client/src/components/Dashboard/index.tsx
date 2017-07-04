@@ -107,7 +107,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
       // For each column, create a layout according to number of columns
       let layouts = ElementConnector.loadLayoutFromDashboard(dashboard, dashboard);
-      layouts = _.extend(layouts, dashboard.config.layout.layouts || {});
+      layouts = _.extend(layouts, dashboard.layouts || {});
 
       this.layouts = layouts;
       this.setState({
@@ -154,8 +154,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
         // Saving layout to API
         let { dashboard } = this.props;
-        dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
-        dashboard.config.layout.layouts[breakpoint] = layout;
+        dashboard.layouts = dashboard.layouts || {};
+        dashboard.layouts[breakpoint] = layout;
 
         if (this.state.editMode) {
           ConfigurationsActions.saveConfiguration(dashboard);
@@ -217,7 +217,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   onDownloadDashboard() {
     let { dashboard } = this.props;
-    dashboard.config.layout.layouts = dashboard.config.layout.layouts || {};
+    dashboard.layouts = dashboard.layouts || {};
     let stringDashboard = ConfigurationsActions.convertDashboardToString(dashboard);
     var dashboardName = dashboard.id.replace(/  +/g, ' ');
     dashboardName = dashboard.id.replace(/  +/g, '_');
