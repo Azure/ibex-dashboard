@@ -122,6 +122,10 @@ router.get('/dashboards/:id*', (req, res) => {
     if (isValidFile(filePath)) {
       const content = getFileContents(filePath);
 
+      if (req.query.format && req.query.format === 'raw') {
+        return res.send(content); // allows request for raw text string
+      }
+
       // Ensuing this dashboard is loaded into the dashboards array on the page
       script += `
         (function (window) {
@@ -232,25 +236,37 @@ router.delete('/dashboards/:id', (req, res) => {
   }
 });
 
-function getFileById(dir, id) {
+function getFileById(dir, id, overwrite) {
   let files = fs.readdirSync(dir) || [];
   
   // Make sure the array only contains files
   files = files.filter(fileName => fs.statSync(path.join(dir, fileName)).isFile());
-  let dashboardFile = null;
-  if (files.length) { 
-    files.forEach(fileName => {
-      let filePath = path.join(dir, fileName);
-
-      if (isValidFile(filePath)) {
-        const fileContents = getFileContents(filePath);
-        const dashboardId = getField(fields.id, fileContents);
-        if (dashboardId === id) {
-          dashboardFile = fileName;
-        }
-      }
-    });
+  if (!files || files.length === 0) { 
+    return null;
   }
+
+  
+  let dashboardFile = null;
+  files.every(fileName => {
+    const filePath = path.join(dir, fileName);
+    if (isValidFile(filePath)) {
+      let dashboardId = undefined;
+      if (overwrite === true) {
+        dashboardId = path.parse(fileName).name;
+        if (dashboardId.endsWith('.private')) {
+          dashboardId = path.parse(dashboardId).name;
+        }
+      } else {
+        const fileContents = getFileContents(filePath);
+        dashboardId = getField(fields.id, fileContents);
+      }
+      if (dashboardId && dashboardId === id) {
+        dashboardFile = fileName;
+        return false;
+      }
+    }
+    return true;
+  });
 
   return dashboardFile;
 }

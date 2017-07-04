@@ -21,6 +21,8 @@ import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import ConfigurationsStore from '../../stores/ConfigurationsStore';
 import VisibilityStore from '../../stores/VisibilityStore';
 
+import {Editor, EditorActions} from './Editor';
+
 const renderHTML = require('react-render-html');
 
 import List from 'react-md/lib/Lists/List';
@@ -241,8 +243,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   render() {
 
-    let { dashboard } = this.props;
-    let { 
+    const { dashboard } = this.props;
+    const { 
       currentBreakpoint, 
       grid, 
       editMode, 
@@ -252,8 +254,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       downloadFormat, 
       askConfig 
     } = this.state;
-    let { infoVisible, infoHtml } = this.state;
-    let layout = this.state.layouts[currentBreakpoint];
+    const { infoVisible, infoHtml } = this.state;
+    const layout = this.state.layouts[currentBreakpoint];
 
     if (!grid) {
       return null;
@@ -269,37 +271,66 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     var dialogs = loadDialogsFromDashboard(dashboard);
 
     // Actions to perform on an active dashboard
-    let toolbarActions = [
-      (
-      <span><Button key="downloadDashboard" icon tooltipLabel="Download Dashboard" onClick={this.onDownloadDashboard}>
-        file_download
-      </Button></span>
-      ),
-      (
-       <span><Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
-        play_for_work
-      </Button></span>
-      ), 
-      (
-      <span><Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
-        info
-      </Button></span>
-      ), (
-      <span><Button key="edit" icon primary={editMode} tooltipLabel="Edit Dashboard" onClick={this.toggleEditMode}>
-        edit
-      </Button></span>
-      ), (
-      <SettingsButton onUpdateLayout={this.onUpdateLayout}/>
-      )
-    ];
+    let toolbarActions = [];
 
-    if (editMode) {
+    if (!editMode) {
       toolbarActions.push(
-        <span>
-          <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
-        </span>
+        (
+          <span>
+            <Button key="downloadDashboard" icon tooltipLabel="Download Dashboard" onClick={this.onDownloadDashboard}>
+              file_download
+            </Button>
+          </span>
+        ),
+        (
+          <span>
+            <Button key="export" icon tooltipLabel="Export data" onClick={this.onExport}>
+              play_for_work
+            </Button>
+          </span>
+        ),
+        (
+          <span>
+            <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
+              info
+            </Button>
+          </span>
+        )
       );
+    } else {
+      toolbarActions.push(
+        (
+          <SettingsButton onUpdateLayout={this.onUpdateLayout} />
+        ),
+        (
+          <span>
+            <Button
+              key="edit-json"
+              icon tooltipLabel="Edit code"
+              onClick={() => EditorActions.loadDashboard(dashboard.id)}
+            >
+              code
+            </Button>
+          </span>
+        ),
+        (
+          <span>
+            <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+          </span>
+        )
+      );
+      toolbarActions.reverse();
     }
+
+    // Edit toggle button
+    const editLabel = editMode ? 'Finish editing' : 'Edit mode' ;
+    toolbarActions.push(
+      (
+        <span><Button key="edit-grid" icon primary={editMode} tooltipLabel={editLabel} onClick={this.toggleEditMode}>
+          edit
+        </Button></span>
+      )
+    );
     
     const fileAvatar = (downloadFormat === 'json') ? 
       <Avatar suffix="red" icon={<FontIcon>insert_drive_file</FontIcon>} /> 
@@ -401,6 +432,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
             {downloadItems}
           </List>
         </Dialog>
+
+        <Editor dashboard={dashboard} />
 
         <Dialog
           id="speedBoost"

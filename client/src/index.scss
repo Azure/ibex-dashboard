@@ -304,3 +304,47 @@ ul.aligned {
   bottom: 0;
   right: 0;
 }
+
+/*================*/
+/* Code editor    */
+/*================*/
+
+.ace_editor > *, .ace_layer > *, .ace_content, .ace_line > *, .ace_text-input {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+/*================*/
+/* Toast          */
+/*================*/
+
+.md-snackbar-container {
+  z-index: 111;
+}
+
+/*================*/
+/* Layout         */
+/*================*/
+
+.layout {
+  display: table;
+  width: 100%;
+  height: 100%;
+}
+
+.layout > .center {
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/*================*/
+/* Styles         */
+/*================*/
+
+.fail {
+  color: red !important;
+}
+
+
