@@ -92,7 +92,7 @@ Thinking about integrating with:
 
 
 ### Assumptions
- 1. Running node version 4.5 or above. 
+ 1. Running node version 6.11 or above. 
 
 ### Installation
 ```bash

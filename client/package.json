@@ -19,7 +19,7 @@
     "leaflet-geosearch": "^2.2.0",
     "leaflet.markercluster": "^1.0.5",
     "nock": "^9.0.9",
-    "node-sass": "^4.5.0",
+    "node-sass": "^4.5.3",
     "npm-run-all": "^4.0.2",
     "react": "^15.4.2",
     "react-addons-css-transition-group": "^15.4.2",

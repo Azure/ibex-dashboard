@@ -305,6 +305,14 @@ ul.aligned {
   right: 0;
 }
 
+/*===================*/
+/* Dialogs full page */
+/*===================*/
+
+html.md-no-scroll {
+  overflow-y: hidden;
+}
+
 /*================*/
 /* Code editor    */
 /*================*/
