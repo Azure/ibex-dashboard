@@ -260,59 +260,65 @@ export default class Home extends React.Component<any, IHomeState> {
       </div>
     );
 
-    // Finding featured
-    let featuredCards = 
-        templates
-          .filter(tmpl => tmpl.id === 'bot_analytics_dashboard' || tmpl.id === 'bot_analytics_inst')
-          .map(createCard);
-    let templateCards = templates.map(createCard);
+    // Dividing templates into categories
+    let categories = { 'General': [] };
+    templates.forEach((tmpl, index) => {
+      let category = tmpl.category || 'General';
+      categories[category] = categories[category] || [];
+      categories[category].push(createCard(tmpl, index));
+    });
 
     return (
       <div>
         <div style={{ textAlign: 'right' }}>
-      <Button
-        tooltipLabel="Import dashboard"
-        onClick={this.onOpenImport.bind(this)}
-        label="Import dashboard"
-      >file_upload
-      </Button>
-      <Dialog
-        id="ImportDashboard"
-        visible={importVisible}
-        title="Import dashboard"
-        modal
-        actions={[
-          { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
-          { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
-        ]}>
-        <FileUpload
-          id="dashboardDefenitionFile"
-          primary
-          label="Choose File"
-          accept="application/javascript"
-          onLoadStart={this.setFile}
-          onLoad={this.onLoad}
-        />
-        <TextField
-          id="dashboardFileName"
-          label="Dashboard ID"
-          value={fileName}
-          onChange={this.updateFileName}
-          disabled={!importedFileContent}
-          lineDirection="center"
-          placeholder="Choose an ID for the imported dashboard"
-        />
-      </Dialog>
-      </div>
-      <h1>Bot Analytics</h1>
-        <div className="md-grid">
-          {featuredCards}
+          <Button
+            tooltipLabel="Import dashboard"
+            onClick={this.onOpenImport.bind(this)}
+            label="Import dashboard"
+          >file_upload
+          </Button>
+          <Dialog
+            id="ImportDashboard"
+            visible={importVisible}
+            title="Import dashboard"
+            modal
+            actions={[
+              { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
+              { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
+            ]}>
+            <FileUpload
+              id="dashboardDefenitionFile"
+              primary
+              label="Choose File"
+              accept="application/javascript"
+              onLoadStart={this.setFile}
+              onLoad={this.onLoad}
+            />
+            <TextField
+              id="dashboardFileName"
+              label="Dashboard ID"
+              value={fileName}
+              onChange={this.updateFileName}
+              disabled={!importedFileContent}
+              lineDirection="center"
+              placeholder="Choose an ID for the imported dashboard"
+            />
+          </Dialog>
         </div>
 
-        <h1>All Dashboards</h1>
-        <div className="md-grid">
-          {templateCards}
-        </div>
+        {
+          Object.keys(categories).map(category => {
+            if (!categories[category].length) { return null; }
+            return (
+              <div>
+                <h1>{category}</h1>
+                <div className="md-grid">
+                  {categories[category]}
+                </div>
+              </div>
+            );
+          })
+        }
 
         <Dialog
           id="templateInfoDialog"

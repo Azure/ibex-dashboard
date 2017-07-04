@@ -30,6 +30,7 @@ export const config: IDashboardConfig = /*return*/ {
       </p>
     </div>
   `,
+  category: 'Bots',
 	config: {
 		connections: { },
 		layout: {
