@@ -9,6 +9,7 @@ export const config: IDashboardConfig = /*return*/ {
   url: "bot_analytics_dashboard",
   description: 'Microsoft Bot Framework based analytics',
   preview: '/images/bot-ai-base.png',
+  category: 'Bots',
 	html: `
     <div>
       This dashboard is built to view the events being sent by the Bot Framework sent for a registered bot.
@@ -35,7 +36,6 @@ export const config: IDashboardConfig = /*return*/ {
       </p>
     </div>
   `,
-  category: 'Bots',
   config: {
 		connections: { },
 		layout: {
