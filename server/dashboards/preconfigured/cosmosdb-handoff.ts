@@ -9,6 +9,7 @@ export const config: IDashboardConfig = /*return*/ {
   url: 'cosmosdb_handoff',
   description: 'Monitor bot and hand-off to human conversations',
   preview: '/images/default.png',
+  category: 'Bots - Advanced',
   html: `
     <div>
       This dashboard displays the status for a bot-to-human handoff system.
@@ -43,7 +44,6 @@ export const config: IDashboardConfig = /*return*/ {
       </p>
     </div>
   `,
-  category: 'Bots - Advanced',
   config: {
     connections: {
       'bot-framework': {

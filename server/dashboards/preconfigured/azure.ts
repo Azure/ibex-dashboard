@@ -9,6 +9,7 @@ export const config: IDashboardConfig = /*return*/ {
   url: "azure_sample",
   description: "A basic azure ARM sample",
   preview: "/images/azure.png",
+  category: 'Samples',
   html: `
     <div>
       A basic sample to show how to get resources from 
@@ -16,7 +17,6 @@ export const config: IDashboardConfig = /*return*/ {
       (Azure) and display them on a dashboard
     </div>
   `,
-  category: 'Samples',
   config: {
     connections: { },
     layout: {

@@ -9,8 +9,8 @@ export const config: IDashboardConfig = /*return*/ {
   url: "mbf_advanced_health",
   description: "Bot Framework Advanced Health Dashboard",
   preview: "/images/default.png",
-  html: `POC - Additional info will be added in the future`,
   category: 'Bots - Advanced',
+  html: `POC - Additional info will be added in the future`,
   config: {
     connections: { },
     layout: {
