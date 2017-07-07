@@ -124,7 +124,7 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
 
   render() {
     const { markers } = this.state;
-    const { title, subtitle, props, mapProps } = this.props;
+    const { id, title, subtitle, props, mapProps } = this.props;
 
     if (!markers) {
       return null;
@@ -145,7 +145,7 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
     const mapProperties = { ...MapData.defaultProps, ...mapProps };
 
     return (
-      <Card title={title} subtitle={subtitle}>
+      <Card id={id} title={title} subtitle={subtitle}>
         <Map
           className="markercluster-map"
           style={styles.map}

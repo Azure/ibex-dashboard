@@ -1,7 +1,7 @@
 // Place your settings in this file to overwrite default and user settings.
 {
   "files.exclude": {
-    "**/*.css": { "when": "$(basename).scss"}
+    "**/*.css": true
   },
   "editor.tabSize": 2,
   "editor.insertSpaces": true,

@@ -79,7 +79,7 @@ export default class ElementConnector {
       elements.push(
         <div key={id}>
           <ReactElement 
-            id={id + idx}
+            id={id + '@' + idx}
             dependencies={dependencies}
             actions={actions || {}}
             props={props || {}}
