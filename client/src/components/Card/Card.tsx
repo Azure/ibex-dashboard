@@ -13,6 +13,7 @@ interface ICardProps {
   widgets?: React.ReactNode;
   titleStyle?: React.CSSProperties;
   contentStyle?: React.CSSProperties;
+  hideTitle?: boolean;
 }
 
 interface ICardState {
@@ -21,6 +22,10 @@ interface ICardState {
 
 export default class Card extends React.PureComponent<ICardProps, ICardState> {
 
+  static defaultProps = {
+    hideTitle: false
+  };
+
   state = {
     hover: false,
   };
@@ -28,13 +33,13 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
   constructor(props: ICardProps) {
     super(props);
   }
-  
+
   render() {
-    const { id, title, subtitle, children, titleStyle, contentStyle } = this.props;
+    const { id, title, subtitle, children, titleStyle, contentStyle, hideTitle } = this.props;
     const { hover } = this.state;
 
     let elements: React.ReactNode[] = [];
-    if (title) {
+    if (title && !hideTitle) {
       elements.push(
         <span key={0}>{title}</span>
       );

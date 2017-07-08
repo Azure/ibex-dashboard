@@ -16,7 +16,11 @@ const styles = {
     padding: 0,
     verticalAlign: 'middle'
   } as React.CSSProperties,
-  scorecard: {
+  title: {
+    margin: 0,
+    padding: 0,
+  } as React.CSSProperties,
+  content: {
     margin: 0,
     padding: 0,
     overflow: 'visible'
@@ -95,7 +99,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
       this.valueToCard(val, idx, className, colorPosition, scorecardWidth));
 
     return (
-      <Card id={id} title={title} titleStyle={styles.scorecard} contentStyle={styles.scorecard}>
+      <Card id={id} title={title} hideTitle={true} titleStyle={styles.title} contentStyle={styles.content}>
         <div className="md-grid--no-spacing md-card-scorecard">
           {cards}
         </div>

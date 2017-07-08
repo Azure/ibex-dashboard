@@ -245,7 +245,7 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       // merge
       target.data = Object.assign(target.data, data); 
       return a;
-    }, []);
+    },                     []);
 
     // Order by largest data set
     result.sort((a, b) => b.data.toString().length - a.data.toString().length);
@@ -261,6 +261,7 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
     // Move '|' to start of each line
     let str = query.replace(/(\|)((\s??\n\s??)(.+?))/gm, '\n| $4'); 
     str = str.replace(/(and)/gm, '\n  $1'); // force newline on 'and'
+    str = str.replace(/([^\(\'\"])(,\s*)(?=(\w+[^\)\'\"]\w+))/gim, '$1,\n  '); // force newline on ','
     const timespanQuery = '| where timestamp > ago(' + timespan + ') \n';
     // Checks for '|' at start
     const matches = str.match(/^(\s*\||\s*\w+\s*\|)/ig); 
@@ -280,15 +281,13 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       return str;
     }
     // Apply selected filters to connected query
-    filters.every((filter) => {
+    filters.forEach((filter) => {
       const { dependency, queryProperty } = filter;
-      const selectedFilters = dependencies[dependency] || [];
+      const selectedFilters: string[] = dependencies[dependency] || [];
       if (selectedFilters.length > 0) {
         const f = '| where ' + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ');
         str = `${str}${f} \n`;
-        return true;
       }
-      return false;
     });
     return str;
   }

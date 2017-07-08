@@ -14,5 +14,7 @@
     "**/node_modules": true,
     "**/build": true,
     "**/coverage": true
-  }
+  },
+  "tslint.configFile": "client/tslint.json",
+  "tslint.nodePath": "client/node_modules"
 }

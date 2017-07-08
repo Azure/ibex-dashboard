@@ -193,6 +193,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
         onHide={this.closeDialog}
         dialogStyle={{ width: '80%' }}
         contentStyle={{ margin: '0px', padding: '0px' }}
+        lastChild={true}
       >
         <Toolbar
           colored
@@ -251,7 +252,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
       this.toast('Browser not supported');
       return;
     }
-    const input = document.createElement('input');
+    const input = document.createElement('textarea');
     input.style.position = 'fixed';
     input.style.opacity = '0';
     input.value = text;
