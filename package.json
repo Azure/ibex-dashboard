@@ -6,6 +6,7 @@
     "npm-run-all": "^4.0.2"
   },
   "scripts": {
+    "build": "cd client && yarn build",
     "start": "node server",
     "start:client": "cd client && yarn start",
     "start:server": "cd server && yarn start",
