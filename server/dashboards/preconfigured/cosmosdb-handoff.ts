@@ -1,4 +1,4 @@
-/// <reference path="../../../src/types.d.ts"/>
+/// <reference path="../../../client/@types/types.d.ts"/>
 import * as _ from 'lodash';
 
 // The following line is important to keep in that format so it can be rendered into the page
@@ -8,37 +8,42 @@ export const config: IDashboardConfig = /*return*/ {
   icon: 'question_answer',
   url: 'cosmosdb_handoff',
   description: 'Monitor bot and hand-off to human conversations',
-  preview: '/images/bot-framework-preview.png',
-  html: `<div>
-    <h1>Hand-off to human</h1>
-    <h2>Features</h2>
-    <ul>
-      <li>
-        <p>Displays total users including how many are talking with bot, human agent or waiting for an agent.</p>
-      </li>
-      <li>
-        <p>Displays average time waiting (in secs) for human agent to connect and respond to user, 
-          including the shortest and longest times.</p>
-      </li>
-      <li>
-        <p>Displays total number of transcripts with bot or with human agent.</p>
-      </li>
-      <li>
-        <p>Displays timeline of conversations with bot and human.</p>
-      </li>
-      <li>
-        <p>Displays list of active conversations with sentiment score.</p>
-        <p>If there is a conversation of interest this can be selected to show the option to hand-off to human.</p>
-      </li>
-    </ul>
-    <p>
-      <span>Refer to the </span>
-      <span>
-        <a href="https://github.com/CatalystCode/ibex-dashboard/blob/master/docs/bot-framework.md" target="_blank">
-          bot-framework
-        </a> docs for setup instructions.</span>
-    </p>
-  </div>`,
+  preview: '/images/default.png',
+  category: 'Bots - Advanced',
+  html: `
+    <div>
+      This dashboard displays the status for a bot-to-human handoff system.
+      <br/>
+      <br/>
+      <h2>Features</h2>
+      <ul>
+        <li>
+          <p>Displays total users including how many are talking with bot, human agent or waiting for an agent.</p>
+        </li>
+        <li>
+          <p>Displays average time waiting (in secs) for human agent to connect and respond to user, 
+            including the shortest and longest times.</p>
+        </li>
+        <li>
+          <p>Displays total number of transcripts with bot or with human agent.</p>
+        </li>
+        <li>
+          <p>Displays timeline of conversations with bot and human.</p>
+        </li>
+        <li>
+          <p>Displays list of active conversations with sentiment score.</p>
+          <p>If there is a conversation of interest this can be selected to show the option to hand-off to human.</p>
+        </li>
+      </ul>
+      <p>
+        <span>Refer to the </span>
+        <span>
+          <a href="https://github.com/CatalystCode/ibex-dashboard/blob/master/docs/bot-framework.md" target="_blank">
+            bot-framework
+          </a> docs for setup instructions.</span>
+      </p>
+    </div>
+  `,
   config: {
     connections: {
       'bot-framework': {
@@ -203,7 +208,9 @@ export const config: IDashboardConfig = /*return*/ {
               const totalMessages = totalBot + totalAgent;
               // Timeline 
               const { timespan } = dependencies;
-              const keys = [...new Set(results.reduce((a, c) => { a.push(c.stateLabel); return a; }, []))];
+              const keys = results.reduce((keyArray, currentValue) => { 
+                return keyArray.includes(currentValue.stateLabel) ? keyArray : [...keyArray, currentValue.stateLabel]
+              }, []);
               const timestampKey = 'time'; // NB: required key name for timeline component
               // group by timestamp
               const graphData = results.reduce((a, c) => {

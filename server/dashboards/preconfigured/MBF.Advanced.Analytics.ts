@@ -1,4 +1,4 @@
-/// <reference path="../../../src/types.d.ts"/>
+/// <reference path="../../../client/@types/types.d.ts"/>
 import * as _ from 'lodash';
 
 // The following line is important to keep in that format so it can be rendered into the page
@@ -8,8 +8,9 @@ export const config: IDashboardConfig = /*return*/ {
   icon: "equalizer",
   url: "mbf_advanced_analytics",
   description: "Bot Framework Advanced Analytics Dashboard",
-  preview: "/images/bot-framework-preview.png",
-  html: ``,
+  preview: "/images/default.png",
+  category: 'Bots - Advanced',
+  html: `POC - Additional info will be added in the future`,
   config: {
     connections: { },
     layout: {

@@ -1,4 +1,4 @@
-/// <reference path="../../../src/types.d.ts"/>
+/// <reference path="../../../client/@types/types.d.ts"/>
 import * as _ from 'lodash';
 
 // The following line is important to keep in that format so it can be rendered into the page
@@ -8,11 +8,11 @@ export const config: IDashboardConfig = /*return*/ {
   icon: "av_timer",
   url: "mbf_advanced_health",
   description: "Bot Framework Advanced Health Dashboard",
-  preview: "/images/bot-framework-preview.png",
-  html: ``,
+  preview: "/images/default.png",
+  category: 'Bots - Advanced',
+  html: `POC - Additional info will be added in the future`,
   config: {
-    connections: {
-    },
+    connections: { },
     layout: {
       isDraggable: true,
       isResizable: true,
