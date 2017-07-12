@@ -237,6 +237,10 @@ export default class Setup extends React.Component<any, ISetupState> {
       />
     ));
 
+    const instructionsUrl = 'https://docs.microsoft.com' + 
+            '/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' + 
+            '#create-an-azure-active-directory-application';
+
     // tslint:disable:max-line-length
     return (
       <div style={{ width: '100%' }}>
@@ -256,14 +260,19 @@ export default class Setup extends React.Component<any, ISetupState> {
           buttonLabel="instructions"
         >
           <div>
-            Follow the instructions
-            in <a href="https://auth0.com/docs/connections/enterprise/azure-active-directory" target="_blank">this link</a> to
-            get <b>Client ID (Application ID)</b> and <b>Client Secret</b> (This process will require you to create a new application, add permissions, configure reply URL).
+            Follow the <a href={instructionsUrl} target="_blank">instructions</a> to get:
+            <br />
+            <ul>
+              <li>Application ID (to Client ID)</li>
+              <li>Client Secret</li>
+              <li>Tenant ID</li>
+            </ul>
+            <br />
+            (This process will require you to create a new application, add permissions, configure reply URL).
+            <br />
             <br />
             The <b>Redirect Url</b> corresponds to the Reply URL.
             <br/>
-            The <b>TenantID</b> is the 'Directory ID' token found in: Azure Portal > Active Directory > Properties.
-
             <hr/>
             Please add an administrator email and press the 'Add' button.
             <hr/>
