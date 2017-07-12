@@ -77,9 +77,9 @@ export default class InfoDrawer extends React.Component<IInfoDrawerProps, IInfoD
           defaultVisible={false}
           onVisibilityToggle={() => {}}
           position={'right'}
-          type={Drawer.DrawerTypes.TEMPORARY}
+          type={Drawer.DrawerTypes.FLOATING}
           header={drawerHeader}
-          style={{ zIndex: 100 }}
+          style={{ zIndex: 100, borderLeft: '1px solid lightgray' }}
         >
           <Media style={{ padding: 20, maxWidth: 300, width: width || 'auto', height: '100%' }}>
             {this.props.children}
