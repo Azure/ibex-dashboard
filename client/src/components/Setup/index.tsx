@@ -106,11 +106,15 @@ export default class Setup extends React.Component<any, ISetupState> {
     if (redirectUrl) { return redirectUrl; }
 
     let host = window.location.host;
+    let protocol = 'https';
 
     // On localhost, authentication requests go directly to port 4000
-    if (host === 'localhost:3000') { host = 'localhost:4000'; }
+    if (host === 'localhost:3000' || host === 'localhost:4000') { 
+      host = 'localhost:4000'; 
+      protocol = 'http';
+    }
 
-    return window.location.protocol + '//' + host + '/auth/openid/return';
+    return protocol + '//' + host + '/auth/openid/return';
   }
 
   getAdminArray(): string[] {
@@ -266,13 +270,13 @@ export default class Setup extends React.Component<any, ISetupState> {
               <li>Application ID (to Client ID)</li>
               <li>Client Secret</li>
               <li>Tenant ID</li>
+              <li>You don't need to follow <b>Assign application to role</b></li>
+              <li>Make sure <b>Sign-on URL/Reply URL</b> is the same as <b>Redirect URL</b> in this screen</li>
             </ul>
             <br />
             (This process will require you to create a new application, add permissions, configure reply URL).
             <br />
             <br />
-            The <b>Redirect Url</b> corresponds to the Reply URL.
-            <br/>
             <hr/>
             Please add an administrator email and press the 'Add' button.
             <hr/>
