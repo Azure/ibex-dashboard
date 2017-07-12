@@ -1,4 +1,5 @@
-# Ibex Dashboard [![Inline docs](http://inch-ci.org/github/CatalystCode/ibex-dashboard.svg?branch=master)](http://inch-ci.org/github/CatalystCode/ibex-dashboard)
+# Ibex Dashboard [![Build Status](https://travis-ci.org/CatalystCode/ibex-dashboard.png?branch=master)](https://travis-ci.org/CatalystCode/ibex-dashboard)
+
 
 This is an application insights based project that displays a bots analytics dashboard.
 
