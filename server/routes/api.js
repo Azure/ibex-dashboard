@@ -42,7 +42,8 @@ const getMetadata = (text) => {
 
 const paths = () => ({
   privateDashboard: path.join(__dirname, '..', 'dashboards'),
-  preconfDashboard: path.join(__dirname, '..', 'dashboards', 'preconfigured')
+  preconfDashboard: path.join(__dirname, '..', 'dashboards', 'preconfigured'),
+  privateTemplate: path.join(__dirname, '..', 'dashboards', 'customTemplates')
 });
 
 const isValidFile = (filePath) => {
@@ -186,6 +187,29 @@ router.get('/templates/:id', (req, res) => {
   }
 
   res.send(script);  
+});
+
+router.put('/templates/:id', (req, res) => {
+  let { id } = req.params;
+  let { script } = req.body || '';
+
+  const { privateTemplate } = paths();
+  let templatePath = path.join(privateTemplate, id + '.private.ts');
+  let templateFile = getFileById(privateTemplate, id);
+  let exists = fs.existsSync(templatePath);
+
+  if (templateFile || exists) {
+    return res.json({ errors: ['Dashboard id or filename already exists'] });
+  }
+
+  fs.writeFile(templatePath, script, err => {
+    if (err) {
+      console.error(err);
+      return res.end(err);
+    }
+
+    res.json({ script });
+  });
 });
 
 router.put('/dashboards/:id', (req, res) => {

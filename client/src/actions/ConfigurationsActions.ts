@@ -11,6 +11,7 @@ interface IConfigurationsActions {
   submitDashboardFile(content: string, fileName: string): void;
   convertDashboardToString(dashboard: IDashboardConfig): string;
   deleteDashboard(id: string): any;
+  saveTemplate(template: IDashboardConfig): any;
 }
 
 class ConfigurationsActions extends AbstractActions implements IConfigurationsActions {
@@ -114,6 +115,31 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
 
         return dispatcher({ template });
       });
+    };
+  }
+
+  saveTemplate(template: IDashboardConfig) {
+    
+    return (dispatcher: (result: { template: IDashboardConfig }) => void) => {
+      let script = this.objectToString(template);
+      
+      script = '/// <reference path="../../../client/@types/types.d.ts"/>\n' +
+              'import * as _ from \'lodash\';\n\n' +
+              'export const config: IDashboardConfig =' + script;
+      request('/api/templates/' + template.id, {
+          method: 'PUT',
+          json: true,
+          body: { script: script }
+        }, 
+              (error: any, json: any) => {
+
+          if (error || (json && json.errors)) {
+            return this.failure(error || json.errors);
+          }
+
+          return dispatcher(json);
+        }
+      );
     };
   }
 
