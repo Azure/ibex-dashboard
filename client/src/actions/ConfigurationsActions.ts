@@ -125,7 +125,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
       
       script = '/// <reference path="../../../client/@types/types.d.ts"/>\n' +
               'import * as _ from \'lodash\';\n\n' +
-              'export const config: IDashboardConfig =' + script;
+              'export const config: IDashboardConfig = /*return*/ ' + script;
       request('/api/templates/' + template.id, {
           method: 'PUT',
           json: true,

@@ -54,10 +54,11 @@ interface IDashboardState {
   infoVisible?: boolean;
   infoHtml?: string;
   newTemplateName?: string;
+  newTemplateDescription?: string;
 }
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
- 
+
   layouts = {};
 
   state = {
@@ -75,7 +76,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     visibilityFlags: {},
     infoVisible: false,
     infoHtml: '',
-    newTemplateName: ''
+    newTemplateName: '',
+    newTemplateDescription: ''
   };
 
   constructor(props: IDashboardProps) {
@@ -100,11 +102,13 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.newTemplateNameChange = this.newTemplateNameChange.bind(this);
     this.onSaveAsTemplateApprove = this.onSaveAsTemplateApprove.bind(this);
     this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
+    this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
     
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
     });
-    this.state.newTemplateName = this.props.dashboard.id;
+    this.state.newTemplateName = this.props.dashboard.name;
+    this.state.newTemplateDescription = this.props.dashboard.description;
   }
 
   componentDidMount() {
@@ -193,7 +197,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   onSaveAsTemplateApprove() {
     let { dashboard } = this.props;
     var template = _.cloneDeep(dashboard);
-    template.id = this.state.newTemplateName;
+    template.name = this.state.newTemplateName;
+    template.description = this.state.newTemplateDescription;
+    template.category = 'Custom Templates';
+    template.id = template.url = dashboard.id + (Math.floor(Math.random() * 1000) + 1); // generate random id
     ConfigurationsActions.saveTemplate(template);
     window.location.href = '/';
     this.setState({ askSaveAsTemplate: false });
@@ -205,6 +212,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   newTemplateNameChange(value: string, e: any) {
     this.setState({ newTemplateName: value });
+  }
+
+  newTemplateDescriptionChange(value: string, e: any) {
+    this.setState({ newTemplateDescription: value });
   }
 
   onDeleteDashboardApprove() {
@@ -285,7 +296,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       downloadFormat, 
       askConfig ,
       askSaveAsTemplate,
-      newTemplateName
+      newTemplateName,
+      newTemplateDescription
     } = this.state;
     const { infoVisible, infoHtml } = this.state;
     const layout = this.state.layouts[currentBreakpoint];
@@ -505,11 +517,20 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
           <p>You can save this dashboard as a custom template for a future reuse</p>
           <TextField
             id="templateName"
-            label="Template Name"
+            label="New Template Name"
             placeholder="Template Name"
             className="md-cell md-cell--bottom"
             value={newTemplateName}
             onChange={this.newTemplateNameChange}
+            required
+          />
+          <TextField
+            id="templateDescription"
+            label="New Template Description"
+            placeholder="Template Description"
+            className="md-cell md-cell--bottom"
+            value={newTemplateDescription}
+            onChange={this.newTemplateDescriptionChange}
             required
           />
         </Dialog>

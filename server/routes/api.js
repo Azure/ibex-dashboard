@@ -58,10 +58,17 @@ const getFileContents = (filePath) => {
     : contents;
 }
 
+const ensureCustomTemplatesFolderExists = () => {
+  const { privateTemplate } = paths();
+  
+  if (!fs.existsSync(privateTemplate)) {
+    fs.mkdirSync(privateTemplate);
+  }
+}
 router.get('/dashboards', (req, res) => {
 
-  const { privateDashboard, preconfDashboard } = paths();
-
+  const { privateDashboard, preconfDashboard, privateTemplate } = paths();
+  
   let script = '';
   let files = fs.readdirSync(privateDashboard);
   if (files && files.length) { 
@@ -86,10 +93,35 @@ router.get('/dashboards', (req, res) => {
     });
   }
 
+  // read preconfigured templates and custom templates
   let templates = fs.readdirSync(preconfDashboard);
   if (templates && templates.length) {
     templates.forEach((fileName) => {
       let filePath = path.join(preconfDashboard, fileName);
+      if (isValidFile(filePath)) {
+        const fileContents = getFileContents(filePath);
+        const jsonDefinition = getMetadata(fileContents);
+        let content = 'return ' + JSON.stringify(jsonDefinition);
+        
+        // Ensuing this dashboard is loaded into the dashboards array on the page
+        script += `
+          (function (window) {
+            var dashboardTemplate = (function () {
+              ${content}
+            })();
+            window.dashboardTemplates = window.dashboardTemplates || [];
+            window.dashboardTemplates.push(dashboardTemplate);
+          })(window);
+        `;
+      }
+    });
+  }
+
+  ensureCustomTemplatesFolderExists();
+  let customTemplates = fs.readdirSync(privateTemplate);
+  if (customTemplates && customTemplates.length) {
+    customTemplates.forEach((fileName) => {
+      let filePath = path.join(privateTemplate, fileName);
       if (isValidFile(filePath)) {
         const fileContents = getFileContents(filePath);
         const jsonDefinition = getMetadata(fileContents);
@@ -164,13 +196,19 @@ router.post('/dashboards/:id', (req, res) => {
 router.get('/templates/:id', (req, res) => {
 
   let templateId = req.params.id;
-  let preconfDashboard = path.join(__dirname, '..', 'dashboards', 'preconfigured');
+  let templatePath = path.join(__dirname, '..', 'dashboards', 'preconfigured');
 
   let script = '';
-  let dashboardFile = getFileById(preconfDashboard, templateId);
-
-  if (dashboardFile) {
-    let filePath = path.join(preconfDashboard, dashboardFile);
+  
+  let templateFile = getFileById(templatePath, templateId);
+  
+  if (!templateFile) {
+    //fallback to custom template
+    templatePath = path.join(__dirname, '..', 'dashboards', 'customTemplates');
+    templateFile = getFileById(templatePath, templateId);
+  }
+  if (templateFile) {
+    let filePath = path.join(templatePath, templateFile);
     if (isValidFile(filePath)) {
       const content = getFileContents(filePath);
 
@@ -194,6 +232,9 @@ router.put('/templates/:id', (req, res) => {
   let { script } = req.body || '';
 
   const { privateTemplate } = paths();
+
+  ensureCustomTemplatesFolderExists();
+
   let templatePath = path.join(privateTemplate, id + '.private.ts');
   let templateFile = getFileById(privateTemplate, id);
   let exists = fs.existsSync(templatePath);
