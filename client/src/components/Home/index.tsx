@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Toolbar from 'react-md/lib/Toolbars';
 import Button from 'react-md/lib/Buttons/Button';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 import { Card, CardTitle, CardActions, CardText } from 'react-md/lib/Cards';
@@ -13,6 +14,8 @@ import SetupStore from '../../stores/SetupStore';
 
 import ConfigurationStore from '../../stores/ConfigurationsStore';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
+
+import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } from '../Dashboard/DownloadFile';
 
 const renderHTML = require('react-render-html');
 
@@ -97,6 +100,9 @@ export default class Home extends React.Component<any, IHomeState> {
     this.onLoad = this.onLoad.bind(this);
     this.setFile = this.setFile.bind(this);
     this.updateFileName = this.updateFileName.bind(this);
+    this.onExportTemplate = this.onExportTemplate.bind(this);
+    this.downloadTemplate = this.downloadTemplate.bind(this);
+    this.onImportTemplate = this.onImportTemplate.bind(this);
   }
 
   updateConfiguration(state: {templates: IDashboardConfig[], template: IDashboardConfig, creationState: string}) {
@@ -105,6 +111,11 @@ export default class Home extends React.Component<any, IHomeState> {
       template: state.template,
       creationState: state.creationState
     });
+    if (this.state.stage === 'requestDownloadTemplate') {
+      setTimeout(() => {
+        this.downloadTemplate(this.state.template);
+      }, 10);
+    }
   }
 
   updateSetup(state: IHomeState) {
@@ -211,6 +222,20 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ importedFileContent });
   }
 
+  onExportTemplate(templateId) {
+    this.setState({stage:'requestDownloadTemplate'});
+    ConfigurationsActions.loadTemplate(templateId);
+  }
+  downloadTemplate(template) {
+    template.layouts = template.layouts || {};
+    let stringDashboard = ConfigurationsActions.convertDashboardToString(template);
+    var dashboardName = template.id.replace(/  +/g, ' ');
+    dashboardName = template.id.replace(/  +/g, '_');
+    downloadBlob('return ' + stringDashboard, 'application/json', dashboardName + '.private.ts');
+  }
+  onImportTemplate() {
+  }
+
   render() {
     let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
     let { importVisible } = this.state;
@@ -241,6 +266,14 @@ export default class Home extends React.Component<any, IHomeState> {
             </MediaOverlay>
           </Media>
           <CardActions style={styles.fabs}>
+           <Button 
+              floating 
+              secondary 
+              style={{backgroundColor:'#959ba5', marginRight:'2px'}}
+              onClick={this.onExportTemplate.bind(this, tmpl.id)}
+            >
+              file_download
+            </Button>
             <Button 
               floating 
               secondary 
@@ -268,16 +301,35 @@ export default class Home extends React.Component<any, IHomeState> {
       categories[category].push(createCard(tmpl, index));
     });
 
+    let toolbarActions = [];
+    toolbarActions.push(
+      (<Button
+          tooltipLabel="Import dashboard"
+          onClick={this.onOpenImport.bind(this)}
+          label="Import dashboard"
+        >file_upload
+      </Button>)
+    );
+
     return (
-      <div>
-        <div style={{ textAlign: 'right' }}>
-          <Button
-            tooltipLabel="Import dashboard"
-            onClick={this.onOpenImport.bind(this)}
-            label="Import dashboard"
-          >file_upload
-          </Button>
-          <Dialog
+      <div className="md-cell md-cell--12">
+        <Toolbar actions={toolbarActions}>        </Toolbar>
+
+        {
+          Object.keys(categories).map(category => {
+            if (!categories[category].length) { return null; }
+            return (
+              <div>
+                <h1>{category}</h1>
+                <div className="md-grid">
+                  {categories[category]}
+                </div>
+              </div>
+            );
+          })
+        }
+
+        <Dialog
             id="ImportDashboard"
             visible={importVisible}
             title="Import dashboard"
@@ -303,22 +355,7 @@ export default class Home extends React.Component<any, IHomeState> {
               lineDirection="center"
               placeholder="Choose an ID for the imported dashboard"
             />
-          </Dialog>
-        </div>
-
-        {
-          Object.keys(categories).map(category => {
-            if (!categories[category].length) { return null; }
-            return (
-              <div>
-                <h1>{category}</h1>
-                <div className="md-grid">
-                  {categories[category]}
-                </div>
-              </div>
-            );
-          })
-        }
+        </Dialog>
 
         <Dialog
           id="templateInfoDialog"
