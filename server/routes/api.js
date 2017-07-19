@@ -65,6 +65,7 @@ const ensureCustomTemplatesFolderExists = () => {
     fs.mkdirSync(privateTemplate);
   }
 }
+
 router.get('/dashboards', (req, res) => {
 
   const { privateDashboard, preconfDashboard, privateTemplate } = paths();
