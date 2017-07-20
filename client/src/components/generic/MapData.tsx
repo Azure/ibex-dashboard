@@ -105,7 +105,10 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
       promises.push(promise);
       promise.then(results => {
         let markupPopup = (popup && L.popup().setContent(popup)) || null;
-        markers.push({ lat: results[0].y, lng: results[0].x, popup: markupPopup });
+
+        if (results.length) {
+          markers.push({ lat: results[0].y, lng: results[0].x, popup: markupPopup });
+        }
       });
     });
 
