@@ -272,6 +272,7 @@ export default class Home extends React.Component<any, IHomeState> {
       <div>
         <div style={{ textAlign: 'right' }}>
           <Button
+            flat
             tooltipLabel="Import dashboard"
             onClick={this.onOpenImport.bind(this)}
             label="Import dashboard"
@@ -279,7 +280,7 @@ export default class Home extends React.Component<any, IHomeState> {
           </Button>
           <Dialog
             id="ImportDashboard"
-            visible={importVisible}
+            visible={importVisible || false}
             title="Import dashboard"
             modal
             actions={[
@@ -297,7 +298,7 @@ export default class Home extends React.Component<any, IHomeState> {
             <TextField
               id="dashboardFileName"
               label="Dashboard ID"
-              value={fileName}
+              value={fileName || ''}
               onChange={this.updateFileName}
               disabled={!importedFileContent}
               lineDirection="center"
@@ -307,10 +308,10 @@ export default class Home extends React.Component<any, IHomeState> {
         </div>
 
         {
-          Object.keys(categories).map(category => {
+          Object.keys(categories).map((category, index) => {
             if (!categories[category].length) { return null; }
             return (
-              <div>
+              <div key={index}>
                 <h1>{category}</h1>
                 <div className="md-grid">
                   {categories[category]}
@@ -323,7 +324,7 @@ export default class Home extends React.Component<any, IHomeState> {
         <Dialog
           id="templateInfoDialog"
           title={infoTitle}
-          visible={infoVisible}
+          visible={infoVisible || false}
           onHide={this.onCloseInfo}
           dialogStyle={{ width: '80%' }}
           contentStyle={{ padding: '0', maxHeight: 'calc(100vh - 148px)' }}

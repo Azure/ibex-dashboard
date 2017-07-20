@@ -11,6 +11,7 @@ interface IConfigurationsActions {
   submitDashboardFile(content: string, fileName: string): void;
   convertDashboardToString(dashboard: IDashboardConfig): string;
   deleteDashboard(id: string): any;
+  saveAsTemplate(template: IDashboardConfig): any;
 }
 
 class ConfigurationsActions extends AbstractActions implements IConfigurationsActions {
@@ -18,15 +19,15 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     super(alt);
   }
 
-  submitDashboardFile = (content, dashboardId) => {
+  submitDashboardFile(content: string, dashboardId: string) {
     return (dispatcher: (json: any) => void) => {
 
       // Replace both 'id' and 'url' with the requested id from the user
-      var idRegExPattern = /id: \".*\",/i;
-      var urlRegExPatternt = /url: \".*\",/i;
-      var updatedContent =
+      const idRegExPattern = /id: \".*\",/i;
+      const urlRegExPatternt = /url: \".*\",/i;
+      const updatedContent =
         content.replace(idRegExPattern, 'id: \"' + dashboardId + '\",')
-          .replace(urlRegExPatternt, 'url: \"' + dashboardId + '\",');
+               .replace(urlRegExPatternt, 'url: \"' + dashboardId + '\",');
 
       request(
         '/api/dashboards/' + dashboardId,
@@ -39,6 +40,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
           if (error || (json && json.errors)) {
             return this.failure(error || json.errors);
           }
+          
           // redirect to the newly imported dashboard
           window.location.replace('dashboard/' + dashboardId);
           return dispatcher(json);
@@ -114,6 +116,33 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
 
         return dispatcher({ template });
       });
+    };
+  }
+
+  saveAsTemplate(template: IDashboardConfig) {
+    
+    return (dispatcher: (result: { template: IDashboardConfig }) => void) => {
+      let script = this.objectToString(template);
+      
+      script = '/// <reference path="../../../client/@types/types.d.ts"/>\n' +
+              'import * as _ from \'lodash\';\n\n' +
+              'export const config: IDashboardConfig = /*return*/ ' + script;
+      return request(
+        '/api/templates/' + template.id, 
+        {
+          method: 'PUT',
+          json: true,
+          body: { script: script }
+        }, 
+        (error: any, json: any) => {
+
+          if (error || (json && json.errors)) {
+            return this.failure(error || json.errors);
+          }
+
+          return dispatcher(json);
+        }
+      );
     };
   }
 
@@ -299,7 +328,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     for (var i in parsedString) {
       if (typeof parsedString[i] === 'string') {
         if (parsedString[i].substring(0, 8) === 'function') {
-          eval('obj[i] = ' + parsedString[i] ); /* tslint:disable-line */
+          global['eval']('obj[i] = ' + parsedString[i] );
 
         } else {
           obj[i] = parsedString[i];
@@ -321,7 +350,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         }
 
         calculated = calculated.substr('function(){return'.length, calculated.length - 'function(){return'.length - 1);
-        eval('dataSource.calculated = ' + calculated); /* tslint:disable-line */
+        global['eval']('dataSource.calculated = ' + calculated);
       }
     });
   }
