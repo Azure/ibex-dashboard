@@ -102,7 +102,6 @@ export default class Home extends React.Component<any, IHomeState> {
     this.updateFileName = this.updateFileName.bind(this);
     this.onExportTemplate = this.onExportTemplate.bind(this);
     this.downloadTemplate = this.downloadTemplate.bind(this);
-    this.onImportTemplate = this.onImportTemplate.bind(this);
   }
 
   updateConfiguration(state: {templates: IDashboardConfig[], template: IDashboardConfig, creationState: string}) {
@@ -112,9 +111,12 @@ export default class Home extends React.Component<any, IHomeState> {
       creationState: state.creationState
     });
     if (this.state.stage === 'requestDownloadTemplate') {
-      setTimeout(() => {
-        this.downloadTemplate(this.state.template);
-      }, 10);
+      setTimeout(
+        () => {
+          this.downloadTemplate(this.state.template);
+        }, 
+        10
+      );
     }
   }
 
@@ -222,18 +224,17 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ importedFileContent });
   }
 
-  onExportTemplate(templateId) {
-    this.setState({stage:'requestDownloadTemplate'});
+  onExportTemplate(templateId: string) {
+    this.setState({ stage: 'requestDownloadTemplate' });
     ConfigurationsActions.loadTemplate(templateId);
   }
-  downloadTemplate(template) {
+
+  downloadTemplate(template: IDashboardConfig) {
     template.layouts = template.layouts || {};
     let stringDashboard = ConfigurationsActions.convertDashboardToString(template);
     var dashboardName = template.id.replace(/  +/g, ' ');
     dashboardName = template.id.replace(/  +/g, '_');
     downloadBlob('return ' + stringDashboard, 'application/json', dashboardName + '.private.ts');
-  }
-  onImportTemplate() {
   }
 
   render() {
@@ -269,7 +270,7 @@ export default class Home extends React.Component<any, IHomeState> {
            <Button 
               floating 
               secondary 
-              style={{backgroundColor:'#959ba5', marginRight:'2px'}}
+              style={{ backgroundColor: '#959ba5', marginRight: '2px' }}
               onClick={this.onExportTemplate.bind(this, tmpl.id)}
             >
               file_download
@@ -303,18 +304,19 @@ export default class Home extends React.Component<any, IHomeState> {
 
     let toolbarActions = [];
     toolbarActions.push(
-      (<Button
-          tooltipLabel="Import dashboard"
-          onClick={this.onOpenImport.bind(this)}
-          label="Import dashboard"
-        >file_upload
-      </Button>)
+      (
+        <Button
+            tooltipLabel="Import dashboard"
+            onClick={this.onOpenImport.bind(this)}
+            label="Import dashboard"
+          >file_upload
+        </Button>
+      )
     );
 
     return (
       <div className="md-cell md-cell--12">
-        <Toolbar actions={toolbarActions}>        </Toolbar>
-
+        <Toolbar actions={toolbarActions} />
         {
           Object.keys(categories).map(category => {
             if (!categories[category].length) { return null; }
