@@ -366,7 +366,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
         (
           <span>
             <Button key="saveAsTemplate" icon tooltipLabel="Save as template" 
-                    onClick={this.onSaveAsTemplate}>next_week</Button>
+                    onClick={this.onSaveAsTemplate}>cloud_download</Button>
           </span>
         )
       );

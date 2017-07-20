@@ -19,7 +19,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     super(alt);
   }
 
-  submitDashboardFile(content, dashboardId) {
+  submitDashboardFile(content: string, dashboardId: string) {
     return (dispatcher: (json: any) => void) => {
 
       // Replace both 'id' and 'url' with the requested id from the user
@@ -127,12 +127,14 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
       script = '/// <reference path="../../../client/@types/types.d.ts"/>\n' +
               'import * as _ from \'lodash\';\n\n' +
               'export const config: IDashboardConfig = /*return*/ ' + script;
-      request('/api/templates/' + template.id, {
+      return request(
+        '/api/templates/' + template.id, 
+        {
           method: 'PUT',
           json: true,
           body: { script: script }
         }, 
-              (error: any, json: any) => {
+        (error: any, json: any) => {
 
           if (error || (json && json.errors)) {
             return this.failure(error || json.errors);
@@ -326,7 +328,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     for (var i in parsedString) {
       if (typeof parsedString[i] === 'string') {
         if (parsedString[i].substring(0, 8) === 'function') {
-          eval('obj[i] = ' + parsedString[i] ); /* tslint:disable-line */
+          global['eval']('obj[i] = ' + parsedString[i] );
 
         } else {
           obj[i] = parsedString[i];
@@ -348,7 +350,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         }
 
         calculated = calculated.substr('function(){return'.length, calculated.length - 'function(){return'.length - 1);
-        eval('dataSource.calculated = ' + calculated); /* tslint:disable-line */
+        global['eval']('dataSource.calculated = ' + calculated);
       }
     });
   }
