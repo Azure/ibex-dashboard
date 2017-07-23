@@ -80,7 +80,7 @@ router.get('/dashboards', (req, res) => {
         const jsonDefinition = getMetadata(fileContents);
         let content = 'return ' + JSON.stringify(jsonDefinition);
 
-        // Ensuing this dashboard is loaded into the dashboards array on the page
+        // Ensuring this dashboard is loaded into the dashboards array on the page
         script += `
           (function (window) {
             var dashboard = (function () {
@@ -229,8 +229,12 @@ router.get('/templates/:id', (req, res) => {
 });
 
 router.put('/templates/:id', (req, res) => {
-  let { id } = req.params;
-  let { script } = req.body || '';
+  let { id } = req.params || {};
+  let { script } = req.body || {};
+
+  if (!id || !script) {
+    return res.end({ error: 'No id or scripts were supplied for saving the template' });
+  }
 
   const { privateTemplate } = paths();
 
@@ -255,8 +259,12 @@ router.put('/templates/:id', (req, res) => {
 });
 
 router.put('/dashboards/:id', (req, res) => {
-  let { id } = req.params;
-  let { script } = req.body || '';
+  let { id } = req.params || {};
+  let { script } = req.body || {};
+
+  if (!id || !script) {
+    return res.end({ error: 'No id or script were supplied for the new dashboard' });
+  }
 
   const { privateDashboard } = paths();
   let dashboardPath = path.join(privateDashboard, id + '.private.js');
