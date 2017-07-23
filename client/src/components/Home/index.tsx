@@ -20,6 +20,7 @@ import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } f
 
 const renderHTML = require('react-render-html');
 
+const MultipleSpacesRegex = /  +/g;
 const styles = {
   card: {
     minWidth: 400,
@@ -228,8 +229,8 @@ export default class Home extends React.Component<any, IHomeState> {
   downloadTemplate(template: IDashboardConfig) {
     template.layouts = template.layouts || {};
     let stringDashboard = utils.convertDashboardToString(template);
-    var dashboardName = template.id.replace(/  +/g, ' ');
-    dashboardName = template.id.replace(/  +/g, '_');
+    var dashboardName = template.id.replace(MultipleSpacesRegex, ' ');
+    dashboardName = template.id.replace(MultipleSpacesRegex, '_');
     downloadBlob('return ' + stringDashboard, 'application/json', dashboardName + '.private.ts');
   }
 
