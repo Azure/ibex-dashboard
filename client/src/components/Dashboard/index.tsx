@@ -201,6 +201,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     template.description = this.state.newTemplateDescription;
     template.category = 'Custom Templates';
     template.id = template.url = dashboard.id + (Math.floor(Math.random() * 1000) + 1); // generate random id
+
+    // Removing connections so private info will not be included
+    template.config.connections = {};
+
     ConfigurationsActions.saveAsTemplate(template);
     window.location.href = '/';
     this.setState({ askSaveAsTemplate: false });
