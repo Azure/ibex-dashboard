@@ -14,6 +14,7 @@ import SetupStore from '../../stores/SetupStore';
 
 import ConfigurationStore from '../../stores/ConfigurationsStore';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
+import utils from '../../utils';
 
 import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } from '../Dashboard/DownloadFile';
 
@@ -111,12 +112,7 @@ export default class Home extends React.Component<any, IHomeState> {
       creationState: state.creationState
     });
     if (this.state.stage === 'requestDownloadTemplate') {
-      setTimeout(
-        () => {
-          this.downloadTemplate(this.state.template);
-        }, 
-        10
-      );
+      this.downloadTemplate(this.state.template);
     }
   }
 
@@ -231,7 +227,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
   downloadTemplate(template: IDashboardConfig) {
     template.layouts = template.layouts || {};
-    let stringDashboard = ConfigurationsActions.convertDashboardToString(template);
+    let stringDashboard = utils.convertDashboardToString(template);
     var dashboardName = template.id.replace(/  +/g, ' ');
     dashboardName = template.id.replace(/  +/g, '_');
     downloadBlob('return ' + stringDashboard, 'application/json', dashboardName + '.private.ts');
