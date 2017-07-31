@@ -114,7 +114,7 @@ export default class Setup extends React.Component<any, ISetupState> {
       protocol = 'http';
     }
 
-    return protocol + '//' + host + '/auth/openid/return';
+    return protocol + '://' + host + '/auth/openid/return';
   }
 
   getAdminArray(): string[] {
