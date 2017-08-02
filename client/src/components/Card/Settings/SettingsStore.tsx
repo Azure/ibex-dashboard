@@ -81,37 +81,62 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       return;
     }
 
-    const matches = this.elementId.match(/[0-9]*$/g);
-    if (!matches) {
+    const matches = this.elementId.split('@');
+    if (matches.length !== 2) {
       console.warn('Element index not found:', this.elementId);
       return;
     }
-    const elementIndex = parseInt(matches[0], 10);
-    if (isNaN(elementIndex) || elementIndex >= dashboard.elements.length || elementIndex < 0) {
-      console.warn('Element index invalid value:', elementIndex);
+
+    const id = matches[0];
+    const index = parseInt(matches[1], 10);
+    let elements = dashboard.elements;
+
+    if (isNaN(index) || index >= elements.length || index < 0) {
+      console.warn('Element index invalid value:', index);
       return;
     }
 
-    const element: IElement = dashboard.elements[elementIndex];
-    this.exportData = this.extrapolateExportData(element.dependencies);
-    this.selectedIndex = 0; // Reset selection
+    if (elements[index].id === id) {
+      this.getElement(elements, index);
+      return;
+    } 
+    
+    // handle dialog element
+    dashboard.dialogs.every(dialog => {
+        if (dialog.elements[index].id === id) {
+          elements = dialog.elements;
+          this.getElement(elements, index, true);
+          return false;
+        } else {
+          return true;
+        }
+      });
   }
 
-  private extrapolateExportData(dependencies: IStringDictionary): IExportData[] {
+  private getElement(elements: IElement[], index: number, isDialog: boolean = false) {
+    const element: IElement = elements[index];
+    this.exportData = this.extrapolateExportData(element.dependencies, isDialog);
+    this.selectedIndex = 0; // resets dialog menu selection
+  }
+
+  private extrapolateExportData(dependencies: IStringDictionary, isDialog: boolean = false): IExportData[] {
     let result: IExportData[] = [];
     const datasources = DataSourceConnector.getDataSources();
-
     Object.keys(dependencies).forEach((id) => {
       const dependency = dependencies[id];
 
-      const dependencyPath = dependency.split(':');
-      if (dependencyPath.length !== 2) {
-        return;
+      let dependencySource = dependency;
+      let dependencyProperty = 'values';
+
+      if (!isDialog) {
+        const dependencyPath = dependency.split(':');
+        if (dependencyPath.length !== 2) {
+          return;
+        }
+        dependencySource = dependencyPath[0];
+        dependencyProperty = dependencyPath[1];
       }
-
-      const dependencySource = dependencyPath[0];
-      const dependencyProperty = dependencyPath[1];
-
+      
       const datasource = Object.keys(datasources).find(key => dependencySource === key);
       if (!datasource) {
         return;
@@ -145,10 +170,10 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       const isForked = !params.query && !!params.table;
 
       if (!isForked) {
-        // Unforked
+        // unforked
         queryFn = params.query;
       } else {
-        // Forked
+        // forked
         if (forkedQueryComponents.length === 2) {
           queryId = forkedQueryComponents[0];
           group = queryId;
@@ -164,7 +189,7 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       // Query dependencies
       let query, filter = '';
       let queryDependencies: IDict<any> = {};
-      let timespan = '60d';
+      let timespan = '30d';
       if (typeof queryFn === 'function') {
         // Get query function dependencies
         const queryDependenciesDict = datasources[datasource].config.dependencies || {};
@@ -185,18 +210,30 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
             return;
           }
 
-          const datasourceId = Object.keys(datasources).find(key => source === key);
-          if (!datasourceId) {
-            console.warn('Unable to find data source id', source);
-            return;
+          if (source === 'args') {
+            const args = datasources[datasource].plugin['lastArgs'];
+            const arg = Object.keys(args).find(key => property === key);
+            if (!arg) {
+              console.warn('Unable to find arg property:', property);
+              return;
+            }
+            const argValue = args[arg] || '';
+            let append = {};
+            append[property] = argValue;
+            Object.assign(queryDependencies, append);
+          } else {
+            const datasourceId = Object.keys(datasources).find(key => source === key);
+            if (!datasourceId) {
+              console.warn('Unable to find data source id:', source);
+              return;
+            }
+            const resolvedValues = !property ? JSON.parse(JSON.stringify(datasources[datasourceId].store.state)) 
+              : datasources[datasourceId].store.state[property];
+            let append = {};
+            append[dependenciesKey] = resolvedValues;
+            Object.assign(queryDependencies, append);
           }
-          const resolvedValues = !property ? JSON.parse(JSON.stringify(datasources[datasourceId].store.state)) 
-            : datasources[datasourceId].store.state[property];
-          let merge = {};
-          merge[dependenciesKey] = resolvedValues;
-          Object.assign(queryDependencies, merge);
         });
-
         query = queryFn(queryDependencies);
       } else {
         query = queryFn ? queryFn.toString() : 'n/a';
@@ -209,6 +246,10 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
         const table = datasources[datasource].config.params.table || null;
         if (queryDependencies['timespan'] && queryDependencies['timespan']['queryTimespan']) {
           timespan = queryDependencies['timespan']['queryTimespan'];
+          timespan = this.convertApplicationInsightsTimespan(timespan);
+        } else if (queryDependencies['queryTimespan']) {
+          // handle dialog params
+          timespan = queryDependencies['queryTimespan'];
           timespan = this.convertApplicationInsightsTimespan(timespan);
         }
         filter = this.formatApplicationInsightsFilterString(queryFilters, queryDependencies);
@@ -258,10 +299,10 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
   }
 
   private formatApplicationInsightsQueryString(query: string, timespan: string, filter: string, table?: string) {
-    // Move '|' to start of each line
-    let str = query.replace(/(\|)((\s??\n\s??)(.+?))/gm, '\n| $4'); 
-    str = str.replace(/(and)/gm, '\n  $1'); // force newline on 'and'
-    str = str.replace(/([^\(\'\"])(,\s*)(?=(\w+[^\)\'\"]\w+))/gim, '$1,\n  '); // force newline on ','
+    let str = query.replace(/(\|)((\s??\n\s??)(.+?))/gm, '\n| $4'); // move '|' to start of each line
+    str = str.replace(/(\s?\|\s?)([^\|])/gim, '\n| $2'); // newline on '|'
+    str = str.replace(/(\sand\s)/gm, '\n $1'); // newline on 'and'
+    str = str.replace(/([^\(\'\"])(,\s*)(?=(\w+[^\)\'\"]\w+))/gim, '$1,\n  '); // newline on ','
     const timespanQuery = '| where timestamp > ago(' + timespan + ') \n';
     // Checks for '|' at start
     const matches = str.match(/^(\s*\||\s*\w+\s*\|)/ig); 

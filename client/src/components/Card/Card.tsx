@@ -6,11 +6,25 @@ import Button from 'react-md/lib/Buttons';
 import { Settings, SettingsActions } from './Settings';
 import { SpinnerActions } from '../Spinner';
 
+const styles = {
+  noTitle: {
+    margin: 0,
+    padding: 0,
+    background: 'transparent',
+  } as React.CSSProperties,
+  noTitleContent: {
+    margin: 0,
+    padding: 0,
+  } as React.CSSProperties
+};
+
 interface ICardProps {
   id?: string;
   title?: string;
   subtitle?: string;
   widgets?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
   titleStyle?: React.CSSProperties;
   contentStyle?: React.CSSProperties;
   hideTitle?: boolean;
@@ -20,10 +34,10 @@ interface ICardState {
   hover: boolean;
 }
 
-export default class Card extends React.PureComponent<ICardProps, ICardState> {
+export default class Card extends React.PureComponent<ICardProps, ICardState> { 
 
   static defaultProps = {
-    hideTitle: false
+    hideTitle: false,
   };
 
   state = {
@@ -35,7 +49,7 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
   }
 
   render() {
-    const { id, title, subtitle, children, titleStyle, contentStyle, hideTitle } = this.props;
+    const { id, title, subtitle, children, className, style, titleStyle, contentStyle, hideTitle } = this.props;
     const { hover } = this.state;
 
     let elements: React.ReactNode[] = [];
@@ -61,11 +75,23 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
     if (hover) {
       elements.push( this.renderWidgets() );
     }
+
+    // NB: Fix for Card scroll content when no title
+    let cardTitleStyle = titleStyle || {};
+    let cardContentStyle = contentStyle || {};
+    if (hideTitle) {
+      Object.assign(cardTitleStyle, styles.noTitle);
+      Object.assign(cardContentStyle, styles.noTitleContent);
+    }
     
     return (
-      <MDCard onMouseOver={() => this.setState({ hover: true })} onMouseLeave={() => this.setState({ hover: false })}>
-        <CardTitle title="" subtitle={elements} style={titleStyle} />
-        <Media style={contentStyle}>
+      <MDCard 
+        onMouseOver={() => this.setState({ hover: true })} 
+        onMouseLeave={() => this.setState({ hover: false })}
+        className={className}
+        style={style}>
+        <CardTitle title="" subtitle={elements} style={cardTitleStyle} /> 
+        <Media style={cardContentStyle}>
           {children}
         </Media>
       </MDCard>

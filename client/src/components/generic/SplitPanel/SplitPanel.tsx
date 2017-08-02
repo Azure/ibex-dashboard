@@ -93,7 +93,7 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
   }
 
   render() {
-    const { props } = this.props;
+    const { props, id } = this.props;
     const { cols, group, hideBorders, compact } = props;
     const { groups, values } = this.state;
 
@@ -123,11 +123,12 @@ export default class SplitPanel extends GenericComponent<ISplitViewProps, ISplit
         />
       );
     });
-
+    
     const table = (!values || values.length === 0) ?
       <CircularProgress key="loading" id="spinner" />
       : (
         <Table
+          id={id}
           props={this.props.props}
           dependencies={this.props.dependencies}
           actions={this.props.actions || {}}

@@ -81,6 +81,12 @@
 	text-overflow: ellipsis;
 }
 
+/* MD tooltip to appear on top of Ace editor */
+
+.md-tooltip-container {
+  z-index: 2 !important;
+}
+
 /* Table */
 
 .table > .primary {
