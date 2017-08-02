@@ -32,6 +32,7 @@ import FontIcon from 'react-md/lib/FontIcons';
 import Avatar from 'react-md/lib/Avatars';
 import Subheader from 'react-md/lib/Subheaders';
 import Divider from 'react-md/lib/Dividers';
+import TextField from 'react-md/lib/TextFields';
 
 interface IDashboardProps {
   dashboard?: IDashboardConfig;
@@ -41,6 +42,7 @@ interface IDashboardState {
   editMode?: boolean;
   askDelete?: boolean;
   askDownload?: boolean;
+  askSaveAsTemplate?: boolean;
   downloadFiles?: IDownloadFile[];
   downloadFormat?: string;
   mounted?: boolean;
@@ -51,15 +53,18 @@ interface IDashboardState {
   visibilityFlags?: IDict<boolean>;
   infoVisible?: boolean;
   infoHtml?: string;
+  newTemplateName?: string;
+  newTemplateDescription?: string;
 }
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
- 
+
   layouts = {};
 
   state = {
     editMode: false,
     askDelete: false,
+    askSaveAsTemplate: false,
     askDownload: false,
     downloadFiles: [],
     downloadFormat: 'json',
@@ -71,6 +76,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     visibilityFlags: {},
     infoVisible: false,
     infoHtml: '',
+    newTemplateName: '',
+    newTemplateDescription: ''
   };
 
   constructor(props: IDashboardProps) {
@@ -91,10 +98,17 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onClickDownloadFile = this.onClickDownloadFile.bind(this);
     this.onChangeDownloadFormat = this.onChangeDownloadFormat.bind(this);
     this.onDownloadDashboard = this.onDownloadDashboard.bind(this);
+    this.onSaveAsTemplate = this.onSaveAsTemplate.bind(this);
+    this.newTemplateNameChange = this.newTemplateNameChange.bind(this);
+    this.onSaveAsTemplateApprove = this.onSaveAsTemplateApprove.bind(this);
+    this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
+    this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
     
     VisibilityStore.listen(state => {
       this.setState({ visibilityFlags: state.flags });
     });
+    this.state.newTemplateName = this.props.dashboard.name;
+    this.state.newTemplateDescription = this.props.dashboard.description;
   }
 
   componentDidMount() {
@@ -176,6 +190,38 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ askDelete: true });
   }
 
+  onSaveAsTemplate() {
+    this.setState({ askSaveAsTemplate: true });
+  }
+
+  onSaveAsTemplateApprove() {
+    let { dashboard } = this.props;
+    var template = _.cloneDeep(dashboard);
+    template.name = this.state.newTemplateName;
+    template.description = this.state.newTemplateDescription;
+    template.category = 'Custom Templates';
+    template.id = template.url = dashboard.id + (Math.floor(Math.random() * 1000) + 1); // generate random id
+
+    // Removing connections so private info will not be included
+    template.config.connections = {};
+
+    ConfigurationsActions.saveAsTemplate(template);
+    window.location.href = '/';
+    this.setState({ askSaveAsTemplate: false });
+  }
+
+  onSaveAsTemplateCancel() {
+    this.setState({ askSaveAsTemplate: false });
+  }
+
+  newTemplateNameChange(value: string, e: any) {
+    this.setState({ newTemplateName: value });
+  }
+
+  newTemplateDescriptionChange(value: string, e: any) {
+    this.setState({ newTemplateDescription: value });
+  }
+
   onDeleteDashboardApprove() {
     let { dashboard } = this.props;
     if (!dashboard) {
@@ -252,7 +298,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       askDownload, 
       downloadFiles, 
       downloadFormat, 
-      askConfig 
+      askConfig ,
+      askSaveAsTemplate,
+      newTemplateName,
+      newTemplateDescription
     } = this.state;
     const { infoVisible, infoHtml } = this.state;
     const layout = this.state.layouts[currentBreakpoint];
@@ -316,6 +365,12 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
         (
           <span>
             <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
+          </span>
+        ),
+        (
+          <span>
+            <Button key="saveAsTemplate" icon tooltipLabel="Save as template" 
+                    onClick={this.onSaveAsTemplate}>cloud_download</Button>
           </span>
         )
       );
@@ -450,6 +505,38 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
             Deleting this dashboard will remove all Connections/Customization you have made to it.
             Are you sure you want to permanently delete this dashboard?
           </p>
+        </Dialog>
+
+        <Dialog
+          dialogStyle={{ width: '50%' }}
+          id="saveAsTemplateDialog"
+          visible={askSaveAsTemplate}
+          title="Save this dashoard as a custom template"
+          modal
+          actions={[
+            { onClick: this.onSaveAsTemplateApprove, primary: false, label: 'Save as custom template', },
+            { onClick: this.onSaveAsTemplateCancel, primary: true, label: 'Cancel' }
+          ]}
+        >
+          <p>You can save this dashboard as a custom template for a future reuse</p>
+          <TextField
+            id="templateName"
+            label="New Template Name"
+            placeholder="Template Name"
+            className="md-cell md-cell--bottom"
+            value={newTemplateName}
+            onChange={this.newTemplateNameChange}
+            required
+          />
+          <TextField
+            id="templateDescription"
+            label="New Template Description"
+            placeholder="Template Description"
+            className="md-cell md-cell--bottom"
+            value={newTemplateDescription}
+            onChange={this.newTemplateDescriptionChange}
+            required
+          />
         </Dialog>
       </div>
     );
