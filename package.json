@@ -12,5 +12,6 @@
     "start:server": "cd server && yarn start",
     "start:dev": "npm-run-all -p start:client start:server",
     "postinstall": "cd client && yarn && cd ../server && yarn"
-  }
+  },
+  "license": "MIT"
 }
