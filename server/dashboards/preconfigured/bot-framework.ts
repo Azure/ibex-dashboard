@@ -1,49 +1,44 @@
-/// <reference path="../../../src/types.d.ts"/>
-import * as _ from 'lodash'; 
+/// <reference path="../../../client/@types/types.d.ts"/>
+import * as _ from 'lodash';
 
 // The following line is important to keep in that format so it can be rendered into the page
 export const config: IDashboardConfig = /*return*/ {
   id: 'bot_analytics_dashboard',
-  name: 'Bot Analytics Dashboard',
+  name: 'Bot Analytics Basic Dashboard',
   icon: "dashboard",
-	url: "bot_analytics_dashboard",
+  url: "bot_analytics_dashboard",
   description: 'Microsoft Bot Framework based analytics',
-  preview: '/images/bot-framework-preview.png',
-	html: `<div>
-				<h1>Bot Analytics Dashboard</h1>
-				<h2>Additional features</h2>
-				<ul>
-					<li>Modes
-						<ul>
-							<li>Allows fast switching between different views</li>
-						</ul>
-					</li>
-				</ul>
-        <h2>Background</h2>
-        <p>
-          This dashboard is designed to enable querying data on top of <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-analytics" target="_blank">Application Insights Analytics</a>.<br/>
-          You can also extend it by developing additional <b>Data Sources</b> or <b>Visual Components</b>.
-        </p>
+  preview: '/images/bot-ai-base.png',
+  category: 'Bots',
+	html: `
+    <div>
+      This dashboard is built to view the events being sent by the Bot Framework sent for a registered bot.
+      <br/>
+      <br/>
+      <h2>Getting Additional Telemetry</h2>
+      <p>
+        Parts of this dashboard will not be functional unless you add additional telemetry with one of the following plugins:
         <br/>
-        <h2>Telemetry plugin</h2>
-        <p>
-          To see all the capabilities of this dashboard, it is recommended to integrate you bot with one of the following:<br/>
-          <a href="https://github.com/CatalystCode/bot-fmk-logging" target="_blank">Node.js Telemetry Plugin</a><br/>
-          <a href="https://trpp24botsamples.visualstudio.com/_git/Code?path=%2FCSharp%2Fsample-Telemetry&amp;version=GBmaster&amp;_a=contents " target="_blank">C# Telemetry Plugin</a><br/>
-          This will enable the bot to send additional telemetry information to Application Insights.
-          <br/><br/>
-          Keep in mind, the data that is stored on Application Insights is not Hippa compliant.
-        </p>
+        <a href="https://github.com/CatalystCode/botbuilder-instrumentation" target="_blank">Node.js Telemetry Plugin</a>
         <br/>
-        <h2>Additional Learnings</h2>
-        <p>
-          This dashboard uses <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-analytics" target="_blank">Application Insights Analytics</a>.<br/>
-          You can also run queries directly using <a href="https://dev.applicationinsights.io/apiexplorer/query" target="_blank">API Explorer</a>
-        </p>
-      </div>`,
+        <a href="https://github.com/CatalystCode/bot-sample-telemetry" target="_blank">C# Telemetry Plugin</a><br/>
+        This will enable the bot to send additional telemetry information to Application Insights.
+        <br/>
+        <br/>
+        If you are connecting your bot to one of these instrumentation modules, <b>Bot Analytics Instrumented Dashboard</b> will give
+        you a better view of your data.
+      </p>
+      <h2>Additional Learnings</h2>
+      <p>
+        This dashboard uses <a href="https://docs.microsoft.com/en-us/azure/application-insights/app-insights-analytics" target="_blank">Application Insights Analytics</a>.
+        <br/>
+        You can also run queries directly using <a href="https://dev.applicationinsights.io/apiexplorer/query" target="_blank">API Explorer</a>
+      </p>
+    </div>
+  `,
   config: {
-    connections: { },
-    layout: {
+		connections: { },
+		layout: {
 			isDraggable: true,
 			isResizable: true,
 			rowHeight: 30,
@@ -56,7 +51,7 @@ export const config: IDashboardConfig = /*return*/ {
 		{
 			id: "timespan",
 			type: "Constant",
-			params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "24 hours" },
+			params: { values: ["24 hours","1 week","1 month","3 months"],selectedValue: "1 month" },
 			calculated: (state, dependencies) => {
         var queryTimespan =
           state.selectedValue === '24 hours' ? 'PT24H' :
@@ -97,6 +92,8 @@ export const config: IDashboardConfig = /*return*/ {
 						mappings: { channel: (val) => val || "unknown",channel_count: (val) => val || 0 },
 						calculated: (filterChannels, dependencies, prevState) => {
 
+              if (!filterChannels) { return; }
+
               // This code is meant to fix the following scenario:
               // When "Timespan" filter changes, to "channels-selected" variable
               // is going to be reset into an empty set.
@@ -121,6 +118,9 @@ export const config: IDashboardConfig = /*return*/ {
               order by intent_count`,
 						mappings: { intent: (val) => val || "unknown",intent_count: (val) => val || 0 },
 						calculated: (filterIntents, dependencies, prevState) => {
+
+              if (!filterIntents) { return; }
+
               const intents = filterIntents.map((x) => x.intent);
               let selectedValues = [];
               if (prevState['intents-selected'] !== undefined) {
@@ -149,40 +149,6 @@ export const config: IDashboardConfig = /*return*/ {
 			params: {
 				table: "customEvents",
 				queries: {
-					conversions: {
-						query: () => `
-								extend successful=tostring(customDimensions.successful) |
-								where name in ('MBFEvent.StartTransaction', 'MBFEvent.EndTransaction') |
-								summarize event_count=count() by name, successful`,
-						mappings: { successful: (val) => val === 'true',event_count: (val) => val || 0 },
-						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
-						calculated: (conversions) => {
-
-							// Conversion Handling
-							// ===================
-
-              let total, successful;
-							total = _.find(conversions, { name: 'MBFEvent.StartTransaction' });
-							successful = _.find(conversions, { name: 'MBFEvent.EndTransaction', successful: true }) || { event_count: 0 };
-
-							if (!total) {
-								return null;
-							}
-
-              // TODO: +5 to enable true numbers in conversions
-							var displayValues = [
-								{ label: 'Successful', count: successful.event_count }, 
-								{ label: 'Failed', count: total.event_count - successful.event_count + 5 }, 
-							];
-
-							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1); 
-
-							return {
-								"conversions-displayValues": displayValues,
-								"conversions-rate": conversionRate + '%',
-							};
-						}
-					},
 					timeline: {
 						query: (dependencies) => {
 							var { granularity } = dependencies;
@@ -310,6 +276,40 @@ export const config: IDashboardConfig = /*return*/ {
 							return { "users-value": (users && users.length && users[0].totalUsers) || 0 };
 						}
 					},
+					conversions: {
+						query: () => `
+								extend successful=tostring(customDimensions.successful) |
+								where name in ('MBFEvent.StartTransaction', 'MBFEvent.EndTransaction') |
+								summarize event_count=count() by name, successful`,
+						mappings: { successful: (val) => val === 'true',event_count: (val) => val || 0 },
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: (conversions) => {
+
+							// Conversion Handling
+							// ===================
+
+              let total, successful;
+							total = _.find(conversions, { name: 'MBFEvent.StartTransaction' });
+							successful = _.find(conversions, { name: 'MBFEvent.EndTransaction', successful: true }) || { event_count: 0 };
+
+							if (!total) {
+								return null;
+							}
+
+              // TODO: +5 to enable true numbers in conversions
+							var displayValues = [
+								{ label: 'Successful', count: successful.event_count }, 
+								{ label: 'Failed', count: total.event_count - successful.event_count + 5 }, 
+							];
+
+							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1); 
+
+							return {
+								"conversions-displayValues": displayValues,
+								"conversions-rate": conversionRate + '%',
+							};
+						}
+					},
 					mapActivity: {
 						query: () => `
                     where name=='Activity' |
@@ -349,6 +349,69 @@ export const config: IDashboardConfig = /*return*/ {
 								"sentiment-subheading" : sentimentValue > 60 ? 'Positive' : sentimentValue < 40 ? 'Negative' : 'Neutral'
 							};
 						}
+					},
+					retention_total_incoming_messages: {
+						query: () => `where name == "MBFEvent.UserMessage" | count`,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: results => 
+              ({ retention_total_incoming_messages: (results && results.length && results[0].Count) || 0 })
+					},
+					retention_avg_incoming_per_user: {
+						query: () => `
+              where name == "MBFEvent.UserMessage" |
+              extend userId=tostring(customDimensions.userId) |
+              summarize messages=count() by userId |
+              summarize avg_message=avg(messages) `,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: (results) => 
+              ({ retention_avg_incoming_per_user: (results && results.length && results[0].avg_message) || 0 })
+					},
+					retention_total_outgoing_messages: {
+						query: () => `where name == "MBFEvent.BotMessage" | count`,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: results => 
+              ({ retention_total_outgoing_messages: (results && results.length && results[0].Count) || 0 })
+					},
+					retention_avg_outgoing_per_user: {
+						query: () => `
+              where name == "MBFEvent.BotMessage" |
+              extend userId=tostring(customDimensions.userId), conversation=tostring(customDimensions.conversationId) |
+              summarize messages=count() by userId, conversation |
+              summarize avg_messages=avg(messages) `,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: results => 
+              ({ retention_avg_outgoing_per_user: (results && results.length && results[0].avg_messages) || 0 })
+					},
+					retention_avg_sessions_per_user: {
+						query: () => `
+              where name == "MBFEvent.UserMessage" |
+              extend userId=tostring(customDimensions.userId), conversation=tostring(customDimensions.conversationId) |
+              summarize messages=count() by bin(timestamp, 1h), conversation, userId |
+              summarize sum_sessions=count() by conversation, userId |
+              summarize avg_sessions=avg(sum_sessions)`,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: results => 
+              ({ retention_avg_sessions_per_user: (results && results.length && results[0].avg_sessions) || 0 })
+					},
+					retention_avg_messages_per_session: {
+						query: () => `
+              where name == "MBFEvent.UserMessage" |
+              extend userId=tostring(customDimensions.userId), conversation=tostring(customDimensions.conversationId) |
+              summarize messages=count() by bin(timestamp, 1h), conversation, userId |
+              summarize sum_sessions=count() by conversation, userId |
+              summarize avg_sessions=avg(sum_sessions)`,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
+						calculated: results => 
+              ({ retention_avg_messages_per_session: (results && results.length && results[0].avg_sessions) || 0 })
+					},
+					retention_top_users: {
+						query: () => `
+              where name == "MBFEvent.UserMessage" |
+              extend userId=substring(tostring(customDimensions.userId), 0, 30), fullUserId=tostring(customDimensions.userId) |
+              summarize messages=count() by fullUserId, userId |
+              top 5 by messages 
+            `,
+						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }]
 					}
 				}
 			}
@@ -545,7 +608,7 @@ export const config: IDashboardConfig = /*return*/ {
 			subtitle: "Total messages sent per channel",
 			size: { w: 3,h: 8 },
 			dependencies: { visible: "modes:messages",values: "ai:timeline-channelUsage" },
-			props: { showLegend: false,compact: true }
+			props: { showLegend: true,compact: true,entityType: "Messages" }
 		},
 		{
 			id: "channels",
@@ -554,7 +617,7 @@ export const config: IDashboardConfig = /*return*/ {
 			subtitle: "Total users sent per channel",
 			size: { w: 3,h: 8 },
 			dependencies: { visible: "modes:users",values: "ai:timeline-users-channelUsage" },
-			props: { showLegend: false,compact: true }
+			props: { showLegend: true,compact: true,entityType: "Users" }
 		},
 		{
 			id: "scores",
@@ -563,6 +626,7 @@ export const config: IDashboardConfig = /*return*/ {
 			dependencies: {
 				card_errors_value: "errors:typesTotal",
 				card_errors_heading: "::Errors",
+        card_errors_tooltip: "::Total errors",
 				card_errors_color: "errors:typesTotal_color",
 				card_errors_icon: "errors:typesTotal_icon",
 				card_errors_subvalue: "errors:typesTotal",
@@ -570,19 +634,22 @@ export const config: IDashboardConfig = /*return*/ {
 				card_errors_onClick: "::onErrorsClick",
 				card_sentiment_value: "ai:sentiment-height",
 				card_sentiment_heading: "::Sentiment",
+        card_sentiment_tooltip: "::Average sentiment",
 				card_sentiment_color: "ai:sentiment-color",
 				card_sentiment_icon: "ai:sentiment-icon",
 				card_sentiment_subvalue: "ai:sentiment-subvalue",
 				card_sentiment_subheading: "ai:sentiment-subheading",
 				card_sentiment_onClick: "::onSentimentsClick",
 				card_users_value: "retention:total",
-				card_users_heading: "::Unique Users",
+				card_users_heading: "::Users",
+        card_users_tooltip: "::User retention",
 				card_users_icon: "::account_circle",
 				card_users_subvalue: "retention:returning",
 				card_users_subheading: "::Returning",
 				card_users_onClick: "::onUsersClick",
 				card_conversions_value: "ai:conversions-rate",
 				card_conversions_heading: "::Conversions",
+        card_conversions_tooltip: "::Conversion rate",
 				card_conversions_icon: "::input",
 				card_conversions_color: "::#2196F3"
 			},
@@ -636,10 +703,46 @@ export const config: IDashboardConfig = /*return*/ {
 				{
 					id: "intentsDialog-data",
 					type: "ApplicationInsights/Query",
-					dependencies: { intent: "dialog_intentsDialog:intent",queryTimespan: "dialog_intentsDialog:queryspan" },
+					dependencies: {
+						intent: "dialog_intentsDialog:intent",
+						queryTimespan: "dialog_intentsDialog:queryspan",
+						timespan: "timespan",
+						granularity: "timespan:granularity"
+					},
 					params: {
 						table: "customEvents",
 						queries: {
+							"intent-usage": {
+								query: ({ intent, granularity }) => `
+                  extend intent=(customDimensions.intent)
+                  | where timestamp > ago(30d) and intent =~ "${intent}"
+                  | summarize intent_count=count() by bin(timestamp, ${granularity})
+                  | order by timestamp 
+                `,
+								calculated: (timeline, dependencies) => {
+                  // Timeline handling
+                  // =================
+
+                  let _timeline = [];
+                  let { timespan } = dependencies;
+
+                  timeline.forEach(row => {
+                    var { timestamp, intent_count } = row;
+                    var timeValue = (new Date(timestamp)).getTime();
+
+                    _timeline.push({
+                      time: (new Date(timestamp)).toUTCString(),
+                      value: intent_count
+                    });
+                  });
+
+                  return {
+                    "timeline-graphData": _timeline,
+                    "timeline-values": ["value"],
+                    "timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date')
+                  };
+                }
+							},
 							"entities-usage": {
 								query: ({ intent }) => `
                     extend conversation=tostring(customDimensions.conversationId), 
@@ -824,7 +927,7 @@ export const config: IDashboardConfig = /*return*/ {
             `
 					},
 					calculated: ({ values }) => {
-            let sentimentValue = (Math as any).round(((values && values.length && values[0].avg_sentiment) || 0) * 100, 1);
+            let sentimentValue = +(((values && values.length && values[0].avg_sentiment) || 0) * 100, 1).toFixed(1);
             return {
               "sentiment-value": sentimentValue + '%',
               "sentiment-height": sentimentValue + '%',
@@ -842,7 +945,7 @@ export const config: IDashboardConfig = /*return*/ {
 					type: "BarData",
 					title: "Entity count appearances in intent",
 					subtitle: "Entity usage and count for the selected intent",
-					size: { w: 4,h: 8 },
+					size: { w: 6,h: 8 },
 					dependencies: { values: "intentsDialog-data:entities-usage",bars: "intentsDialog-data:entities-usage-bars" },
 					props: { nameKey: "entityType" }
 				},
@@ -853,6 +956,19 @@ export const config: IDashboardConfig = /*return*/ {
 					dependencies: { values: "intentsDialog-data:intent_utterances" },
 					props: {
 						cols: [{ header: "Top Utterances",width: "200px",field: "text" },{ header: "Count",field: "count_utterances",type: "number" }]
+					}
+				},
+				{
+					id: "intent-timeline",
+					type: "Timeline",
+					title: "Message Rate",
+					subtitle: "How many messages were sent per timeframe",
+					size: { w: 8,h: 8 },
+					dependencies: {
+						visible: "modes:messages",
+						values: "intentsDialog-data:timeline-graphData",
+						lines: "intentsDialog-data:timeline-values",
+						timeFormat: "intentsDialog-data:timeline-timeFormat"
 					}
 				},
 				{
@@ -919,7 +1035,12 @@ export const config: IDashboardConfig = /*return*/ {
 					actions: {
 						openMessagesDialog: {
 							action: "dialog:messages",
-							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+							params: {
+								title: "args:id",
+								conversation: "args:conversation",
+								intent: "dialog_intentConversations:intent",
+								queryspan: "timespan:queryTimespan"
+							}
 						}
 					}
 				}
@@ -941,7 +1062,7 @@ export const config: IDashboardConfig = /*return*/ {
                       intent=customDimensions.intent,
                       timestamp=tostring(customDimensions.timestamp),
                       userId=tostring(customDimensions.userId)
-              | where name=='MBFEvent.Intent' and intent =~ 'alarm.set'
+              | where name=='MBFEvent.Intent'
               | join kind= leftouter (
                   customEvents |
                   where name startswith 'MBFEvent.Sentiment' |
@@ -984,7 +1105,7 @@ export const config: IDashboardConfig = /*return*/ {
 					actions: {
 						openMessagesDialog: {
 							action: "dialog:messages",
-							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan",intent: "::" }
 						}
 					}
 				},
@@ -1006,7 +1127,7 @@ export const config: IDashboardConfig = /*return*/ {
 					actions: {
 						openMessagesDialog: {
 							action: "dialog:messages",
-							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan" }
+							params: { title: "args:id",conversation: "args:conversation",queryspan: "timespan:queryTimespan",intent: "::" }
 						}
 					}
 				}
@@ -1015,14 +1136,18 @@ export const config: IDashboardConfig = /*return*/ {
 		{
 			id: "messages",
 			width: "50%",
-			params: ["title","conversation","queryspan"],
+			params: ["title","conversation","intent","queryspan"],
 			dataSources: [
 				{
 					id: "messages-data",
 					type: "ApplicationInsights/Query",
-					dependencies: { conversation: "dialog_messages:conversation",queryTimespan: "dialog_messages:queryspan" },
+					dependencies: {
+						conversation: "dialog_messages:conversation",
+						optional_intent: "dialog_messages:intent",
+						queryTimespan: "dialog_messages:queryspan"
+					},
 					params: {
-						query: ({ conversation }) => ` 
+						query: ({ conversation, optional_intent }) => ` 
               customEvents
               | extend intent=tostring(customDimensions.intent), 
                       conversation=tostring(customDimensions.conversationId), 
@@ -1037,6 +1162,16 @@ export const config: IDashboardConfig = /*return*/ {
                           userId=tostring(customDimensions.userId)
                   | where name == "MBFEvent.Sentiment" and conversation == '${conversation}'
               ) on eventTimestamp, conversation, userId
+              ${optional_intent && `
+                | union (
+                    customEvents
+                    | extend conversation=tostring(customDimensions.conversationId), 
+                            intent=tostring(customDimensions.intent),
+                            eventTimestamp=tostring(customDimensions.timestamp),
+                            userId=tostring(customDimensions.userId)
+                    | where name == "MBFEvent.Intent" and intent == '${optional_intent}' and conversation == '${conversation}'
+                )
+              ` || ''}
               | union (
                   customEvents
                   | extend conversation=tostring(customDimensions.conversationId), 
@@ -1054,16 +1189,32 @@ export const config: IDashboardConfig = /*return*/ {
 
             if (!values) { return; }
 
-            let chat = values.map(msg => (
-              _.extend(msg, { 
-                icon:  isNaN(parseInt(msg.sentiment)) ? '' :
+            _.forEach(values, (msg, index) => {
+              msg.message = msg.message;
+              msg.icon = isNaN(parseInt(msg.sentiment)) ? '' :
                        msg.sentiment > 0.6 ? 'sentiment_satisfied' : 
-                       msg.sentiment < 0.4 ? 'sentiment_dissatisfied' : '',
-                color: isNaN(parseInt(msg.sentiment)) ? '' :
+                       msg.sentiment < 0.4 ? 'sentiment_dissatisfied' : '';
+              msg.color = isNaN(parseInt(msg.sentiment)) ? '' :
                        msg.sentiment > 0.6 ? '#AEEA00' :
-                       msg.sentiment < 0.4 ? '#D50000' : '',
-              })
-            ));
+                       msg.sentiment < 0.4 ? '#D50000' : '';
+
+              if (msg.eventName === 'MBFEvent.UserMessage') {
+                let i = +index;
+                let j = i + 1;
+                while(j <= i + 5 && j < values.length) {
+                  let intent = values[j];
+                  if (intent.eventName === 'MBFEvent.Intent' && intent.message === msg.message && intent.intent) {
+                    msg.intent = intent.intent;
+                    msg.message = '[' + msg.intent + '] ' + msg.message;
+                    msg.eventName = msg.eventName + ' intent';
+                    break;
+                  }
+                  j++;
+                }
+              }
+            });
+
+            let chat = values.filter(msg => msg.eventName !== 'MBFEvent.Intent');
 
             return { chat };
           }
@@ -1081,7 +1232,7 @@ export const config: IDashboardConfig = /*return*/ {
 						cols: [
 							{ header: "Timestamp",width: "50px",field: "timestamp",type: "time",format: "MMM-DD HH:mm:ss" },
 							{ width: "10px",field: "icon",type: "icon",color: "color" },
-							{ header: "Message",field: "message" }
+							{ header: "Message",width: "500px",field: "message" }
 						]
 					}
 				}
@@ -1127,7 +1278,7 @@ export const config: IDashboardConfig = /*return*/ {
 					id: "errors-list",
 					type: "SplitPanel",
 					title: "Errors",
-					size: { w: 12,h: 16 },
+					size: { w: 12,h: 14 },
 					dependencies: { groups: "errors-group",values: "errors-selection" },
 					props: {
 						cols: [
@@ -1136,7 +1287,9 @@ export const config: IDashboardConfig = /*return*/ {
 							{ header: "HandledAt",field: "handledAt" },
 							{ type: "button",value: "more",click: "openErrorDetail" }
 						],
-						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" }
+						group: { field: "type",secondaryField: "innermostMessage",countField: "error_count" },
+            hideBorders: true,
+            defaultRowsPerPage: 20,
 					},
 					actions: {
 						select: {
@@ -1181,7 +1334,7 @@ export const config: IDashboardConfig = /*return*/ {
 					id: "errordetail-item",
 					type: "Detail",
 					title: "Error detail",
-					size: { w: 12,h: 16 },
+					size: { w: 12,h: 14 },
 					dependencies: { values: "errordetail-data" },
 					props: {
 						cols: [
@@ -1204,18 +1357,114 @@ export const config: IDashboardConfig = /*return*/ {
 			dataSources: [],
 			elements: [
 				{
+					id: "retention-scores",
+					type: "Scorecard",
+					size: { w: 6,h: 3 },
+					dependencies: {
+						card_msgs_icon: "::chat",
+						card_msgs_value: "ai:retention_total_incoming_messages",
+						card_msgs_heading: "::Total Msgs",
+						card_msgs_subvalue: "ai:retention_total_outgoing_messages",
+						card_msgs_subheading: "::Outgoing",
+						card_msgs_color: "::#2196F3",
+						card_impu_icon: "::account_circle",
+						card_impu_value: "ai:retention_avg_incoming_per_user",
+						card_impu_heading: "::Avg msg/usr",
+						card_impu_subvalue: "ai:retention_avg_outgoing_per_user",
+						card_impu_subheading: "::Outgoing",
+						card_impu_color: "::#2196F3",
+						card_aspu_icon: "::account_circle",
+						card_aspu_value: "ai:retention_avg_sessions_per_user",
+						card_aspu_heading: "::Avg ssn/usr",
+						card_aspu_subvalue: "ai:retention_avg_messages_per_session",
+						card_aspu_subheading: "::Msg/Session",
+						card_aspu_color: "::#2196F3"
+					}
+				},
+				{
 					id: "user-retention-table",
 					type: "Table",
 					title: "User Retention",
-					size: { w: 12,h: 16 },
+					size: { w: 3,h: 9 },
 					dependencies: { values: "retention" },
 					props: {
+						compact: true,
 						cols: [
 							{ header: "Time Span",field: "timespan" },
 							{ header: "Retention",field: "retention" },
 							{ header: "Returning",field: "returning" },
 							{ header: "Unique Users",field: "unique" }
 						]
+					}
+				},
+				{
+					id: "top-users-table",
+					type: "Table",
+					title: "Top Users",
+					size: { w: 3,h: 9 },
+					dependencies: { values: "ai:retention_top_users" },
+					props: {
+						compact: true,
+						cols: [
+							{ header: "User Id",field: "userId" },
+							{ header: "Messages",field: "messages" },
+							{ type: "button",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:userConversations",
+							params: { title: "args:userId",userId: "args:fullUserId",queryspan: "timespan:queryTimespan" }
+						}
+					}
+				}
+			]
+		},
+		{
+			id: "userConversations",
+			width: "60%",
+			params: ["title","userId","queryspan"],
+			dataSources: [
+				{
+					id: "user-conversations-data",
+					type: "ApplicationInsights/Query",
+					dependencies: { userId: "dialog_userConversations:userId",queryTimespan: "dialog_userConversations:queryspan" },
+					params: {
+						query: ({ userId }) => ` 
+              customEvents
+              | extend conversation=tostring(customDimensions.conversationId), userId=tostring(customDimensions.userId)
+              | where name=='MBFEvent.UserMessage' and userId == '${userId}'
+              | summarize count=count(), maxTimestamp=max(timestamp) by conversation
+              | order by maxTimestamp`,
+						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
+					}
+				}
+			],
+			elements: [
+				{
+					id: "user-conversations-list",
+					type: "Table",
+					title: "Conversations",
+					size: { w: 12,h: 16 },
+					dependencies: { values: "user-conversations-data" },
+					props: {
+						cols: [
+							{ header: "Conversation Id",field: "id" },
+							{ header: "Last Message",field: "maxTimestamp",type: "time",format: "MMM-DD HH:mm:ss" },
+							{ header: "Count",field: "count" },
+							{ type: "button",value: "chat",click: "openMessagesDialog" }
+						]
+					},
+					actions: {
+						openMessagesDialog: {
+							action: "dialog:messages",
+							params: {
+								title: "args:id",
+								conversation: "args:conversation",
+								intent: "dialog_intentConversations:intent",
+								queryspan: "timespan:queryTimespan"
+							}
+						}
 					}
 				}
 			]
