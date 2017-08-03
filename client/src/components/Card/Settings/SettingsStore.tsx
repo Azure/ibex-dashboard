@@ -99,13 +99,13 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
     if (elements[index].id === id) {
       this.getElement(elements, index);
       return;
-    } 
-    
+    }
+
     // handle dialog element
     dashboard.dialogs.every(dialog => {
-        if (dialog.elements[index].id === id) {
+        if (dialog.elements.length > index && dialog.elements[index].id === id) {
           elements = dialog.elements;
-          this.getElement(elements, index, true);
+          this.getElement(elements, index);
           return false;
         } else {
           return true;
@@ -113,13 +113,13 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       });
   }
 
-  private getElement(elements: IElement[], index: number, isDialog: boolean = false) {
+  private getElement(elements: IElement[], index: number) {
     const element: IElement = elements[index];
-    this.exportData = this.extrapolateExportData(element.dependencies, isDialog);
+    this.exportData = this.extrapolateExportData(element.dependencies);
     this.selectedIndex = 0; // resets dialog menu selection
   }
 
-  private extrapolateExportData(dependencies: IStringDictionary, isDialog: boolean = false): IExportData[] {
+  private extrapolateExportData(dependencies: IStringDictionary): IExportData[] {
     let result: IExportData[] = [];
     const datasources = DataSourceConnector.getDataSources();
     Object.keys(dependencies).forEach((id) => {
@@ -127,12 +127,9 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
 
       let dependencySource = dependency;
       let dependencyProperty = 'values';
+      const dependencyPath = dependency.split(':');
 
-      if (!isDialog) {
-        const dependencyPath = dependency.split(':');
-        if (dependencyPath.length !== 2) {
-          return;
-        }
+      if (dependencyPath.length === 2) {
         dependencySource = dependencyPath[0];
         dependencyProperty = dependencyPath[1];
       }
@@ -174,12 +171,12 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
         queryFn = params.query;
       } else {
         // forked
-        if (forkedQueryComponents.length === 2) {
+        if (!params.queries[queryId] && forkedQueryComponents.length === 2) {
           queryId = forkedQueryComponents[0];
           group = queryId;
         }
         if (!params.queries[queryId]) {
-          console.warn(`Unable to locate query id '${queryId}' in datasource '${dependencySource}'.`);
+          console.warn(`Unable to locate query id '${queryId}' in datasource '${dependencySource}'.`, dependency);
           return;
         }
         queryFn = params.queries[queryId].query;

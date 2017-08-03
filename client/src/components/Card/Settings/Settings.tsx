@@ -184,6 +184,59 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
       ];
     }
 
+    let id = 'Element id error';
+    if ( elementId) {
+      id = elementId.split('@')[0] || 'Element index error';
+    }
+
+    const content = !query ? (
+      <div className="md-toolbar-relative md-grid">
+        <div className="md-cell--12">
+          <h3>{id}</h3>
+        </div>
+        <div className="md-cell--12">
+          <p>Use the same id for the element and data source to unwind the query and data.</p>
+        </div>
+      </div>
+    ) : (
+      <div className="md-toolbar-relative md-grid md-grid--no-spacing">
+        <div className="md-cell--6">
+          <Toolbar title="Data" actions={dataActions} themed style={{ width: '100%' }} />
+          <AceEditor className="md-cell--12"
+            name="ace"
+            mode={mode}
+            theme="github"
+            value={json}
+            readOnly={true}
+            showGutter={true}
+            showPrintMargin={false}
+            highlightActiveLine={true}
+            tabSize={2}
+            width="100%"
+            height={aceHeight}
+            editorProps={editorProps}
+          />
+        </div>
+        <div className="md-cell--6">
+          <Toolbar title="Query" actions={queryActions} themed style={{ width: '100%' }} />
+          <AceEditor className="md-cell--12"
+            name="ace"
+            mode="text"
+            theme="github"
+            value={query}
+            readOnly={true}
+            showGutter={true}
+            showPrintMargin={false}
+            highlightActiveLine={true}
+            tabSize={2}
+            width="100%"
+            height={aceHeight}
+            editorProps={editorProps}
+          />
+        </div>
+      </div>
+    );
+
     return (
       <Dialog
         id="editElementDialog"
@@ -203,42 +256,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
           fixed
           style={{ width: '100%' }}
         />
-        <div className="md-toolbar-relative md-grid md-grid--no-spacing">
-          <div className="md-cell--6">
-            <Toolbar title="Data" actions={dataActions} themed style={{ width: '100%' }} />
-            <AceEditor className="md-cell--12"
-              name="ace"
-              mode={mode}
-              theme="github"
-              value={json}
-              readOnly={true}
-              showGutter={true}
-              showPrintMargin={false}
-              highlightActiveLine={true}
-              tabSize={2}
-              width="100%"
-              height={aceHeight}
-              editorProps={editorProps}
-            />
-          </div>
-          <div className="md-cell--6">
-            <Toolbar title="Query" actions={queryActions} themed style={{ width: '100%' }} />
-            <AceEditor className="md-cell--12"
-              name="ace"
-              mode="text"
-              theme="github"
-              value={query}
-              readOnly={true}
-              showGutter={true}
-              showPrintMargin={false}
-              highlightActiveLine={true}
-              tabSize={2}
-              width="100%"
-              height={aceHeight}
-              editorProps={editorProps}
-            />
-          </div>
-        </div>
+        {content}
       </Dialog>
     );
   }
