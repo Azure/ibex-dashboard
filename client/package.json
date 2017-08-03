@@ -61,7 +61,7 @@
     "start": "npm-run-all -p css:watch client:start",
     "coverage": "react-scripts-ts test --env=jsdom --coverage --collectCoverageFrom=src/**/*.{ts,tsx} --collectCoverageFrom=!src/**/*.d.ts",
     "lint": "tslint src",
-    "build": "yarn run css:build && react-scripts-ts build",
+    "build": "yarn run css:build && react-scripts-ts build && rm -rf ../build/static && cp -rf build ../",
     "test": "react-scripts-ts test --env=jsdom"
   }
 }

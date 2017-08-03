@@ -67,6 +67,7 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
   description?: string,
   html?: string,
   preview?: string,
+  category?: string,
   config: {
     connections: IConnections,
     layout: {
@@ -75,12 +76,12 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
       rowHeight?: number,
       verticalCompact?: boolean, // Turns off compaction so you can place items wherever.
       cols: Sizes<number>,
-      breakpoints: Sizes<number>,
-      layouts?: ILayouts
+      breakpoints: Sizes<number>
     }
   },
   filters: IFilter[]
-  dialogs: IDialog[]
+  dialogs: IDialog[],
+  layouts?: ILayouts
 }
 
 interface Sizes<T> {

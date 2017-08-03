@@ -9,6 +9,7 @@ export const config: IDashboardConfig = /*return*/ {
   url: "basic_sample",
   description: "A basic sample to understand a basic dashboard",
   preview: "/images/sample.png",
+  category: 'Samples',
   html: `
     <div>
       This is a basic sample dashboard, with JSON based sample data source, to show how data from different data sources

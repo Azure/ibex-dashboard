@@ -9,6 +9,7 @@ export const config: IDashboardConfig = /*return*/ {
   url: "mbf_advanced_analytics",
   description: "Bot Framework Advanced Analytics Dashboard",
   preview: "/images/default.png",
+  category: 'Bots - Advanced',
   html: `POC - Additional info will be added in the future`,
   config: {
     connections: { },

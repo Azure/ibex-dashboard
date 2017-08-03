@@ -9,6 +9,7 @@ export const config: IDashboardConfig = /*return*/ {
 	url: "qna",
 	description: "Sample QnA Maker dashboard",
 	preview: "/images/default.png",
+  category: 'Bots - Advanced',
 	html: `
     <div>
       <p>Displays <a href="https://qnamaker.ai" target="_blank">QnA Maker service</a> usage metrics.</p> 
