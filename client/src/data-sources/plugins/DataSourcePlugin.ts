@@ -1,4 +1,4 @@
-
+import { IDataSource } from '../DataSourceConnector';
 import { ToastActions } from '../../components/Toast';
 
 export interface IDataSourceOptions {
@@ -39,6 +39,7 @@ export interface IDataSourcePlugin {
   getParams(): IDictionary;
   getCalculated(): ICalculated;
   getConnection(): IStringDictionary;
+  getElementQuery(dataSource: IDataSource, dependencies: IDict<any>, aQuery: string, queryFilters: any): string;
 }
 
 export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
@@ -141,6 +142,12 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
 
   getCalculated() {
     return this._props.calculated;
+  }
+
+  getElementQuery(dataSource: IDataSource, dependencies: IDict<any>, aQuery: string, queryFilters: any): string {
+    const plugin = dataSource.plugin.type;
+    console.warn(`'getElementQuery' function may not be fully implemented for the ${plugin} plugin.`);
+    return null;
   }
 
   failure(error: any): void { 

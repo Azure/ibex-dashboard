@@ -1,7 +1,7 @@
 import * as React from 'react';
 import alt, { AbstractStoreModel } from '../../../alt';
 
-import { DataSourceConnector, IDataSourceDictionary } from '../../../data-sources/DataSourceConnector';
+import { DataSourceConnector, IDataSourceDictionary, IDataSource } from '../../../data-sources/DataSourceConnector';
 
 import settingsActions from './SettingsActions';
 
@@ -115,11 +115,11 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
 
   private getElement(elements: IElement[], index: number) {
     const element: IElement = elements[index];
-    this.exportData = this.extrapolateExportData(element.dependencies);
+    this.exportData = this.extrapolateElementExportData(element.dependencies);
     this.selectedIndex = 0; // resets dialog menu selection
   }
 
-  private extrapolateExportData(dependencies: IStringDictionary): IExportData[] {
+  private extrapolateElementExportData(dependencies: IStringDictionary): IExportData[] {
     let result: IExportData[] = [];
     const datasources = DataSourceConnector.getDataSources();
     Object.keys(dependencies).forEach((id) => {
@@ -186,7 +186,6 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       // Query dependencies
       let query, filter = '';
       let queryDependencies: IDict<any> = {};
-      let timespan = '30d';
       if (typeof queryFn === 'function') {
         // Get query function dependencies
         const queryDependenciesDict = datasources[datasource].config.dependencies || {};
@@ -238,26 +237,17 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
 
       query = this.formatQueryString(query);
 
-      // Application Insights
-      if (datasources[datasource].config.type === 'ApplicationInsights/Query') {
-        const table = datasources[datasource].config.params.table || null;
-        if (queryDependencies['timespan'] && queryDependencies['timespan']['queryTimespan']) {
-          timespan = queryDependencies['timespan']['queryTimespan'];
-          timespan = this.convertApplicationInsightsTimespan(timespan);
-        } else if (queryDependencies['queryTimespan']) {
-          // handle dialog params
-          timespan = queryDependencies['queryTimespan'];
-          timespan = this.convertApplicationInsightsTimespan(timespan);
-        }
-        filter = this.formatApplicationInsightsFilterString(queryFilters, queryDependencies);
-        query = this.formatApplicationInsightsQueryString(query, timespan, filter, table);
+      const dataSource: IDataSource = datasources[datasource];
+      const elementQuery = dataSource.plugin.getElementQuery(dataSource, queryDependencies, query, queryFilters);
+      if (elementQuery !== null) {
+        query = elementQuery;
       }
 
       const exportData: IExportData = { id, data, isJSON, query, group, isGroupedJSON };
       result.push(exportData);
     });
 
-    // Group primative results
+    // Group primative (scorecard) results
     result = result.reduce((a: IExportData[], c: IExportData) => {
       if (c.isJSON) {
         a.push(c);
@@ -293,51 +283,6 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
   private formatQueryString(query: string) {
     // Strip indent whitespaces
     return query.replace(/(\s{2,})?(.+)?/gm, '$2\n').trim(); 
-  }
-
-  private formatApplicationInsightsQueryString(query: string, timespan: string, filter: string, table?: string) {
-    let str = query.replace(/(\|)((\s??\n\s??)(.+?))/gm, '\n| $4'); // move '|' to start of each line
-    str = str.replace(/(\s?\|\s?)([^\|])/gim, '\n| $2'); // newline on '|'
-    str = str.replace(/(\sand\s)/gm, '\n $1'); // newline on 'and'
-    str = str.replace(/([^\(\'\"])(,\s*)(?=(\w+[^\)\'\"]\w+))/gim, '$1,\n  '); // newline on ','
-    const timespanQuery = '| where timestamp > ago(' + timespan + ') \n';
-    // Checks for '|' at start
-    const matches = str.match(/^(\s*\||\s*\w+\s*\|)/ig); 
-    const start = (!matches || matches.length !== 1) ? '| ' : '';
-    if (table) {
-      str = table + ' \n' + timespanQuery + filter + start + str;
-    } else {
-      // Insert timespan and filter after table name
-      str = str.replace(/^\s*(\w+)\s*/gi, '$1 \n' + timespanQuery + filter + start); 
-    }
-    return str;
-  }
-
-  private formatApplicationInsightsFilterString(filters: IStringDictionary[], dependencies: IDict<any>) {
-    let str = '';
-    if (!filters) {
-      return str;
-    }
-    // Apply selected filters to connected query
-    filters.forEach((filter) => {
-      const { dependency, queryProperty } = filter;
-      const selectedFilters: string[] = dependencies[dependency] || [];
-      if (selectedFilters.length > 0) {
-        const f = '| where ' + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ');
-        str = `${str}${f} \n`;
-      }
-    });
-    return str;
-  }
-
-  private convertApplicationInsightsTimespan(timespan: string) {
-    let str = timespan;
-    if (timespan.substr(0, 2) === 'PT') {
-      str = str.substring(2).toLowerCase();
-    } else if (timespan.substr(0, 1) === 'P') {
-      str = str.substring(1).toLowerCase();
-    }
-    return str;
   }
 
 }
