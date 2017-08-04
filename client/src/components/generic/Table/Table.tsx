@@ -109,7 +109,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     }
 
     let totalRows = values.length;
-    let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
+    let pageValues = Array.isArray(values) && values.slice(rowIndex, rowIndex + rowsPerPage) || [];
 
     let renderColumn = (col: ITableColumnProps, value: any): JSX.Element => {
       let style = { color: col.color ? value[col.color] : null };

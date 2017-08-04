@@ -177,8 +177,11 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
           queryId = forkedQueryComponents[0];
           group = queryId;
         }
+        if (params.queries[dependencySource]) {
+          queryId = dependencySource; // dialog case
+        }
         if (!params.queries[queryId]) {
-          console.warn(`Unable to locate query id '${queryId}' in datasource '${dependencySource}'.`, dependency);
+          console.warn(`Unable to locate query id '${queryId}' in datasource '${dependencySource}'.`);
           return;
         }
         queryFn = params.queries[queryId].query;
@@ -204,7 +207,7 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
             property = path[1];
           }
 
-          if (source.startsWith('::')) {
+          if (source.startsWith('::') || source === 'connection') {
             return;
           }
 
