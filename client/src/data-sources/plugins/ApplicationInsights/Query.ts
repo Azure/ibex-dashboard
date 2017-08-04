@@ -164,19 +164,20 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     }
   }
 
-  getElementQuery(dataSource: IDataSource, dependencies: IDict<any>, aQuery: string, queryFilters: any): string {
+  getElementQuery(dataSource: IDataSource, dependencies: IDict<any>, partialQuery: string, queryFilters: any): string {
     let timespan = '30d';
-    const table = dataSource['config'].params.table || null;
-    if (dependencies['timespan'] && dependencies['timespan']['queryTimespan']) {
+    const table = dataSource && dataSource['config'] && dataSource['config'].params && 
+      dataSource['config'].params.table || null;
+    if (dependencies && dependencies['timespan'] && dependencies['timespan']['queryTimespan']) {
       timespan = dependencies['timespan']['queryTimespan'];
       timespan = this.convertApplicationInsightsTimespan(timespan);
-    } else if (dependencies['queryTimespan']) {
+    } else if (dependencies && dependencies['queryTimespan']) {
       // handle dialog params
       timespan = dependencies['queryTimespan'];
       timespan = this.convertApplicationInsightsTimespan(timespan);
     }
     const filter = this.formatApplicationInsightsFilterString(queryFilters, dependencies);
-    const query = this.formatApplicationInsightsQueryString(aQuery, timespan, filter, table);
+    const query = this.formatApplicationInsightsQueryString(partialQuery, timespan, filter, table);
     return query;
   }
 

@@ -59,6 +59,8 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
 
   closeDialog() {
     this.visible = false;
+    this.title = '';
+    this.exportData = null;
   }
 
   selectIndex(index: number) {

@@ -55,7 +55,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
     if (!values || !values.length) {
       return (
-        <Card title={title} subtitle={subtitle}>
+        <Card id={id} title={title} subtitle={subtitle}>
           <div style={{ padding: 20 }}>No data is available</div>
         </Card>
       );
