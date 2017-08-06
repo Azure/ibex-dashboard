@@ -16,7 +16,7 @@ import ConfigurationStore from '../../stores/ConfigurationsStore';
 import ConfigurationsActions from '../../actions/ConfigurationsActions';
 import utils from '../../utils';
 
-import IDownloadFile, { exportDataSources, createDownloadFiles, downloadBlob } from '../Dashboard/DownloadFile';
+import { downloadBlob } from '../Dashboard/DownloadFile';
 
 const renderHTML = require('react-render-html');
 
