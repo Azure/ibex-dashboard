@@ -61,19 +61,23 @@ export function scorecard (
   let { values } = state;
 
   let args = typeof format !== 'string' && format.args || { thresholds: null };
+  let countField = args.countField || 'count';
+  let checkValue = (values && values[0] && values[0][countField]) || 0;
   
-  let createScoreValue = (value: any, color: string, icon: string) => {
+  let createScoreValue = (value: any, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
     let prefix = args && args.prefix || plugin._props.id;
     item[prefix + '_value'] = value;
     item[prefix + '_color'] = color;
     item[prefix + '_icon'] = icon;
+    item[prefix + '_subvalue'] = subvalue || "";
+    item[prefix + '_subheading'] = subheading || "";
     return item;
   };
 
   let thresholds = args.thresholds || [ ];
-  let firstThreshold = thresholds.length && thresholds[0] || { value: 0, color: '#000', icon: 'done' };
-  let countField = args.countField || 'count';
+  if (!thresholds.length) { thresholds.push({ value: checkValue, color: '#000', icon: 'done' }) }
+  let firstThreshold = thresholds[0];
 
   if (!values || !values.length) { 
     return createScoreValue(firstThreshold.value, firstThreshold.color, firstThreshold.icon);
@@ -81,15 +85,34 @@ export function scorecard (
 
   // Todo: check validity of thresholds and each value
 
-  let checkValue = values[0][countField];
   let thresholdIdx = 0;
   let threshold = thresholds[thresholdIdx++];
   
-  while (checkValue > threshold.value && thresholds.length > thresholdIdx) {
+  while (checkValue < threshold.value && thresholds.length > thresholdIdx) {
     threshold = thresholds[thresholdIdx++];      
   }
 
-  return createScoreValue(checkValue, threshold.color, threshold.icon);
+  let subvalue = null;
+  let subheading = null;
+  if (args.subvalueField || args.subvalueThresholds) {
+    let subvalueField = args.subvalueField || null;
+    let subvalueThresholds = args.subvalueThresholds || [];
+
+    if (subvalueThresholds.length) { thresholds.push({ value: 0, subheading: '' }) }
+    
+    checkValue = values[0][subvalueField || countField] || 0;
+    thresholdIdx = 0;
+    let subvalueThreshold = subvalueThresholds[thresholdIdx++];
+    
+    while (checkValue < subvalueThreshold.value && subvalueThresholds.length > thresholdIdx) {
+      subvalueThreshold = subvalueThresholds[thresholdIdx++];      
+    }
+
+    subvalue = checkValue;
+    subheading = subvalueThreshold.subheading;
+  }
+
+  return createScoreValue(checkValue, threshold.color, threshold.icon, subvalue, subheading);
 }
 
 /**
@@ -314,7 +337,9 @@ export function timeline(
 
   const timeline = state.values;
   const { timespan } = dependencies;
-  const { timeField, lineField, valueField } = format.args;
+  const args = format.args || {};
+  const { timeField, lineField, valueField } = args;
+  let prefix = args.prefix || 'timeline';
 
   let _timeline = {};
   let _lines = {};
@@ -347,10 +372,30 @@ export function timeline(
     return value;
   });
 
-  return {
-    'timeline-graphData': timelineValues,
-    'timeline-usage': usage,
-    'timeline-timeFormat': (timespan === '24 hours' ? 'hour' : 'date'),
-    'timeline-lines': lines
-  };
+  let result = {};
+  result[prefix + '-graphData'] = timelineValues;
+  result[prefix + '-usage'] = usage;
+  result[prefix + '-timeFormat'] = (timespan === '24 hours' ? 'hour' : 'date');
+  result[prefix + '-lines'] = lines;
+
+  return result;
+}
+
+export function bars(
+  format: string | IDataFormat, 
+  state: any, 
+  dependencies: IDictionary, 
+  plugin: IDataSourcePlugin, 
+  prevState: any) {
+
+  if (!format || typeof format === 'string') { return null; }
+  
+  const args = format.args || {};
+  let prefix = args.prefix || 'prefix';
+  let valueField = args.valueField || 'value';
+
+  let result = {};
+  result[prefix + '-bars'] = [ valueField ];
+
+  return result;
 }

@@ -145,7 +145,11 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
             const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
 
             // Extract data formats
-            const format = queries[aTable].format;
+            let format = queries[aTable].format;
+            if (format && typeof format !== 'string') {
+              if (!format.args) { format.args = {}; }
+              if (!format.args.prefix) { format.args.prefix = aTable; }
+            }
             let result = { values: returnedResults[aTable] };
             let formatExtract = DataSourceConnector.handleDataFormat(format, this, result, dependencies);
             if (formatExtract) {
