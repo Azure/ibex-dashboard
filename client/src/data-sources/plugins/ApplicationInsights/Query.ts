@@ -3,6 +3,7 @@ import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { appInsightsUri } from './common';
 import ApplicationInsightsConnection from '../../connections/application-insights';
 import { DataSourceConnector } from '../../DataSourceConnector';
+import * as formats from '../../../utils/data-formats';
 
 let connectionType = new ApplicationInsightsConnection();
 
@@ -142,10 +143,20 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
             returnedResults[aTable] = resultTables.length > idx ? resultTables[idx] : null;
             // Get state for filter selection
             const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
+
+            // Extract data formats
+            const format = queries[aTable].format;
+            const formatName = format && format.type || format;
+            if (formatName && typeof formats[formatName] === 'function') {
+              let result = { values: returnedResults[aTable] };
+              let additionalValues = formats[formatName](format, result, dependencies, this, prevState) || {};
+              Object.assign(returnedResults, additionalValues);
+            }
+
             // Extracting calculated values
             let calc = queries[aTable].calculated;
             if (typeof calc === 'function') {
-              var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
+              let additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
               Object.assign(returnedResults, additionalValues);
             }
           });

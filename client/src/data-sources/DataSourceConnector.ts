@@ -5,6 +5,9 @@ import DialogsActions from '../components/generic/Dialogs/DialogsActions';
 import datasourcePluginsMappings from './plugins/PluginsMapping';
 import VisibilityActions from '../actions/VisibilityActions';
 import VisibilityStore from '../stores/VisibilityStore';
+import * as formats from '../utils/data-formats';
+
+const DataFormatTypes = formats.DataFormatTypes;
 
 export interface IDataSource {
   id: string;
@@ -307,7 +310,7 @@ export class DataSourceConnector {
         (<any> this).setState(newData);
       }
     }
-    var StoreClass = alt.createStore(NewStoreClass, config.id + '-Store');
+    var StoreClass = alt.createStore(<any>NewStoreClass, config.id + '-Store');
     return StoreClass;
   }
 
@@ -323,24 +326,28 @@ export class DataSourceConnector {
     }
 
     // Callibrate calculated values
-    var calculated = plugin._props.calculated;
-    var state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
+    const format = <any>plugin.getFormat();
+    const calculated = plugin._props.calculated;
+    const prevState = DataSourceConnector.dataSources[plugin._props.id].store.getState();
+    const formatName = format && format.type || format;
 
+    let state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
     state = _.extend(state, result);
+
+    if (formatName && typeof formats[formatName] === 'function') {
+      let additionalValues = formats[formatName](format, state, dependencies, plugin, prevState) || {};
+      Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
+    }
 
     if (typeof calculated === 'function') {
       var additionalValues = calculated(state, dependencies) || {};
-      Object.keys(additionalValues).forEach(key => {
-        result[key] = additionalValues[key];
-      });
+      Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
     }
 
     if (Array.isArray(calculated)) {
       calculated.forEach(calc => {
         var additionalValues = calc(state, dependencies) || {};
-        Object.keys(additionalValues).forEach(key => {
-          result[key] = additionalValues[key];
-        });
+        Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
       });
     }
 

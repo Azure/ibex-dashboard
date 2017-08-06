@@ -1,5 +1,6 @@
 
 import { ToastActions } from '../../components/Toast';
+import { DataFormatTypes, IDataFormat } from '../../utils/data-formats';
 
 export interface IDataSourceOptions {
   dependencies: (string | Object)[];
@@ -27,6 +28,7 @@ export interface IDataSourcePlugin {
     dependables: string[],
     actions: string[],
     params: IDictionary,
+    format: DataFormatTypes | IDataFormat,
     calculated: ICalculated
   };
 
@@ -37,6 +39,7 @@ export interface IDataSourcePlugin {
   getActions(): string[];
   getParamKeys(): string[];
   getParams(): IDictionary;
+  getFormat(): DataFormatTypes | IDataFormat;
   getCalculated(): ICalculated;
   getConnection(): IStringDictionary;
 }
@@ -53,6 +56,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     dependables: [],
     actions: [ 'updateDependencies', 'failure', 'updateSelectedValues' ],
     params: <T> {},
+    format: DataFormatTypes.none,
     calculated: {},
     autoUpdateIntervalMs: -1,
   };
@@ -73,6 +77,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.dependables = options.dependables || [];
     props.actions.push.apply(props.actions, options.actions || []);
     props.params = <T> (options.params || {});
+    props.format = options.format || DataFormatTypes.none;
     props.calculated = options.calculated || {};
     props.autoUpdateIntervalMs = options.autoUpdateIntervalMs || -1;
 
@@ -137,6 +142,10 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
 
   getParams(): T {
     return this._props.params;
+  }
+
+  getFormat() : DataFormatTypes | IDataFormat {
+    return this._props.format || DataFormatTypes.none;
   }
 
   getCalculated() {
