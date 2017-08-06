@@ -20,28 +20,28 @@ describe('Spinner', () => {
   });
 
   it ('Start page loading', () => {
-    SpinnerActions.startPageLoading();
+    SpinnerActions.startPageLoading(null);
     
     let progress = TestUtils.scryRenderedComponentsWithType(spinner, CircularProgress);
     expect(progress.length).toBe(1);
   });
 
   it ('Stop page loading', () => {
-    SpinnerActions.endPageLoading();
+    SpinnerActions.endPageLoading(null);
     
     let progress = TestUtils.scryRenderedComponentsWithType(spinner, CircularProgress);
     expect(progress.length).toBe(0);
   });
 
   it ('Start request loading', () => {
-    SpinnerActions.startRequestLoading();
+    SpinnerActions.startRequestLoading(null);
     
     let progress = TestUtils.scryRenderedComponentsWithType(spinner, CircularProgress);
     expect(progress.length).toBe(1);
   });
 
   it ('Start request loading', () => {
-    SpinnerActions.endRequestLoading();
+    SpinnerActions.endRequestLoading(null);
     
     let progress = TestUtils.scryRenderedComponentsWithType(spinner, CircularProgress);
     expect(progress.length).toBe(0);

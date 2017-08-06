@@ -146,11 +146,10 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
             // Extract data formats
             const format = queries[aTable].format;
-            const formatName = format && format.type || format;
-            if (formatName && typeof formats[formatName] === 'function') {
-              let result = { values: returnedResults[aTable] };
-              let additionalValues = formats[formatName](format, result, dependencies, this, prevState) || {};
-              Object.assign(returnedResults, additionalValues);
+            let result = { values: returnedResults[aTable] };
+            let formatExtract = DataSourceConnector.handleDataFormat(format, this, result, dependencies);
+            if (formatExtract) {
+              Object.assign(returnedResults, formatExtract);
             }
 
             // Extracting calculated values

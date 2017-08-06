@@ -103,10 +103,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onSaveAsTemplateApprove = this.onSaveAsTemplateApprove.bind(this);
     this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
     this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
+    this.onVisibilityStoreChange = this.onVisibilityStoreChange.bind(this);
     
-    VisibilityStore.listen(state => {
-      this.setState({ visibilityFlags: state.flags });
-    });
+    VisibilityStore.listen(this.onVisibilityStoreChange);
+    
     this.state.newTemplateName = this.props.dashboard.name;
     this.state.newTemplateDescription = this.props.dashboard.description;
   }
@@ -140,6 +140,14 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   componentDidUpdate() {
     this.componentDidMount();
+  }
+
+  componentWillUnmount() {
+    VisibilityStore.unlisten(this.onVisibilityStoreChange);    
+  }
+
+  onVisibilityStoreChange(state: any) {
+    this.setState({ visibilityFlags: state.flags });
   }
 
   onBreakpointChange(breakpoint: any) {
@@ -244,6 +252,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.setState({ editMode: !this.state.editMode });
     this.setState({ editMode: !this.state.editMode });
   }
+
   onOpenInfo(html: string) {
     this.setState({ infoVisible: true, infoHtml: html });
   }

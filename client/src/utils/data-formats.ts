@@ -10,11 +10,16 @@ export enum DataFormatTypes {
 }
 
 export interface IDataFormat {
-  type: DataFormatTypes
-  args: any
+  type: string;
+  args: any;
 }
 
-export function timespan(format, state, dependencies, plugin: IDataSourcePlugin) {
+export function timespan(
+  format: string | IDataFormat, 
+  state: any, 
+  dependencies: IDictionary, 
+  plugin: IDataSourcePlugin, 
+  prevState: any) {
 
   if (!state) { return null; }
 
@@ -31,7 +36,12 @@ export function timespan(format, state, dependencies, plugin: IDataSourcePlugin)
   return { queryTimespan, granularity };
 }
 
-export function flags(format, state, dependencies, plugin: IDataSourcePlugin) {
+export function flags(
+  format: string | IDataFormat, 
+  state: any, 
+  dependencies: IDictionary, 
+  plugin: IDataSourcePlugin, 
+  prevState: any) {
 
   const params = plugin.getParams();
 
@@ -42,19 +52,25 @@ export function flags(format, state, dependencies, plugin: IDataSourcePlugin) {
   return flags;
 }
 
-export function scorecard (format, state, dependencies, plugin: IDataSourcePlugin) {
+export function scorecard (
+  format: string | IDataFormat, 
+  state: any, 
+  dependencies: IDictionary, 
+  plugin: IDataSourcePlugin, 
+  prevState: any) {
   let { values } = state;
 
+  let args = typeof format !== 'string' && format.args || { thresholds: null };
+  
   let createScoreValue = (value: any, color: string, icon: string) => {
     let item = {};
-    let prefix = format.args && format.args.prefix || plugin._props.id;
+    let prefix = args && args.prefix || plugin._props.id;
     item[prefix + '_value'] = value;
     item[prefix + '_color'] = color;
     item[prefix + '_icon'] = icon;
     return item;
   };
 
-  let args = format && format.args || { thresholds: null };
   let thresholds = args.thresholds || [ ];
   let firstThreshold = thresholds.length && thresholds[0] || { value: 0, color: '#000', icon: 'done' };
   let countField = args.countField || 'count';
@@ -121,7 +137,12 @@ export function scorecard (format, state, dependencies, plugin: IDataSourcePlugi
  * @param dependencies Dependencies for the plugin
  * @param plugin The entire plugin (for id generation, params etc...)
  */
-export function retention (format, state, dependencies, plugin: IDataSourcePlugin) {
+export function retention (
+  format: string | IDataFormat, 
+  state: any, 
+  dependencies: IDictionary, 
+  plugin: IDataSourcePlugin, 
+  prevState: any) {
   const { values } = state;
   const { selectedTimespan } = dependencies;
 
@@ -157,6 +178,11 @@ export function retention (format, state, dependencies, plugin: IDataSourcePlugi
     case 'P30D':
       result.total = result.totalUniqueUsersIn30d;
       result.returning = result.returning30d;
+      break;
+
+    default:
+      result.total = 0;
+      result.returning = 0;
       break;
   }
 
@@ -298,15 +324,15 @@ export function timeline(
     let lineFieldValue = row[lineField];
     let valueFieldValue = row[valueField];
 
-    var timeValue = (new Date(timestamp)).getTime();
+    let timeValue = (new Date(timestamp)).getTime();
 
-    if (!_timeline[timeValue]) _timeline[timeValue] = {
-      time: (new Date(timestamp)).toUTCString()
-    };
-    if (!_lines[lineFieldValue]) _lines[lineFieldValue] = {
-      name: lineFieldValue,
-      value: 0
-    };
+    if (!_timeline[timeValue]) {
+        _timeline[timeValue] = { time: (new Date(timestamp)).toUTCString() };
+    }
+
+    if (!_lines[lineFieldValue]) {
+      _lines[lineFieldValue] = { name: lineFieldValue, value: 0 };
+    }
 
     _timeline[timeValue][lineFieldValue] = valueFieldValue;
     _lines[lineFieldValue].value += valueFieldValue;
@@ -316,15 +342,15 @@ export function timeline(
   let usage = _.values(_lines);
   let timelineValues = _.map(_timeline, value => {
     lines.forEach(line => {
-      if (!value[line]) value[line] = 0;
+      if (!value[line]) { value[line] = 0; }
     });
     return value;
   });
 
   return {
-    "timeline-graphData": timelineValues,
-    "timeline-usage": usage,
-    "timeline-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
-    "timeline-lines": lines
+    'timeline-graphData': timelineValues,
+    'timeline-usage': usage,
+    'timeline-timeFormat': (timespan === '24 hours' ? 'hour' : 'date'),
+    'timeline-lines': lines
   };
 }

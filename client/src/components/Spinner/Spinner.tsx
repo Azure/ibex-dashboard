@@ -29,7 +29,7 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     var sendOriginal = XMLHttpRequest.prototype.send;
 
     XMLHttpRequest.prototype.open = function(method: string, url: string, async?: boolean, _?: string, __?: string) {
-      SpinnerActions.startRequestLoading();
+      SpinnerActions.startRequestLoading.defer(null);
       openOriginal.apply(this, arguments);
     };
 
@@ -39,7 +39,7 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
 
         // readyState === 4: means the response is complete
         if (_xhr.readyState === 4) {
-          SpinnerActions.endRequestLoading();
+          SpinnerActions.endRequestLoading.defer(null);
 
           if (_xhr.status === 429) {
             self._429ApplicationInsights();
@@ -54,6 +54,10 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
 
   componentDidMount() {
     SpinnerStore.listen(this.onChange);
+  }
+
+  componentWillUnmount() {
+    SpinnerStore.unlisten(this.onChange);
   }
 
   _429ApplicationInsights() {
