@@ -31,6 +31,20 @@ interface IScorecardProps extends IGenericProps {
 export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
   static editor = settings;
+  static fromSource(source: any) {
+    if (!source || typeof source !== 'object') { return {}; }
+
+    let mappings = {};
+    _.keys(source).forEach(key => {
+      mappings['card_' + key + '_value'] = source[key] + '-value';
+      mappings['card_' + key + '_heading'] = source[key] + '-heading';
+      mappings['card_' + key + '_color'] = source[key] + '-color';
+      mappings['card_' + key + '_icon'] = source[key] + '-icon';
+      mappings['card_' + key + '_subvalue'] = source[key] + '-subvalue';
+      mappings['card_' + key + '_subheading'] = source[key] + '-subheading';
+    });
+    return mappings;
+  }
 
   constructor(props: IScorecardProps) {
     super(props);

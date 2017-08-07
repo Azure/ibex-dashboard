@@ -118,6 +118,7 @@ interface IElement {
   title?: string;
   subtitle?: string;
   theme?: string[];
+  source?: string;
   dependencies?: IStringDictionary;
   props?: IDictionary;
   actions?: IDictionary;

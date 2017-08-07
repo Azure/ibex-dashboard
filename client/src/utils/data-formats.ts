@@ -66,10 +66,11 @@ export function scorecard (
   const postfix = args.postfix || null;
   let checkValue = (values && values[0] && values[0][countField]) || 0; 
   
-  let createScoreValue = (value: any, color: string, icon: string, subvalue?: any, subheading?: string) => {
+  let createScoreValue = (value: any, heading: string, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
     let prefix = args && args.prefix || plugin._props.id;
     item[prefix + '-value'] = utils.kmNumber(value, postfix);
+    item[prefix + '-heading'] = heading;
     item[prefix + '-color'] = color;
     item[prefix + '-icon'] = icon;
     item[prefix + '-subvalue'] = subvalue || "";
@@ -78,20 +79,27 @@ export function scorecard (
   };
 
   let thresholds = args.thresholds || [ ];
-  if (!thresholds.length) { thresholds.push({ value: checkValue, color: '#000', icon: 'done' }) }
+  if (!thresholds.length) { thresholds.push({ value: checkValue, heading: '', color: '#000', icon: 'done' }) }
   let firstThreshold = thresholds[0];
 
   if (!values || !values.length) { 
-    return createScoreValue(firstThreshold.value, firstThreshold.color, firstThreshold.icon);
+    return createScoreValue(
+      firstThreshold.value, 
+      firstThreshold.heading, 
+      firstThreshold.color, 
+      firstThreshold.icon
+    );  
   }
 
   // Todo: check validity of thresholds and each value
 
   let thresholdIdx = 0;
-  let threshold = thresholds[thresholdIdx++];
+  let threshold = thresholds[thresholdIdx];
   
-  while (checkValue < threshold.value && thresholds.length > thresholdIdx) {
-    threshold = thresholds[thresholdIdx++];      
+  while (thresholds.length > (thresholdIdx + 1) && 
+         checkValue > threshold.value &&    
+         checkValue >= thresholds[++thresholdIdx].value) {
+    threshold = thresholds[thresholdIdx];      
   }
 
   let subvalue = null;
@@ -100,21 +108,23 @@ export function scorecard (
     let subvalueField = args.subvalueField || null;
     let subvalueThresholds = args.subvalueThresholds || [];
 
-    if (!subvalueThresholds.length) { subvalueThresholds.push({ value: 0, subheading: '' }) }
+    if (!subvalueThresholds.length) { subvalueThresholds.push({ subvalue: 0, subheading: '' }) }
     
     checkValue = values[0][subvalueField || countField] || 0;
     thresholdIdx = 0;
-    let subvalueThreshold = subvalueThresholds[thresholdIdx++];
+    let subvalueThreshold = subvalueThresholds[thresholdIdx];
     
-    while (checkValue < subvalueThreshold.value && subvalueThresholds.length > thresholdIdx) {
-      subvalueThreshold = subvalueThresholds[thresholdIdx++];      
+    while (subvalueThresholds.length > (thresholdIdx + 1) && 
+           checkValue > subvalueThreshold.value &&
+           checkValue >= subvalueThresholds[++thresholdIdx].value) {
+      subvalueThreshold = subvalueThresholds[thresholdIdx];      
     }
 
     subvalue = checkValue;
     subheading = subvalueThreshold.subheading;
   }
 
-  return createScoreValue(checkValue, threshold.color, threshold.icon, subvalue, subheading);
+  return createScoreValue(checkValue, threshold.heading, threshold.color, threshold.icon, subvalue, subheading);
 }
 
 /**
