@@ -4,16 +4,16 @@ import SelectField from 'react-md/lib/SelectFields';
 
 export default class TextFilter extends GenericComponent<any, any> {
 
+  static defaultProps = {
+    title: 'Select'
+  };
+  
   static fromSource(source: string) {
     return {
       selectedValue: source + '-selected', 
       values: source + '-values'
     };
   }
-
-  static defaultProps = {
-    title: 'Select'
-  };
 
   constructor(props: any) {
     super(props);

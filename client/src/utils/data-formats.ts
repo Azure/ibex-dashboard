@@ -80,24 +80,26 @@ export function scorecard (
   const postfix = args.postfix || null;
   let checkValue = (values && values[0] && values[0][countField]) || 0; 
   
-  let createScoreValue = (value: any, heading: string, color: string, icon: string, subvalue?: any, subheading?: string) => {
+  let createValue = (value: any, heading: string, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
     let prefix = args && args.prefix || plugin._props.id;
     item[prefix + '-value'] = utils.kmNumber(value, postfix);
     item[prefix + '-heading'] = heading;
     item[prefix + '-color'] = color;
     item[prefix + '-icon'] = icon;
-    item[prefix + '-subvalue'] = subvalue || "";
-    item[prefix + '-subheading'] = subheading || "";
+    item[prefix + '-subvalue'] = subvalue || '';
+    item[prefix + '-subheading'] = subheading || '';
     return item;
   };
 
   let thresholds = args.thresholds || [ ];
-  if (!thresholds.length) { thresholds.push({ value: checkValue, heading: '', color: '#000', icon: 'done' }) }
+  if (!thresholds.length) { 
+    thresholds.push({ value: checkValue, heading: '', color: '#000', icon: 'done' });
+  }
   let firstThreshold = thresholds[0];
 
   if (!values || !values.length) { 
-    return createScoreValue(
+    return createValue(
       firstThreshold.value, 
       firstThreshold.heading, 
       firstThreshold.color, 
@@ -122,7 +124,7 @@ export function scorecard (
     let subvalueField = args.subvalueField || null;
     let subvalueThresholds = args.subvalueThresholds || [];
 
-    if (!subvalueThresholds.length) { subvalueThresholds.push({ subvalue: 0, subheading: '' }) }
+    if (!subvalueThresholds.length) { subvalueThresholds.push({ subvalue: 0, subheading: '' }); }
     
     checkValue = values[0][subvalueField || countField] || 0;
     thresholdIdx = 0;
@@ -138,7 +140,7 @@ export function scorecard (
     subheading = subvalueThreshold.subheading;
   }
 
-  return createScoreValue(checkValue, threshold.heading, threshold.color, threshold.icon, subvalue, subheading);
+  return createValue(checkValue, threshold.heading, threshold.color, threshold.icon, subvalue, subheading);
 }
 
 /**
@@ -421,7 +423,7 @@ export function bars(
   const valueField = args.valueField || 'count';
   const barsField = args.barsField || null;
   const seriesField = args.seriesField || null;
-  const valueMaxLength = parseInt(args.valueMaxLength) || 13;
+  const valueMaxLength = args.valueMaxLength && parseInt(args.valueMaxLength, 10) || 13;
   const threshold = args.threshold || 0;
   const othersField = args.othersField || 'Others';
 

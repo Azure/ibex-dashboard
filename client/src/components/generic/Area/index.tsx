@@ -29,18 +29,18 @@ interface IAreaState extends IGenericState {
 export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
   static editor = AreaSettings;
-  static fromSource(source: string) {
-    return {
-      values: source + "-graphData",
-      lines: source + "-lines",
-      timeFormat: source + "-timeFormat" 
-    };
-  }
-
   static defaultProps = {
     isStacked: true
   };
 
+  static fromSource(source: string) {
+    return {
+      values: source + '-graphData',
+      lines: source + '-lines',
+      timeFormat: source + '-timeFormat' 
+    };
+  }
+  
   dateFormat(time: string): string {
     return moment(time).format('MMM-DD');
   }

@@ -44,17 +44,11 @@ interface IMapDataProps extends IGenericProps {
 };
 
 interface IMapDataState extends IGenericState {
-  markers: Object[];
+  markers: any[];
   locations: any[];
 }
 
 export default class MapData extends GenericComponent<IMapDataProps, IMapDataState> {
-
-  static fromSource(source: string) {
-    return {
-      locations: source
-    };
-  }
 
   static defaultProps = {
     center: [14.704929, -25.210251],
@@ -62,13 +56,19 @@ export default class MapData extends GenericComponent<IMapDataProps, IMapDataSta
     maxZoom: 8,
   };
 
-  state = {
-    markers: [],
-    locations: [],
-  };
+  static fromSource(source: string) {
+    return {
+      locations: source
+    };
+  }
 
   constructor(props: IMapDataProps) {
     super(props);
+
+    this.state = {
+      markers: [],
+      locations: [],
+    };
   }
 
   componentWillMount() {
