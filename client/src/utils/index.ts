@@ -1,16 +1,18 @@
 import * as moment from 'moment';
 
 export default class Utils {
-  static kmNumber(num: number): string {
-    if (isNaN(num)) { return ''; }
+  static kmNumber(num: any, postfix?: string): string {
+    if (isNaN(num)) { return num + (postfix || ''); }
+
+    let value = parseFloat(num);
 
     return (
-      num > 999999 ?
-        (num / 1000000).toFixed(1) + 'M' :
-        num > 999 ?
-          (num / 1000).toFixed(1) + 'K' : 
-            (num % 1 * 10) !== 0 ?
-            num.toFixed(1).toString() : num.toString());
+      value > 999999 ?
+        (value / 1000000).toFixed(1) + 'M' :
+        value > 999 ?
+          (value / 1000).toFixed(1) + 'K' : 
+            (value % 1 * 10) !== 0 ?
+            value.toFixed(1).toString() : value.toString()) + (postfix || '');
   }
 
   static ago(date: Date): string {

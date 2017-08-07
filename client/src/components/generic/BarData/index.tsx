@@ -45,9 +45,11 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
   }
 
   render() {
-    var { values, bars } = this.state;
-    var { title, subtitle, props } = this.props;
-    var { barProps, showLegend, nameKey } = props;
+    let { values, bars } = this.state;
+    let { title, subtitle, props } = this.props;
+    let { barProps, showLegend, nameKey } = props;
+
+    nameKey = nameKey || 'value';
 
     if (!values) {
       return null;

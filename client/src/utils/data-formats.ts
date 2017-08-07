@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import utils from './index';
 import { IDataSourcePlugin } from '../data-sources/plugins/DataSourcePlugin';
 
 export enum DataFormatTypes {
@@ -60,18 +61,19 @@ export function scorecard (
   prevState: any) {
   let { values } = state;
 
-  let args = typeof format !== 'string' && format.args || { thresholds: null };
-  let countField = args.countField || 'count';
-  let checkValue = (values && values[0] && values[0][countField]) || 0;
+  const args = typeof format !== 'string' && format.args || { thresholds: null };
+  const countField = args.countField || 'count';
+  const postfix = args.postfix || null;
+  let checkValue = (values && values[0] && values[0][countField]) || 0; 
   
   let createScoreValue = (value: any, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
     let prefix = args && args.prefix || plugin._props.id;
-    item[prefix + '_value'] = value;
-    item[prefix + '_color'] = color;
-    item[prefix + '_icon'] = icon;
-    item[prefix + '_subvalue'] = subvalue || "";
-    item[prefix + '_subheading'] = subheading || "";
+    item[prefix + '-value'] = utils.kmNumber(value, postfix);
+    item[prefix + '-color'] = color;
+    item[prefix + '-icon'] = icon;
+    item[prefix + '-subvalue'] = subvalue || "";
+    item[prefix + '-subheading'] = subheading || "";
     return item;
   };
 
@@ -391,11 +393,55 @@ export function bars(
   if (!format || typeof format === 'string') { return null; }
   
   const args = format.args || {};
-  let prefix = args.prefix || 'prefix';
-  let valueField = args.valueField || 'value';
+  const prefix = args.prefix || 'prefix';
+  const valueField = args.valueField || 'count';
+  const barsField = args.barsField || null;
+  const seriesField = args.seriesField || null;
+  const valueMaxLength = parseInt(args.valueMaxLength) || 13;
+  const threshold = args.threshold || 0;
+  const othersField = args.othersField || 'Others';
+
+  let values: any[] = state.values;
+
+  // Concating values with '...'
+  if (values && values.length && valueMaxLength && (seriesField || barsField)) {
+    const cutLength = Math.max(valueMaxLength - 3, 0);
+    values.forEach(val => {
+      if (seriesField && val[seriesField] && val[seriesField].length > valueMaxLength) {
+        val[seriesField] = val[seriesField].substring(0, cutLength) + '...';
+      }
+      if (barsField && val[barsField] && val[barsField].length > valueMaxLength) {
+        val[barsField] = val[barsField].substring(0, cutLength) + '...';
+      }
+    });
+  }
 
   let result = {};
-  result[prefix + '-bars'] = [ valueField ];
+  let barValues = {};
+
+  // Setting the field describing the bars
+  if (barsField) {
+
+    let series = {};
+    values.forEach(val => {
+      barValues[val[barsField]] = barValues[val[barsField]] || { value: val[barsField] };
+
+      if (threshold && val[valueField] < threshold) {
+        barValues[val[barsField]][othersField] = (barValues[val[barsField]][othersField] || 0) + val[valueField];
+        series[othersField] = true;
+      } else {
+        barValues[val[barsField]][val[seriesField]] = val[valueField];
+        series[val[seriesField]] = true;
+      }
+    });
+
+    result[prefix + '-bars'] = _.keys(series);
+    result[prefix + '-values'] = _.values(barValues);
+
+  } else {
+    result[prefix + '-bars'] = [ valueField ];
+    result[prefix + '-values'] = values;
+  }
 
   return result;
 }
