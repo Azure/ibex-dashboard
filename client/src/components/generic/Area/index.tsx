@@ -33,6 +33,13 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
     isStacked: false
   };
 
+  state = {
+    timeFormat: '',
+    values: [],
+    lines: [],
+    isStacked: this.props.isStacked
+  };
+
   static fromSource(source: string) {
     return {
       values: source + '-graphData',
@@ -40,13 +47,6 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
       timeFormat: source + '-timeFormat' 
     };
   }
-  
-  state = {
-    timeFormat: '',
-    values: [],
-    lines: [],
-    isStacked: this.props.isStacked
-  };
 
   constructor(props: IAreaProps) {
     super(props);
