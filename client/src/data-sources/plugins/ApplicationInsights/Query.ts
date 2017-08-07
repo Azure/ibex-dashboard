@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as request from 'xhr-request';
 import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { appInsightsUri } from './common';
@@ -147,8 +148,8 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
             // Extract data formats
             let format = queries[aTable].format;
             if (format && typeof format !== 'string') {
-              if (!format.args) { format.args = {}; }
-              if (!format.args.prefix) { format.args.prefix = aTable; }
+              format = _.extend({ args: {} }, format);
+              format.args = _.extend({ prefix: aTable }, format.args);
             }
             let result = { values: returnedResults[aTable] };
             let formatExtract = DataSourceConnector.handleDataFormat(format, this, result, dependencies);

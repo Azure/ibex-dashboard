@@ -93,7 +93,7 @@ export default class Utils {
           return res;
         });
 
-        if (arrayStringLength <= 120) {
+        if (arrayStringLength <= 100) {
           result += `[${mappedValues.join()}]`;
         } else {
           result += `[\n${sind}\t${mappedValues.join(',\n' + sind + '\t')}\n${sind}]`;          

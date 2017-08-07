@@ -100,7 +100,7 @@ export function scorecard (
     let subvalueField = args.subvalueField || null;
     let subvalueThresholds = args.subvalueThresholds || [];
 
-    if (subvalueThresholds.length) { thresholds.push({ value: 0, subheading: '' }) }
+    if (!subvalueThresholds.length) { subvalueThresholds.push({ value: 0, subheading: '' }) }
     
     checkValue = values[0][subvalueField || countField] || 0;
     thresholdIdx = 0;
