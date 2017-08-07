@@ -64,6 +64,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
         return dispatch();
       };
     }
+    console.log('^', dependencies);
 
     let { queryTimespan } = dependencies;
     let params = this._props.params;
@@ -71,7 +72,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     let mappings: Array<any> = [];
     let queries: IDictionary = {};
     let table: string = null;
-    let filters: Array<IFilterParams> = params.filters;
+    let filters: Array<IFilterParams> = params.filters || [];
 
     // Checking if this is a single query or a fork query
     let query: string;
@@ -223,6 +224,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
   private query(query: any, dependencies: any, isForked: boolean, queryKey: string, filters: IFilterParams[]): string {
     let q = this.compileQuery(query, dependencies);
+    console.log('q1', q, dependencies, isForked, queryKey, filters);
     // Don't filter a filter query, or no filters specified
     if (queryKey.startsWith('filter') || filters === undefined || filters.length === 0) {
       return this.formatQuery(q, isForked);
@@ -232,12 +234,13 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       const { dependency, queryProperty } = filter;
       const selectedFilters = dependencies[dependency] || [];
       if (selectedFilters.length > 0) {
-        const f = 'where ' + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ') + ' | ';
-        q = ` ${f} \n ${q} `;
+        const f = 'where ' + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ');
+        q = isForked ? ` ${f} |\n ${q} ` : q.replace(/^(\s?\w+\s*?){1}(.)*/gim, '$1 | ' + f + ' $2');
         return true;
       }
       return false;
     });
+    console.log('q2', q);
     return this.formatQuery(q, isForked);
   }
 
