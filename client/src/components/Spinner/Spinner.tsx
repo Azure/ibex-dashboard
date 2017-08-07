@@ -53,6 +53,7 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
   }
 
   componentDidMount() {
+    this.onChange(SpinnerStore.getState());
     SpinnerStore.listen(this.onChange);
   }
 
