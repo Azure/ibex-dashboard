@@ -51,7 +51,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
   render() {
     let { values, bars } = this.state;
-    let { title, subtitle, props } = this.props;
+    let { id, title, subtitle, props } = this.props;
     let { barProps, showLegend, nameKey } = props;
 
     nameKey = nameKey || 'value';
@@ -62,7 +62,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
     if (!values || !values.length) {
       return (
-        <Card title={title} subtitle={subtitle}>
+        <Card id={id} title={title} subtitle={subtitle}>
           <div style={{ padding: 20 }}>No data is available</div>
         </Card>
       );
@@ -85,7 +85,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
     // Todo: Receive the width of the SVG component from the container
     return (
-      <Card title={title} subtitle={subtitle}>
+      <Card id={id} title={title} subtitle={subtitle}>
         <ResponsiveContainer>
           <BarChart
             data={values}

@@ -87,24 +87,6 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
 
   abstract render();
 
-  /**
-   * returns boolean option from state, passed props or default values (in that order).
-   * @param property name of property
-   */
-  protected is(property: string): boolean {
-    if (this.state[property] !== undefined && typeof(this.state[property]) === 'boolean') {
-      return this.state[property];
-    }
-    let { props } = this.props;
-    if (props && props[property] !== undefined && typeof(props[property]) === 'boolean') {
-      return props[property] as boolean;
-    }
-    if (this.props[property] !== undefined && typeof(this.props[property]) === 'boolean') {
-      return this.props[property];
-    }
-    return false;
-  }
-
   private onStateChange(state: any) {
     var result = DataSourceConnector.extrapolateDependencies(this.props.dependencies);
     var updatedState: IGenericState = {};

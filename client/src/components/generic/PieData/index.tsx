@@ -128,7 +128,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
 
   render() {
     var { values } = this.state;
-    var { props, title, subtitle, layout, theme } = this.props;
+    var { id, props, title, subtitle, layout, theme } = this.props;
     var { pieProps, showLegend, legendVerticalAlign } = props;
 
     if (!values) {
@@ -139,7 +139,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
 
     // Todo: Receive the width of the SVG component from the container
     return (
-      <Card title={title} subtitle={subtitle}>
+      <Card id={id} title={title} subtitle={subtitle}>
         <ResponsiveContainer>
           <PieChart>
             <Pie

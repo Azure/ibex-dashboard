@@ -36,7 +36,7 @@ export default class Scatter extends GenericComponent<IScatterProps, IScatterSta
 
   render() {
     var { groupedValues } = this.state;
-    var { title, subtitle, theme, props } = this.props;
+    var { id, title, subtitle, theme, props } = this.props;
     var { scatterProps, groupTitles } = props;
 
     var { xDataKey, yDataKey, zDataKey, zRange } = this.props.props;
@@ -70,7 +70,7 @@ export default class Scatter extends GenericComponent<IScatterProps, IScatterSta
     }
 
     return (
-      <Card title={title} subtitle={subtitle}>
+      <Card id={id} title={title} subtitle={subtitle}>
         <ResponsiveContainer>
           <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }} {...scatterProps}>
             <XAxis dataKey={xDataKey} />

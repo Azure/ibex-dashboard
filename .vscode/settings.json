@@ -1,7 +1,7 @@
 // Place your settings in this file to overwrite default and user settings.
 {
   "files.exclude": {
-    "**/*.css": { "when": "$(basename).scss"}
+    "**/*.css": true
   },
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
@@ -14,5 +14,7 @@
     "**/node_modules": true,
     "**/build": true,
     "**/coverage": true
-  }
+  },
+  "tslint.configFile": "client/tslint.json",
+  "tslint.nodePath": "client/node_modules"
 }
