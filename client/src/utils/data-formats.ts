@@ -24,6 +24,8 @@ export function timespan(
 
   if (!state) { return null; }
 
+  const params = plugin.getParams();
+  let prefix = (typeof format !== 'string' && format.args && format.args.prefix) || plugin._props.id;
   let queryTimespan =
     state.selectedValue === '24 hours' ? 'PT24H' :
     state.selectedValue === '1 week' ? 'P7D' :
@@ -34,7 +36,14 @@ export function timespan(
     state.selectedValue === '24 hours' ? '5m' :
     state.selectedValue === '1 week' ? '1d' : '1d';
 
-  return { queryTimespan, granularity };
+  let result = { 
+    queryTimespan, 
+    granularity 
+  };
+  result[prefix + '-values'] = params.values;
+  result[prefix + '-selected'] = state.selectedValue;
+
+  return result;
 }
 
 export function flags(
@@ -48,8 +57,13 @@ export function flags(
 
   if (!state || !params || !Array.isArray(params.values)) { return null; }
 
+  let prefix = (typeof format !== 'string' && format.args && format.args.prefix) || plugin._props.id;
   let flags = {};
   params.values.forEach(key => { flags[key] = state.selectedValue === key; });
+
+  flags[prefix + '-values'] = params.values;
+  flags[prefix + '-selected'] = state.selectedValue;
+
   return flags;
 }
 
@@ -301,7 +315,7 @@ export function filter (
   }
 
   let result = {};
-  result[prefix + '-filters'] = filters;
+  result[prefix + '-values'] = filters;
   result[prefix + '-selected'] = selectedValues;
 
   return result;

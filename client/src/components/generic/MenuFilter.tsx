@@ -45,6 +45,13 @@ const classNames = {
 
 export default class MenuFilter extends GenericComponent<any, any> {
 
+  static fromSource(source: string) {
+    return {
+      selectedValue: source + '-selected', 
+      values: source + '-values'
+    };
+  }
+  
   static defaultProps = {
     title: '',
     subtitle: 'Select filter',

@@ -126,6 +126,7 @@ interface IElement {
 
 interface IFilter {
   type: string,
+  source?: string,
   dependencies?: IStringDictionary,  
   actions?: IStringDictionary,
   title?: string,

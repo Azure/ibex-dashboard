@@ -105,18 +105,25 @@ export default class ElementConnector {
     filters: React.Component<any, any>[],
     additionalFilters: React.Component<any, any>[]
   } {
-    var filters = [];
-    var additionalFilters = [];
+    let filters = [];
+    let additionalFilters = [];
     dashboard.filters.forEach((element, idx) => {
-      var ReactElement = plugins[element.type];
+      let ReactElement = plugins[element.type];
+      let { dependencies, source, actions, title, subtitle, icon } = element;
+
+      if (source && typeof ReactElement.fromSource === 'function') {
+        let fromSource = ReactElement.fromSource(source);
+        dependencies = _.extend({}, dependencies, fromSource);
+      }
+
       (element.first ? filters : additionalFilters).push(
         <ReactElement 
               key={idx} 
-              dependencies={element.dependencies}
-              actions={element.actions}
-              title={element.title}
-              subtitle={element.subtitle}
-              icon={element.icon}
+              dependencies={dependencies}
+              actions={actions}
+              title={title}
+              subtitle={subtitle}
+              icon={icon}
         />
       );
     });
