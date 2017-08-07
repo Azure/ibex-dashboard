@@ -64,7 +64,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
         return dispatch();
       };
     }
-    console.log('^', dependencies);
 
     let { queryTimespan } = dependencies;
     let params = this._props.params;
@@ -224,7 +223,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
 
   private query(query: any, dependencies: any, isForked: boolean, queryKey: string, filters: IFilterParams[]): string {
     let q = this.compileQuery(query, dependencies);
-    console.log('q1', q, dependencies, isForked, queryKey, filters);
     // Don't filter a filter query, or no filters specified
     if (queryKey.startsWith('filter') || filters === undefined || filters.length === 0) {
       return this.formatQuery(q, isForked);
@@ -240,7 +238,6 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       }
       return false;
     });
-    console.log('q2', q);
     return this.formatQuery(q, isForked);
   }
 
