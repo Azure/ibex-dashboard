@@ -50,6 +50,12 @@ interface IMapDataState extends IGenericState {
 
 export default class MapData extends GenericComponent<IMapDataProps, IMapDataState> {
 
+  static fromSource(source: string) {
+    return {
+      locations: source
+    };
+  }
+
   static defaultProps = {
     center: [14.704929, -25.210251],
     zoom: 1.4,

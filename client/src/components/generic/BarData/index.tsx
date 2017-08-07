@@ -28,6 +28,12 @@ interface IBarState extends IGenericState {
 export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
   static editor = settings;
+  static fromSource(source: string) {
+    return {
+      values: source + '-values', 
+      bars: source + '-bars'
+    };
+  }
 
   state = {
     values: [],
