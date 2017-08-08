@@ -117,12 +117,27 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
 
   private getElement(elements: IElement[], index: number) {
     const element: IElement = elements[index];
-    this.exportData = this.extrapolateElementExportData(element.dependencies);
+    this.exportData = this.extrapolateElementExportData(element.dependencies, element.source, element.id);
     this.selectedIndex = 0; // resets dialog menu selection
   }
 
-  private extrapolateElementExportData(dependencies: IStringDictionary): IExportData[] {
+  private extrapolateElementExportData(elementDependencies: IStringDictionary, 
+                                       sources: string | IStringDictionary, 
+                                       elementId: string): IExportData[] {
     let result: IExportData[] = [];
+    let dependencies = {};
+    Object.assign(dependencies, elementDependencies);
+    if (typeof sources === 'string') {
+      let source = {};
+      source[elementId] = sources;
+      Object.assign(dependencies, source);
+    } else if (sources && typeof sources === 'object' && Object.keys(sources).length > 0 ) {
+      Object.assign(dependencies, sources);
+    }
+    if (!dependencies || Object.keys(dependencies).length === 0 ) {
+      console.warn('Missing element dependencies');
+      return result;
+    }
     const datasources = DataSourceConnector.getDataSources();
     Object.keys(dependencies).forEach((id) => {
       const dependency = dependencies[id];
