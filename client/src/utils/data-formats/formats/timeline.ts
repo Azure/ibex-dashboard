@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import utils from '../../index';
-import { DataFormatTypes, IDataFormat } from '../common';
+import { DataFormatTypes, IDataFormat, formatWarn, getPrefix } from '../common';
 import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugin';
 
 /**
@@ -42,13 +42,15 @@ export function timeline(
   plugin: IDataSourcePlugin, 
   prevState: any) {
 
-  if (typeof format === 'string') { return {}; }
+  if (typeof format === 'string') { 
+    return formatWarn('format should be an object with args', 'timeline', plugin);
+  }
 
   const timeline = state.values;
   const { timespan } = dependencies;
   const args = format.args || {};
   const { timeField, lineField, valueField } = args;
-  let prefix = args.prefix || 'timeline';
+  const prefix = getPrefix(format);
 
   let _timeline = {};
   let _lines = {};
@@ -82,10 +84,10 @@ export function timeline(
   });
 
   let result = {};
-  result[prefix + '-graphData'] = timelineValues;
-  result[prefix + '-timeFormat'] = (timespan === '24 hours' ? 'hour' : 'date');
-  result[prefix + '-lines'] = lines;
-  result[prefix + '-pieData'] = usage;
+  result[prefix + 'graphData'] = timelineValues;
+  result[prefix + 'timeFormat'] = (timespan === '24 hours' ? 'hour' : 'date');
+  result[prefix + 'lines'] = lines;
+  result[prefix + 'pieData'] = usage;
 
   return result;
 }

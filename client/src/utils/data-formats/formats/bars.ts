@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import utils from '../../index';
-import { DataFormatTypes, IDataFormat } from '../common';
+import { DataFormatTypes, IDataFormat, formatWarn, getPrefix } from '../common';
 import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugin';
 
 /**
@@ -8,9 +8,10 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  * 
  * Receives a list of filtering values:
  * values: [
- *  { field: 'value 1' },
- *  { field: 'value 2' },
- *  { field: 'value 3' },
+ *  { count: 10, barField: 'bar 1', seriesField: 'series1Value' },
+ *  { count: 15, barField: 'bar 2', seriesField: 'series1Value' },
+ *  { count: 20, barField: 'bar 1', seriesField: 'series2Value' },
+ *  { count: 44, barField: 'bar 3', seriesField: 'series2Value' },
  * ]
  * 
  * And outputs the result in a consumable filter way:
@@ -18,8 +19,8 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  "prefix-bars": [ 'bar 1', 'bar 2', 'bar 3' ],
  *  "prefix-values": [
  *    { value: 'bar 1', series1Value: 10, series2Value: 20 },
- *    { value: 'bar 2', series1Value: 15, series2Value: 5 },
- *    { value: 'bar 3', series1Value: 7, series2Value: 44 },
+ *    { value: 'bar 2', series1Value: 15, series2Value: 0 },
+ *    { value: 'bar 3', series1Value: 0, series2Value: 44 },
  *  ],
  * }
  * 
@@ -49,10 +50,12 @@ export function bars(
   plugin: IDataSourcePlugin, 
   prevState: any) {
 
-  if (!format || typeof format === 'string') { return null; }
+  if (typeof format === 'string') { 
+    return formatWarn('format should be an object with args', 'bars', plugin);
+  }
   
   const args = format.args || {};
-  const prefix = args.prefix || 'prefix';
+  const prefix = getPrefix(format);
   const valueField = args.valueField || 'count';
   const barsField = args.barsField || null;
   const seriesField = args.seriesField || null;
@@ -94,12 +97,12 @@ export function bars(
       }
     });
 
-    result[prefix + '-bars'] = _.keys(series);
-    result[prefix + '-values'] = _.values(barValues);
+    result[prefix + 'bars'] = _.keys(series);
+    result[prefix + 'values'] = _.values(barValues);
 
   } else {
-    result[prefix + '-bars'] = [ valueField ];
-    result[prefix + '-values'] = values;
+    result[prefix + 'bars'] = [ valueField ];
+    result[prefix + 'values'] = values;
   }
 
   return result;

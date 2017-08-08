@@ -10,8 +10,8 @@ export default class TextFilter extends GenericComponent<any, any> {
   
   static fromSource(source: string) {
     return {
-      selectedValue: source + '-selected', 
-      values: source + '-values'
+      selectedValue: GenericComponent.sourceFormat(source, 'values-selected'), 
+      values: GenericComponent.sourceFormat(source, 'values-all')
     };
   }
 

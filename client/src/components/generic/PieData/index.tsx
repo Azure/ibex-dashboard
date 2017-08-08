@@ -40,7 +40,7 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
 
   static fromSource(source: string) {
     return {
-      values: source + '-pieData'
+      values: GenericComponent.sourceFormat(source, 'pieData')
     };
   }
 

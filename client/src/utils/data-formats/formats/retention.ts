@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import utils from '../../index';
-import { DataFormatTypes, IDataFormat } from '../common';
+import { DataFormatTypes, IDataFormat, formatWarn, getPrefix } from '../common';
 import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugin';
 
 /**
@@ -45,7 +45,8 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  * 
  * @param format Plugin format parameter
  * @param state Current received state from data source
- * @param dependencies Dependencies for the plugin
+ * @param dependencies Dependencies for the plugin 
+ *                     should contain "selectedTimespan" equals to 'PT24H', 'P7D' etc...
  * @param plugin The entire plugin (for id generation, params etc...)
  */
 export function retention (
@@ -57,6 +58,9 @@ export function retention (
   const { values } = state;
   const { selectedTimespan } = dependencies;
 
+  if (!values || !values.length) { return null; }
+  
+  const prefix = getPrefix(format);
   let result = {
     totalUnique: 0,
     totalUniqueUsersIn24hr: 0,
@@ -70,10 +74,8 @@ export function retention (
     returning: 0,
     values: []
   };
-
-  if (values && values.length) {
-    _.extend(result, values[0]);
-  }
+  
+  _.extend(result, values[0]);
 
   switch (selectedTimespan) {
     case 'PT24H':
@@ -97,7 +99,7 @@ export function retention (
       break;
   }
 
-  result.values = [
+  result[prefix + 'values'] = [
     { 
       timespan: '24 hours', 
       retention: Math.round(100 * result.returning24hr / result.totalUniqueUsersIn24hr || 0) + '%',

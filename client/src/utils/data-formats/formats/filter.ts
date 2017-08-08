@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import utils from '../../index';
-import { DataFormatTypes, IDataFormat } from '../common';
+import { DataFormatTypes, IDataFormat, formatWarn, getPrefix } from '../common';
 import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugin';
 
 /**
@@ -24,7 +24,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  * @param format { 
  *  type: 'filter',
  *  args: { 
- *    prefix: string - The prefix of the variable to be consumed, 
+ *    prefix: string - a prefix string for the exported variables (default to id).
  *    field: string - the field holding the filter values in the results
  *  }
  * }
@@ -42,11 +42,23 @@ export function filter (
 
   const { values } = state;
 
-  let filterValues = values;
-  if (!filterValues || typeof format === 'string' || !format.args.prefix) { return {}; }
-
-  const { prefix, field } = format.args;
+  if (typeof format === 'string') { 
+    return formatWarn('format should be an object with args', 'filter', plugin);
+  }
+  
+  const args = format.args || {};
+  const field = args.field;
+  const prefix = getPrefix(format);
   const unknown = format.args.unknown || 'unknown';
+
+  if (!field) { 
+    return formatWarn('No value was supplied for "field" parameter', 'filter', plugin);
+  }
+
+  let filterValues = values;
+  if (!filterValues || !format.args.prefix) { 
+    return null;
+  }
 
   // This code is meant to fix the following scenario:
   // When "Timespan" filter changes, to "channels-selected" variable
@@ -54,13 +66,13 @@ export function filter (
   // For this reason, using previous state to copy filter
   const filters = filterValues.map(x => x[field] || unknown);
   let selectedValues = [];
-  if (prevState[prefix + '-selected'] !== undefined) {
-    selectedValues = prevState[prefix + '-selected'];
+  if (prevState[prefix + 'values-selected'] !== undefined) {
+    selectedValues = prevState[prefix + 'values-selected'];
   }
 
   let result = {};
-  result[prefix + '-values'] = filters;
-  result[prefix + '-selected'] = selectedValues;
+  result[prefix + 'values-all'] = filters;
+  result[prefix + 'values-selected'] = selectedValues;
 
   return result;
 }

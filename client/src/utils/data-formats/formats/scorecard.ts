@@ -1,29 +1,35 @@
 import * as _ from 'lodash';
 import utils from '../../index';
-import { DataFormatTypes, IDataFormat } from '../common';
+import { DataFormatTypes, IDataFormat, getPrefix } from '../common';
 import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugin';
 
 /**
- * Formats a result to suite a timeline (time series) chart
+ * Formats a result to suite a scorecard
  * 
- * Receives a list of filtering values:
+ * Receives a list of one value:
  * values: [{ count: 99 }]
  * 
  * And outputs the result in a consumable filter way:
  * result: {
- *  "prefix-filters": [ 'value 1', 'value 2', 'value 3' ],
- *  "prefix-selected": [ ],
+ *  "prefix-value": 99,
+ *  "prefix-heading": "Heading",
+ *  "prefix-color": "#fff",
+ *  "prefix-icon": "chat",
+ *  "prefix-subvalue": 44,
+ *  "prefix-subheading": "Subheading"
  * }
  * 
  * "prefix-selected" will be able to hold the selected values from the filter component
  * 
- * @param format { 
- *  type: 'filter',
+ * @param format 'scorecard' | { 
+ *  type: 'scorecard',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
- *    timeField: 'timestamp' - The field containing timestamp
- *    lineField: 'channel' - A field to hold/group by different lines in the graph
- *    valueField: 'count' - holds the value/y value of the current point
+ *    countField: 'count' - Field name with count value (default: 'count')
+ *    postfix: '%' - String to add after the value (default: null)
+ *    thresholds: [{ value: 0, heading: '', color: '#000', icon: 'done' }]
+ *    subvalueField: 'other_count' - Other number field to check
+ *    subvalueThresholds: [{ subvalue: 0, subheading: '' }]
  *  }
  * }
  * @param state Current received state from data source
@@ -46,13 +52,13 @@ export function scorecard (
   
   let createValue = (value: any, heading: string, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
-    let prefix = args && args.prefix || plugin._props.id;
-    item[prefix + '-value'] = utils.kmNumber(value, postfix);
-    item[prefix + '-heading'] = heading;
-    item[prefix + '-color'] = color;
-    item[prefix + '-icon'] = icon;
-    item[prefix + '-subvalue'] = subvalue || '';
-    item[prefix + '-subheading'] = subheading || '';
+    const prefix = getPrefix(format);
+    item[prefix + 'value'] = utils.kmNumber(value, postfix);
+    item[prefix + 'heading'] = heading;
+    item[prefix + 'color'] = color;
+    item[prefix + 'icon'] = icon;
+    item[prefix + 'subvalue'] = subvalue || '';
+    item[prefix + 'subheading'] = subheading || '';
     return item;
   };
 

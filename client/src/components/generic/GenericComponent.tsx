@@ -23,6 +23,15 @@ export abstract class GenericComponent<T1 extends IGenericProps, T2 extends IGen
 
   private id: string = null;
 
+  static sourceFormat(source: string, variable: string) {
+    return source + ((source || '').indexOf(':') >= 0 ? '-' : ':') + variable;
+  }
+
+  static sourceAction(source: string, variable: string, action: string) {
+    let sourceFormat = GenericComponent.sourceFormat(source, variable).split(':');
+    return sourceFormat.join(`:${action}:`);
+  }
+
   constructor(props: T1) {
     super(props);
 

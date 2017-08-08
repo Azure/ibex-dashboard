@@ -45,12 +45,12 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
     let mappings = {};
     _.keys(source).forEach(key => {
-      mappings['card_' + key + '_value'] = source[key] + '-value';
-      mappings['card_' + key + '_heading'] = source[key] + '-heading';
-      mappings['card_' + key + '_color'] = source[key] + '-color';
-      mappings['card_' + key + '_icon'] = source[key] + '-icon';
-      mappings['card_' + key + '_subvalue'] = source[key] + '-subvalue';
-      mappings['card_' + key + '_subheading'] = source[key] + '-subheading';
+      mappings['card_' + key + '_value'] = GenericComponent.sourceFormat(source[key], 'value');
+      mappings['card_' + key + '_heading'] = GenericComponent.sourceFormat(source[key], 'heading');
+      mappings['card_' + key + '_color'] = GenericComponent.sourceFormat(source[key], 'color');
+      mappings['card_' + key + '_icon'] = GenericComponent.sourceFormat(source[key], 'icon');
+      mappings['card_' + key + '_subvalue'] = GenericComponent.sourceFormat(source[key], 'subvalue');
+      mappings['card_' + key + '_subheading'] = GenericComponent.sourceFormat(source[key], 'subheading');
     });
     return mappings;
   }

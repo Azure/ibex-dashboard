@@ -27,9 +27,9 @@ export default class Timeline extends GenericComponent<ITimelineProps, ITimeline
   static editor = settings;
   static fromSource(source: string) {
     return {
-      values: source + '-graphData',
-      lines: source + '-lines',
-      timeFormat: source + '-timeFormat' 
+      values: GenericComponent.sourceFormat(source, 'graphData'),
+      lines: GenericComponent.sourceFormat(source, 'lines'),
+      timeFormat: GenericComponent.sourceFormat(source, 'timeFormat')
     };
   }
 
