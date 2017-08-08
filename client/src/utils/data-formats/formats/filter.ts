@@ -25,7 +25,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'filter',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
- *    field: string - the field holding the filter values in the results
+ *    field: string - the field holding the filter values in the results (default = "value")
  *  }
  * }
  * @param state Current received state from data source
@@ -41,30 +41,18 @@ export function filter (
   prevState: any) {
 
   const { values } = state;
-
-  if (typeof format === 'string') { 
-    return formatWarn('format should be an object with args', 'filter', plugin);
-  }
+  if (!values) { return null; }
   
-  const args = format.args || {};
-  const field = args.field;
+  const args = typeof format !== 'string' ? format.args : {};
   const prefix = getPrefix(format);
-  const unknown = format.args.unknown || 'unknown';
-
-  if (!field) { 
-    return formatWarn('No value was supplied for "field" parameter', 'filter', plugin);
-  }
-
-  let filterValues = values;
-  if (!filterValues || !format.args.prefix) { 
-    return null;
-  }
+  const field = args.field || 'value';
+  const unknown = args.unknown || 'unknown';
 
   // This code is meant to fix the following scenario:
   // When "Timespan" filter changes, to "channels-selected" variable
   // is going to be reset into an empty set.
   // For this reason, using previous state to copy filter
-  const filters = filterValues.map(x => x[field] || unknown);
+  const filters = values.map(x => x[field] || unknown);
   let selectedValues = [];
   if (prevState[prefix + 'values-selected'] !== undefined) {
     selectedValues = prevState[prefix + 'values-selected'];

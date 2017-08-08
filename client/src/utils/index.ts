@@ -54,7 +54,7 @@ export default class Utils {
           objectValues.push(mapping);
         });
 
-        if (valuesStringLength <= 120) {
+        if (valuesStringLength + sind.length <= 100) {
           result += `{ ${objectValues.join()} }`;
         } else {
           result += `{\n${sind}\t${objectValues.join(',\n' + sind + '\t')}\n${sind}}`;          
@@ -93,7 +93,7 @@ export default class Utils {
           return res;
         });
 
-        if (arrayStringLength <= 100) {
+        if (arrayStringLength + sind.length <= 100) {
           result += `[${mappedValues.join()}]`;
         } else {
           result += `[\n${sind}\t${mappedValues.join(',\n' + sind + '\t')}\n${sind}]`;          
