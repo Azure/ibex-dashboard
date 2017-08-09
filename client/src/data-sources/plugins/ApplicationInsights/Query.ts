@@ -73,7 +73,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     let mappings: Array<any> = [];
     let queries: IDictionary = {};
     let table: string = null;
-    let filters: Array<IFilterParams> = params.filters;
+    let filters: Array<IFilterParams> = params.filters || [];
 
     // Checking if this is a single query or a fork query
     let query: string;
@@ -248,8 +248,8 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       const { dependency, queryProperty } = filter;
       const selectedFilters = dependencies[dependency] || [];
       if (selectedFilters.length > 0) {
-        const f = 'where ' + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ') + ' | ';
-        q = ` ${f} \n ${q} `;
+        const f = 'where ' + selectedFilters.map((value) => `${queryProperty}=="${value}"`).join(' or ');
+        q = isForked ? ` ${f} |\n ${q} ` : q.replace(/^(\s?\w+\s*?){1}(.)*/gim, '$1 | ' + f + ' $2');
         return true;
       }
       return false;
