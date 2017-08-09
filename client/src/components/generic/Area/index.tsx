@@ -29,7 +29,6 @@ interface IAreaState extends IGenericState {
 export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
   static editor = AreaSettings;
-
   static defaultProps = {
     isStacked: false
   };
@@ -40,6 +39,14 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
     lines: [],
     isStacked: this.props.isStacked
   };
+
+  static fromSource(source: string) {
+    return {
+      values: GenericComponent.sourceFormat(source, 'graphData'),
+      lines: GenericComponent.sourceFormat(source, 'lines'),
+      timeFormat: GenericComponent.sourceFormat(source, 'timeFormat')
+    };
+  }
 
   constructor(props: IAreaProps) {
     super(props);

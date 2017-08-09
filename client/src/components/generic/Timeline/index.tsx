@@ -25,6 +25,13 @@ interface ITimelineState extends IGenericState {
 export default class Timeline extends GenericComponent<ITimelineProps, ITimelineState> {
 
   static editor = settings;
+  static fromSource(source: string) {
+    return {
+      values: GenericComponent.sourceFormat(source, 'graphData'),
+      lines: GenericComponent.sourceFormat(source, 'lines'),
+      timeFormat: GenericComponent.sourceFormat(source, 'timeFormat')
+    };
+  }
 
   dateFormat(time: string) {
     return moment(time).format('MMM-DD');

@@ -1,10 +1,10 @@
 import alt, { AbstractActions } from '../../alt';
 
 interface ISpinnerActions {
-  startPageLoading(): void;
-  endPageLoading(): void;
-  startRequestLoading(): void;
-  endRequestLoading(): void;
+  startPageLoading: AltJS.Action<any>;
+  endPageLoading: AltJS.Action<any>;
+  startRequestLoading: AltJS.Action<any>;
+  endRequestLoading: AltJS.Action<any>;
 }
 
 class SpinnerActions extends AbstractActions /*implements ISpinnerActions*/ {

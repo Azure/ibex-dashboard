@@ -79,7 +79,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     super(props);
 
     this.onBreakpointChange = this.onBreakpointChange.bind(this);
-    this.onLayoutChange = this.onLayoutChange.bind(this);
+    this.onLayoutChangeActive = this.onLayoutChangeActive.bind(this);
+    this.onLayoutChangeInactive = this.onLayoutChangeInactive.bind(this);
     this.onConfigDashboard = this.onConfigDashboard.bind(this);
     this.toggleEditMode = this.toggleEditMode.bind(this);
     this.onDeleteDashboard = this.onDeleteDashboard.bind(this);
@@ -94,10 +95,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onSaveAsTemplateApprove = this.onSaveAsTemplateApprove.bind(this);
     this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
     this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
+    this.onVisibilityStoreChange = this.onVisibilityStoreChange.bind(this);
     
-    VisibilityStore.listen(state => {
-      this.setState({ visibilityFlags: state.flags });
-    });
+    VisibilityStore.listen(this.onVisibilityStoreChange);
+    
     this.state.newTemplateName = this.props.dashboard.name;
     this.state.newTemplateDescription = this.props.dashboard.description;
   }
@@ -105,6 +106,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   componentDidMount() {
     let { dashboard } = this.props;
     let { mounted } = this.state;
+    this.onLayoutChange = this.onLayoutChangeActive;
 
     if (dashboard && !mounted) {
 
@@ -133,6 +135,15 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.componentDidMount();
   }
 
+  componentWillUnmount() {
+    this.onLayoutChange = this.onLayoutChangeInactive;
+    VisibilityStore.unlisten(this.onVisibilityStoreChange);    
+  }
+
+  onVisibilityStoreChange(state: any) {
+    this.setState({ visibilityFlags: state.flags });
+  }
+
   onBreakpointChange(breakpoint: any) {
     var layouts = this.state.layouts;
     layouts[breakpoint] = layouts[breakpoint] || this.layouts[breakpoint];
@@ -142,31 +153,29 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     });
   }
 
-  onLayoutChange(layout: any, layouts: any) {
+  onLayoutChange(layout: any, layouts: any) { }
+
+  onLayoutChangeActive(layout: any, layouts: any) {
 
     // Waiting for breakpoint to change
-    let currentBreakpoint = this.state.currentBreakpoint;
-    setTimeout(
-      () => {
-        if (currentBreakpoint !== this.state.currentBreakpoint) { return; }
+    let breakpoint = this.state.currentBreakpoint;
+    let newLayouts = this.state.layouts;
+    newLayouts[breakpoint] = layout;
+    this.setState({
+      layouts: newLayouts
+    });
 
-        var breakpoint = this.state.currentBreakpoint;
-        var newLayouts = this.state.layouts;
-        newLayouts[breakpoint] = layout;
-        this.setState({
-          layouts: newLayouts
-        });
+    // Saving layout to API
+    let { dashboard } = this.props;
+    dashboard.layouts = dashboard.layouts || {};
+    dashboard.layouts[breakpoint] = layout;
 
-        // Saving layout to API
-        let { dashboard } = this.props;
-        dashboard.layouts = dashboard.layouts || {};
-        dashboard.layouts[breakpoint] = layout;
+    if (this.state.editMode) {
+      ConfigurationsActions.saveConfiguration(dashboard);
+    }
+  }
 
-        if (this.state.editMode) {
-          ConfigurationsActions.saveConfiguration(dashboard);
-        }
-      },
-      500);
+  onLayoutChangeInactive(layout: any, layouts: any) {
   }
 
   onConfigDashboard() {

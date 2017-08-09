@@ -21,23 +21,28 @@ interface IBarProps extends IGenericProps {
 };
 
 interface IBarState extends IGenericState {
-  values: Object[];
-  bars: Object[];
+  values: any[];
+  bars: any[];
 }
 
 export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
   static editor = settings;
-
-  state = {
-    values: [],
-    bars: []
-  };
+  static fromSource(source: string) {
+    return {
+      values: GenericComponent.sourceFormat(source, 'values'),
+      bars: GenericComponent.sourceFormat(source, 'bars')
+    };
+  }
 
   constructor(props: any) {
     super(props);
 
     this.handleClick = this.handleClick.bind(this);
+    this.state = {
+      values: [],
+      bars: []
+    };
   }
 
   handleClick(data: any, index: number) {
@@ -45,9 +50,11 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
   }
 
   render() {
-    var { values, bars } = this.state;
-    var { id, title, subtitle, props } = this.props;
-    var { barProps, showLegend, nameKey } = props;
+    let { values, bars } = this.state;
+    let { id, title, subtitle, props } = this.props;
+    let { barProps, showLegend, nameKey } = props;
+
+    nameKey = nameKey || 'value';
 
     if (!values) {
       return null;

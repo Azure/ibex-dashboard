@@ -38,6 +38,12 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
     values: null
   };
 
+  static fromSource(source: string) {
+    return {
+      values: GenericComponent.sourceFormat(source, 'pieData')
+    };
+  }
+
   constructor(props: any) {
     super(props);
 

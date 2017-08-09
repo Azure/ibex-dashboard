@@ -118,6 +118,7 @@ interface IElement {
   title?: string;
   subtitle?: string;
   theme?: string[];
+  source?: string | IStringDictionary;
   dependencies?: IStringDictionary;
   props?: IDictionary;
   actions?: IDictionary;
@@ -125,6 +126,7 @@ interface IElement {
 
 interface IFilter {
   type: string,
+  source?: string,
   dependencies?: IStringDictionary,  
   actions?: IStringDictionary,
   title?: string,

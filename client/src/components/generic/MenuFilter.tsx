@@ -53,12 +53,12 @@ export default class MenuFilter extends GenericComponent<any, any> {
     selectNone: 'Clear filters'
   };
 
-  state = {
-    overlay: false,
-    values: [],
-    selectedValues: [],
-    originalSelectedValues: []
-  };
+  static fromSource(source: string) {
+    return {
+      selectedValue: GenericComponent.sourceFormat(source, 'values-selected'), 
+      values: GenericComponent.sourceFormat(source, 'values-all')
+    };
+  }
 
   constructor(props: any) {
     super(props);
@@ -68,6 +68,13 @@ export default class MenuFilter extends GenericComponent<any, any> {
     this.hideOverlay = this.hideOverlay.bind(this);
     this.selectAll = this.selectAll.bind(this);
     this.selectNone = this.selectNone.bind(this);
+
+    this.state = {
+      overlay: false,
+      values: [],
+      selectedValues: [],
+      originalSelectedValues: []
+    };
   }
 
   toggleOverlay() {

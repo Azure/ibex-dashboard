@@ -7,6 +7,13 @@ export default class TextFilter extends GenericComponent<any, any> {
   static defaultProps = {
     title: 'Select'
   };
+  
+  static fromSource(source: string) {
+    return {
+      selectedValue: GenericComponent.sourceFormat(source, 'values-selected'), 
+      values: GenericComponent.sourceFormat(source, 'values-all')
+    };
+  }
 
   constructor(props: any) {
     super(props);

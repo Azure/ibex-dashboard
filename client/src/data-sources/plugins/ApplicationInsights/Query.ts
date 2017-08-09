@@ -1,8 +1,10 @@
+import * as _ from 'lodash';
 import * as request from 'xhr-request';
 import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { appInsightsUri } from './common';
 import ApplicationInsightsConnection from '../../connections/application-insights';
 import { DataSourceConnector, IDataSource } from '../../DataSourceConnector';
+import * as formats from '../../../utils/data-formats';
 
 let connectionType = new ApplicationInsightsConnection();
 
@@ -142,10 +144,24 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
             returnedResults[aTable] = resultTables.length > idx ? resultTables[idx] : null;
             // Get state for filter selection
             const prevState = DataSourceConnector.getDataSource(this._props.id).store.getState();
+
+            // Extract data formats
+            let format = queries[aTable].format;
+            if (format) {
+              format = typeof format === 'string' ? { type: format } : format;
+              format = _.extend({ args: {} }, format);
+              format.args = _.extend({ prefix: aTable + '-' }, format.args);
+              let result = { values: returnedResults[aTable] };
+              let formatExtract = DataSourceConnector.handleDataFormat(format, this, result, dependencies);
+              if (formatExtract) {
+                Object.assign(returnedResults, formatExtract);
+              }
+            }
+
             // Extracting calculated values
             let calc = queries[aTable].calculated;
             if (typeof calc === 'function') {
-              var additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
+              let additionalValues = calc(returnedResults[aTable], dependencies, prevState) || {};
               Object.assign(returnedResults, additionalValues);
             }
           });
