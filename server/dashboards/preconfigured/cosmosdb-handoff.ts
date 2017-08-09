@@ -177,14 +177,14 @@ export const config: IDashboardConfig = /*return*/ {
                 return t;
               };
               return {
-                'transcriptsAverageTimeWaiting-value': isFinite(avgTimeWaiting) ? timeFormat(avgTimeWaiting) : '-',
-                'transcriptsLongestTimeWaiting-value': isFinite(avgTimeWaiting) ? timeFormat(maxTimeWaiting) : '-',
-                'transcriptsShortestTimeWaiting-value': isFinite(avgTimeWaiting) ? timeFormat(minTimeWaiting) : '-',
+                'transcriptsTimeWaiting-avg': isFinite(avgTimeWaiting) ? timeFormat(avgTimeWaiting) : '-',
+                'transcriptsTimeWaiting-longest': isFinite(avgTimeWaiting) ? timeFormat(maxTimeWaiting) : '-',
+                'transcriptsTimeWaiting-shortest': isFinite(avgTimeWaiting) ? timeFormat(minTimeWaiting) : '-',
               };
             }
           },
 
-          transcriptsTimeline: {
+          timeline: {
             query: (dependencies) => {
               var { granularity } = dependencies;
               return `where name == 'Transcript' 
@@ -240,9 +240,9 @@ export const config: IDashboardConfig = /*return*/ {
                 'timeline-graphData': graphData,
                 'timeline-recipients': keys,
                 'timeline-timeFormat': (timespan === '24 hours' ? 'hour' : 'date'),
-                'transcriptsBot-value': totalBot,
-                'transcriptsAgent-value': totalAgent,
-                'transcriptsTotal-value': totalMessages,
+                'timeline-bot': totalBot,
+                'timeline-agent': totalAgent,
+                'timeline-total': totalMessages,
               };
             }
           },
@@ -266,10 +266,10 @@ export const config: IDashboardConfig = /*return*/ {
               const waiting = customerTranscripts.filter((customer) => customer.state === 1);
               const agent = customerTranscripts.filter((customer) => customer.state === 2);
               return {
-                'customerTotal-value': customerTranscripts.length,
-                'customerBot-value': bot.length,
-                'customerWaiting-value': waiting.length,
-                'customerAgent-value': agent.length,
+                'customerTranscripts-total': customerTranscripts.length,
+                'customerTranscripts-bot': bot.length,
+                'customerTranscripts-waiting': waiting.length,
+                'customerTranscripts-agent': agent.length,
               };
             }
           }
@@ -280,29 +280,29 @@ export const config: IDashboardConfig = /*return*/ {
   ],
   elements: [
     {
-      id: 'customerTotal',
+      id: 'customerTranscripts',
       type: 'Scorecard',
       title: 'Users',
       size: { w: 6, h: 3 },
       dependencies: {
         card_total_heading: '::Total Users',
         card_total_tooltip: "::Total users",
-        card_total_value: 'ai:customerTotal-value',
+        card_total_value: 'ai:customerTranscripts-total',
         card_total_color: '::#666666',
         card_total_icon: '::account_circle',
         card_bot_heading: '::Bot',
         card_bot_tooltip: "::Total users talking to the bot",
-        card_bot_value: 'ai:customerBot-value',
+        card_bot_value: 'ai:customerTranscripts-bot',
         card_bot_color: '::#00FF00',
         card_bot_icon: '::memory',
         card_agent_heading: '::Agent',
         card_agent_tooltip: "::Total users talking to a human agent",
-        card_agent_value: 'ai:customerAgent-value',
+        card_agent_value: 'ai:customerTranscripts-agent',
         card_agent_color: '::#0066FF',
         card_agent_icon: '::perm_identity',
         card_waiting_heading: '::Waiting',
         card_waiting_tooltip: "::Total users waiting for a human agent to respond",
-        card_waiting_value: 'ai:customerWaiting-value',
+        card_waiting_value: 'ai:customerTranscripts-waiting',
         card_waiting_color: '::#FF6600',
         card_waiting_icon: '::more_horiz',
       }
@@ -316,48 +316,48 @@ export const config: IDashboardConfig = /*return*/ {
       dependencies: {
         card_average_heading: '::Average',
         card_average_tooltip: "::Average time for human agent to respond",
-        card_average_value: 'ai:transcriptsAverageTimeWaiting-value',
+        card_average_value: 'ai:transcriptsTimeWaiting-avg',
         card_average_color: '::#333333',
         card_average_icon: '::av_timer',  
         card_max_heading: '::Slowest',
         card_max_tooltip: "::Slowest time for human agent to respond",
-        card_max_value: 'ai:transcriptsLongestTimeWaiting-value',
+        card_max_value: 'ai:transcriptsTimeWaiting-longest',
         card_max_color: '::#ff0000',
         card_max_icon: '::timer',
         card_min_heading: '::Fastest',
         card_min_tooltip: "::Fastest time for human agent to respond",
-        card_min_value: 'ai:transcriptsShortestTimeWaiting-value',
+        card_min_value: 'ai:transcriptsTimeWaiting-shortest',
         card_min_color: '::#0066ff',
         card_min_icon: '::timer',
       }
     },
 
     {
-      id: 'transcriptsTotal',
+      id: 'timelineScores',
       type: 'Scorecard',
       title: 'Transcripts',
       size: { w: 2, h: 8 },
       dependencies: {
         card_total_heading: '::Total Msgs',
         card_total_tooltip: "::Total messages",
-        card_total_value: 'ai:transcriptsTotal-value',
+        card_total_value: 'ai:timeline-total',
         card_total_color: '::#666666',
         card_total_icon: '::question_answer',
         card_bot_heading: '::Bot',
         card_bot_tooltip: "::Total messages with bot",
-        card_bot_value: 'ai:transcriptsBot-value',
+        card_bot_value: 'ai:timeline-bot',
         card_bot_color: '::#00FF00',
         card_bot_icon: '::memory',
         card_agent_heading: '::Agent',
         card_agent_tooltip: "::Total messages with a human",
-        card_agent_value: 'ai:transcriptsAgent-value',
+        card_agent_value: 'ai:timeline-agent',
         card_agent_color: '::#0066FF',
         card_agent_icon: '::perm_identity'
       }
     },
 
     {
-      id: 'timelineHandoffConversations',
+      id: 'timeline',
       type: 'Area',
       title: 'Conversations with bot / human',
       subtitle: 'How many conversations required hand-off to human',
@@ -374,7 +374,7 @@ export const config: IDashboardConfig = /*return*/ {
     },
 
     {
-      id: 'conversations',
+      id: 'transcripts',
       type: 'Table',
       title: 'Recent Conversations',
       subtitle: 'Monitor bot communications',
@@ -406,7 +406,7 @@ export const config: IDashboardConfig = /*return*/ {
       params: ['title', 'conversationId', 'queryspan'],
       dataSources: [
         {
-          id: 'transcripts-data',
+          id: 'transcriptsData',
           type: 'ApplicationInsights/Query',
           dependencies: {
             username: 'dialog_transcriptsDialog:title',
@@ -415,52 +415,45 @@ export const config: IDashboardConfig = /*return*/ {
             secret: 'connection:bot-framework.directLine'
           },
           params: {
-            table: 'customEvents',
-            queries: {
-              'userConversationTranscripts':
-              {
-                query: ({ conversationId }) => {
-                  return `where name == 'Transcript' 
-                    | where customDimensions.customerConversationId == '${conversationId}'
-                    | extend timestamp=tostring(customDimensions.timestamp)
-                    | project timestamp, 
-                      text=tostring(customDimensions.text), 
-                      sentimentScore=todouble(customDimensions.sentimentScore), 
-                      from=tostring(customDimensions.from),
-                      state=toint(customDimensions.state)
-                    | order by timestamp asc`; },
-                calculated: (transcripts, dependencies) => {
-                  if (!transcripts || transcripts.length < 1) {
-                    return null;
-                  }
-
-                  const { secret } = dependencies;
-                  const { conversationId } = dependencies;
-
-                  let values = transcripts || [];
-                  let body, headers = {};
-                  let disabled = transcripts[transcripts.length - 1].state !== 0 ? true : false;
-
-                  values.map(v => {
-                    const lastSentimentScore = v.sentimentScore || 0.5;
-                    v['sentiment'] = lastSentimentScore < 0 ? 'error_outline' :
-                      lastSentimentScore < 0.2 ? 'sentiment_very_dissatisfied' :
-                        lastSentimentScore < 0.4 ? 'sentiment_dissatisfied' :
-                          lastSentimentScore < 0.6 ? 'sentiment_neutral' :
-                            lastSentimentScore < 0.8 ? 'sentiment_satisfied' : 'sentiment_very_satisfied';
-                  });
-
-                  body = {
-                    'conversationId': conversationId,
-                  };
-                  headers = {
-                    'Authorization': `Bearer ${secret}`
-                  };
-                  return { 'values': values, 'headers': headers, 'body': body, 'disabled': disabled };
-                }
-
-              }
+            query: ({ conversationId }) => `customEvents 
+              | where name == 'Transcript' 
+              | where customDimensions.customerConversationId == '${conversationId}'
+              | extend timestamp=tostring(customDimensions.timestamp)
+              | project timestamp, 
+                text=tostring(customDimensions.text), 
+                sentimentScore=todouble(customDimensions.sentimentScore), 
+                from=tostring(customDimensions.from),
+                state=toint(customDimensions.state)
+              | order by timestamp asc`
+          },
+          calculated: (state, dependencies) => {
+            let { values } = state || [];
+            if (!values || values.length < 1) {
+              return null;
             }
+
+            const { secret } = dependencies;
+            const { conversationId } = dependencies;
+
+            let body, headers = {};
+            let disabled = values[values.length - 1].state !== 0 ? true : false;
+
+            values.map(v => {
+              const lastSentimentScore = v.sentimentScore || 0.5;
+              v['sentiment'] = lastSentimentScore < 0 ? 'error_outline' :
+                lastSentimentScore < 0.2 ? 'sentiment_very_dissatisfied' :
+                  lastSentimentScore < 0.4 ? 'sentiment_dissatisfied' :
+                    lastSentimentScore < 0.6 ? 'sentiment_neutral' :
+                      lastSentimentScore < 0.8 ? 'sentiment_satisfied' : 'sentiment_very_satisfied';
+            });
+
+            body = {
+              'conversationId': conversationId,
+            };
+            headers = {
+              'Authorization': `Bearer ${secret}`
+            };
+            return { values, headers, body, disabled };
           }
         }
       ],
@@ -472,9 +465,9 @@ export const config: IDashboardConfig = /*return*/ {
           size: { w: 2, h: 1 },
           location: { x: 0, y: 0 },
           dependencies: {
-            body: 'transcripts-data:body',
-            headers: 'transcripts-data:headers',
-            disabled: 'transcripts-data:disabled',
+            body: 'transcriptsData:body',
+            headers: 'transcriptsData:headers',
+            disabled: 'transcriptsData:disabled',
             conversationsEndpoint: 'connection:bot-framework.conversationsEndpoint'
           },
           props: {
@@ -494,7 +487,7 @@ export const config: IDashboardConfig = /*return*/ {
           dependencies: {
             token: 'connection:bot-framework.directLine',
             webchatEndpoint: 'connection:bot-framework.webchatEndpoint',
-            dependsOn: 'transcripts-data:disabled'
+            dependsOn: 'transcriptsData:disabled'
           },
           props: {
             url: ({ token, webchatEndpoint }) => `${webchatEndpoint}/?s=${token}`,
@@ -504,12 +497,12 @@ export const config: IDashboardConfig = /*return*/ {
           }
         },
         {
-          id: 'transcripts-list',
+          id: 'transcriptsData',
           type: 'Table',
           title: 'Transcripts',
           size: { w: 12, h: 11 },
           location: { x: 0, y: 1 },
-          dependencies: { values: 'transcripts-data:values' },
+          dependencies: { values: 'transcriptsData:values' },
           props: {
             rowClassNameField: 'from',
             cols: [

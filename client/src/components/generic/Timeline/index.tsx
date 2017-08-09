@@ -25,6 +25,13 @@ interface ITimelineState extends IGenericState {
 export default class Timeline extends GenericComponent<ITimelineProps, ITimelineState> {
 
   static editor = settings;
+  static fromSource(source: string) {
+    return {
+      values: GenericComponent.sourceFormat(source, 'graphData'),
+      lines: GenericComponent.sourceFormat(source, 'lines'),
+      timeFormat: GenericComponent.sourceFormat(source, 'timeFormat')
+    };
+  }
 
   dateFormat(time: string) {
     return moment(time).format('MMM-DD');
@@ -36,7 +43,7 @@ export default class Timeline extends GenericComponent<ITimelineProps, ITimeline
 
   render() {
     var { timeFormat, values, lines } = this.state;
-    var { title, subtitle, theme, props } = this.props;
+    var { id, title, subtitle, theme, props } = this.props;
     var { lineProps } = props;
 
     var format = timeFormat === 'hour' ? this.hourFormat : this.dateFormat;
@@ -59,7 +66,7 @@ export default class Timeline extends GenericComponent<ITimelineProps, ITimeline
     }
 
     return (
-      <Card title={title} subtitle={subtitle}>
+      <Card id={id} title={title} subtitle={subtitle}>
         <ResponsiveContainer>
           <LineChart data={values} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} {...lineProps}>
             <XAxis dataKey="time" tickFormatter={format} minTickGap={20} />

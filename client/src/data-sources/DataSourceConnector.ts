@@ -5,6 +5,9 @@ import DialogsActions from '../components/generic/Dialogs/DialogsActions';
 import datasourcePluginsMappings from './plugins/PluginsMapping';
 import VisibilityActions from '../actions/VisibilityActions';
 import VisibilityStore from '../stores/VisibilityStore';
+import * as formats from '../utils/data-formats';
+
+const DataFormatTypes = formats.DataFormatTypes;
 
 export interface IDataSource {
   id: string;
@@ -204,6 +207,28 @@ export class DataSourceConnector {
     return this.dataSources[name];
   }
 
+  static handleDataFormat(
+    format: string | formats.IDataFormat, 
+    plugin: IDataSourcePlugin, 
+    state: any, 
+    dependencies: IDictionary) {
+
+    if (!format) { return null; }
+    
+    const prevState = DataSourceConnector.dataSources[plugin._props.id].store.getState();
+
+    let result = {};
+
+    let formatName = (typeof format === 'string' ? format : format.type) || DataFormatTypes.none.toString();
+
+    if (formatName && typeof formats[formatName] === 'function') {
+      let additionalValues = formats[formatName](format, state, dependencies, plugin, prevState) || {};
+      Object.assign(result, additionalValues);
+    }
+
+    return result;
+  }
+
   private static connectDataSource(sourceDS: IDataSource) {
     // Connect sources and dependencies
     sourceDS.store.listen((state) => {
@@ -307,7 +332,7 @@ export class DataSourceConnector {
         (<any> this).setState(newData);
       }
     }
-    var StoreClass = alt.createStore(NewStoreClass, config.id + '-Store');
+    var StoreClass = alt.createStore(NewStoreClass as any, config.id + '-Store');
     return StoreClass;
   }
 
@@ -323,24 +348,26 @@ export class DataSourceConnector {
     }
 
     // Callibrate calculated values
-    var calculated = plugin._props.calculated;
-    var state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
+    const calculated = plugin._props.calculated;
 
+    let state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
     state = _.extend(state, result);
 
+    let format = plugin.getFormat();
+    let formatExtract = DataSourceConnector.handleDataFormat(format, plugin, state, dependencies);
+    if (formatExtract) {
+      Object.assign(result, formatExtract);
+    }
+
     if (typeof calculated === 'function') {
-      var additionalValues = calculated(state, dependencies) || {};
-      Object.keys(additionalValues).forEach(key => {
-        result[key] = additionalValues[key];
-      });
+      let additionalValues = calculated(state, dependencies) || {};
+      Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
     }
 
     if (Array.isArray(calculated)) {
       calculated.forEach(calc => {
-        var additionalValues = calc(state, dependencies) || {};
-        Object.keys(additionalValues).forEach(key => {
-          result[key] = additionalValues[key];
-        });
+        let additionalValues = calc(state, dependencies) || {};
+        Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
       });
     }
 

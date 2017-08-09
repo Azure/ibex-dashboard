@@ -21,23 +21,28 @@ interface IBarProps extends IGenericProps {
 };
 
 interface IBarState extends IGenericState {
-  values: Object[];
-  bars: Object[];
+  values: any[];
+  bars: any[];
 }
 
 export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
   static editor = settings;
-
-  state = {
-    values: [],
-    bars: []
-  };
+  static fromSource(source: string) {
+    return {
+      values: GenericComponent.sourceFormat(source, 'values'),
+      bars: GenericComponent.sourceFormat(source, 'bars')
+    };
+  }
 
   constructor(props: any) {
     super(props);
 
     this.handleClick = this.handleClick.bind(this);
+    this.state = {
+      values: [],
+      bars: []
+    };
   }
 
   handleClick(data: any, index: number) {
@@ -45,9 +50,11 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
   }
 
   render() {
-    var { values, bars } = this.state;
-    var { title, subtitle, props } = this.props;
-    var { barProps, showLegend, nameKey } = props;
+    let { values, bars } = this.state;
+    let { id, title, subtitle, props } = this.props;
+    let { barProps, showLegend, nameKey } = props;
+
+    nameKey = nameKey || 'value';
 
     if (!values) {
       return null;
@@ -55,7 +62,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
     if (!values || !values.length) {
       return (
-        <Card title={title} subtitle={subtitle}>
+        <Card id={id} title={title} subtitle={subtitle}>
           <div style={{ padding: 20 }}>No data is available</div>
         </Card>
       );
@@ -78,7 +85,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
     // Todo: Receive the width of the SVG component from the container
     return (
-      <Card title={title} subtitle={subtitle}>
+      <Card id={id} title={title} subtitle={subtitle}>
         <ResponsiveContainer>
           <BarChart
             data={values}

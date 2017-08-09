@@ -86,10 +86,10 @@ export const config: IDashboardConfig = /*return*/ {
                 return null;
               }
               return { 
-                'avg-score-value': avgscore[0].avg + '%',
-                'avg-score-color': avgscore[0].avg >= 80 ? '#4caf50' : 
+                'avgScore-value': avgscore[0].avg + '%',
+                'avgScore-color': avgscore[0].avg >= 80 ? '#4caf50' : 
                                     (avgscore[0].avg > 60 ? '#FFc107' : '#F44336'),
-                'avg-score-icon': avgscore[0].avg >= 80 ? 'sentiment_very_satisfied' : 
+                'avgScore-icon': avgscore[0].avg >= 80 ? 'sentiment_very_satisfied' : 
                                     (avgscore[0].avg > 60 ? 
                                       'sentiment_satisfied' : 
                                       'sentiment_dissatisfied')
@@ -100,9 +100,9 @@ export const config: IDashboardConfig = /*return*/ {
 						query: () => `
                 where name == 'MBFEvent.QNAEvent'
                 | summarize hits=count() `,
-						calculated: hits =>({ 'score-hits': hits[0].hits })
+						calculated: hits =>({ 'totalHits-value': hits[0].hits })
 					},
-					scoreHits: {
+					'timeline_hits': {
 						query: () => `
                 where name == 'MBFEvent.QNAEvent'
                 | summarize hits=count() by bin(timestamp,1d) 
@@ -144,14 +144,14 @@ export const config: IDashboardConfig = /*return*/ {
               });
 
               return {
-                "timeline-hits-graphData": timelineValues,
-                "timeline-hits-channelUsage": channelUsage,
-                "timeline-hits-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
-                "timeline-hits-channels": channels
+                "timeline_hits-graphData": timelineValues,
+                "timeline_hits-channelUsage": channelUsage,
+                "timeline_hits-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
+                "timeline_hits-channels": channels
               };
             }
 					},
-					users_timeline: {
+					'timeline_users': {
 						query: ({ granularity }) => `
                   where name == 'MBFEvent.QNAEvent'
                   | extend userName=tostring(customDimensions.userName)
@@ -194,10 +194,10 @@ export const config: IDashboardConfig = /*return*/ {
               });
 
               return {
-                "timeline-users-graphData": timelineValues,
-                "timeline-users-channelUsage": channelUsage,
-                "timeline-users-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
-                "timeline-users-channels": channels
+                "timeline_users-graphData": timelineValues,
+                "timeline_users-channelUsage": channelUsage,
+                "timeline_users-timeFormat": (timespan === "24 hours" ? 'hour' : 'date'),
+                "timeline_users-channels": channels
               };
             }
 					},
@@ -235,7 +235,7 @@ export const config: IDashboardConfig = /*return*/ {
 			title: "Hit Rate",
 			subtitle: "How many questions were asked per timeframe",
 			size: { w: 5,h: 8 },
-			dependencies: { values: "ai:timeline-hits-graphData",lines: "ai:timeline-hits-channels",timeFormat: "ai:timeline-hits-timeFormat" }
+			dependencies: { values: "ai:timeline_hits-graphData",lines: "ai:timeline_hits-channels",timeFormat: "ai:timeline_hits-timeFormat" }
 		},
 		{
 			id: "channels",
@@ -243,22 +243,22 @@ export const config: IDashboardConfig = /*return*/ {
 			title: "Channel Usage (Users)",
 			subtitle: "Total users sent per channel",
 			size: { w: 5,h: 8 },
-			dependencies: { values: "ai:timeline-users-channelUsage" },
+			dependencies: { values: "ai:timeline_users-channelUsage" },
 			props: { showLegend: true, entityType: 'messages'  }
 		},
 		{
 			id: "scorecardAvgScore",
 			type: "Scorecard",
 			title: "Avg Score",
-			size: { w: 2,h: 3 },
+			size: { w: 2,h: 8 },
 			dependencies: {
-				card_avgscore_value: "ai:avg-score-value",
-				card_avgscore_color: "ai:avg-score-color",
-				card_avgscore_icon: "ai:avg-score-icon",
+				card_avgscore_value: "ai:avgScore-value",
+				card_avgscore_color: "ai:avgScore-color",
+				card_avgscore_icon: "ai:avgScore-icon",
 				card_avgscore_heading: "::Avg Score",
 				card_avgscore_onClick: "::onScoreClick",
 
-        card_totalhits_value: "ai:score-hits",
+        card_totalhits_value: "ai:totalHits-value",
 				card_totalhits_color: "::#2196F3",
 				card_totalhits_icon: "::av_timer",
 				card_totalhits_heading: "::Total hits"
@@ -343,7 +343,7 @@ export const config: IDashboardConfig = /*return*/ {
 					id: "top5negative",
 					type: "Table",
 					size: { w: 5,h: 8 },
-					dependencies: { values: "sentiment-conversations-data:top5Positive" },
+					dependencies: { values: "sentiment-conversations-data:top5Negative" },
 					props: {
 						compact: true,
 						cols: [
