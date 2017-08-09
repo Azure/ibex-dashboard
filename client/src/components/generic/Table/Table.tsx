@@ -5,10 +5,10 @@ import * as moment from 'moment';
 import utils from '../../../utils';
 
 import { DataTable, TableHeader, TableBody, TableRow, TableColumn, TablePagination } from 'react-md/lib/DataTables';
-import { Card, CardText, TableCardHeader } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
+import Card from '../../Card';
 
 const styles = {
   autoscroll: {
@@ -100,7 +100,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
   }
 
   render() {
-    const { props } = this.props;
+    const { props, id, title } = this.props;
     const { checkboxes, cols, rowClassNameField, hideBorders, compact } = props;
     const { values, rowIndex, rowsPerPage, currentPage, rowsPerPageItems } = this.state;
     
@@ -109,7 +109,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     }
 
     let totalRows = values.length;
-    let pageValues = values.slice(rowIndex, rowIndex + rowsPerPage) || [];
+    let pageValues = Array.isArray(values) && values.slice(rowIndex, rowIndex + rowsPerPage) || [];
 
     let renderColumn = (col: ITableColumnProps, value: any): JSX.Element => {
       let style = { color: col.color ? value[col.color] : null };
@@ -181,7 +181,11 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     className += compact ? 'table-compact' : '';
 
     return (
-      <Card className={hideBorders ? 'hide-borders' : ''} style={styles.autoscroll}>
+      <Card id={id} 
+            title={title}
+            hideTitle={true} 
+            className={hideBorders ? 'hide-borders' : ''} 
+            contentStyle={styles.autoscroll}>
         <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination" responsive={false}>
           <TableHeader>
             <TableRow>

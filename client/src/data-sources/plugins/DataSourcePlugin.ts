@@ -1,5 +1,6 @@
-
+import { IDataSource } from '../DataSourceConnector';
 import { ToastActions } from '../../components/Toast';
+import { DataFormatTypes, IDataFormat } from '../../utils/data-formats';
 
 export interface IDataSourceOptions {
   dependencies: (string | Object)[];
@@ -27,6 +28,7 @@ export interface IDataSourcePlugin {
     dependables: string[],
     actions: string[],
     params: IDictionary,
+    format: string | IDataFormat,
     calculated: ICalculated
   };
 
@@ -37,8 +39,10 @@ export interface IDataSourcePlugin {
   getActions(): string[];
   getParamKeys(): string[];
   getParams(): IDictionary;
+  getFormat(): string | IDataFormat;
   getCalculated(): ICalculated;
   getConnection(): IStringDictionary;
+  getElementQuery(dataSource: IDataSource, dependencies: IDict<any>, aQuery: string, queryFilters: any): string;
 }
 
 export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
@@ -53,6 +57,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     dependables: [],
     actions: [ 'updateDependencies', 'failure', 'updateSelectedValues' ],
     params: <T> {},
+    format: DataFormatTypes.none.toString(),
     calculated: {},
     autoUpdateIntervalMs: -1,
   };
@@ -73,6 +78,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.dependables = options.dependables || [];
     props.actions.push.apply(props.actions, options.actions || []);
     props.params = <T> (options.params || {});
+    props.format = options.format || DataFormatTypes.none.toString();
     props.calculated = options.calculated || {};
     props.autoUpdateIntervalMs = options.autoUpdateIntervalMs || -1;
 
@@ -139,8 +145,18 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     return this._props.params;
   }
 
+  getFormat(): string | IDataFormat {
+    return this._props.format || DataFormatTypes.none.toString();
+  }
+
   getCalculated() {
     return this._props.calculated;
+  }
+
+  getElementQuery(dataSource: IDataSource, dependencies: IDict<any>, aQuery: string, queryFilters: any): string {
+    const plugin = dataSource.plugin.type;
+    console.warn(`'getElementQuery' function may not be fully implemented for the ${plugin} plugin.`);
+    return null;
   }
 
   failure(error: any): void { 

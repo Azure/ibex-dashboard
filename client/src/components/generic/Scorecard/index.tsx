@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 
-import { Card } from 'react-md/lib/Cards';
+import Card from '../../Card';
 import FontIcon from 'react-md/lib/FontIcons';
 import Tooltip from '../../Tooltip';
 
@@ -15,7 +15,16 @@ const styles = {
     float: 'none',
     padding: 0,
     verticalAlign: 'middle'
-  }
+  } as React.CSSProperties,
+  title: {
+    margin: 0,
+    padding: 0,
+  } as React.CSSProperties,
+  content: {
+    margin: 0,
+    padding: 0,
+    overflow: 'visible'
+  } as React.CSSProperties
 };
 
 interface IScorecardProps extends IGenericProps {
@@ -31,6 +40,20 @@ interface IScorecardProps extends IGenericProps {
 export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
   static editor = settings;
+  static fromSource(source: any) {
+    if (!source || typeof source !== 'object') { return {}; }
+
+    let mappings = {};
+    _.keys(source).forEach(key => {
+      mappings['card_' + key + '_value'] = GenericComponent.sourceFormat(source[key], 'value');
+      mappings['card_' + key + '_heading'] = GenericComponent.sourceFormat(source[key], 'heading');
+      mappings['card_' + key + '_color'] = GenericComponent.sourceFormat(source[key], 'color');
+      mappings['card_' + key + '_icon'] = GenericComponent.sourceFormat(source[key], 'icon');
+      mappings['card_' + key + '_subvalue'] = GenericComponent.sourceFormat(source[key], 'subvalue');
+      mappings['card_' + key + '_subheading'] = GenericComponent.sourceFormat(source[key], 'subheading');
+    });
+    return mappings;
+  }
 
   constructor(props: IScorecardProps) {
     super(props);
@@ -47,7 +70,7 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
   render() {
     let { values, value, icon, subvalue, color, className } = this.state;
-    let { title, props, actions } = this.props;
+    let { id, title, props, actions } = this.props;
     let { subheading, colorPosition, scorecardWidth, onClick, tooltip } = props;
 
     if (_.has(this.state, 'values')) {
@@ -90,8 +113,8 @@ export default class Scorecard extends GenericComponent<IScorecardProps, any> {
       this.valueToCard(val, idx, className, colorPosition, scorecardWidth));
 
     return (
-      <Card className="md-card-scorecard">
-        <div className="md-grid--no-spacing">
+      <Card id={id} title={title} hideTitle={true} titleStyle={styles.title} contentStyle={styles.content}>
+        <div className="md-grid--no-spacing md-card-scorecard">
           {cards}
         </div>
       </Card>

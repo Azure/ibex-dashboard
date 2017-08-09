@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as _ from 'lodash';
 import plugins from './generic/plugins';
+import * as formats from '../utils/data-formats';
 
 import { DataSourceConnector } from '../data-sources/DataSourceConnector';
 import VisibilityActions from '../actions/VisibilityActions';
@@ -58,8 +59,13 @@ export default class ElementConnector {
 
     dashboard.elements.forEach((element, idx) => {
       var ReactElement = plugins[element.type];
-      var { id, dependencies, actions, props, title, subtitle, size, theme, location } = element;
+      var { id, dependencies, source, actions, props, title, subtitle, size, theme, location } = element;
       var layoutProps = _.find(layout, { 'i': id });
+
+      if (source && typeof ReactElement.fromSource === 'function') {
+        let fromSource = ReactElement.fromSource(source);
+        dependencies = _.extend({}, dependencies, fromSource);
+      }
 
       if (dependencies && dependencies.visible && !visibilityFlags[dependencies.visible]) { 
         if (typeof visibilityFlags[dependencies.visible] === 'undefined') {
@@ -79,7 +85,7 @@ export default class ElementConnector {
       elements.push(
         <div key={id}>
           <ReactElement 
-            id={id + idx}
+            id={id + '@' + idx}
             dependencies={dependencies}
             actions={actions || {}}
             props={props || {}}
@@ -99,18 +105,25 @@ export default class ElementConnector {
     filters: React.Component<any, any>[],
     additionalFilters: React.Component<any, any>[]
   } {
-    var filters = [];
-    var additionalFilters = [];
+    let filters = [];
+    let additionalFilters = [];
     dashboard.filters.forEach((element, idx) => {
-      var ReactElement = plugins[element.type];
+      let ReactElement = plugins[element.type];
+      let { dependencies, source, actions, title, subtitle, icon } = element;
+
+      if (source && typeof ReactElement.fromSource === 'function') {
+        let fromSource = ReactElement.fromSource(source);
+        dependencies = _.extend({}, dependencies, fromSource);
+      }
+
       (element.first ? filters : additionalFilters).push(
         <ReactElement 
               key={idx} 
-              dependencies={element.dependencies}
-              actions={element.actions}
-              title={element.title}
-              subtitle={element.subtitle}
-              icon={element.icon}
+              dependencies={dependencies}
+              actions={actions}
+              title={title}
+              subtitle={subtitle}
+              icon={icon}
         />
       );
     });
