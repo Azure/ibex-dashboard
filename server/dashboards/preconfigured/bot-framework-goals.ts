@@ -20,8 +20,8 @@ html: `
       <br/>
       <br/>
       var eventProperties = new Dictionary&lt;string, string&gt;();<br/>
-      eventProperties.Add("Name", "Your goal name");<br/>
-      DefaultInstrumentation.TrackCustomEvent(context.Activity, "Goal", eventProperties);
+      eventProperties.Add("GoalName", "Your goal name");<br/>
+      DefaultInstrumentation.TrackCustomEvent(context.Activity, "MBFEvent.GoalEvent", eventProperties);
       <br/>
       <br/>
       This dashboard contains a bar chart which will show the top 3 goals triggered and when the bar chart is clicked a full list of goals
@@ -125,7 +125,7 @@ html: `
 					goals_top_goals_count: {
 						query: () => `
               extend GoalName=tostring(customDimensions.Name) | 
-              where name=='Goal' | 
+              where name=='MBFEvent.GoalEvent' | 
               summarize count=count() by GoalName | take 3`,
 						mappings: { goal: (val) => val || "Unknown",count: (val) => val || 0 },
 						filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
@@ -189,7 +189,7 @@ html: `
             filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						query: () => `customEvents |
               extend GoalName=tostring(customDimensions.Name) | 
-              where name=='Goal' |
+              where name=='MBFEvent.GoalEvent' |
               summarize count=count() by GoalName | order by GoalName asc`
 					}
 				}
@@ -231,7 +231,7 @@ html: `
 						query: ({ goal }) => ` 
               customEvents
               | extend conversation=tostring(customDimensions.conversationId), goal=customDimensions.Name
-              | where name=='Goal' and goal =~ '${goal}'
+              | where name=='MBFEvent.GoalEvent' and goal =~ '${goal}'
               | summarize count=count(), maxTimestamp=max(timestamp) by conversation
               | order by maxTimestamp`,
 						mappings: { id: (val, row, idx) => `Conversation ${idx}` }
@@ -259,7 +259,6 @@ html: `
 					 		params: {
 					 			title: "args:id",
 					 			conversation: "args:conversation",
-					 			//intent: "dialog_intentConversations:intent",
 					 			queryspan: "timespan:queryTimespan"
 					 		}
 					 	}
