@@ -30,7 +30,9 @@ yarn start
 yarn start:dev
 ```
 
-1. Open **http://localhost:3000**
+Open **http://localhost:3000**
+
+For contribution and code documentation, [follow this link](/docs/README.md).
 
 (For more information on development environment, see https://www.fullstackreact.com/articles/using-create-react-app-with-a-server/)
 
@@ -102,7 +104,6 @@ This project is built using:
 The server approach was added using:
 
 * https://www.fullstackreact.com/articles/using-create-react-app-with-a-server/
-* https://medium.com/@patriciolpezjuri/using-create-react-app-with-react-router-express-js-8fa658bf892d#.14dex6478
 
 Thinking about integrating with:
 
