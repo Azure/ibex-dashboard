@@ -29,61 +29,97 @@ export const config: IDashboardConfig = /*return*/ {
   },
   dataSources: [
     {
+      id: 'filter1',
+      type: 'Sample',
+      format: 'filter',
+      params: {
+        samples: {
+          'values': [
+            {value: 'en'}, 
+            {value: 'fr'}, 
+            {value: 'de'}
+          ]
+        }
+      }
+    },
+    {
+      id: 'filter2',
+      type: 'Sample',
+      format: 'filter',
+      params: {
+        samples: {
+          'values': [
+            {value: 'skype'}, 
+            {value: 'messenger'}, 
+            {value: 'slack'}
+          ]
+        }
+      }
+    },
+    {
       id: 'samples',
       type: 'Sample',
       dependencies: {
-        selectedFilter: 'filters:filter-selected',
+        selectedFilter1: 'filter1:values-selected',
+        selectedFilter2: 'filter2:values-selected',
       },
       params: {
         samples: {
           data_for_pie: [
-            { name: 'value1', value: 1, category: 'app' },
-            { name: 'value2', value: 2, category: 'bot' },
-            { name: 'value3', value: 3, category: 'bot' },
-            { name: 'value4', value: 4, category: 'web' },
-            { name: 'value5', value: 5, category: 'web' },
-            { name: 'value6', value: 6, category: 'web' },
-            { name: 'value6', value: 6, category: 'web' }
+            { name: 'skype-en', value: 9, locale: 'en', channel: 'skype' },
+            { name: 'skype-fr', value: 8, locale: 'fr', channel: 'skype' },
+            { name: 'skype-de', value: 7, locale: 'de', channel: 'skype' },
+            { name: 'messenger-en', value: 6, locale: 'en', channel: 'messenger' },
+            { name: 'messenger-fr', value: 5, locale: 'fr', channel: 'messenger' },
+            { name: 'messenger-de', value: 4, locale: 'de', channel: 'messenger' },
+            { name: 'slack-en', value: 3, locale: 'en', channel: 'slack' },
+            { name: 'slack-fr', value: 2, locale: 'fr', channel: 'slack' },
+            { name: 'slack-de', value: 1, locale: 'de', channel: 'slack' }
           ]
         },
-        filters: [{ dependency: 'selectedFilter', queryProperty: 'category' }],
+        filters: [
+          { dependency: 'selectedFilter1', queryProperty: 'locale' },
+          { dependency: 'selectedFilter2', queryProperty: 'channel' }
+        ],
       },
-      calculated: (state, dependencies) => {
-        const {data_for_pie} = state;
-        const {selectedFilter} = dependencies;
-        let {filtered_data_value, filtered_data_subvalue} = state;
-        let filtered_data_for_pie = data_for_pie;
-        if (selectedFilter && selectedFilter.length > 0) {
-          filtered_data_for_pie = data_for_pie.filter(i => i.category === selectedFilter.find(f => f === i.category) );
-        }
-        filtered_data_value = filtered_data_for_pie.length;
-        filtered_data_subvalue = filtered_data_for_pie.reduce((a,c) => a + c.value, 0);
-        return {
-          'filtered_data_value': filtered_data_value || 0,
-          'filtered_data_subvalue': filtered_data_subvalue || 0,
-          'filtered_data_for_pie': filtered_data_for_pie
-        };
-      }
+      format: {
+        type: 'filtered_samples'
+      },
     },
     {
-      id: 'filters',
+      id: 'scorecard',
       type: 'Sample',
-      params: {
-        samples: {
-          'filter-categories': ['web', 'app', 'bot'],
-          'filter-selected': []
-        }
+      dependencies: {
+        filteredData: 'samples:filtered_data_for_pie',
+      },
+      calculated: (state, dependencies) => {
+        const {filteredData} = state;
+        const filteredDataValue = filteredData && filteredData.reduce((a, c) => a + c.value, 0) || 0;
+        const filteredDataSubvalue = filteredData && filteredData.length || 0;
+        return {
+          'filtered_data_value': filteredDataValue,
+          'filtered_data_subvalue': filteredDataSubvalue,
+        };
       }
     }
   ],
   filters: [
     {
       type: 'MenuFilter',
-      title: 'Filter',
-      subtitle: 'Select category',
+      title: 'Locale',
+      subtitle: 'Select locale',
       icon: 'forum',
-      dependencies: { selectedValues: 'filters:filter-selected', values: 'filters:filter-categories' },
-      actions: { onChange: 'filters:updateSelectedValues:filter-selected' },
+      source: 'filter1',
+      actions: { onChange: 'filter1:updateSelectedValues:values-selected' },
+      first: true
+    },
+    {
+      type: 'MenuFilter',
+      title: 'Channel',
+      subtitle: 'Select channel',
+      icon: 'forum',
+      source: 'filter2',
+      actions: { onChange: 'filter2:updateSelectedValues:values-selected' },
       first: true
     },
   ],
@@ -95,7 +131,7 @@ export const config: IDashboardConfig = /*return*/ {
       subtitle: 'Description of pie sample 1',
       size: { w: 5, h: 8 },
       dependencies: { values: 'samples:filtered_data_for_pie' },
-      props: { showLegend: true }
+      props: { entityType: 'Sessions', showLegend: true }
     },
     {
       id: 'pie_sample2',
@@ -104,34 +140,34 @@ export const config: IDashboardConfig = /*return*/ {
       subtitle: 'Hover on the values to see the difference from sample 1',
       size: { w: 5, h: 8 },
       dependencies: { values: 'samples:filtered_data_for_pie' },
-      props: { showLegend: true, compact: true }
+      props: { entityType: 'Sessions', showLegend: true, compact: true }
     },
     {
-      id: 'scorecard_sample1',
+      id: 'scorecard1',
       type: 'Scorecard',
       title: 'Value',
       size: { w: 1, h: 3 },
       dependencies: {
-        value: 'samples:filtered_data_value',
+        value: 'scorecard:filtered_data_value',
         color: '::#2196F3',
         icon: '::av_timer'
       }
     },
     {
-      id: 'scorecard_sample2',
+      id: 'scorecard2',
       type: 'Scorecard',
       title: 'Same Value',
       size: { w: 1, h: 3 },
       dependencies: {
-        value: 'samples:filtered_data_value',
+        value: 'scorecard:filtered_data_value',
         color: '::#2196F3',
         icon: '::av_timer',
-        subvalue: 'samples:filtered_data_subvalue'
+        subvalue: 'scorecard:filtered_data_subvalue'
       },
       props: {
-        subheading: 'Total value'
+        subheading: 'segments'
       }
     }
   ],
   dialogs: []
-}
+};

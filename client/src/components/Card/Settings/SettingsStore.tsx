@@ -181,11 +181,11 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
       const forkedQueryComponents = dependencyProperty.split('-');
       const params = datasources[datasource].config.params;
 
-      const isForked = !params.query && !!params.table;
+      const isForked = params && !params.query && !!params.table;
 
       if (!isForked) {
         // unforked
-        queryFn = params.query;
+        queryFn = params && params.query || 'n/a';
       } else {
         // forked
         if (!params.queries[queryId] && forkedQueryComponents.length === 2) {
