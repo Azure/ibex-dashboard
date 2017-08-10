@@ -98,11 +98,11 @@ export function bars(
     });
 
     result[prefix + 'bars'] = _.keys(series);
-    result[prefix + 'values'] = _.values(barValues);
+    result[prefix + 'bar-values'] = _.values(barValues);
 
   } else {
     result[prefix + 'bars'] = [ valueField ];
-    result[prefix + 'values'] = values;
+    result[prefix + 'bar-values'] = values;
   }
 
   return result;
