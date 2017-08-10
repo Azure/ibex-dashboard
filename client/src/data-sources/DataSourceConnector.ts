@@ -373,7 +373,7 @@ export class DataSourceConnector {
     if (Array.isArray(calculated)) {
       calculated.forEach(calc => {
         let additionalValues = calc(state, dependencies) || {};
-      Object.assign(result, additionalValues);
+        Object.assign(result, additionalValues);
       });
     }
 
