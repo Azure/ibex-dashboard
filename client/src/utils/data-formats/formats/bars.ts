@@ -63,7 +63,7 @@ export function bars(
   const threshold = args.threshold || 0;
   const othersValue = args.othersValue || 'Others';
 
-  let values: any[] = state.values;
+  let values: any[] = state.values || [];
 
   // Concating values with '...'
   if (values && values.length && valueMaxLength && (seriesField || barsField)) {

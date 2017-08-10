@@ -8,8 +8,8 @@ interface ISampleParams {
 
 export default class Sample extends DataSourcePlugin<ISampleParams> {
 
-  type = 'Constant';
-  defaultProperty = 'selectedValue';
+  type = 'Sample';
+  defaultProperty = 'values';
 
   constructor(options: IOptions<ISampleParams>, connections: IDict<IStringDictionary>) {
     super(options, connections);

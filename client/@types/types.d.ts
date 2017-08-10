@@ -10,6 +10,10 @@ interface IDataSource {
   id: string,
   dependencies?: IStringDictionary,
   params?: IDictionary,
+  format?: string | {
+    type: string,
+    args?: IDictionary
+  }
   calculated?: (state: any, dependencies?: any, prevState?: any) => IDictionary
 }
 

@@ -231,8 +231,9 @@ export class DataSourceConnector {
 
   private static connectDataSource(sourceDS: IDataSource) {
     // Connect sources and dependencies
-    sourceDS.store.listen((state) => {
+    sourceDS.store.listen((updatedState) => {
 
+      let state = sourceDS.store.getState();
       Object.keys(this.dataSources).forEach(checkDSId => {
         var checkDS = this.dataSources[checkDSId];
         var dependencies = checkDS.plugin.getDependencies() || {};
