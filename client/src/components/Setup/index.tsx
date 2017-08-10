@@ -106,12 +106,12 @@ export default class Setup extends React.Component<any, ISetupState> {
     if (redirectUrl) { return redirectUrl; }
 
     let host = window.location.host;
-    let protocol = 'https';
+    let protocol = 'https:';
 
     // On localhost, authentication requests go directly to port 4000
     if (host === 'localhost:3000' || host === 'localhost:4000') { 
       host = 'localhost:4000'; 
-      protocol = 'http';
+      protocol = 'http:';
     }
 
     return protocol + '//' + host + '/auth/openid/return';

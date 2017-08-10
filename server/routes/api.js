@@ -72,25 +72,36 @@ router.get('/dashboards', (req, res) => {
   
   let script = '';
   let files = fs.readdirSync(privateDashboard);
+  files = (files || []).filter(fileName => isValidFile(path.join(privateDashboard, fileName)));
+
+  // In case no dashboard is present, create a new sample file
+  if (!files || !files.length) { 
+    const sampleFileName = 'basic_sample.private.js';
+    const sampleTemplatePath = path.join(preconfDashboard, 'sample.ts');
+    const samplePath = path.join(privateDashboard, sampleFileName);
+    let content = getFileContents(sampleTemplatePath);
+
+    fs.writeFileSync(samplePath, content);
+    files = [ sampleFileName ];
+  }
+
   if (files && files.length) { 
     files.forEach((fileName) => {
-      let filePath = path.join(privateDashboard, fileName);
-      if (isValidFile(filePath)) {
-        const fileContents = getFileContents(filePath);
-        const jsonDefinition = getMetadata(fileContents);
-        let content = 'return ' + JSON.stringify(jsonDefinition);
+      const filePath = path.join(privateDashboard, fileName);
+      const fileContents = getFileContents(filePath);
+      const jsonDefinition = getMetadata(fileContents);
+      let content = 'return ' + JSON.stringify(jsonDefinition);
 
-        // Ensuring this dashboard is loaded into the dashboards array on the page
-        script += `
-          (function (window) {
-            var dashboard = (function () {
-              ${content}
-            })();
-            window.dashboardDefinitions = window.dashboardDefinitions || [];
-            window.dashboardDefinitions.push(dashboard);
-          })(window);
-        `;
-      }
+      // Ensuing this dashboard is loaded into the dashboards array on the page
+      script += `
+        (function (window) {
+          var dashboard = (function () {
+            ${content}
+          })();
+          window.dashboardDefinitions = window.dashboardDefinitions || [];
+          window.dashboardDefinitions.push(dashboard);
+        })(window);
+      `;
     });
   }
 
@@ -191,7 +202,7 @@ router.post('/dashboards/:id', (req, res) => {
     }
 
     res.json({ script });
-  })
+  });
 });
 
 router.get('/templates/:id', (req, res) => {

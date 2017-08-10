@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import { Card, CardText } from 'react-md/lib/Cards';
 import FontIcon from 'react-md/lib/FontIcons';
 import Button from 'react-md/lib/Buttons/Button';
 import CircularProgress from 'react-md/lib/Progress/CircularProgress';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
+import Card from '../../Card';
 
 const styles = {
   autoscroll: {
@@ -40,7 +40,7 @@ export default class Detail extends GenericComponent<IDetailProps, IDetailState>
   }
 
   render() {
-    const { props } = this.props;
+    const { props, id, title } = this.props;
     const { cols, hideBorders } = props;
     const { values } = this.state;
 
@@ -74,7 +74,12 @@ export default class Detail extends GenericComponent<IDetailProps, IDetailState>
     });
 
     return (
-      <Card className={hideBorders ? 'hide-borders' : ''} style={styles.autoscroll}>
+      <Card 
+        id={id} 
+        title={title} 
+        hideTitle={true} 
+        className={hideBorders ? 'hide-borders' : ''} 
+        contentStyle={styles.autoscroll}>
         {lists}
       </Card>
     );

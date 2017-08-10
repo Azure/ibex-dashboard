@@ -103,6 +103,25 @@ h2, .md-subheading-2 {
     float: right;
     padding: 2px 7px;
   }
+
+  .card-settings {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .card-settings > span {
+    float: left;
+  }
+
+  .card-settings-btn {
+    color: lightgrey;
+  }
+
+  .card-settings-btn:hover {
+    color: $md-primary-color;
+  }
 }
 
 .react-draggable {
