@@ -3,10 +3,10 @@ import * as _ from 'lodash';
 
 // The following line is important to keep in that format so it can be rendered into the page
 export const config: IDashboardConfig = /*return*/ {
-  id: "basic_sample",
-  name: "Basic Sample",
+  id: "sample_with_dialog",
+  name: "Sample with Dialog",
   icon: "extension",
-  url: "basic_sample",
+  url: "sample_with_dialog",
   description: "A basic sample to understand a basic dashboard",
   preview: "/images/sample.png",
   category: 'Samples',
@@ -50,18 +50,75 @@ export const config: IDashboardConfig = /*return*/ {
           threshold: 10 
         }
       }
+    },
+    {
+      id: "dialog-data",
+      type: "Sample",
+      dependencies: {
+      	param1_dependency: "dialog_sample_dlg:param1"
+      },
+      params: {
+        samples: {
+          "values": [
+            { count: 199, barField: 'bar 1', seriesField: 'series1Value' },
+            { count: 105, barField: 'bar 1', seriesField: 'series1Value' },
+            { count: 203, barField: 'bar 2', seriesField: 'series2Value' },
+            { count: 445, barField: 'bar 2', seriesField: 'series2Value' }
+          ]
+        }
+      },
+      calculated: (state, dependencies) => {
+        let { values } = state;
+        let { param1_dependency } = dependencies;
+        return {
+          values: _.filter(values, { barField: param1_dependency })
+        };
+      },
+      format: {
+        type: "bars",
+        args: { 
+          valueField: "count", 
+          barsField: "barField", 
+          seriesField: "seriesField", 
+          threshold: 10 
+        }
+      }
     }
   ],
   filters: [],
   elements: [
     {
-      id: "pie_sample1",
-      type: "PieData",
-      title: "Pie Sample 1",
-      subtitle: "Description of pie sample 1",
+      id: "bar_sample1",
+      type: "BarData",
+      title: "Bars Sample 1",
+      subtitle: "Description of bars sample 1",
       source: "samples",
-      props: { showLegend: true }
+      size: { w: 6,h: 8 },
+      actions: {
+				onBarClick: {
+					action: "dialog:sample_dlg",
+					params: { title: "args:value",param1: "args:value" }
+				}
+			}
     }
   ],
-  dialogs: []
+  dialogs: [
+    {
+			id: "sample_dlg",
+			params: ["title","param1"],
+			dataSources: [
+				
+			],
+			elements: [
+				{
+					id: "dialog-sample-bars",
+					type: "BarData",
+					title: "Sample bars in dialog",
+					subtitle: "Sample bars in dialog with some param filter",
+					size: { w: 6,h: 8 },
+					source: "dialog-data"
+				}
+			]
+		}
+  ]
 }
