@@ -63,6 +63,10 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     DialogsStore.listen(this.onChange);
   }
 
+  componentWillUnmount() {
+    DialogsStore.unlisten(this.onChange);
+  }
+
   componentDidUpdate() {
     const { dialogData } = this.props;
     var { dialogId, dialogArgs } = this.state;
