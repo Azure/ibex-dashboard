@@ -9,8 +9,6 @@ import Snackbar from 'react-md/lib/Snackbars';
 import SpinnerStore, { ISpinnerStoreState } from './SpinnerStore';
 import SpinnerActions from './SpinnerActions';
 
-import {Toast, ToastActions, IToast} from '../Toast';
-
 interface ISpinnerState extends ISpinnerStoreState {
 }
 
@@ -22,34 +20,6 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
     this.state = SpinnerStore.getState();
 
     this.onChange = this.onChange.bind(this);
-    this._429ApplicationInsights = this._429ApplicationInsights.bind(this);
-
-    var self = this;
-    var openOriginal = XMLHttpRequest.prototype.open;
-    var sendOriginal = XMLHttpRequest.prototype.send;
-
-    XMLHttpRequest.prototype.open = function(method: string, url: string, async?: boolean, _?: string, __?: string) {
-      SpinnerActions.startRequestLoading.defer(null);
-      openOriginal.apply(this, arguments);
-    };
-
-    XMLHttpRequest.prototype.send = function(data: any) {
-      let _xhr: XMLHttpRequest = this;
-      _xhr.onreadystatechange = (response) => {
-
-        // readyState === 4: means the response is complete
-        if (_xhr.readyState === 4) {
-          SpinnerActions.endRequestLoading.defer(null);
-
-          if (_xhr.status === 429) {
-            self._429ApplicationInsights();
-          }
-        }
-      };
-      sendOriginal.apply(_xhr, arguments);
-    };
-
-    // Todo: Add timeout to requests - if no reply received, turn spinner off
   }
 
   componentDidMount() {
@@ -59,11 +29,6 @@ export default class Spinner extends React.Component<any, ISpinnerState> {
 
   componentWillUnmount() {
     SpinnerStore.unlisten(this.onChange);
-  }
-
-  _429ApplicationInsights() {
-    let toast: IToast = { text: 'You have reached the maximum number of Application Insights requests.' };
-    ToastActions.addToast(toast);
   }
 
   onChange(state: ISpinnerState) {
