@@ -73,6 +73,6 @@ class SpinnerStore extends AbstractStoreModel<ISpinnerStoreState> implements ISp
   }
 }
 
-const spinnerStore = alt.createStore<ISpinnerStoreState>(SpinnerStore, 'SpinnerStore');
+const spinnerStore = alt.createStore<ISpinnerStoreState>(SpinnerStore as any, 'SpinnerStore');
 
 export default spinnerStore;
