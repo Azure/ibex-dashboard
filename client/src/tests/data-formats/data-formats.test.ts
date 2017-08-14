@@ -2,7 +2,7 @@ import { IDataSourceDictionary } from '../../data-sources';
 import { setupTests } from '../utils/setup';
 import Sample from '../../data-sources/plugins/Sample';
 
-import * as testCases from './format-values';
+import { formatTests } from './formats';
 import * as formats from '../../utils/data-formats';
 
 describe('Data Source: Application Insights: Forked Query', () => {
@@ -16,11 +16,11 @@ describe('Data Source: Application Insights: Forked Query', () => {
       }
     }, {});
 
-  Object.keys(testCases.tests).forEach(testFormat => {
+  Object.keys(formatTests).forEach(testFormat => {
 
     it ('Check data format ' + testFormat, () => {
 
-      let test = testCases.tests[testFormat];
+      let test = formatTests[testFormat];
       let values = test.state;
     
       let result = formats[testFormat](test.format, test.state, {}, mockPlugin, {});
