@@ -7,7 +7,7 @@ import * as formats from '../../utils/data-formats';
 
 describe('Data Source: Application Insights: Forked Query', () => {
 
-  let mockPlugin = new Sample(<any>{
+  let sampleMockPlugin = new Sample(<any>{
       params: {
         values: [ 'value 1', 'value 2', 'value 3' ],
         samples: {
@@ -20,11 +20,27 @@ describe('Data Source: Application Insights: Forked Query', () => {
 
     it ('Check data format ' + testFormat, () => {
 
-      let test = formatTests[testFormat];
-      let values = test.state;
-    
-      let result = formats[testFormat](test.format, test.state, {}, mockPlugin, {});
-      expect(result).toMatchObject(test.expected);
+      let testCase = formatTests[testFormat];
+      let tests = [];
+      if (!Array.isArray(testCase)) {
+        tests = [ testCase ];
+      } else {
+        tests = testCase;
+      }
+
+      tests.forEach(test => {
+        let values = test.state;
+
+        let mockPlugin = sampleMockPlugin;
+        if (test.params) {
+          mockPlugin = new Sample(<any>{
+            params: test.params
+          }, {});
+        }
+      
+        let result = formats[testFormat](test.format, test.state, {}, mockPlugin, {});
+        expect(result).toMatchObject(test.expected);
+      });
     });
   });
 });
