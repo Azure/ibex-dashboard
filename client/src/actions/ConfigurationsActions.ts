@@ -8,7 +8,7 @@ interface IConfigurationsActions {
   createDashboard(dashboard: IDashboardConfig): any;
   loadTemplate(id: string): any;
   saveConfiguration(dashboard: IDashboardConfig): any;
-  failure(error: any): void;
+  failure(error: any): any;
   submitDashboardFile(content: string, fileName: string): void;
   convertDashboardToString(dashboard: IDashboardConfig): string;
   deleteDashboard(id: string): any;
