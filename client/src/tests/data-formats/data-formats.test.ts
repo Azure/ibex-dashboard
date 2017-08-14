@@ -5,7 +5,7 @@ import Sample from '../../data-sources/plugins/Sample';
 import { formatTests } from './formats';
 import * as formats from '../../utils/data-formats';
 
-describe('Data Source: Application Insights: Forked Query', () => {
+describe('Data Formats', () => {
 
   let sampleMockPlugin = new Sample(<any>{
       params: {
@@ -18,7 +18,7 @@ describe('Data Source: Application Insights: Forked Query', () => {
 
   Object.keys(formatTests).forEach(testFormat => {
 
-    it ('Check data format ' + testFormat, () => {
+    it (testFormat, () => {
 
       let testCase = formatTests[testFormat];
       let tests = [];
@@ -37,8 +37,10 @@ describe('Data Source: Application Insights: Forked Query', () => {
             params: test.params
           }, {});
         }
+
+        let dependencies = test.dependencies || {};
       
-        let result = formats[testFormat](test.format, test.state, {}, mockPlugin, {});
+        let result = formats[testFormat](test.format, test.state, dependencies, mockPlugin, {});
         expect(result).toMatchObject(test.expected);
       });
     });
