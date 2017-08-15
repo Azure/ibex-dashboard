@@ -10,8 +10,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'rec
 import colors from '../../colors';
 const { ThemeColors } = colors;
 
-import settings from './Settings';
-
 interface IBarProps extends IGenericProps {
   props: {
     barProps: { [key: string]: Object };
@@ -28,7 +26,6 @@ interface IBarState extends IGenericState {
 
 export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
-  static editor = settings;
   static fromSource(source: string) {
     return {
       values: GenericComponent.sourceFormat(source, 'bar-values'),

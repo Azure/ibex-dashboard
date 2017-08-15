@@ -11,8 +11,6 @@ import { Tooltip, Legend } from 'recharts';
 import colors from '../../colors';
 const { ThemeColors } = colors;
 
-import settings from './Settings';
-
 interface IScatterProps extends IGenericProps {
   theme?: string[];
   xDataKey?: string;
@@ -25,8 +23,6 @@ interface IScatterState extends IGenericState {
 }
 
 export default class Scatter extends GenericComponent<IScatterProps, IScatterState> {
-
-  static editor = settings;
 
   static defaultProps = {
     xDataKey: 'x',

@@ -12,8 +12,6 @@ var { ThemeColors } = colors;
 
 import '../generic.css';
 
-import AreaSettings from './Settings';
-
 interface IAreaProps extends IGenericProps {
   theme?: string[];
   showLegend?: boolean;
@@ -29,7 +27,6 @@ interface IAreaState extends IGenericState {
 
 export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
-  static editor = AreaSettings;
   static defaultProps = {
     isStacked: false
   };

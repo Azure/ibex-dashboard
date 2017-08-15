@@ -11,8 +11,6 @@ import Button from 'react-md/lib/Buttons/Button';
 import colors from '../../colors';
 var { ThemeColors } = colors;
 
-import settings from './Settings';
-
 interface ITimelineProps extends IGenericProps {
   theme?: string[];
 }
@@ -25,7 +23,6 @@ interface ITimelineState extends IGenericState {
 
 export default class Timeline extends GenericComponent<ITimelineProps, ITimelineState> {
 
-  static editor = settings;
   static fromSource(source: string) {
     return {
       values: GenericComponent.sourceFormat(source, 'graphData'),

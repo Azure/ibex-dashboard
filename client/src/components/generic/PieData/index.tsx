@@ -10,8 +10,6 @@ import { PieChart, Pie, Sector, Cell, Legend } from 'recharts';
 import colors from '../../colors';
 const { ThemeColors } = colors;
 
-import settings from './Settings';
-
 interface IPieProps extends IGenericProps {
   props: {
     pieProps: { [key: string]: Object };
@@ -31,8 +29,6 @@ interface IPieState extends IGenericState {
 }
 
 export default class PieData extends GenericComponent<IPieProps, IPieState> {
-
-  static editor = settings;
 
   state = {
     activeIndex: 0,
