@@ -2,8 +2,9 @@ import * as React from 'react';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import * as moment from 'moment';
 import * as _ from 'lodash';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import Card from '../../Card';
+import ResponsiveContainer from '../../ResponsiveContainer';
 
 import Button from 'react-md/lib/Buttons/Button';
 
@@ -43,7 +44,7 @@ export default class Timeline extends GenericComponent<ITimelineProps, ITimeline
 
   render() {
     var { timeFormat, values, lines } = this.state;
-    var { id, title, subtitle, theme, props } = this.props;
+    var { id, title, subtitle, theme, props, layout } = this.props;
     var { lineProps } = props;
 
     var format = timeFormat === 'hour' ? this.hourFormat : this.dateFormat;
@@ -67,7 +68,7 @@ export default class Timeline extends GenericComponent<ITimelineProps, ITimeline
 
     return (
       <Card id={id} title={title} subtitle={subtitle}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <LineChart data={values} margin={{ top: 5, right: 30, left: 20, bottom: 5 }} {...lineProps}>
             <XAxis dataKey="time" tickFormatter={format} minTickGap={20} />
             <YAxis type="number" domain={['dataMin', 'dataMax']} />
