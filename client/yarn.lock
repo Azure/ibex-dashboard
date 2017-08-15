@@ -4486,9 +4486,15 @@ react-dom@^15.4.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.0"
 
-react-draggable@^2.1.0, react-draggable@^2.1.1:
+react-draggable@^2.1.0:
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/react-draggable/-/react-draggable-2.2.3.tgz#17628cb8aaefed639d38e0021b978a685d80b08b"
+  dependencies:
+    classnames "^2.2.5"
+
+react-draggable@^2.2.6:
+  version "2.2.6"
+  resolved "https://registry.yarnpkg.com/react-draggable/-/react-draggable-2.2.6.tgz#3a806e10f2da6babfea4136be6510e89b0d76901"
   dependencies:
     classnames "^2.2.5"
 
@@ -4500,13 +4506,14 @@ react-event-listener@^0.4.0:
     react-addons-shallow-compare "^15.4.2"
     warning "^3.0.0"
 
-react-grid-layout@^0.14.4:
-  version "0.14.4"
-  resolved "https://registry.yarnpkg.com/react-grid-layout/-/react-grid-layout-0.14.4.tgz#7d2b664ea7368824a9a4e660ec56c8f8f498cca8"
+react-grid-layout@^0.14.7:
+  version "0.14.7"
+  resolved "https://registry.yarnpkg.com/react-grid-layout/-/react-grid-layout-0.14.7.tgz#aaa0d090007a4d482d39a95bd63c8ef12901eab4"
   dependencies:
     classnames "^2.2.5"
     lodash.isequal "^4.0.0"
-    react-draggable "^2.1.1"
+    prop-types "^15.5.8"
+    react-draggable "^2.2.6"
     react-resizable "^1.4.0"
 
 react-json-tree@^0.10.9:
