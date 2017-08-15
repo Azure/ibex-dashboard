@@ -295,7 +295,11 @@ export const config: IDashboardConfig = /*return*/ {
 				card_users_icon: "::account_circle",
 				card_users_subvalue: "retention:returning",
 				card_users_subheading: "::Returning",
-				card_users_onClick: "::onUsersClick"
+        card_users_onClick: "::onUsersClick",
+        card_errors_tooltip: "::Total errors",
+        card_sentiment_tooltip: "::Average sentiment",
+        card_users_tooltip: "::Total users and retention",
+        card_conversions_tooltip: "::Percentage of user interactions completed with a conversion",
 			},
 			actions: {
 				onErrorsClick: {
