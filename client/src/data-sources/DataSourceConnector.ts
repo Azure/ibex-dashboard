@@ -234,18 +234,30 @@ export class DataSourceConnector {
     sourceDS.store.listen((state) => {
 
       Object.keys(this.dataSources).forEach(checkDSId => {
-        var checkDS = this.dataSources[checkDSId];
-        var dependencies = checkDS.plugin.getDependencies() || {};
+        let checkDS = this.dataSources[checkDSId];
+        let dependencies = checkDS.plugin.getDependencies() || {};
 
+        let populatedDependencies = {};
         let connected = _.find(_.keys(dependencies), dependencyKey => {
           let dependencyValue = dependencies[dependencyKey] || '';
-          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
+          if (typeof dependencyValue === 'string' && dependencyValue.length > 0)  {
+            if (dependencyValue === sourceDS.id) {
+              let defaultProperty = sourceDS.plugin.defaultProperty || 'value';
+              populatedDependencies[dependencyKey] = state[defaultProperty];
+              return true;
+            } else if (dependencyValue.startsWith(sourceDS.id + ':')) {
+              let property = dependencyValue.substr(sourceDS.id.length + 1);
+              populatedDependencies[dependencyKey] = _.get(state, property);
+              return true;
+            }
+          }
+          return false;
         });
 
         if (connected) {
 
           // Todo: add check that all dependencies are met
-          checkDS.action.updateDependencies.defer(state);
+          checkDS.action.updateDependencies.defer(populatedDependencies);
         }
       });
 
@@ -338,7 +350,7 @@ export class DataSourceConnector {
 
   private static callibrateResult(result: any, plugin: IDataSourcePlugin, dependencies: IDictionary): any {
 
-    var defaultProperty = plugin.defaultProperty || 'value';
+    let defaultProperty = plugin.defaultProperty || 'value';
 
     // In case result is not an object, push result into an object
     if (typeof result !== 'object') {
@@ -353,22 +365,24 @@ export class DataSourceConnector {
     let state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
     state = _.extend(state, result);
 
-    let format = plugin.getFormat();
-    let formatExtract = DataSourceConnector.handleDataFormat(format, plugin, state, dependencies);
-    if (formatExtract) {
-      Object.assign(result, formatExtract);
-    }
-
     if (typeof calculated === 'function') {
       let additionalValues = calculated(state, dependencies) || {};
-      Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
+      Object.assign(result, additionalValues);
     }
 
     if (Array.isArray(calculated)) {
       calculated.forEach(calc => {
         let additionalValues = calc(state, dependencies) || {};
-        Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
+        Object.assign(result, additionalValues);
       });
+    }
+
+    state = _.extend(state, result);
+    
+    let format = plugin.getFormat();
+    let formatExtract = DataSourceConnector.handleDataFormat(format, plugin, state, dependencies);
+    if (formatExtract) {
+      Object.assign(result, formatExtract);
     }
 
     return result;

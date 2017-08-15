@@ -63,7 +63,7 @@ export function bars(
   const threshold = args.threshold || 0;
   const othersValue = args.othersValue || 'Others';
 
-  let values: any[] = state.values;
+  let values: any[] = state.values || [];
 
   // Concating values with '...'
   if (values && values.length && valueMaxLength && (seriesField || barsField)) {
@@ -98,11 +98,11 @@ export function bars(
     });
 
     result[prefix + 'bars'] = _.keys(series);
-    result[prefix + 'values'] = _.values(barValues);
+    result[prefix + 'bar-values'] = _.values(barValues);
 
   } else {
     result[prefix + 'bars'] = [ valueField ];
-    result[prefix + 'values'] = values;
+    result[prefix + 'bar-values'] = values;
   }
 
   return result;

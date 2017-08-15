@@ -30,7 +30,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
   static editor = settings;
   static fromSource(source: string) {
     return {
-      values: GenericComponent.sourceFormat(source, 'values'),
+      values: GenericComponent.sourceFormat(source, 'bar-values'),
       bars: GenericComponent.sourceFormat(source, 'bars')
     };
   }

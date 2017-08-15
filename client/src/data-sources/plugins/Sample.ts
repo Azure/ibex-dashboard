@@ -8,8 +8,8 @@ interface ISampleParams {
 
 export default class Sample extends DataSourcePlugin<ISampleParams> {
 
-  type = 'Constant';
-  defaultProperty = 'selectedValue';
+  type = 'Sample';
+  defaultProperty = 'values';
 
   constructor(options: IOptions<ISampleParams>, connections: IDict<IStringDictionary>) {
     super(options, connections);
@@ -21,7 +21,7 @@ export default class Sample extends DataSourcePlugin<ISampleParams> {
   }
 
   initialize() {
-    let { samples } = <any> this._props.params;
+    let { samples } = _.cloneDeep(this._props.params);
     return samples || {};
   }
 
@@ -29,7 +29,10 @@ export default class Sample extends DataSourcePlugin<ISampleParams> {
    * updateDependencies - called when dependencies are created
    */
   dependenciesUpdated(dependencies: IDictionary, args: IDictionary, callback: (result: any) => void) {
-    var result = _.extend(dependencies, args);
+    let result = _.extend(dependencies, args);
+    let { samples } = this.getParams();
+
+    _.extend(result, samples);
 
     if (typeof callback === 'function') {
       return callback(result);

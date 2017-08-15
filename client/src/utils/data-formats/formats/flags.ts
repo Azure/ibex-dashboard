@@ -52,7 +52,7 @@ export function flags(
   params.values.forEach(key => { flags[key] = state.selectedValue === key; });
 
   flags[prefix + 'values-all'] = params.values;
-  flags[prefix + 'values-selected'] = state.selectedValue;
+  flags[prefix + 'values-selected'] = state.selectedValue || [];
 
   return flags;
 }

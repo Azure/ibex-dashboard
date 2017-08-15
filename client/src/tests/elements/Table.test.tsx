@@ -30,6 +30,9 @@ describe('Table', () => {
   })
 
   it('Render inside a Card', () => {
+    dataSources['samples'].action.updateDependencies({
+      'table-values': dataSources['samples'].store.state['values']
+    });
     let card = TestUtils.scryRenderedComponentsWithType(table, Card);
     expect(card.length).toBe(1);
   });
@@ -46,7 +49,7 @@ describe('Table', () => {
 
   it('Rows == 0', () => {
     dataSources['samples'].action.updateDependencies({
-      values: []
+      'table-values': []
     });
     let rows = TestUtils.scryRenderedComponentsWithType(table, TableRow);
     expect(rows.length).toBe(1);
