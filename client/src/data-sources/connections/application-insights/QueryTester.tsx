@@ -36,7 +36,7 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
 
   state: IQueryTesterState = {
     showDialog: false,
-    query: '',
+    query: 'customEvents | take 10',
     response: {},
     loadingData: false,
     responseExpanded: true
@@ -112,13 +112,11 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
         >
           <TextField
             id="query"
-            placeholder="Place your query here..."
+            label= "Place your query here"
             defaultValue={query}
-            block
             paddedBlock
             onChange={this.onQueryChange}
           />
-          <Divider />
           <div style={styles.json}>
             <JSONTree data={response} theme="default" shouldExpandNode={() => responseExpanded}/>
           </div>
