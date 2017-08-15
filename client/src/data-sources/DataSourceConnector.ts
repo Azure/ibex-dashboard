@@ -6,6 +6,7 @@ import datasourcePluginsMappings from './plugins/PluginsMapping';
 import VisibilityActions from '../actions/VisibilityActions';
 import VisibilityStore from '../stores/VisibilityStore';
 import * as formats from '../utils/data-formats';
+import RefreshStore from '../stores/RefreshStore';
 
 const DataFormatTypes = formats.DataFormatTypes;
 
@@ -30,6 +31,7 @@ export interface IExtrapolationResult {
 export class DataSourceConnector {
 
   private static dataSources: IDataSourceDictionary = {};
+  private static runningRefreshInterval: any;
 
   static createDataSource(dataSourceConfig: any, connections: IConnections) {
 
@@ -68,6 +70,36 @@ export class DataSourceConnector {
     });
 
     DataSourceConnector.initializeDataSources();
+
+    DataSourceConnector.runningRefreshInterval = null;
+    RefreshStore.listen(DataSourceConnector.setRefreshInterval);
+    
+  }
+
+  static setRefreshInterval(state: any) {
+    // clear any previously scheduled interval
+    if (DataSourceConnector.runningRefreshInterval) {
+      clearInterval(DataSourceConnector.runningRefreshInterval);
+      DataSourceConnector.runningRefreshInterval = null;
+    }
+
+    if (!state.refreshInterval || state.refreshInterval === -1) {
+      // don't auto refresh
+      return;
+    }
+
+    // setup a new interval
+    var interval = setInterval(
+      () => {
+        let topLevelDataSources = _.filter(DataSourceConnector.dataSources, ds => !ds.config.dependencies);
+
+        topLevelDataSources.forEach(dataSource => {
+          dataSource.action.refresh.defer();
+        });
+      },
+      state.refreshInterval);
+
+    DataSourceConnector.runningRefreshInterval = interval;
   }
 
   static initializeDataSources() {

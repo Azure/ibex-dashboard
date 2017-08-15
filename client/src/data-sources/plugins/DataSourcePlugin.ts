@@ -55,7 +55,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     id: '',
     dependencies: {} as any,
     dependables: [],
-    actions: [ 'updateDependencies', 'failure', 'updateSelectedValues' ],
+    actions: [ 'updateDependencies', 'failure', 'updateSelectedValues', 'refresh' ],
     params: <T> {},
     format: DataFormatTypes.none.toString(),
     calculated: {},
@@ -66,6 +66,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
   private lastDependencies: IDictionary;
   private lastArgs: IDictionary;
   private lastCallback: (result: any) => void;
+  private loaded: boolean;
 
   /**
    * @param {DataSourcePlugin} options - Options object
@@ -82,6 +83,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.calculated = options.calculated || {};
     props.autoUpdateIntervalMs = options.autoUpdateIntervalMs || -1;
 
+    this.refresh = this.refresh.bind(this);
     this.updateDependencies = this.updateDependencies.bind(this);
     this.dependenciesUpdated = this.dependenciesUpdated.bind(this);
     this.updateSelectedValues = this.updateSelectedValues.bind(this);
@@ -90,6 +92,12 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     this.updateDependenciesInterval = props.autoUpdateIntervalMs <= 0 ? -1 :
       setInterval(() => this.updateDependencies(this.lastDependencies, this.lastArgs, this.lastCallback),
                   props.autoUpdateIntervalMs);
+  }
+
+  refresh () {
+    if (this.loaded) {
+      return this.updateDependencies(this.lastDependencies, this.lastArgs, this.lastCallback);
+    }
   }
 
   updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void {
@@ -101,6 +109,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     this.lastDependencies = dependencies;
     this.lastArgs = args;
     this.lastCallback = callback;
+    this.loaded = true;
     return returnValue;
   }
 

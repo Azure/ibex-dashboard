@@ -35,6 +35,8 @@ import Subheader from 'react-md/lib/Subheaders';
 import Divider from 'react-md/lib/Dividers';
 import TextField from 'react-md/lib/TextFields';
 
+import RefreshActions from '../../actions/RefreshActions';
+
 interface IDashboardProps {
   dashboard?: IDashboardConfig;
 }
@@ -53,6 +55,7 @@ interface IDashboardState {
   infoHtml?: string;
   newTemplateName?: string;
   newTemplateDescription?: string;
+  refreshMenuVisible?: boolean;
 }
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
@@ -72,7 +75,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     infoVisible: false,
     infoHtml: '',
     newTemplateName: '',
-    newTemplateDescription: ''
+    newTemplateDescription: '',
+    refreshMenuVisible: false,
   };
 
   constructor(props: IDashboardProps) {
@@ -96,11 +100,40 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
     this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
     this.onVisibilityStoreChange = this.onVisibilityStoreChange.bind(this);
-    
+
+    this.handleRefreshIntervalChange = this.handleRefreshIntervalChange.bind(this);
+
     VisibilityStore.listen(this.onVisibilityStoreChange);
-    
+
     this.state.newTemplateName = this.props.dashboard.name;
     this.state.newTemplateDescription = this.props.dashboard.description;
+  }
+
+  handleRefreshIntervalChange = (refreshInterval: string) => {
+    var interval = -1; // default none
+    var oneSec = 1000;
+    switch (refreshInterval) {
+      case '30 Sec': 
+        interval = 30 * oneSec;
+        break;
+      case '60 Sec': 
+        interval = 60 * oneSec;
+        break;
+      case '2 Min': 
+        interval = 2 * 60 * oneSec;
+        break;
+      case '5 Min': 
+        interval = 5 * 60 * oneSec;
+        break;
+      case '30 Min': 
+        interval = 30 * 60 * oneSec;
+        break;
+      default: 
+        interval = -1;
+        break;
+    }
+    
+    RefreshActions.updateInterval(interval);
   }
 
   componentDidMount() {
@@ -264,6 +297,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   render() {
     const { dashboard } = this.props;
+
     const { 
       currentBreakpoint, 
       grid, 
@@ -295,6 +329,21 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     if (!editMode) {
       toolbarActions.push(
+        (
+          <span>
+            <SelectField
+              id="autorefresh"
+              label="Auto Refresh"
+              placeholder="0"
+              defaultValue={'None'}
+              position={SelectField.Positions.BELOW}
+              menuItems={['None', '30 Sec', '60 Sec', '2 Min', '5 Min', '30 Minutes']}
+              toolbar={false}
+              onChange={this.handleRefreshIntervalChange}
+              className="md-select-field--toolbar"
+            />
+          </span>
+        ),
         (
           <span>
             <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
@@ -353,7 +402,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     return (
       <div style={{width: '100%'}}>
-        <Toolbar actions={toolbarActions}>
+        <Toolbar width={100} actions={toolbarActions}>
           {filters}
           <Spinner />
         </Toolbar>

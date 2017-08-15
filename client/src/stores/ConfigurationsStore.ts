@@ -14,6 +14,7 @@ export interface IConfigurationsStoreState {
   connections: IDictionary;
   connectionsMissing: boolean;
   loaded: boolean;
+  refreshSwitch: boolean;
 }
 
 class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> implements IConfigurationsStoreState {
@@ -26,6 +27,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
   connections: IDictionary;
   connectionsMissing: boolean;
   loaded: boolean;
+  refreshSwitch: boolean;
 
   constructor() {
     super();
@@ -38,6 +40,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
     this.connections = {};
     this.connectionsMissing = false;
     this.loaded = false;
+    this.refreshSwitch = false;
 
     this.bindListeners({
       loadConfiguration: configurationActions.loadConfiguration,
