@@ -124,7 +124,7 @@ html: `
 				queries: {
 					goals_top_goals_count: {
 						query: () => `
-              extend GoalName=tostring(customDimensions.Name) | 
+              extend GoalName=tostring(customDimensions.GoalName) | 
               where name=='MBFEvent.GoalEvent' | 
               summarize count=count() by GoalName | take 3`,
 						mappings: { goal: (val) => val || "Unknown",count: (val) => val || 0 },
@@ -188,7 +188,7 @@ html: `
 					params: {
             filters: [{ dependency: "selectedChannels",queryProperty: "customDimensions.channel" }],
 						query: () => `customEvents |
-              extend GoalName=tostring(customDimensions.Name) | 
+              extend GoalName=tostring(customDimensions.GoalName) | 
               where name=='MBFEvent.GoalEvent' |
               summarize count=count() by GoalName | order by GoalName asc`
 					}
@@ -230,7 +230,7 @@ html: `
             filters: [{ dependency: "selectedChannels" ,queryProperty: "customDimensions.channel" }],
 						query: ({ goal }) => ` 
               customEvents
-              | extend conversation=tostring(customDimensions.conversationId), goal=customDimensions.Name
+              | extend conversation=tostring(customDimensions.conversationId), goal=customDimensions.GoalName
               | where name=='MBFEvent.GoalEvent' and goal =~ '${goal}'
               | summarize count=count(), maxTimestamp=max(timestamp) by conversation
               | order by maxTimestamp`,
