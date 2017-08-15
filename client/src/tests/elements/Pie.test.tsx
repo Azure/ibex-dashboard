@@ -61,7 +61,7 @@ describe('Pie', () => {
     expect(pieChartElement.length).toBe(1);
   });
 
-  it('Rows == 4', () => {
+  it('Cells == 4', () => {
     let cells = TestUtils.scryRenderedComponentsWithType(pie, Sector);
     expect(cells.length).toBe(4);
   });

@@ -99,6 +99,7 @@ export default class ElementConnector {
 
     return (
       <ReactElement 
+        key={idx}
         id={id + '@' + (idx || 0)}
         dependencies={dependencies}
         actions={actions || {}}
