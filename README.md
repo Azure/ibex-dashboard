@@ -131,6 +131,7 @@ Or
 .travis/build.sh
 ```
 
+<<<<<<< HEAD
 # Resources
 
 ### Technologies In Use
