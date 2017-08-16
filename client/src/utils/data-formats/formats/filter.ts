@@ -25,6 +25,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'filter',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
+ *    data: string - the state property holding the data (default is 'values').
  *    field: string - the field holding the filter values in the results (default = "value")
  *  }
  * }
@@ -40,14 +41,14 @@ export function filter (
   plugin: IDataSourcePlugin, 
   prevState: any) {
 
-  const { values } = state;
-  if (!values) { return null; }
-  
   const args = typeof format !== 'string' ? format.args : {};
   const prefix = getPrefix(format);
   const field = args.field || 'value';
   const unknown = args.unknown || 'unknown';
 
+  const values = state[args.data || 'values'];
+  if (!values) { return null; }
+  
   // This code is meant to fix the following scenario:
   // When "Timespan" filter changes, to "channels-selected" variable
   // is going to be reset into an empty set.

@@ -26,6 +26,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'timespan',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
+ *    data: string - the state property holding the data (default is 'values').
  *  }
  * }
  * @param state Current received state from data source
@@ -58,7 +59,11 @@ export function timespan(
     queryTimespan, 
     granularity 
   };
-  result[prefix + 'values-all'] = params.values;
+
+  const args = typeof format !== 'string' && format.args || {};
+  let values = params[args.data || 'values'];
+
+  result[prefix + 'values-all'] = values;
   result[prefix + 'values-selected'] = state.selectedValue;
 
   return result;

@@ -25,6 +25,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'filter',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
+ *    data: string - the state property holding the data (default is 'values').
  *    timeField: 'timestamp' - The field containing timestamp
  *    lineField: 'channel' - A field to hold/group by different lines in the graph
  *    valueField: 'count' - holds the value/y value of the current point
@@ -46,11 +47,12 @@ export function timeline(
     return formatWarn('format should be an object with args', 'timeline', plugin);
   }
 
-  const timeline = state.values;
   const { timespan } = dependencies;
   const args = format.args || {};
   const { timeField, lineField, valueField } = args;
   const prefix = getPrefix(format);
+  let values = state[args.data || 'values'];
+  const timeline = values;
 
   let _timeline = {};
   let _lines = {};
