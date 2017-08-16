@@ -337,7 +337,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
               placeholder="0"
               defaultValue={'None'}
               position={SelectField.Positions.BELOW}
-              menuItems={['None', '30 Sec', '60 Sec', '2 Min', '5 Min', '30 Minutes']}
+              menuItems={['None', '30 Sec', '60 Sec', '2 Min', '5 Min', '30 Min']}
               toolbar={false}
               onChange={this.handleRefreshIntervalChange}
               className="md-select-field--toolbar"
