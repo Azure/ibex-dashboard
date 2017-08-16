@@ -20,6 +20,8 @@ Many of the aspects in this project are extendible. The following are possibilit
 
 ## Data Source Plugins
 
+[How to create a Data Source Plugin](add-new-data-source.md)
+
 * Constant
 * Sample
 * Application Insights
@@ -29,6 +31,8 @@ Many of the aspects in this project are extendible. The following are possibilit
 * Azure 
 
 ## Elements Plugins
+
+[How to create a Visual Plugin](add-new-element.md)
 
 * [Area Chart](area.md)
 * [Bar Chart](bar.md)
@@ -42,6 +46,8 @@ Many of the aspects in this project are extendible. The following are possibilit
 * [Timeline Chart](timeline.md)
 
 ## data-formats plugins
+
+[A short excerpt on data-formats](data-formats)
 
 # Additional Features
 
