@@ -46,8 +46,8 @@ export function pie(
     return formatWarn('format should be an object with args', 'timeline', plugin);
   }
 
-  const values = state.values || [];
   const args = format.args || {};
+  let values: any[] = state[args.data || 'values'] || [];
   const prefix = getPrefix(format);
 
   const labelField = args.label || 'name';
