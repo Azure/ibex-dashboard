@@ -28,6 +28,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'pie',
  *  args: {
  *    value: string - The field name holding the value the pie piece
+ *    data: string - the state property holding the data (default is 'values').
  *    label: string - The field name holding the series name (aggregation in a specific field)
  *    maxLength: number - At what length to cut string values (default: 13),
  *  }
