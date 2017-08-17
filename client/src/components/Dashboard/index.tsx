@@ -61,6 +61,19 @@ interface IDashboardState {
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
 
+  oneSecInMs = 1000;
+  oneMinInMs = 60 * this.oneSecInMs;
+  refreshIntervals = [
+    {text: 'None', intervalMs: -1},
+    {text: '30 Sec', intervalMs: 30 * this.oneSecInMs},
+    {text: '60 Sec', intervalMs: 60 * this.oneSecInMs},
+    {text: '90 Sec', intervalMs: 90 * this.oneSecInMs},
+    {text: '2 Min', intervalMs: 2 * this.oneMinInMs},
+    {text: '5 Min', intervalMs: 5 * this.oneMinInMs},
+    {text: '15 Min', intervalMs: 15 * this.oneMinInMs},
+    {text: '30 Min', intervalMs: 30 * this.oneMinInMs},
+  ];
+
   layouts = {};
 
   state = {
@@ -111,28 +124,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
   }
 
   handleRefreshIntervalChange = (refreshInterval: string) => {
-    var interval = -1; // default none
     var oneSec = 1000;
-    switch (refreshInterval) {
-      case '30 Sec': 
-        interval = 30 * oneSec;
-        break;
-      case '60 Sec': 
-        interval = 60 * oneSec;
-        break;
-      case '2 Min': 
-        interval = 2 * 60 * oneSec;
-        break;
-      case '5 Min': 
-        interval = 5 * 60 * oneSec;
-        break;
-      case '30 Min': 
-        interval = 30 * 60 * oneSec;
-        break;
-      default: 
-        interval = -1;
-        break;
-    }
+    var interval = this.refreshIntervals.find((x) => { return x.text === refreshInterval; }).intervalMs;
     
     RefreshActions.updateInterval(interval);
     RefreshActions.setRefreshTimer(
@@ -331,6 +324,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     // Actions to perform on an active dashboard
     let toolbarActions = [];
 
+    let refreshDropDownTexts = this.refreshIntervals.map((x) => { return x.text; });
     if (!editMode) {
       toolbarActions.push(
         (
@@ -341,7 +335,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
               placeholder="0"
               defaultValue={'None'}
               position={SelectField.Positions.BELOW}
-              menuItems={['None', '30 Sec', '60 Sec', '2 Min', '5 Min', '30 Min']}
+              menuItems={refreshDropDownTexts}
               toolbar={false}
               onChange={this.handleRefreshIntervalChange}
               className="md-select-field--toolbar"
