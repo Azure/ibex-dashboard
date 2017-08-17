@@ -108,7 +108,7 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
         onClick={() => SettingsActions.openDialog(title, id)}
         className="card-settings-btn"
       >
-        settings
+        expand_more
       </Button>
     );
 
