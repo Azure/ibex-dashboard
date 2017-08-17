@@ -23,7 +23,7 @@ describe('Data Source: Constant', () => {
         { "count": 0, "id": 2 },
         { "count": 10, "id": 3 }
       ],
-      "values": undefined,
+      "values": [],
     });
   });
 
@@ -38,7 +38,7 @@ describe('Data Source: Constant', () => {
           { "count": 10, "id": 3 },
           { "count": 10, "id": 3 }
         ],
-        "values": undefined,
+        "values": [],
       });
 
   });

@@ -10,6 +10,7 @@ dashboard.dialogs.push({
       id: 'timespan',
       type: 'Constant',
       params: {
+        values: [],
         selectedValue: 'default'
       },
       calculated: (state, dependencies) => {

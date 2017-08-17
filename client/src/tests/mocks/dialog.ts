@@ -1,4 +1,4 @@
-export default {
+export default <IDialog>{
   id: "conversations",
   width: '60%',
   params: [ 'title', 'intent', 'queryspan' ],
@@ -7,6 +7,7 @@ export default {
       id: 'timespan',
       type: 'Constant',
       params: {
+        values: [],
         selectedValue: 'default'
       },
       calculated: (state, dependencies) => {

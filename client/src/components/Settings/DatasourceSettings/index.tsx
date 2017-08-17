@@ -35,11 +35,11 @@ export default class DataSourceSettings extends React.Component<IDataSourceSetti
    * Each element is expected to expose a static 'editor' property, which is the UI editor for this specific 
    * data source node.
    */
-  getSettingsEditor(element: DataSource): JSX.Element {
+  getSettingsEditor(element: IDataSource): JSX.Element {
 
     if (!element) { return null; }
 
-    let ReactElementClass = plugins[element.type];
+    let ReactElementClass: any = plugins[element.type];
     if (ReactElementClass && ReactElementClass.editor) {
       let SettingsEditor = ReactElementClass.editor;
       return <SettingsEditor key={DataSourceSettings.uniqueId++} settings={element} />;
