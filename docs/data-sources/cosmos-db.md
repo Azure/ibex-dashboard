@@ -2,7 +2,7 @@
 
 CosmosDB can be added to the list of required connections.
 
-## Config 
+## Config (Connection)
 To enable [Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) data sources add 'cosmos-db' to the connections config. The host name and password key are required values.
 
 ```js
@@ -15,6 +15,16 @@ connections: {
 ```
 
 NB. The host name excludes the '.documents.azure.com' suffix.
+
+## Returned Structure
+
+```ts
+{
+  'Documents': any[],
+  '_count': number,
+  '_rid': 'request id'
+}
+```
 
 ## Data Sources 
 | Property | Type | Value | Description 

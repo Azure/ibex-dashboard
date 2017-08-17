@@ -4,7 +4,7 @@ A [Bot Framework](https://dev.botframework.com) [Direct Line](https://docs.botfr
 
 To get the [Direct Line secret](https://dev.botframework.com/bots/), open the bot's  *Channels* section and under the *Direct Line* listing select 'Edit'. If it's empty then select 'Add new site' to generate the secret keys, or else select the existing site to show secret keys.
 
-## Config 
+## Config (Connection
 To enable [Direct Line](https://docs.botframework.com/en-us/restapi/directline3/#navtitle) add 'bot-framework' and the following properties to the dashboard's connections config. 
 
 ```js
@@ -14,6 +14,18 @@ connections: {
     'conversationsEndpoint': "",
     'webchatEndpoint': ""
   }
+}
+```
+
+## Returned Structure
+
+```ts
+{
+  'conversationId': 'XXX', 
+  'token': 'XXX', 
+  'expires_in': 'XXX', 
+  'streamUrl': 'https://url', 
+  'referenceGrammarId': 'XXX'
 }
 ```
 

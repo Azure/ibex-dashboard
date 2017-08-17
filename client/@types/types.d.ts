@@ -193,16 +193,78 @@ type ILayouts = Sizes<ILayout[]>;
  */
 
 interface IElement {
+  /**
+   * Unique Id used to locate and save the location of an element on a dashboard
+   */
   id: string;
+  /**
+   * The name of the element type to be used
+   * For a complete list follow:
+   * https://github.com/CatalystCode/ibex-dashboard/tree/master/docs#elements-plugins
+   */
   type: string;
+  /**
+   * How many units (width/height) should this element take.
+   * This property is overriden when the user plays with the layout in edit mode.
+   */
   size: { w: number, h: number };
+  /**
+   * This property can usually be used when wanting to pull an element "up" in a dashboard.
+   * For the following sizes (Width x Height) the last 4 columns have a vacancy of 6 rows:
+   * 4x8, 4x8, 4,2
+   * 
+   * The last element on the next line can "pull up" by definition { x: 8, y: 2 }
+   */
   location?: { x: number, y: number };
+  /**
+   * Title to display at the top of the element on the dashboard
+   */
   title?: string;
+  /**
+   * A subtitle to display on a tooltip
+   */
   subtitle?: string;
+  /**
+   * An array of colors to override the default array supplied by the dashboard.
+   */
   theme?: string[];
+  /**
+   * Use this property on a source that uses a "format" attribute.
+   * Whenever the data source is updated, the data in this element will also update.
+   * 
+   * Example:
+   * dataSource: {
+   *  id: 'dataSource1',
+   *  ...
+   *  format: 'pie'
+   * }
+   * 
+   * {
+   *  id: 'element1',
+   *  type: 'PieData',
+   *  source: 'dataSource1',
+   *  ...
+   * }
+   */
   source?: string | IStringDictionary;
+  /**
+   * If you don't supply a 'source' attribute, or want to override one of the attribute,
+   * You can use 'dependencies' to populate a property with data.
+   * Whenever the data source is updated, the data in this element will also update.
+   * 
+   * Example:
+   * {
+   *  values: 'dataSourceX:values'
+   * }
+   */
   dependencies?: IStringDictionary;
+  /**
+   * Use to define Element Type specific properties (like showLedged, compact, etc...)
+   */
   props?: IDictionary;
+  /**
+   * Define what should happen on certain actions like 'onclick'.
+   */
   actions?: IDictionary;
 }
 

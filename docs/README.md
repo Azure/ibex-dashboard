@@ -25,23 +25,23 @@ Connection plugins are connected to Data Source plugins. A Data Source can have 
 * Constant
 * Sample
 * Application Insights
-* [CosmosDB](./cosmos-db.md)
-* [Bot Framework](./bot-framework.md)
+* [CosmosDB](data-sources/cosmos-db.md)
+* [Bot Framework](data-sources/bot-framework.md)
 * GraphQL
 * Azure 
 
 ## Elements Plugins
 
-* [Area Chart](area.md)
-* [Bar Chart](bar.md)
-* [Detail View](detail.md)
-* [Pie Chart](pie.md)
-* [Request Button](requestbutton.md)
-* [Scatter Chart](scatter.md)
-* [Scorecard](scorecard.md)
-* [Split View Panel](splitpanel.md)
-* [Table](table.md)
-* [Timeline Chart](timeline.md)
+* [Area Chart](components/area.md)
+* [Bar Chart](components/bar.md)
+* [Detail View](components/detail.md)
+* [Pie Chart](components/pie.md)
+* [Request Button](components/requestbutton.md)
+* [Scatter Chart](components/scatter.md)
+* [Scorecard](components/scorecard.md)
+* [Split View Panel](components/splitpanel.md)
+* [Table](components/table.md)
+* [Timeline Chart](components/timeline.md)
 
 ## data-formats plugins
 
@@ -50,4 +50,4 @@ Connection plugins are connected to Data Source plugins. A Data Source can have 
 * [Two Modes Elements](two-modes-element.md)
 * [Filter Plugins](filter.md)
 * [Dialogs](dialog.md)
-* Settings [TODO]
+* [Actions](actions.md)
