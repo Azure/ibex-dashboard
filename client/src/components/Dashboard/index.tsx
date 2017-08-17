@@ -36,6 +36,7 @@ import Divider from 'react-md/lib/Dividers';
 import TextField from 'react-md/lib/TextFields';
 
 import RefreshActions from '../../actions/RefreshActions';
+import { DataSourceConnector, IDataSourceDictionary, IDataSource } from '../../data-sources/DataSourceConnector';
 
 interface IDashboardProps {
   dashboard?: IDashboardConfig;
@@ -134,6 +135,9 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     }
     
     RefreshActions.updateInterval(interval);
+    RefreshActions.setRefreshTimer(
+      interval, 
+      DataSourceConnector.refreshDs);
   }
 
   componentDidMount() {

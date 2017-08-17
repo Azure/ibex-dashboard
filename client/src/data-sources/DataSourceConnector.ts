@@ -6,6 +6,7 @@ import datasourcePluginsMappings from './plugins/PluginsMapping';
 import VisibilityActions from '../actions/VisibilityActions';
 import VisibilityStore from '../stores/VisibilityStore';
 import * as formats from '../utils/data-formats';
+import RefreshActions from '../actions/RefreshActions';
 import RefreshStore from '../stores/RefreshStore';
 
 const DataFormatTypes = formats.DataFormatTypes;
@@ -31,7 +32,6 @@ export interface IExtrapolationResult {
 export class DataSourceConnector {
 
   private static dataSources: IDataSourceDictionary = {};
-  private static runningRefreshInterval: any;
 
   static createDataSource(dataSourceConfig: any, connections: IConnections) {
 
@@ -71,35 +71,15 @@ export class DataSourceConnector {
 
     DataSourceConnector.initializeDataSources();
 
-    DataSourceConnector.runningRefreshInterval = null;
-    RefreshStore.listen(DataSourceConnector.setRefreshInterval);
-    
+    RefreshStore.getState();
   }
 
-  static setRefreshInterval(state: any) {
-    // clear any previously scheduled interval
-    if (DataSourceConnector.runningRefreshInterval) {
-      clearInterval(DataSourceConnector.runningRefreshInterval);
-      DataSourceConnector.runningRefreshInterval = null;
-    }
+  static refreshDs() {
+    let topLevelDataSources = _.filter(DataSourceConnector.dataSources, ds => !ds.config.dependencies);
 
-    if (!state.refreshInterval || state.refreshInterval === -1) {
-      // don't auto refresh
-      return;
-    }
-
-    // setup a new interval
-    var interval = setInterval(
-      () => {
-        let topLevelDataSources = _.filter(DataSourceConnector.dataSources, ds => !ds.config.dependencies);
-
-        topLevelDataSources.forEach(dataSource => {
-          dataSource.action.refresh.defer();
-        });
-      },
-      state.refreshInterval);
-
-    DataSourceConnector.runningRefreshInterval = interval;
+    topLevelDataSources.forEach(dataSource => {
+      dataSource.action.refresh.defer();
+    });
   }
 
   static initializeDataSources() {
@@ -136,13 +116,13 @@ export class DataSourceConnector {
       // Checking if this is a config value
       if (dependency.startsWith('connection:')) {
         const connection = dependency.substr(dependency.indexOf(':') + 1);
-        if ( Object.keys(DataSourceConnector.dataSources).length < 1 ) {
+        if (Object.keys(DataSourceConnector.dataSources).length < 1) {
           throw new Error('Connection error, couldn\'t find any data sources.');
         }
         // Selects first data source to get connections 
         const dataSource: IDataSource = DataSourceConnector.dataSources[
           Object.keys(DataSourceConnector.dataSources)[0]];
-        if ( !dataSource || !dataSource.plugin.hasOwnProperty('connections')) {
+        if (!dataSource || !dataSource.plugin.hasOwnProperty('connections')) {
           throw new Error('Tried to resolve connections reference path, but couldn\'t find any connections.');
         }
         const connections = dataSource.plugin['connections'];
@@ -150,7 +130,7 @@ export class DataSourceConnector {
         if (path.length !== 2) {
           throw new Error('Expected connection reference dot path consisting of 2 components.');
         }
-        if ( !connections.hasOwnProperty(path[0]) || !connections[path[0]].hasOwnProperty(path[1])) {
+        if (!connections.hasOwnProperty(path[0]) || !connections[path[0]].hasOwnProperty(path[1])) {
           throw new Error('Unable to resolve connection reference path:' + connection);
         }
         result.dependencies[key] = connections[path[0]][path[1]];
@@ -240,13 +220,13 @@ export class DataSourceConnector {
   }
 
   static handleDataFormat(
-    format: string | formats.IDataFormat, 
-    plugin: IDataSourcePlugin, 
-    state: any, 
+    format: string | formats.IDataFormat,
+    plugin: IDataSourcePlugin,
+    state: any,
     dependencies: IDictionary) {
 
     if (!format) { return null; }
-    
+
     const prevState = DataSourceConnector.dataSources[plugin._props.id].store.getState();
 
     let result = {};
@@ -302,7 +282,7 @@ export class DataSourceConnector {
 
   private static createActionClass(plugin: IDataSourcePlugin): any {
     class NewActionClass {
-      constructor() {}
+      constructor() { }
     }
 
     plugin.getActions().forEach(action => {

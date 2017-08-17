@@ -20,6 +20,7 @@ class RefreshStore extends AbstractStoreModel<IRefreshStoreState> implements IRe
   
   updateInterval(state: any) {
     this.refreshInterval = state.refreshInterval;
+    
   }
 }
 

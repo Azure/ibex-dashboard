@@ -3,18 +3,46 @@ import * as request from 'xhr-request';
 
 interface IRefreshActions {
   updateInterval(newInterval: number): any;
+  setRefreshTimer(newInterval: any, cb: any): void;
 }
 
 class RefreshActions extends AbstractActions implements IRefreshActions {
+    
+  private runningRefreshInterval: any;
+
   constructor(alt: AltJS.Alt) {
     super(alt);
+
+    this.setRefreshTimer = this.setRefreshTimer.bind(this);
   }
 
   updateInterval(newInterval: number) {
-   return { refreshInterval: newInterval };
+    
+    return { refreshInterval: newInterval };
+  }
+
+  setRefreshTimer(newInterval: any, cb: any) {
+
+    // clear any previously scheduled interval
+    if (this.runningRefreshInterval) {
+      clearInterval(this.runningRefreshInterval);
+      this.runningRefreshInterval = null;
+    }
+
+    if (!newInterval || newInterval === -1) {
+      // don't auto refresh
+      return {};
+    }
+
+    // setup a new interval
+    var interval = setInterval(
+      cb,
+      newInterval);
+
+    this.runningRefreshInterval = interval;
+    return {};
   }
 }
-
 const refreshActions = alt.createActions<IRefreshActions>(RefreshActions);
 
 export default refreshActions;
