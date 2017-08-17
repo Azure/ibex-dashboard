@@ -142,7 +142,7 @@ h2, .md-subheading-2 {
 }
 
 /*=============*/
-/* Rechards    */
+/* Recharts    */
 /*=============*/
 
 .recharts-legend-item .recharts-surface {
@@ -153,6 +153,15 @@ h2, .md-subheading-2 {
   height: auto;
   width: auto;
   position: static;
+}
+
+.recharts-legend-item-text {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100px;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 /*=============*/

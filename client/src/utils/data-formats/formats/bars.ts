@@ -65,19 +65,6 @@ export function bars(
 
   let values: any[] = state.values || [];
 
-  // Concating values with '...'
-  if (values && values.length && valueMaxLength && (seriesField || barsField)) {
-    const cutLength = Math.max(valueMaxLength - 3, 0);
-    values.forEach(val => {
-      if (seriesField && val[seriesField] && val[seriesField].length > valueMaxLength) {
-        val[seriesField] = val[seriesField].substring(0, cutLength) + '...';
-      }
-      if (barsField && val[barsField] && val[barsField].length > valueMaxLength) {
-        val[barsField] = val[barsField].substring(0, cutLength) + '...';
-      }
-    });
-  }
-
   let result = {};
   let barValues = {};
 
