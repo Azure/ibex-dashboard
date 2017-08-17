@@ -22,7 +22,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  * "prefix-selected" will be able to hold the selected values from the filter component
  * 
  * @param format { 
- *  type: 'filter',
+ *  type: 'timeline',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
  *    timeField: 'timestamp' - The field containing timestamp
