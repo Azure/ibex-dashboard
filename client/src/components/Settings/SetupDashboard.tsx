@@ -30,7 +30,7 @@ export default class SetupDashboard extends React.Component<ISetupDashboardProps
     super(props);
 
     this.onSave = this.onSave.bind(this);
-    this.onCancel = this.onCancel.bind(this);
+    this.onDelete = this.onDelete.bind(this);
     this.onSaveGoToDashboard = this.onSaveGoToDashboard.bind(this);
     this.redirectToHomepageIfStandalone = this.redirectToHomepageIfStandalone.bind(this);
 
@@ -46,15 +46,15 @@ export default class SetupDashboard extends React.Component<ISetupDashboardProps
   }
 
   onParamChange(connectionKey: string, paramKey: string, value: any) {
-    let { connections } = this.state;
+    const { connections } = this.state;
 
     connections[connectionKey] = connections[connectionKey] || {};
     connections[connectionKey][paramKey] = value;
   }
 
   onSave() {
-    let { dashboard } = this.props;
-    let { connections } = this.state;
+    const { dashboard } = this.props;
+    const { connections } = this.state;
 
     dashboard.config.connections = connections;
 
@@ -66,18 +66,23 @@ export default class SetupDashboard extends React.Component<ISetupDashboardProps
     setTimeout(this.redirectToHomepageIfStandalone, 2000);
   }
 
-  onCancel() {
-    this.redirectToHomepageIfStandalone();    
+  onDelete() {
+    const { dashboard } = this.props;
+    if (!dashboard) {
+      console.warn('Dashboard not found. Aborting delete.');
+    }
+    ConfigurationsActions.deleteDashboard(dashboard.id);
+    window.location.href = '/';
   }
 
   redirectToHomepageIfStandalone() {
-    let { dashboard } = this.props;
+    const { dashboard } = this.props;
     window.location.replace(`/dashboard/${dashboard.url}`);
   }
 
   render() {
-    let { dashboard } = this.props;
-    let { connections } = this.state;
+    const { dashboard } = this.props;
+    const { connections } = this.state;
 
     return (
       <div style={{ width: '100%' }}>
@@ -85,8 +90,8 @@ export default class SetupDashboard extends React.Component<ISetupDashboardProps
         
         <div>
           <Button flat primary label="Save" onClick={this.onSave}>save</Button>
-          <Button flat secondary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
-          <Button flat secondary label="Cancel" onClick={this.onCancel}>cancel</Button>
+          <Button flat primary label="Save and Go to Dashboard" onClick={this.onSaveGoToDashboard}>save</Button>
+          <Button flat secondary label="Delete" onClick={this.onDelete}>delete</Button>
         </div>
         
       </div>
