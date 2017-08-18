@@ -95,6 +95,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
   loadTemplate(result: { template: IDashboardConfig }) {
     let { template } = result;
     this.template = template;
+    this.errors = null;
 
     if (this.template) {
 

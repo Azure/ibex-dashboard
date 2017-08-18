@@ -260,11 +260,11 @@ export default class Home extends React.Component<any, IHomeState> {
       return null;
     }
 
+    // Create dashboard form validation
     let error = false;
     let errorText = null;
-    const isBadId = errors && errors.error && errors.error.message && errors.error.type && errors.error.type === 'id';
-    if (isBadId) {
-      errorText = errors.error.message;
+    if (errors && errors.error && errors.type && errors.type === 'id') {
+      errorText = errors.error;
       error = true;
     }
 

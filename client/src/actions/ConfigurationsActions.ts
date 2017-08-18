@@ -94,8 +94,8 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
         }, 
               (error: any, json: any) => {
 
-          if (error || (json && json.errors)) {
-            return this.failure(error || json.errors);
+          if (error || (json && (json.error || json.errors))) {
+            return this.failure(error || json);
           }
 
           return dispatcher(json);
@@ -173,7 +173,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
   }
 
   failure(error: any) {
-    return { error };
+    return error;
   }
 
   deleteDashboard(id: string) {
