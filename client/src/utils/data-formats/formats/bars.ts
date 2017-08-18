@@ -33,7 +33,6 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *    valueField: string - The field name holding the value/y value of the bar
  *    barsField: string - The field name holding the names for the bars
  *    seriesField: string - The field name holding the series name (aggregation in a specific field)
- *    valueMaxLength: number - At what length to cut string values (default: 13),
  *    threshold: number - Under this threshold, the values will be aggregated to others (default: 0 - none)
  *    othersValue: string - Name for the 'Others' field (default: 'Others')
  *  }
@@ -59,7 +58,6 @@ export function bars(
   const valueField = args.valueField || 'count';
   const barsField = args.barsField || null;
   const seriesField = args.seriesField || null;
-  const valueMaxLength = args.valueMaxLength && parseInt(args.valueMaxLength, 10) || 13;
   const threshold = args.threshold || 0;
   const othersValue = args.othersValue || 'Others';
 
