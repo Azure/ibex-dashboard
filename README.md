@@ -158,5 +158,5 @@ Thinking about integrating with:
 
 * Running node version 6.11 or above. 
 
-# Lisence
+# License
 MIT

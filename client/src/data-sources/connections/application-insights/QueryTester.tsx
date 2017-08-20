@@ -24,11 +24,11 @@ interface IQueryTesterProps {
 }
 
 const styles = {
-  json: { 
-    overflowY: 'scroll', 
-    height: 'calc(100% - 200px)', 
-    width: 'calc(100% - 48px)', 
-    position: 'absolute' 
+  json: {
+    overflowY: 'scroll',
+    height: 'calc(100% - 200px)',
+    width: 'calc(100% - 48px)',
+    position: 'absolute'
   }
 };
 
@@ -36,12 +36,12 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
 
   state: IQueryTesterState = {
     showDialog: false,
-    query: '',
+    query: 'customEvents | take 10',
     response: {},
     loadingData: false,
     responseExpanded: true
   };
-  
+
   constructor(props: any) {
     super(props);
 
@@ -90,47 +90,53 @@ export default class QueryTester extends React.Component<IQueryTesterProps, IQue
     let { showDialog, query, response, loadingData, responseExpanded } = this.state;
 
     const dialogActions = [
-            { onClick: this.submitQuery, primary: true, label: 'Run query' },
-            { onClick: this.collapseResponse, primary: false, label: 'Collapse', 
+      { onClick: this.submitQuery, primary: true, label: 'Run query' },
+{ onClick: this.collapseResponse, primary: false, label: 'Collapse', 
             disabled: _.isEmpty(response) || !responseExpanded}, 
             { onClick: this.expandResponse, primary: false, label: 'Expand',
            disabled: _.isEmpty(response) || responseExpanded}, 
             { onClick: this.closeDialog, primary: false, label: 'Close'}
-          ];
-    
+    ];
+
     return (
       <div>
         <Button raised label="Test connection" onClick={this.openDialog} style={this.props.buttonStyle} />
-        <Dialog 
-          id="testerForm" 
-          visible={showDialog} 
-          onHide={this.closeDialog} 
+        <Dialog
+          id="testerForm"
+          visible={showDialog}
+          onHide={this.closeDialog}
           dialogStyle={{ width: '60%', height: '90%' }}
           style={{ zIndex: 99 }}
-          title="Query tester"
-          actions= {dialogActions}
+          title={
+            (
+              <div>Query tester
+                  <Button disabled icon style={{height: '38px'}} 
+                          href={'https://docs.loganalytics.io/index'} target="_blank">help
+                  </Button>
+              </div>
+            )
+          }
+          actions={dialogActions}
         >
           <TextField
             id="query"
-            placeholder="Place your query here..."
+            label= "Place your query here"
             defaultValue={query}
-            block
             paddedBlock
             onChange={this.onQueryChange}
           />
-          <Divider />
           <div style={styles.json}>
             <JSONTree data={response} theme="default" shouldExpandNode={() => responseExpanded}/>
           </div>
           {
-            loadingData && 
+            loadingData &&
             (
               <div style={{ width: '100%', position: 'absolute', top: 130, left: 0 }}>
                 <CircularProgress id="testerProgress" />
               </div>
             )
           }
-        </Dialog>  
+        </Dialog>
       </div>
     );
   }
