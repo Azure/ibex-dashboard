@@ -10,6 +10,7 @@ dashboard.dataSources.push({
   id: 'data',
   type: 'Constant',
   params: {
+    values: [],
     selectedValue: 'default'
   },
   calculated: (state, dependencies) => {
