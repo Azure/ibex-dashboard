@@ -9,9 +9,8 @@ import { Spinner, SpinnerActions } from '../../components/Spinner';
 import PieData from '../../components/generic/PieData';
 import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
 
-//import dataSourceMock from '../mocks/dataSource';
 import dashboardMock from '../mocks/dashboards/pie';
-import ElementConnector from "../../components/ElementConnector";
+import ElementConnector from '../../components/ElementConnector';
 
 describe('Pie', () => {
 
@@ -40,11 +39,13 @@ describe('Pie', () => {
           subtitle);
         pie = TestUtils.renderIntoDocument(pieElement);
         TestUtils.isElementOfType(pie, 'div');
+
+        // Adding a timeout to make sure Flux cycle is complete
+        setTimeout(done, 100);
+        
+      } catch (e) {
+        return done(e);
       }
-      catch (e) {
-        console.error(e);
-      }
-      setTimeout(done, 100);
 
     }, 100);
   })
