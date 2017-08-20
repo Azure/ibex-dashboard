@@ -6,6 +6,7 @@ import Button from 'react-md/lib/Buttons';
 import Dialog from 'react-md/lib/Dialogs';
 
 import { Spinner } from '../Spinner';
+import { AutoRefreshSelector } from '../AutoRefreshSelector';
 
 import * as ReactGridLayout from 'react-grid-layout';
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
@@ -28,15 +29,11 @@ const renderHTML = require('react-render-html');
 
 import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
-import SelectField from 'react-md/lib/SelectFields';
 import FontIcon from 'react-md/lib/FontIcons';
 import Avatar from 'react-md/lib/Avatars';
 import Subheader from 'react-md/lib/Subheaders';
 import Divider from 'react-md/lib/Dividers';
 import TextField from 'react-md/lib/TextFields';
-
-import RefreshActions from '../../actions/RefreshActions';
-import { DataSourceConnector, IDataSourceDictionary, IDataSource } from '../../data-sources/DataSourceConnector';
 
 interface IDashboardProps {
   dashboard?: IDashboardConfig;
@@ -56,23 +53,9 @@ interface IDashboardState {
   infoHtml?: string;
   newTemplateName?: string;
   newTemplateDescription?: string;
-  refreshMenuVisible?: boolean;
 }
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
-
-  oneSecInMs = 1000;
-  oneMinInMs = 60 * this.oneSecInMs;
-  refreshIntervals = [
-    {text: 'None', intervalMs: -1},
-    {text: '30 Sec', intervalMs: 30 * this.oneSecInMs},
-    {text: '60 Sec', intervalMs: 60 * this.oneSecInMs},
-    {text: '90 Sec', intervalMs: 90 * this.oneSecInMs},
-    {text: '2 Min', intervalMs: 2 * this.oneMinInMs},
-    {text: '5 Min', intervalMs: 5 * this.oneMinInMs},
-    {text: '15 Min', intervalMs: 15 * this.oneMinInMs},
-    {text: '30 Min', intervalMs: 30 * this.oneMinInMs},
-  ];
 
   layouts = {};
 
@@ -90,7 +73,6 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     infoHtml: '',
     newTemplateName: '',
     newTemplateDescription: '',
-    refreshMenuVisible: false,
   };
 
   constructor(props: IDashboardProps) {
@@ -115,22 +97,10 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
     this.onVisibilityStoreChange = this.onVisibilityStoreChange.bind(this);
 
-    this.handleRefreshIntervalChange = this.handleRefreshIntervalChange.bind(this);
-
     VisibilityStore.listen(this.onVisibilityStoreChange);
 
     this.state.newTemplateName = this.props.dashboard.name;
     this.state.newTemplateDescription = this.props.dashboard.description;
-  }
-
-  handleRefreshIntervalChange = (refreshInterval: string) => {
-    var oneSec = 1000;
-    var interval = this.refreshIntervals.find((x) => { return x.text === refreshInterval; }).intervalMs;
-    
-    RefreshActions.updateInterval(interval);
-    RefreshActions.setRefreshTimer(
-      interval, 
-      DataSourceConnector.refreshDs);
   }
 
   componentDidMount() {
@@ -324,22 +294,11 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     // Actions to perform on an active dashboard
     let toolbarActions = [];
 
-    let refreshDropDownTexts = this.refreshIntervals.map((x) => { return x.text; });
     if (!editMode) {
       toolbarActions.push(
         (
           <span>
-            <SelectField
-              id="autorefresh"
-              label="Auto Refresh"
-              placeholder="0"
-              defaultValue={'None'}
-              position={SelectField.Positions.BELOW}
-              menuItems={refreshDropDownTexts}
-              toolbar={false}
-              onChange={this.handleRefreshIntervalChange}
-              className="md-select-field--toolbar"
-            />
+            <AutoRefreshSelector/>
           </span>
         ),
         (

@@ -1,4 +1,4 @@
-import alt, { AbstractActions } from '../alt';
+import alt, { AbstractActions } from '../../alt';
 import * as request from 'xhr-request';
 
 interface IRefreshActions {

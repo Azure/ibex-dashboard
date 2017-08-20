@@ -6,8 +6,6 @@ import datasourcePluginsMappings from './plugins/PluginsMapping';
 import VisibilityActions from '../actions/VisibilityActions';
 import VisibilityStore from '../stores/VisibilityStore';
 import * as formats from '../utils/data-formats';
-import RefreshActions from '../actions/RefreshActions';
-import RefreshStore from '../stores/RefreshStore';
 
 const DataFormatTypes = formats.DataFormatTypes;
 
@@ -70,8 +68,6 @@ export class DataSourceConnector {
     });
 
     DataSourceConnector.initializeDataSources();
-
-    RefreshStore.getState();
   }
 
   static refreshDs() {

@@ -1,8 +1,8 @@
-import alt, { AbstractStoreModel } from '../alt';
+import alt, { AbstractStoreModel } from '../../alt';
 
-import refreshActions from '../actions/RefreshActions';
+import refreshActions from './RefreshActions';
 
-interface IRefreshStoreState {
+export interface IRefreshStoreState {
   refreshInterval: number;
 }
 
