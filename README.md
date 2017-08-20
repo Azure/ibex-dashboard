@@ -45,9 +45,8 @@ yarn start:dev
 
 Open **http://localhost:3000**
 
-For contribution and code documentation, [follow this link](/docs/README.md).
-
-(For more information on development environment, see https://www.fullstackreact.com/articles/using-create-react-app-with-a-server/)
+For contribution and code documentation follow:
+[DEVELOPMENT & CONTRIBUTION](/docs/README.md).
 
 # Deploy To Azure
 

@@ -30,6 +30,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'bars',
  *  args: {
  *    prefix: string - a prefix string for the exported variables (default to id).
+ *    data: string - the state property holding the data (default is 'values').
  *    valueField: string - The field name holding the value/y value of the bar
  *    barsField: string - The field name holding the names for the bars
  *    seriesField: string - The field name holding the series name (aggregation in a specific field)
@@ -63,7 +64,7 @@ export function bars(
   const threshold = args.threshold || 0;
   const othersValue = args.othersValue || 'Others';
 
-  let values: any[] = state.values || [];
+  let values: any[] = state[args.data || 'values'] || [];
 
   // Concating values with '...'
   if (values && values.length && valueMaxLength && (seriesField || barsField)) {

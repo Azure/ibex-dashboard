@@ -22,6 +22,8 @@ Connection plugins are connected to Data Source plugins. A Data Source can have 
 
 ## Data Source Plugins
 
+[How to create a Data Source Plugin](add-new-data-source.md)
+
 * Constant
 * Sample
 * Application Insights
@@ -31,6 +33,8 @@ Connection plugins are connected to Data Source plugins. A Data Source can have 
 * Azure 
 
 ## Elements Plugins
+
+[How to create a Visual Plugin](add-new-element.md)
 
 * [Area Chart](components/area.md)
 * [Bar Chart](components/bar.md)
@@ -44,6 +48,8 @@ Connection plugins are connected to Data Source plugins. A Data Source can have 
 * [Timeline Chart](components/timeline.md)
 
 ## data-formats plugins
+
+[A short excerpt on data-formats](data-formats)
 
 # Additional Features
 
