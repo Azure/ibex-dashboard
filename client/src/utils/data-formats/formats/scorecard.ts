@@ -53,11 +53,11 @@ export function scorecard (
   let createValue = (value: any, heading: string, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
     const prefix = getPrefix(format);
-    item[prefix + 'value'] = utils.kmNumber(value, postfix);
+    item[prefix + 'value'] = isFinite(value) ? utils.kmNumber(value, postfix) : '-';
     item[prefix + 'heading'] = heading;
     item[prefix + 'color'] = color;
     item[prefix + 'icon'] = icon;
-    item[prefix + 'subvalue'] = subvalue || '';
+    item[prefix + 'subvalue'] = isFinite(subvalue) ? subvalue : '';
     item[prefix + 'subheading'] = subheading || '';
     return item;
   };

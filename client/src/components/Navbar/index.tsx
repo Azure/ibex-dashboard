@@ -156,7 +156,7 @@ export default class Navbar extends React.Component<any, any> {
             />
           ) : (
               <ListItem
-                primaryText="Anon"
+                primaryText="Anonymous"
                 leftAvatar={<Avatar icon={<FontIcon>perm_identity</FontIcon>} />}
                 disabled
               />
