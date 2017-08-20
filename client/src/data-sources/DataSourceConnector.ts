@@ -90,7 +90,7 @@ export class DataSourceConnector {
       dataSources: {},
       dependencies: {}
     };
-    Object.keys(dependencies).forEach(key => {
+    Object.keys(dependencies || {}).forEach(key => {
 
       // Find relevant store
       let dependency = dependencies[key] || '';

@@ -162,7 +162,7 @@ export default class Editor extends React.PureComponent<IEditorProps, IEditorSta
     ];
 
     const actions = !value ? null : actionButtons;
-    const content = !value ? this.renderLoading() : this.renderEditor(value, theme);
+    const content = value !== null ? this.renderEditor(value, theme) : this.renderLoading();
 
     return (
       <Dialog

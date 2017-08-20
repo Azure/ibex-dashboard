@@ -4,22 +4,13 @@ There are 2 basic types of filter control:
 1. Single selection
 2. Multi-selection
 
-## Single selection:
+# Single selection
 
 The **TextFilter** component is used for single selection.
 
 | Control | UI Style | Description
 | :-------|:---------|:-----------
 | `TextFilter` | Select menu | Single selection menu 
-
-## Multi-selection:
-
-The **MenuFilter** or **CheckboxFilter** components can be used for multiple selection.
-
-| Control | UI Style | Description
-| :-------|:---------|:-----------
-| `MenuFilter` | Select menu | Multi-select menu with checkbox list item controls 
-| `CheckboxFilter` | Checkboxes | Multi-select checkboxes 
 
 ## Single selection properties
 
@@ -40,7 +31,7 @@ Define `dependencies` as follows:
 | `values`| `string` | Reference to option values
 
 
-#### Single selection sample
+## Single selection sample
 
 ```js
 {
@@ -55,6 +46,15 @@ Define `dependencies` as follows:
   first: true
 },
 ```
+
+# Multi selection
+
+The **MenuFilter** or **CheckboxFilter** components can be used for multiple selection.
+
+| Control | UI Style | Description
+| :-------|:---------|:-----------
+| `MenuFilter` | Select menu | Multi-select menu with checkbox list item controls 
+| `CheckboxFilter` | Checkboxes | Multi-select checkboxes 
 
 ## Multi-selection properties
 
@@ -76,7 +76,7 @@ Define `dependencies` as follows:
 | `selectedValues`| `string` | Reference to the selected values
 | `values`| `string` | Reference to option values
 
-#### Multi-selection sample (using a forked data source)
+## Multi-selection sample (using a forked data source)
 
 ```js
 {
@@ -93,3 +93,7 @@ Define `dependencies` as follows:
   first: true
 },
 ```
+
+# Filter Actions
+
+[See Actions](actions.md)

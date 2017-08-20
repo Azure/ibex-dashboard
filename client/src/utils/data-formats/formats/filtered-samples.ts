@@ -27,11 +27,7 @@ export function filtered_samples (
   prevState: any) {
   let result = {};
 
-  if (typeof format === 'string') { 
-    return formatWarn('format should be an object with args', 'bars', plugin);
-  }
-
-  const args = format.args || {};
+  const args = typeof format !== 'string' && format.args || {};
   const prefix = args['prefix'] || 'filtered';
 
   const params = plugin.getParams();
