@@ -56,7 +56,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     id: '',
     dependencies: {} as any,
     dependables: [],
-    actions: [ 'updateDependencies', 'failure', 'updateSelectedValues' ],
+    actions: [ 'updateDependencies', 'failure', 'updateSelectedValues', 'refresh' ],
     params: <T> {},
     format: DataFormatTypes.none.toString(),
     calculated: {},
@@ -83,6 +83,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     props.calculated = options.calculated || {};
     props.autoUpdateIntervalMs = options.autoUpdateIntervalMs || -1;
 
+    this.refresh = this.refresh.bind(this);
     this.updateDependencies = this.updateDependencies.bind(this);
     this.dependenciesUpdated = this.dependenciesUpdated.bind(this);
     this.updateSelectedValues = this.updateSelectedValues.bind(this);
@@ -91,6 +92,12 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
     this.updateDependenciesInterval = props.autoUpdateIntervalMs <= 0 ? -1 :
       setInterval(() => this.updateDependencies(this.lastDependencies, this.lastArgs, this.lastCallback),
                   props.autoUpdateIntervalMs);
+  }
+
+  refresh () {
+    if (this.lastCallback) {
+      return this.updateDependencies(this.lastDependencies, this.lastArgs, this.lastCallback);
+    }
   }
 
   updateDependencies (dependencies: IDictionary, args: IDictionary, callback: (result: any) => void): void {
