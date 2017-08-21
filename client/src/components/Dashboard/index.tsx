@@ -6,6 +6,7 @@ import Button from 'react-md/lib/Buttons';
 import Dialog from 'react-md/lib/Dialogs';
 
 import { Spinner } from '../Spinner';
+import { AutoRefreshSelector } from '../AutoRefreshSelector';
 
 import * as ReactGridLayout from 'react-grid-layout';
 var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
@@ -28,7 +29,6 @@ const renderHTML = require('react-render-html');
 
 import List from 'react-md/lib/Lists/List';
 import ListItem from 'react-md/lib/Lists/ListItem';
-import SelectField from 'react-md/lib/SelectFields';
 import FontIcon from 'react-md/lib/FontIcons';
 import Avatar from 'react-md/lib/Avatars';
 import Subheader from 'react-md/lib/Subheaders';
@@ -72,7 +72,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     infoVisible: false,
     infoHtml: '',
     newTemplateName: '',
-    newTemplateDescription: ''
+    newTemplateDescription: '',
   };
 
   constructor(props: IDashboardProps) {
@@ -96,9 +96,9 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
     this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
     this.onVisibilityStoreChange = this.onVisibilityStoreChange.bind(this);
-    
+
     VisibilityStore.listen(this.onVisibilityStoreChange);
-    
+
     this.state.newTemplateName = this.props.dashboard.name;
     this.state.newTemplateDescription = this.props.dashboard.description;
   }
@@ -264,6 +264,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
   render() {
     const { dashboard } = this.props;
+
     const { 
       currentBreakpoint, 
       grid, 
@@ -295,6 +296,11 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     if (!editMode) {
       toolbarActions.push(
+        (
+          <span>
+            <AutoRefreshSelector/>
+          </span>
+        ),
         (
           <span>
             <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
@@ -353,7 +359,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
     return (
       <div style={{width: '100%'}}>
-        <Toolbar actions={toolbarActions}>
+        <Toolbar width={100} actions={toolbarActions}>
           {filters}
           <Spinner />
         </Toolbar>

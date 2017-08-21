@@ -1,6 +1,7 @@
 /// <reference path="../../../client/@types/types.d.ts"/>
 import * as _ from 'lodash';
 
+/* tslint:disable:indent quotemark max-line-length */
 // The following line is important to keep in that format so it can be rendered into the page
 export const config: IDashboardConfig = /*return*/ {
 	id: "bot_analytics_inst",

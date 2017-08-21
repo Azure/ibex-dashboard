@@ -17,7 +17,7 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
   state: IDashboardState = {
     dashboard: null,
     connections: {},
-    connectionsMissing: false
+    connectionsMissing: false    
   };
 
   constructor(props: any) {
@@ -41,7 +41,6 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
   }
 
   render() {
-
     var { dashboard, connections, connectionsMissing } = this.state;
 
     if (!dashboard) {

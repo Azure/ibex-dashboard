@@ -34,7 +34,7 @@ class AzureConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
             in <a href={servicePrincipalUrl} target="_blank">this link</a> to
             get <b>Service Principal ID</b> and <b>Service Principal Key</b>
             <hr/>
-            This setup will creates credential for the dashboard to query resources from Azure.
+            This setup will create credentials for the dashboard to query resources from Azure.
           </div>
         </InfoDrawer>
         <TextField

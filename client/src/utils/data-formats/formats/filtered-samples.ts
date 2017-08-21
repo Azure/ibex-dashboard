@@ -11,6 +11,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'filtered_samples',
  *  args: {
  *    prefix: string - a prefix string for the filtered sample data (defaults to 'filtered').
+ *    data: string - the state property holding the data (default is 'values').
  *  }
  * }
  * @param state Current received state from data source
@@ -26,11 +27,7 @@ export function filtered_samples (
   prevState: any) {
   let result = {};
 
-  if (typeof format === 'string') { 
-    return formatWarn('format should be an object with args', 'bars', plugin);
-  }
-
-  const args = format.args || {};
+  const args = typeof format !== 'string' && format.args || {};
   const prefix = args['prefix'] || 'filtered';
 
   const params = plugin.getParams();
