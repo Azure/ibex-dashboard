@@ -32,7 +32,7 @@ const getField = (regExp, text) => {
   const matches = regExp.exec(text);
   let match = matches && matches.length >= 3 && matches[2];
   if (!match) {
-    match = matches && matches.length > 0 && matches[0]
+    match = matches && matches.length > 0 && matches[0];
   }
   return match;
 }

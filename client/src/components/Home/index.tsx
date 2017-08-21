@@ -325,11 +325,11 @@ export default class Home extends React.Component<any, IHomeState> {
     });
 
     // Sort templates alphabetically 
-    let sortedCategories = { 'General':  categories.General, 'Featured': categories.Featured }
+    let sortedCategories = { 'General':  categories.General, 'Featured': categories.Featured };
     const keys = Object.keys(categories).sort();
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
-      if (key != 'Featured') {
+      if (key !== 'Featured') {
         sortedCategories[key] = categories[key];
       }
     }
