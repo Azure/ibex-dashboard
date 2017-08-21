@@ -221,7 +221,7 @@ export default class Home extends React.Component<any, IHomeState> {
   onSubmitImport() {
     var dashboardId = this.state.fileName;
     ConfigurationsActions.submitDashboardFile(this.state.content, dashboardId);
-    
+
     this.setState({ importVisible: false });
   }
 
@@ -270,9 +270,9 @@ export default class Home extends React.Component<any, IHomeState> {
 
     let createCard = (tmpl, index) => (
       <div key={index} className="md-cell" style={styles.card}>
-        <Card 
-          className="md-block-centered" 
-          key={index} 
+        <Card
+          className="md-block-centered"
+          key={index}
           style={{ backgroundImage: `url(${tmpl.preview})`}} >
           <Media>
             <MediaOverlay>
@@ -280,24 +280,24 @@ export default class Home extends React.Component<any, IHomeState> {
             </MediaOverlay>
           </Media>
           <CardActions style={styles.fabs}>
-           <Button 
-              floating 
-              secondary 
+            <Button
+              floating
+              secondary
               style={{ backgroundColor: '#959ba5', marginRight: '2px' }}
               onClick={this.onExportTemplate.bind(this, tmpl.id)}
             >
               file_download
             </Button>
-            <Button 
-              floating 
-              secondary 
+            <Button
+              floating
+              secondary
               onClick={this.onOpenInfo.bind(this, tmpl.html || '<p>No info available</p>', tmpl.name)}
             >
               info
             </Button>
-            <Button 
-              floating 
-              primary 
+            <Button
+              floating
+              primary
               onClick={this.onNewTemplateSelected.bind(this, tmpl.id)} style={styles.primaryFab}
             >
               add_circle_outline
@@ -308,22 +308,36 @@ export default class Home extends React.Component<any, IHomeState> {
     );
 
     // Dividing templates into categories
-    let categories = { 'General': [] };
+    let categories = { 'General': [], 'Featured': [] };
     templates.forEach((tmpl, index) => {
       let category = tmpl.category || 'General';
+      if (tmpl.featured) {
+        categories['Featured'].push(createCard(tmpl, index));
+      }
       categories[category] = categories[category] || [];
       categories[category].push(createCard(tmpl, index));
     });
+
+    // Sort templates alphabetically 
+    let sortedCategories = { 'General':  categories.General, 'Featured': categories.Featured }
+    const keys = Object.keys(categories).sort();
+    for (let i = 0; i < keys.length; i++) {
+      let key = keys[i];
+      if (key != 'Featured') {
+        sortedCategories[key] = categories[key];
+      }
+    }
+    categories = sortedCategories;
 
     let toolbarActions = [];
     toolbarActions.push(
       (
         <Button
-            flat
-            tooltipLabel="Import dashboard"
-            onClick={this.onOpenImport.bind(this)}
-            label="Import dashboard"
-          >file_upload
+          flat
+          tooltipLabel="Import dashboard"
+          onClick={this.onOpenImport.bind(this)}
+          label="Import dashboard"
+        >file_upload
         </Button>
       )
     );
@@ -346,31 +360,31 @@ export default class Home extends React.Component<any, IHomeState> {
         }
 
         <Dialog
-            id="ImportDashboard"
-            visible={importVisible || false}
-            title="Import dashboard"
-            modal
-            actions={[
-              { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
-              { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
-            ]}>
-            <FileUpload
-              id="dashboardDefenitionFile"
-              primary
-              label="Choose File"
-              accept="application/javascript"
-              onLoadStart={this.setFile}
-              onLoad={this.onLoad}
-            />
-            <TextField
-              id="dashboardFileName"
-              label="Dashboard ID"
-              value={fileName || ''}
-              onChange={this.updateFileName}
-              disabled={!importedFileContent}
-              lineDirection="center"
-              placeholder="Choose an ID for the imported dashboard"
-            />
+          id="ImportDashboard"
+          visible={importVisible || false}
+          title="Import dashboard"
+          modal
+          actions={[
+            { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
+            { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
+          ]}>
+          <FileUpload
+            id="dashboardDefenitionFile"
+            primary
+            label="Choose File"
+            accept="application/javascript"
+            onLoadStart={this.setFile}
+            onLoad={this.onLoad}
+          />
+          <TextField
+            id="dashboardFileName"
+            label="Dashboard ID"
+            value={fileName || ''}
+            onChange={this.updateFileName}
+            disabled={!importedFileContent}
+            lineDirection="center"
+            placeholder="Choose an ID for the imported dashboard"
+          />
         </Dialog>
 
         <Dialog
