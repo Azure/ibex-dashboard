@@ -63,6 +63,17 @@ export function bars(
 
   let values: any[] = state.values || [];
 
+  if (values && values.length && (seriesField || barsField)) {
+    values.forEach(val => {
+      if (seriesField && val[seriesField]) {
+        val[seriesField] = val[seriesField];
+      }
+      if (barsField && val[barsField]) {
+        val[barsField] = val[barsField];
+      }
+    });
+  }
+
   let result = {};
   let barValues = {};
 
