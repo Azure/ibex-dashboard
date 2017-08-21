@@ -95,6 +95,27 @@ h2, .md-subheading-2 {
   }
 }
 
+.templates .md-card-title--title-block {
+  width: 100%;
+  overflow: hidden;
+}
+
+.templates h2.md-card-title--title,
+.templates h3.md-card-title--title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+div.templates > section > div.preview {
+  opacity: 0.5;
+  transition: opacity .5s ease-out;
+}
+
+div.templates:hover > section > div.preview {
+  opacity: 1.0;
+}
+
 .md-card {
   .card-icon {
     cursor: default;

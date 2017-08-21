@@ -1,4 +1,4 @@
-import { createDashboard } from "./utils";
+import { createDashboard } from './utils';
 
 let dashboard = createDashboard();
 dashboard.dataSources.push({
