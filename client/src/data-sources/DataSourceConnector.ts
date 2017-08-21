@@ -70,6 +70,14 @@ export class DataSourceConnector {
     DataSourceConnector.initializeDataSources();
   }
 
+  static refreshDs() {
+    let topLevelDataSources = _.filter(DataSourceConnector.dataSources, ds => !ds.config.dependencies);
+
+    topLevelDataSources.forEach(dataSource => {
+      dataSource.action.refresh.defer();
+    });
+  }
+
   static initializeDataSources() {
     // Call initialize methods
     Object.keys(this.dataSources).forEach(sourceDSId => {
@@ -90,7 +98,7 @@ export class DataSourceConnector {
       dataSources: {},
       dependencies: {}
     };
-    Object.keys(dependencies).forEach(key => {
+    Object.keys(dependencies || {}).forEach(key => {
 
       // Find relevant store
       let dependency = dependencies[key] || '';
@@ -104,13 +112,13 @@ export class DataSourceConnector {
       // Checking if this is a config value
       if (dependency.startsWith('connection:')) {
         const connection = dependency.substr(dependency.indexOf(':') + 1);
-        if ( Object.keys(DataSourceConnector.dataSources).length < 1 ) {
+        if (Object.keys(DataSourceConnector.dataSources).length < 1) {
           throw new Error('Connection error, couldn\'t find any data sources.');
         }
         // Selects first data source to get connections 
         const dataSource: IDataSource = DataSourceConnector.dataSources[
           Object.keys(DataSourceConnector.dataSources)[0]];
-        if ( !dataSource || !dataSource.plugin.hasOwnProperty('connections')) {
+        if (!dataSource || !dataSource.plugin.hasOwnProperty('connections')) {
           throw new Error('Tried to resolve connections reference path, but couldn\'t find any connections.');
         }
         const connections = dataSource.plugin['connections'];
@@ -118,7 +126,7 @@ export class DataSourceConnector {
         if (path.length !== 2) {
           throw new Error('Expected connection reference dot path consisting of 2 components.');
         }
-        if ( !connections.hasOwnProperty(path[0]) || !connections[path[0]].hasOwnProperty(path[1])) {
+        if (!connections.hasOwnProperty(path[0]) || !connections[path[0]].hasOwnProperty(path[1])) {
           throw new Error('Unable to resolve connection reference path:' + connection);
         }
         result.dependencies[key] = connections[path[0]][path[1]];
@@ -208,13 +216,13 @@ export class DataSourceConnector {
   }
 
   static handleDataFormat(
-    format: string | formats.IDataFormat, 
-    plugin: IDataSourcePlugin, 
-    state: any, 
+    format: string | formats.IDataFormat,
+    plugin: IDataSourcePlugin,
+    state: any,
     dependencies: IDictionary) {
 
     if (!format) { return null; }
-    
+
     const prevState = DataSourceConnector.dataSources[plugin._props.id].store.getState();
 
     let result = {};
@@ -234,18 +242,30 @@ export class DataSourceConnector {
     sourceDS.store.listen((state) => {
 
       Object.keys(this.dataSources).forEach(checkDSId => {
-        var checkDS = this.dataSources[checkDSId];
-        var dependencies = checkDS.plugin.getDependencies() || {};
+        let checkDS = this.dataSources[checkDSId];
+        let dependencies = checkDS.plugin.getDependencies() || {};
 
+        let populatedDependencies = {};
         let connected = _.find(_.keys(dependencies), dependencyKey => {
           let dependencyValue = dependencies[dependencyKey] || '';
-          return (dependencyValue === sourceDS.id || dependencyValue.startsWith(sourceDS.id + ':'));
+          if (typeof dependencyValue === 'string' && dependencyValue.length > 0)  {
+            if (dependencyValue === sourceDS.id) {
+              let defaultProperty = sourceDS.plugin.defaultProperty || 'value';
+              populatedDependencies[dependencyKey] = state[defaultProperty];
+              return true;
+            } else if (dependencyValue.startsWith(sourceDS.id + ':')) {
+              let property = dependencyValue.substr(sourceDS.id.length + 1);
+              populatedDependencies[dependencyKey] = _.get(state, property);
+              return true;
+            }
+          }
+          return false;
         });
 
         if (connected) {
 
           // Todo: add check that all dependencies are met
-          checkDS.action.updateDependencies.defer(state);
+          checkDS.action.updateDependencies.defer(populatedDependencies);
         }
       });
 
@@ -270,7 +290,7 @@ export class DataSourceConnector {
 
   private static createActionClass(plugin: IDataSourcePlugin): any {
     class NewActionClass {
-      constructor() {}
+      constructor() { }
     }
 
     plugin.getActions().forEach(action => {
@@ -338,7 +358,7 @@ export class DataSourceConnector {
 
   private static callibrateResult(result: any, plugin: IDataSourcePlugin, dependencies: IDictionary): any {
 
-    var defaultProperty = plugin.defaultProperty || 'value';
+    let defaultProperty = plugin.defaultProperty || 'value';
 
     // In case result is not an object, push result into an object
     if (typeof result !== 'object') {
@@ -353,22 +373,24 @@ export class DataSourceConnector {
     let state = DataSourceConnector.dataSources[plugin._props.id].store.getState();
     state = _.extend(state, result);
 
-    let format = plugin.getFormat();
-    let formatExtract = DataSourceConnector.handleDataFormat(format, plugin, state, dependencies);
-    if (formatExtract) {
-      Object.assign(result, formatExtract);
-    }
-
     if (typeof calculated === 'function') {
       let additionalValues = calculated(state, dependencies) || {};
-      Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
+      Object.assign(result, additionalValues);
     }
 
     if (Array.isArray(calculated)) {
       calculated.forEach(calc => {
         let additionalValues = calc(state, dependencies) || {};
-        Object.keys(additionalValues).forEach(key => { result[key] = additionalValues[key]; });
+        Object.assign(result, additionalValues);
       });
+    }
+
+    state = _.extend(state, result);
+    
+    let format = plugin.getFormat();
+    let formatExtract = DataSourceConnector.handleDataFormat(format, plugin, state, dependencies);
+    if (formatExtract) {
+      Object.assign(result, formatExtract);
     }
 
     return result;

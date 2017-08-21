@@ -302,11 +302,11 @@ export const config: IDashboardConfig = /*return*/ {
 								{ label: 'Failed', count: total.event_count - successful.event_count + 5 }, 
 							];
 
-							let conversionRate = (100 * total.event_count / (successful.event_count + 5)).toFixed(1); 
+							let conversionRate = (100 * total.event_count / (successful.event_count + 5)); 
 
 							return {
 								"conversions-displayValues": displayValues,
-								"conversions-rate": conversionRate + '%',
+								"conversions-rate": isFinite(conversionRate) ?  conversionRate.toFixed(1) + '%' : '-',
 							};
 						}
 					},
@@ -642,14 +642,14 @@ export const config: IDashboardConfig = /*return*/ {
 				card_sentiment_onClick: "::onSentimentsClick",
 				card_users_value: "retention:total",
 				card_users_heading: "::Users",
-        card_users_tooltip: "::User retention",
+        card_users_tooltip: "::Total users and retention",
 				card_users_icon: "::account_circle",
 				card_users_subvalue: "retention:returning",
 				card_users_subheading: "::Returning",
 				card_users_onClick: "::onUsersClick",
 				card_conversions_value: "ai:conversions-rate",
-				card_conversions_heading: "::Conversions",
-        card_conversions_tooltip: "::Conversion rate",
+        card_conversions_heading: "::Conversions",
+        card_conversions_tooltip: "::Percentage of user interactions completed with a conversion",
 				card_conversions_icon: "::input",
 				card_conversions_color: "::#2196F3"
 			},

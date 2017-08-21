@@ -52,6 +52,67 @@ export default class ElementConnector {
     return layouts;
   }
 
+  static createGenericFilter(
+    ReactElement: any, 
+    idx?: number, 
+    icon?: string,
+    source?: string | IStringDictionary,
+    dependencies?: IStringDictionary, 
+    actions?: IDictionary, 
+    title?: string, 
+    subtitle?: string): JSX.Element {
+
+    return ElementConnector.createGenericElement(
+      ReactElement,
+      '__filter',
+      idx || 0,
+      source, 
+      dependencies,
+      actions,
+      null,
+      title, 
+      subtitle,
+      null, 
+      null,
+      icon
+    );
+  }
+
+  static createGenericElement(
+    ReactElement: any, 
+    id: string, 
+    idx?: number, 
+    source?: string | IStringDictionary,
+    dependencies?: IStringDictionary, 
+    actions?: IDictionary, 
+    props?: IDictionary, 
+    title?: string, 
+    subtitle?: string, 
+    layout?: ILayout, 
+    theme?: string[],
+    icon?: string): JSX.Element {
+
+    if (source && typeof ReactElement.fromSource === 'function') {
+      let fromSource = ReactElement.fromSource(source);
+      dependencies = _.extend({}, dependencies, fromSource);
+    }
+
+    return (
+      <ReactElement 
+        key={idx}
+        id={id + '@' + (idx || 0)}
+        dependencies={dependencies}
+        actions={actions || {}}
+        props={props || {}}
+        title={title}
+        subtitle={subtitle}
+        layout={layout}
+        theme={theme}
+        icon={icon}
+      />
+    );
+  }
+
   static loadElementsFromDashboard(dashboard: IElementsContainer, layout: ILayout[]): React.Component<any, any>[] {
     var elements = [];
     var elementId = {};
@@ -61,11 +122,6 @@ export default class ElementConnector {
       var ReactElement = plugins[element.type];
       var { id, dependencies, source, actions, props, title, subtitle, size, theme, location } = element;
       var layoutProps = _.find(layout, { 'i': id });
-
-      if (source && typeof ReactElement.fromSource === 'function') {
-        let fromSource = ReactElement.fromSource(source);
-        dependencies = _.extend({}, dependencies, fromSource);
-      }
 
       if (dependencies && dependencies.visible && !visibilityFlags[dependencies.visible]) { 
         if (typeof visibilityFlags[dependencies.visible] === 'undefined') {
@@ -84,16 +140,21 @@ export default class ElementConnector {
       elementId[id] = true;
       elements.push(
         <div key={id}>
-          <ReactElement 
-            id={id + '@' + idx}
-            dependencies={dependencies}
-            actions={actions || {}}
-            props={props || {}}
-            title={title}
-            subtitle={subtitle}
-            layout={layoutProps}
-            theme={theme}
-          />
+          {
+            ElementConnector.createGenericElement(
+              ReactElement, 
+              id, 
+              idx, 
+              source, 
+              dependencies, 
+              actions, 
+              props, 
+              title, 
+              subtitle, 
+              layoutProps, 
+              theme
+            )
+          }
         </div>
       );
     });
@@ -111,20 +172,17 @@ export default class ElementConnector {
       let ReactElement = plugins[element.type];
       let { dependencies, source, actions, title, subtitle, icon } = element;
 
-      if (source && typeof ReactElement.fromSource === 'function') {
-        let fromSource = ReactElement.fromSource(source);
-        dependencies = _.extend({}, dependencies, fromSource);
-      }
-
       (element.first ? filters : additionalFilters).push(
-        <ReactElement 
-              key={idx} 
-              dependencies={dependencies}
-              actions={actions}
-              title={title}
-              subtitle={subtitle}
-              icon={icon}
-        />
+        ElementConnector.createGenericFilter(
+          ReactElement,
+          idx,
+          icon,
+          source,
+          dependencies,
+          actions,
+          title,
+          subtitle
+        )
       );
     });
 

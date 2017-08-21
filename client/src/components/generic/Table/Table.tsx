@@ -188,9 +188,9 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
             contentStyle={styles.autoscroll}>
         <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination" responsive={false}>
           <TableHeader>
-            <TableRow>
+            <TableRow autoAdjust={false}>
               {cols.map((col, i) => (
-                <TableColumn key={i} width={col.width}>{
+                <TableColumn key={i} style={this.styleColumnWidth(col.width)}>{
                   col.secondaryHeader !== undefined ? (
                     <div className="table">
                       <span className="primary">{col.header}</span>
@@ -218,5 +218,16 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
         </DataTable>
       </Card>
     );
+  }
+
+  private styleColumnWidth(width?: string | number): React.CSSProperties {
+    if (!width) {
+      return {
+        width: '100%'
+      } as React.CSSProperties;
+    }
+    return {
+      width: typeof(width) === 'string' ? width : width + 'px'
+    } as React.CSSProperties;
   }
 }

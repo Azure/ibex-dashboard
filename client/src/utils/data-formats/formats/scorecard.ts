@@ -25,6 +25,7 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  *  type: 'scorecard',
  *  args: { 
  *    prefix: string - a prefix string for the exported variables (default to id).
+ *    data: string - the state property holding the data (default is 'values').
  *    countField: 'count' - Field name with count value (default: 'count')
  *    postfix: '%' - String to add after the value (default: null)
  *    thresholds: [{ value: 0, heading: '', color: '#000', icon: 'done' }]
@@ -43,21 +44,22 @@ export function scorecard (
   dependencies: IDictionary, 
   plugin: IDataSourcePlugin, 
   prevState: any) {
-  let { values } = state;
 
   const args = typeof format !== 'string' && format.args || { thresholds: null };
   const countField = args.countField || 'count';
   const postfix = args.postfix || null;
+  let values = state[args.data || 'values'];
+
   let checkValue = (values && values[0] && values[0][countField]) || 0; 
   
   let createValue = (value: any, heading: string, color: string, icon: string, subvalue?: any, subheading?: string) => {
     let item = {};
     const prefix = getPrefix(format);
-    item[prefix + 'value'] = utils.kmNumber(value, postfix);
+    item[prefix + 'value'] = isFinite(value) ? utils.kmNumber(value, postfix) : '-';
     item[prefix + 'heading'] = heading;
     item[prefix + 'color'] = color;
     item[prefix + 'icon'] = icon;
-    item[prefix + 'subvalue'] = subvalue || '';
+    item[prefix + 'subvalue'] = isFinite(subvalue) ? subvalue : '';
     item[prefix + 'subheading'] = subheading || '';
     return item;
   };
@@ -96,17 +98,17 @@ export function scorecard (
 
     if (!subvalueThresholds.length) { subvalueThresholds.push({ subvalue: 0, subheading: '' }); }
     
-    checkValue = values[0][subvalueField || countField] || 0;
+    let checkSubvalue = values[0][subvalueField || countField] || 0;
     thresholdIdx = 0;
     let subvalueThreshold = subvalueThresholds[thresholdIdx];
     
     while (subvalueThresholds.length > (thresholdIdx + 1) && 
-           checkValue > subvalueThreshold.value &&
-           checkValue >= subvalueThresholds[++thresholdIdx].value) {
+           checkSubvalue > subvalueThreshold.value &&
+           checkSubvalue >= subvalueThresholds[++thresholdIdx].value) {
       subvalueThreshold = subvalueThresholds[thresholdIdx];      
     }
 
-    subvalue = checkValue;
+    subvalue = checkSubvalue;
     subheading = subvalueThreshold.subheading;
   }
 

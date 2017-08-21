@@ -40,10 +40,11 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
     this.onChange = this.onChange.bind(this);
 
     // Create dialog data source
-    var dialogDS: IDataSource = {
+    var dialogDS: DataSource = {
       id: 'dialog_' + this.props.dialogData.id,
       type: 'Constant',
       params: {
+        values: [],
         selectedValue: null
       }
     };
@@ -61,6 +62,10 @@ export default class Dialog extends React.PureComponent<IDialogProps, IDialogSta
   componentDidMount() {
     this.setState({ mounted: true });
     DialogsStore.listen(this.onChange);
+  }
+
+  componentWillUnmount() {
+    DialogsStore.unlisten(this.onChange);
   }
 
   componentDidUpdate() {

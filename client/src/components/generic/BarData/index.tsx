@@ -3,13 +3,12 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 
 import Card from '../../Card';
+import ResponsiveContainer from '../../ResponsiveContainer';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 import colors from '../../colors';
 const { ThemeColors } = colors;
-
-import settings from './Settings';
 
 interface IBarProps extends IGenericProps {
   props: {
@@ -27,10 +26,9 @@ interface IBarState extends IGenericState {
 
 export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
-  static editor = settings;
   static fromSource(source: string) {
     return {
-      values: GenericComponent.sourceFormat(source, 'values'),
+      values: GenericComponent.sourceFormat(source, 'bar-values'),
       bars: GenericComponent.sourceFormat(source, 'bars')
     };
   }
@@ -51,7 +49,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
 
   render() {
     let { values, bars } = this.state;
-    let { id, title, subtitle, props } = this.props;
+    let { id, title, subtitle, props, layout } = this.props;
     let { barProps, showLegend, nameKey } = props;
 
     nameKey = nameKey || 'value';
@@ -86,7 +84,7 @@ export default class BarData extends GenericComponent<IBarProps, IBarState> {
     // Todo: Receive the width of the SVG component from the container
     return (
       <Card id={id} title={title} subtitle={subtitle}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <BarChart
             data={values}
             margin={{ top: 5, right: 30, left: 0, bottom: 5 }}

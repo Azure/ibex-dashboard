@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 import Card from '../Card';
-import { RadialBarChart, RadialBar, PolarGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import ResponsiveContainer from '../ResponsiveContainer';
+import { RadialBarChart, RadialBar, PolarGrid, Tooltip, Legend } from 'recharts';
 
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -40,7 +41,7 @@ export default class RadialBarChartCard extends GenericComponent<IRadarProps, IR
   render() {
 
     var { values } = this.state;
-    var { title, subtitle, props } = this.props;
+    var { title, subtitle, props, layout } = this.props;
 
     if (!values) {
       return null;
@@ -57,7 +58,7 @@ export default class RadialBarChartCard extends GenericComponent<IRadarProps, IR
 
     return (
       <Card title={title} subtitle={subtitle}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <RadialBarChart
             width={730}
             height={250}

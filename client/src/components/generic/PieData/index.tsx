@@ -3,13 +3,12 @@ import * as _ from 'lodash';
 import * as moment from 'moment';
 
 import Card from '../../Card';
+import ResponsiveContainer from '../../ResponsiveContainer';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
-import { PieChart, Pie, Sector, Cell, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Sector, Cell, Legend } from 'recharts';
 
 import colors from '../../colors';
 const { ThemeColors } = colors;
-
-import settings from './Settings';
 
 interface IPieProps extends IGenericProps {
   props: {
@@ -30,8 +29,6 @@ interface IPieState extends IGenericState {
 }
 
 export default class PieData extends GenericComponent<IPieProps, IPieState> {
-
-  static editor = settings;
 
   state = {
     activeIndex: 0,
@@ -141,16 +138,17 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
       return null;
     }
 
-    var themeColors = theme || ThemeColors;
+    let themeColors = theme || ThemeColors;
+    let layoutHeight = layout && layout.h || 100;
+    let layoutWidth = layout && layout.w || 100;
 
-    // Todo: Receive the width of the SVG component from the container
     return (
       <Card id={id} title={title} subtitle={subtitle}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <PieChart>
             <Pie
               data={values}
-              cx={Math.min(layout.h / 4, layout.w) * 70}
+              cx={Math.min(layoutHeight / 4, layoutWidth) * 70}
               innerRadius={60}
               fill="#8884d8"
               onMouseEnter={this.onPieEnter}
@@ -160,8 +158,6 @@ export default class PieData extends GenericComponent<IPieProps, IPieState> {
               {...pieProps}
             >
               {values.map((entry, index) => <Cell key={index} fill={themeColors[index % themeColors.length]} />)}
-              <Cell key={100} fill={colors.GoodColor} />
-              <Cell key={101} fill={colors.BadColor} />
             </Pie>
             {
               showLegend !== false && (
