@@ -30,7 +30,7 @@
     "react-leaflet": "^1.1.6",
     "react-leaflet-div-icon": "^1.0.2",
     "react-leaflet-markercluster": "^1.1.5",
-    "react-md": "^1.0.10",
+    "react-md": "^1.0.18",
     "react-render-html": "^0.1.6",
     "react-router": "3.0.0",
     "react-scripts-ts": "1.4",
