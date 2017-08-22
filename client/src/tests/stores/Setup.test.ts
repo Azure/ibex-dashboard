@@ -10,16 +10,7 @@ describe('Data Source: Samples', () => {
   it('Testing SetupActions', (done) => {
 
     let checkState = (state) => {
-      expect(state).toHaveProperty('admins');
-      expect(state).toHaveProperty('allowHttp');
-      expect(state).toHaveProperty('clientID');
-      expect(state).toHaveProperty('clientSecret');
-      expect(state).toHaveProperty('enableAuthentication');
-      expect(state).toHaveProperty('issuer');
-      expect(state).toHaveProperty('loaded');
-      expect(state).toHaveProperty('redirectUrl');
-      expect(state).toHaveProperty('saveSuccess');
-      expect(state).toHaveProperty('stage');
+      expect(state).toMatchSnapshot('SetupActionsLoad')
 
       SetupStore.unlisten(checkState);
       done();
