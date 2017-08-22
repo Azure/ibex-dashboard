@@ -34,6 +34,7 @@ import Avatar from 'react-md/lib/Avatars';
 import Subheader from 'react-md/lib/Subheaders';
 import Divider from 'react-md/lib/Dividers';
 import TextField from 'react-md/lib/TextFields';
+import MenuButton from 'react-md/lib/Menus/MenuButton';
 
 interface IDashboardProps {
   dashboard?: IDashboardConfig;
@@ -294,66 +295,66 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     // Actions to perform on an active dashboard
     let toolbarActions = [];
 
-    if (!editMode) {
-      toolbarActions.push(
-        (
-          <span>
-            <AutoRefreshSelector/>
-          </span>
-        ),
-        (
-          <span>
-            <Button key="info" icon tooltipLabel="Info" onClick={this.onOpenInfo.bind(this, dashboard.html)}>
-              info
-            </Button>
-          </span>
-        ),
-        (
-          <span>
-            <Button key="downloadDashboard" icon tooltipLabel="Download Dashboard" onClick={this.onDownloadDashboard}>
-              file_download
-            </Button>
-          </span>
-        )
-      );
-    } else {
-      toolbarActions.push(
-        (
-          <SettingsButton onUpdateLayout={this.onUpdateLayout} />
-        ),
-        (
-          <span>
-            <Button
-              key="edit-json"
-              icon tooltipLabel="Edit code"
-              onClick={() => EditorActions.loadDashboard(dashboard.id)}
-            >
-              code
-            </Button>
-          </span>
-        ),
-        (
-          <span>
-            <Button key="delete" icon tooltipLabel="Delete dashboard" onClick={this.onDeleteDashboard}>delete</Button>
-          </span>
-        ),
-        (
-          <span>
-            <Button key="saveAsTemplate" icon tooltipLabel="Save as template" 
-                    onClick={this.onSaveAsTemplate}>cloud_download</Button>
-          </span>
-        )
-      );
-      toolbarActions.reverse();
-    }
-
     // Edit toggle button
-    const editLabel = editMode ? 'Finish editing' : 'Edit mode' ;
+    const editLabel = editMode ? 'Save layout' : 'Edit layout' ;
+
     toolbarActions.push(
       (
-        <span><Button key="edit-grid" icon primary={editMode} tooltipLabel={editLabel} onClick={this.toggleEditMode}>
-          edit
-        </Button></span>
+        <span>
+          <AutoRefreshSelector/>
+        </span>
+      ),
+      (
+        <span>
+          <Button key="edit-grid" icon primary={editMode} tooltipLabel={editLabel} onClick={this.toggleEditMode}>
+            edit
+          </Button>
+        </span>
+      ),
+      (
+        <SettingsButton onUpdateLayout={this.onUpdateLayout} />
+      ),
+      (
+        <span>
+          <MenuButton 
+            id="vert-menu"
+            icon
+            buttonChildren="more_vert"
+            tooltipLabel="More">
+            <ListItem 
+              key="info" 
+              primaryText="Info" 
+              leftIcon={<FontIcon key="info">info</FontIcon>}
+              onClick={this.onOpenInfo.bind(this, dashboard.html)} 
+            />
+            <Divider />
+            <ListItem 
+              key="edit" 
+              primaryText="Edit code" 
+              leftIcon={<FontIcon key="code">code</FontIcon>}
+              onClick={() => EditorActions.loadDashboard(dashboard.id)} 
+            />
+            <ListItem 
+              key="down" 
+              primaryText="Download dashboard" 
+              leftIcon={<FontIcon key="file_download">file_download</FontIcon>}
+              onClick={this.onDownloadDashboard} 
+            />
+            <ListItem 
+              key="temp" 
+              primaryText="Save as template" 
+              leftIcon={<FontIcon key="cloud_download">cloud_download</FontIcon>}
+              onClick={this.onSaveAsTemplate} 
+            />
+            <Divider />
+            <ListItem 
+              key="del" 
+              primaryText="Delete dashboard" 
+              leftIcon={<FontIcon key="delete">delete</FontIcon>}
+              onClick={this.onDeleteDashboard} 
+            />
+          </MenuButton>
+        </span>
       )
     );
 
