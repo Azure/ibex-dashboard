@@ -46,7 +46,8 @@ export const config: IDashboardConfig = /*return*/ {
               return `
                where duration > 0 |
                summarize avg_duration= round(avg(duration) / 1000, 1) by bin(timestamp, ${granularity}) |
-               order by timestamp asc `
+               order by timestamp asc 
+              `
             },
             format: { type: "timeline", args: { timeField: "timestamp", valueField: "avg_duration" } }
           },
@@ -54,7 +55,8 @@ export const config: IDashboardConfig = /*return*/ {
             query: ({ granularity }) => {
               return `
                 summarize sum = sum(itemCount) by bin(timestamp, ${granularity}), success |
-                order by timestamp asc `
+                order by timestamp asc 
+              `
             },
             format: {
               type: "bars",
@@ -73,19 +75,20 @@ export const config: IDashboardConfig = /*return*/ {
         queries: {
           type: {
             query: ({ granularity }) => {
-              return `summarize count = count() by type `
+              return `summarize count = count() by type 
+            `
             },
             format: { type: "pie", args: { value: "count", label: "type", maxLength: 20 } }
           },
           mapActivity: {
             query: () => `
-                     extend location=strcat(client_City, ', ', client_CountryOrRegion)
-                    | summarize location_count=count() by location 
-                    | extend popup=strcat('<b>', location, '</b><br />', location_count, ' exceptions')`
+              extend location=strcat(client_City, ', ', client_CountryOrRegion) |
+              summarize location_count=count() by location |
+              extend popup=strcat('<b>', location, '</b><br />', location_count, ' exceptions')
+            `
           },
           count: {
-            query: () =>
-              ` summarize count = count() `,
+            query: () => ` summarize count = count() `,
             format: {
               type: "scorecard",
               args: {
@@ -105,9 +108,7 @@ export const config: IDashboardConfig = /*return*/ {
         table: "customEvents",
         queries: {
           usercount: {
-            query: () =>
-              `
-                summarize count = dcount(user_Id) `,
+            query: () => ` summarize count = dcount(user_Id) `,
             format: {
               type: "scorecard",
               args: {
@@ -127,8 +128,7 @@ export const config: IDashboardConfig = /*return*/ {
         table: "traces",
         queries: {
           count: {
-            query: () =>
-              ` summarize count = count() `,
+            query: () => ` summarize count = count() `,
             format: {
               type: "scorecard",
               args: {
@@ -138,10 +138,11 @@ export const config: IDashboardConfig = /*return*/ {
             }
           },
           top: {
-            query: () =>
-              ` project timestamp , message | 
+            query: () => `
+              project timestamp , message | 
               order by timestamp desc | 
-              take 10 `
+              take 10 
+            `
           }
         }
       }
@@ -157,7 +158,8 @@ export const config: IDashboardConfig = /*return*/ {
             query: ({ granularity }) => {
               return `
                 summarize sum = sum(itemCount) by bin(timestamp, ${granularity}), name |
-                order by timestamp asc `
+                order by timestamp asc 
+              `
             },
             format: {
               type: "bars",
@@ -165,8 +167,7 @@ export const config: IDashboardConfig = /*return*/ {
             }
           },
           count: {
-            query: () =>
-              ` summarize count = count() `,
+            query: () => ` summarize count = count() `,
             format: {
               type: "scorecard",
               args: {
@@ -176,10 +177,11 @@ export const config: IDashboardConfig = /*return*/ {
             }
           },
           top: {
-            query: () =>
-              ` project timestamp , target, data | 
+            query: () => ` 
+              project timestamp , target, data | 
               order by timestamp desc | 
-              take 10 `
+              take 10 
+            `
           }
         }
       }
@@ -400,10 +402,10 @@ export const config: IDashboardConfig = /*return*/ {
           dependencies: { queryTimespan: "dialog_errors:queryspan" },
           params: {
             query: () => ` 
-              exceptions
-              | summarize error_count=count() by type, innermostMessage
-              | project type, innermostMessage, error_count
-              | order by error_count desc `
+              exceptions |
+              summarize error_count=count() by type, innermostMessage |
+              project type, innermostMessage, error_count |
+              order by error_count desc `
           }
         },
         {
@@ -416,10 +418,11 @@ export const config: IDashboardConfig = /*return*/ {
           },
           params: {
             query: ({ type, innermostMessage }) => `
-              exceptions
-              | where type == '${type}'
-              | where innermostMessage == "${innermostMessage}"
-              | project type, innermostMessage, handledAt, operation_Id `
+              exceptions |
+              where type == '${type}' |
+              where innermostMessage == "${innermostMessage}" |
+              project type, innermostMessage, handledAt, operation_Id 
+            `
           }
         }
       ],
@@ -475,9 +478,10 @@ export const config: IDashboardConfig = /*return*/ {
           dependencies: { operation_Id: "dialog_errordetail:operation_Id", queryTimespan: "dialog_errordetail:queryspan" },
           params: {
             query: ({ operation_Id }) => ` 
-              exceptions
-              | where operation_Id == '${operation_Id}'
-              | project handledAt, type, innermostMessage, operation_Id, timestamp, details `
+              exceptions |
+              where operation_Id == '${operation_Id}' |
+              project handledAt, type, innermostMessage, operation_Id, timestamp, details 
+            `
           }
         }
       ],

@@ -52,7 +52,7 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
    */
   category?: string,
   /** 
-    * A flag indicates whether the template is featured
+    * A flag indicates whether the template is featured at the top of the dashboard creation screen
    */
   featured?: boolean,
   /**

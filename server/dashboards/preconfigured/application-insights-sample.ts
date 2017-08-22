@@ -45,7 +45,8 @@ export const config: IDashboardConfig = /*return*/ {
             query: ({ granularity }) => {
               return `
                summarize count= count() by bin(timestamp, ${granularity}) |
-               order by timestamp asc `
+               order by timestamp asc 
+              `
             },
             format: { type: "timeline", args: { timeField: "timestamp", valueField: "count" } }
           },
