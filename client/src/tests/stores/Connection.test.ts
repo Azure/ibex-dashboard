@@ -16,15 +16,4 @@ describe('Data Source: Samples', () => {
     });
     ConnectionsActions.updateConnection('Conn name', {});
   });
-
-  // it ('Testing SetupActions - failure message', (done) => {
-
-   /* SetupStore.listen((state) => {
-      expect(state).toHaveProperty('admins');
-     
-      done();
-    });
-*/
- //   SetupActions.failure('some error')
-  //});
 })
