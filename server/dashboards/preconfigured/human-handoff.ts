@@ -1,12 +1,13 @@
 /// <reference path="../../../client/@types/types.d.ts"/>
 import * as _ from 'lodash';
 
+/* tslint:disable:indent quotemark max-line-length */
 // The following line is important to keep in that format so it can be rendered into the page
 export const config: IDashboardConfig = /*return*/ {
-  id: 'cosmosdb_handoff',
+  id: 'human_handoff',
   name: 'Hand-off to human',
   icon: 'question_answer',
-  url: 'cosmosdb_handoff',
+  url: 'human_handoff',
   description: 'Monitor bot and hand-off to human conversations',
   preview: '/images/default.png',
   category: 'Bots - Advanced',
@@ -61,32 +62,12 @@ export const config: IDashboardConfig = /*return*/ {
       breakpoints: { lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }
     }
   },
-  filters: [
-    {
-      type: 'TextFilter',
-      title: 'Timespan',
-      dependencies: { selectedValue: 'timespan', values: 'timespan:values' },
-      actions: { onChange: 'timespan:updateSelectedValue' },
-      first: true
-    }
-  ],
   dataSources: [
     {
       id: 'timespan',
       type: 'Constant',
       params: { values: ['24 hours', '1 week', '1 month', '3 months'], selectedValue: '1 month' },
-      calculated: (state, dependencies) => {
-        let { selectedValue } = state;
-        let queryTimespan =
-          selectedValue === '24 hours' ? 'PT24H' :
-            selectedValue === '1 week' ? 'P7D' :
-              selectedValue === '1 month' ? 'P30D' :
-                'P90D';
-        let granularity =
-          selectedValue === '24 hours' ? '5m' :
-            selectedValue === '1 week' ? '1d' : '1d';
-        return { queryTimespan, granularity };
-      }
+      format: 'timespan'
     },
     {
       id: 'ai',
@@ -100,7 +81,8 @@ export const config: IDashboardConfig = /*return*/ {
         table: 'customEvents',
         queries: {
           transcripts: {
-            query: () => `where name == 'Transcript'
+            query: () => `
+              where name == 'Transcript'
               | extend conversationId=tostring(customDimensions.userConversationId), 
                 customerName=tostring(customDimensions.customerName), 
                 timestamp=todatetime(customDimensions.timestamp) 
@@ -110,43 +92,45 @@ export const config: IDashboardConfig = /*return*/ {
                 transcripts=makelist(customDimensions) by customerName, conversationId
               | project conversationId, customerName, transcripts_count, transcripts`,
             calculated: (transcripts) => {
-              const listTranscripts = transcripts.reduce((destArray, currentValue) => {
-                const transcriptsArray = JSON.parse(currentValue.transcripts);
-                if (!Array.isArray(transcriptsArray)) {
+              const listTranscripts = transcripts.reduce(
+                (destArray, currentValue) => {
+                  const transcriptsArray = JSON.parse(currentValue.transcripts);
+                  if (!Array.isArray(transcriptsArray)) {
+                    return destArray;
+                  }
+                  const lastMessage = transcriptsArray.find(x => x.from === 'Customer');
+                  if (!lastMessage) {
+                    return destArray;
+                  }
+                  const lastSentimentScore = parseFloat(lastMessage.sentimentScore) || 0.5;
+                  const lastState = parseInt(transcriptsArray[0].state, 10);
+                  const value = {
+                    userId: lastMessage.customerId,
+                    conversationId: lastMessage.customerConversationId,
+                    username: lastMessage.customerName || 'Anon',
+                    timestamp: new Date(lastMessage.timestamp).toUTCString(),
+                    lastMessage: lastMessage.text || '',
+                    lastSentimentScore: lastSentimentScore,
+                    lastSentiment: lastSentimentScore < 0 ? 'error_outline' :
+                      lastSentimentScore < 0.2 ? 'sentiment_very_dissatisfied' :
+                        lastSentimentScore < 0.4 ? 'sentiment_dissatisfied' :
+                          lastSentimentScore < 0.6 ? 'sentiment_neutral' :
+                            lastSentimentScore < 0.8 ? 'sentiment_satisfied' : 'sentiment_very_satisfied',
+                    icon: lastState === 0 ? 'memory' :
+                      lastState === 2 ? 'perm_identity' : 'more_horiz',
+                  };
+                  destArray.push(value);
                   return destArray;
-                }
-                const lastMessage = transcriptsArray.find(x => x.from === 'Customer');
-                if (!lastMessage) {
-                  return destArray;
-                }
-                const lastSentimentScore = parseFloat(lastMessage.sentimentScore) || 0.5;
-                const lastState = parseInt(transcriptsArray[0].state);
-                const value = {
-                  userId: lastMessage.customerId,
-                  conversationId: lastMessage.customerConversationId,
-                  username: lastMessage.customerName || 'Anon',
-                  timestamp: new Date(lastMessage.timestamp).toUTCString(),
-                  lastMessage: lastMessage.text || '',
-                  lastSentimentScore: lastSentimentScore,
-                  lastSentiment: lastSentimentScore < 0 ? 'error_outline' :
-                    lastSentimentScore < 0.2 ? 'sentiment_very_dissatisfied' :
-                      lastSentimentScore < 0.4 ? 'sentiment_dissatisfied' :
-                        lastSentimentScore < 0.6 ? 'sentiment_neutral' :
-                          lastSentimentScore < 0.8 ? 'sentiment_satisfied' : 'sentiment_very_satisfied',
-                  icon: lastState === 0 ? 'memory' :  
-                    lastState === 2 ? 'perm_identity' : 'more_horiz',
-                };
-                destArray.push(value);
-                return destArray;
-              }, []);
+                },
+                []);
               return {
                 'transcripts-values': listTranscripts
               };
             }
           },
-
           transcriptsTimeWaiting: {
-            query: () => `where name == 'Transcript'
+            query: () => `
+              where name == 'Transcript'
               | extend conversationId=tostring(customDimensions.userConversationId), 
                 customerId=tostring(customDimensions.customerId), 
                 state=toint(customDimensions.state)  
@@ -158,11 +142,13 @@ export const config: IDashboardConfig = /*return*/ {
               | where result == 2
               | project conversationId, customerId, timeTaken=todatetime(startEndTimes[1])-todatetime(startEndTimes[0])`,
             calculated: (results) => {
-              const times = results.reduce((acc, cur) => {
-                // converts time hh:mm:ss format to value in seconds
-                acc.push(cur.timeTaken.split(':').reverse().reduce((a, c, i) => a + c * Math.pow(60, i), 0));
-                return acc;
-              }, []);
+              const times = results.reduce(
+                (acc, cur) => {
+                  // converts time hh:mm:ss format to value in seconds
+                  acc.push(cur.timeTaken.split(':').reverse().reduce((a, c, i) => a + c * Math.pow(60, i), 0));
+                  return acc;
+                },
+                []);
               const avgTimeWaiting = times.reduce((a, c) => a + c, 0) / times.length;
               const maxTimeWaiting = Math.max(...times);
               const minTimeWaiting = Math.min(...times);
@@ -183,7 +169,6 @@ export const config: IDashboardConfig = /*return*/ {
               };
             }
           },
-
           timeline: {
             query: (dependencies) => {
               var { granularity } = dependencies;
@@ -208,34 +193,38 @@ export const config: IDashboardConfig = /*return*/ {
               const totalMessages = totalBot + totalAgent;
               // Timeline 
               const { timespan } = dependencies;
-              const keys = results.reduce((keyArray, currentValue) => { 
-                return keyArray.includes(currentValue.stateLabel) ? keyArray : [...keyArray, currentValue.stateLabel]
-              }, []);
+              const keys = results.reduce(
+                (keyArray, currentValue) => {
+                  return keyArray.includes(currentValue.stateLabel) ? keyArray : [...keyArray, currentValue.stateLabel];
+                },
+                []);
               const timestampKey = 'time'; // NB: required key name for timeline component
               // group by timestamp
-              const graphData = results.reduce((a, c) => {
-                if (!c.timestamp) {
-                  console.warn('Invalid date format:', c);
+              const graphData = results.reduce(
+                (a, c) => {
+                  if (!c.timestamp) {
+                    console.warn('Invalid date format:', c);
+                    return a;
+                  }
+                  const item = a.find(collection => collection[timestampKey] === c.timestamp);
+                  if (!item) {
+                    // new time collection
+                    let collection = {
+                      count: 0
+                    };
+                    collection[timestampKey] = c.timestamp;
+                    keys.forEach(key => {
+                      collection[key] = (key !== c.stateLabel) ? 0 : c.transcripts_count;
+                    });
+                    a.push(collection);
+                  } else {
+                    // merge into time collection
+                    item.count += c.transcripts_count;
+                    item[c.stateLabel] += c.transcripts_count;
+                  }
                   return a;
-                }
-                const item = a.find(collection => collection[timestampKey] === c.timestamp);
-                if (!item) {
-                  // new time collection
-                  let collection = {
-                    count: 0
-                  };
-                  collection[timestampKey] = c.timestamp;
-                  keys.forEach(key => {
-                    collection[key] = (key !== c.stateLabel) ? 0 : c.transcripts_count;
-                  });
-                  a.push(collection);
-                } else {
-                  // merge into time collection
-                  item.count += c.transcripts_count;
-                  item[c.stateLabel] += c.transcripts_count;
-                }
-                return a;
-              }, []);
+                },
+                []);
               return {
                 'timeline-graphData': graphData,
                 'timeline-recipients': keys,
@@ -246,9 +235,9 @@ export const config: IDashboardConfig = /*return*/ {
               };
             }
           },
-
           customerTranscripts: {
-            query: () => `where name == 'Transcript' 
+            query: () => `
+              where name == 'Transcript' 
               | extend customerId=tostring(customDimensions.customerId) 
               | extend state=toint(customDimensions.state) 
               | extend timestamp=todatetime(customDimensions.timestamp) 
@@ -278,6 +267,15 @@ export const config: IDashboardConfig = /*return*/ {
       }
     }
   ],
+  filters: [
+    {
+      type: 'TextFilter',
+      title: 'Timespan',
+      source: 'timespan',
+      actions: { onChange: 'timespan:updateSelectedValue' },
+      first: true
+    },
+  ],
   elements: [
     {
       id: 'customerTranscripts',
@@ -286,28 +284,27 @@ export const config: IDashboardConfig = /*return*/ {
       size: { w: 6, h: 3 },
       dependencies: {
         card_total_heading: '::Total Users',
-        card_total_tooltip: "::Total users",
+        card_total_tooltip: '::Total users',
         card_total_value: 'ai:customerTranscripts-total',
         card_total_color: '::#666666',
         card_total_icon: '::account_circle',
         card_bot_heading: '::Bot',
-        card_bot_tooltip: "::Total users talking to the bot",
+        card_bot_tooltip: '::Total users talking to the bot',
         card_bot_value: 'ai:customerTranscripts-bot',
         card_bot_color: '::#00FF00',
         card_bot_icon: '::memory',
         card_agent_heading: '::Agent',
-        card_agent_tooltip: "::Total users talking to a human agent",
+        card_agent_tooltip: '::Total users talking to a human agent',
         card_agent_value: 'ai:customerTranscripts-agent',
         card_agent_color: '::#0066FF',
         card_agent_icon: '::perm_identity',
         card_waiting_heading: '::Waiting',
-        card_waiting_tooltip: "::Total users waiting for a human agent to respond",
+        card_waiting_tooltip: '::Total users waiting for a human agent to respond',
         card_waiting_value: 'ai:customerTranscripts-waiting',
         card_waiting_color: '::#FF6600',
         card_waiting_icon: '::more_horiz',
       }
     },
-
     {
       id: 'customerWaiting',
       type: 'Scorecard',
@@ -315,23 +312,22 @@ export const config: IDashboardConfig = /*return*/ {
       size: { w: 6, h: 3 },
       dependencies: {
         card_average_heading: '::Average',
-        card_average_tooltip: "::Average time for human agent to respond",
+        card_average_tooltip: '::Average time for human agent to respond',
         card_average_value: 'ai:transcriptsTimeWaiting-avg',
         card_average_color: '::#333333',
-        card_average_icon: '::av_timer',  
+        card_average_icon: '::av_timer',
         card_max_heading: '::Slowest',
-        card_max_tooltip: "::Slowest time for human agent to respond",
+        card_max_tooltip: '::Slowest time for human agent to respond',
         card_max_value: 'ai:transcriptsTimeWaiting-longest',
         card_max_color: '::#ff0000',
         card_max_icon: '::timer',
         card_min_heading: '::Fastest',
-        card_min_tooltip: "::Fastest time for human agent to respond",
+        card_min_tooltip: '::Fastest time for human agent to respond',
         card_min_value: 'ai:transcriptsTimeWaiting-shortest',
         card_min_color: '::#0066ff',
         card_min_icon: '::timer',
       }
     },
-
     {
       id: 'timelineScores',
       type: 'Scorecard',
@@ -339,23 +335,22 @@ export const config: IDashboardConfig = /*return*/ {
       size: { w: 2, h: 8 },
       dependencies: {
         card_total_heading: '::Total Msgs',
-        card_total_tooltip: "::Total messages",
+        card_total_tooltip: '::Total messages',
         card_total_value: 'ai:timeline-total',
         card_total_color: '::#666666',
         card_total_icon: '::question_answer',
         card_bot_heading: '::Bot',
-        card_bot_tooltip: "::Total messages with bot",
+        card_bot_tooltip: '::Total messages with bot',
         card_bot_value: 'ai:timeline-bot',
         card_bot_color: '::#00FF00',
         card_bot_icon: '::memory',
         card_agent_heading: '::Agent',
-        card_agent_tooltip: "::Total messages with a human",
+        card_agent_tooltip: '::Total messages with a human',
         card_agent_value: 'ai:timeline-agent',
         card_agent_color: '::#0066FF',
         card_agent_icon: '::perm_identity'
       }
     },
-
     {
       id: 'timeline',
       type: 'Area',
@@ -372,7 +367,6 @@ export const config: IDashboardConfig = /*return*/ {
         showLegend: true
       }
     },
-
     {
       id: 'transcripts',
       type: 'Table',
@@ -397,7 +391,6 @@ export const config: IDashboardConfig = /*return*/ {
         }
       }
     }
-
   ],
   dialogs: [
     {
@@ -415,7 +408,8 @@ export const config: IDashboardConfig = /*return*/ {
             secret: 'connection:bot-framework.directLine'
           },
           params: {
-            query: ({ conversationId }) => `customEvents 
+            query: ({ conversationId }) => `
+              customEvents 
               | where name == 'Transcript' 
               | where customDimensions.customerConversationId == '${conversationId}'
               | extend timestamp=tostring(customDimensions.timestamp)
@@ -514,6 +508,5 @@ export const config: IDashboardConfig = /*return*/ {
         }
       ]
     }
-
   ]
 };
