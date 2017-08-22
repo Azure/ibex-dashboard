@@ -314,12 +314,24 @@ export default class Home extends React.Component<any, IHomeState> {
     );
 
     // Dividing templates into categories
-    let categories = { 'General': [] };
+    // General - All dashboards without any categories
+    // Features - Dashboards appearing at the top of the creation screen
+    let categories = { 'General': [], 'Featured': [] };
     templates.forEach((tmpl, index) => {
       let category = tmpl.category || 'General';
+      
+      if (tmpl.featured) {
+        categories['Featured'].push(createCard(tmpl, index));
+      }
       categories[category] = categories[category] || [];
       categories[category].push(createCard(tmpl, index));
     });
+
+    // Sort templates alphabetically 
+    let sortedCategories = { 'General':  categories.General, 'Featured': categories.Featured };
+    const keys = Object.keys(categories).filter(category => category !== 'Featured').sort(); 
+    keys.forEach(key => sortedCategories[key] = categories[key]);
+    categories = sortedCategories;
 
     let toolbarActions = [];
     toolbarActions.push(

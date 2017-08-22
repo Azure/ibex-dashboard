@@ -4,12 +4,13 @@ import * as _ from 'lodash';
 /* tslint:disable:indent quotemark max-line-length */
 // The following line is important to keep in that format so it can be rendered into the page
 export const config: IDashboardConfig = /*return*/ {
-	id: "bot_analytics_inst",
+  id: "bot_analytics_inst",
+  featured: true,
 	name: "Bot Analytics Instrumented Dashboard",
 	icon: "dashboard",
 	url: "bot_analytics_inst",
 	description: "Microsoft Bot Framework based analytics",
-	preview: "/images/bot-ai-cs.png",
+	preview: "/images/bot-instrumented.png",
   category: 'Bots',
 	html: `
     <div>

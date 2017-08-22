@@ -45,16 +45,16 @@ import { IDataSourcePlugin } from '../../../data-sources/plugins/DataSourcePlugi
  * @param prevState The previous state to compare for changing filters
  */
 export function bars(
-  format: string | IDataFormat, 
-  state: any, 
-  dependencies: IDictionary, 
-  plugin: IDataSourcePlugin, 
+  format: string | IDataFormat,
+  state: any,
+  dependencies: IDictionary,
+  plugin: IDataSourcePlugin,
   prevState: any) {
 
-  if (typeof format === 'string') { 
+  if (typeof format === 'string') {
     return formatWarn('format should be an object with args', 'bars', plugin);
   }
-  
+
   const args = format.args || {};
   const prefix = getPrefix(format);
   const valueField = args.valueField || 'count';
@@ -93,8 +93,9 @@ export function bars(
         barValues[val[barsField]][othersValue] = (barValues[val[barsField]][othersValue] || 0) + val[valueField];
         series[othersValue] = true;
       } else {
-        barValues[val[barsField]][val[seriesField]] = val[valueField];
-        series[val[seriesField]] = true;
+        let value = val[seriesField] || valueField;
+        barValues[val[barsField]][value] = val[valueField];
+        series[value] = true;
       }
     });
 
@@ -102,7 +103,7 @@ export function bars(
     result[prefix + 'bar-values'] = _.values(barValues);
 
   } else {
-    result[prefix + 'bars'] = [ valueField ];
+    result[prefix + 'bars'] = [valueField];
     result[prefix + 'bar-values'] = values;
   }
 
