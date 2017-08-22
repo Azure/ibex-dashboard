@@ -10,8 +10,6 @@ const { directLine } = dashboardMock.config.connections['bot-framework'];
  */
 function mockRequests() {
   let bearer = 'Bearer ' + directLine;
-  console.log('###################################### bearer is');
-  console.log(bearer);
   nock('https://directline.botframework.com/', {
     reqheaders: {
       "Authorization": bearer
