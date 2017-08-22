@@ -8,7 +8,7 @@ export const config: IDashboardConfig = /*return*/ {
   icon: 'dashboard',
   url: 'bot_analytics_inst',
   description: 'Microsoft Bot Framework based analytics',
-  preview: '/images/bot-ai-cs.png',
+  preview: '/images/bot-instrumented.png',
   category: 'Bots',
   featured: true,
   html: `
