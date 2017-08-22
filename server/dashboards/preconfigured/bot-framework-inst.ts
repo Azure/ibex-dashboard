@@ -10,6 +10,7 @@ export const config: IDashboardConfig = /*return*/ {
   description: 'Microsoft Bot Framework based analytics',
   preview: '/images/bot-ai-cs.png',
   category: 'Bots',
+  featured: true,
   html: `
     <div>
       This dashboard is built to view events sent by Microsoft Bot Framework based bot.

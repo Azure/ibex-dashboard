@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { GenericComponent, IGenericProps, IGenericState } from './GenericComponent';
 import Card from '../Card';
-import { RadarChart, Radar, PolarGrid, Legend, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import ResponsiveContainer from '../ResponsiveContainer';
+import { RadarChart, Radar, PolarGrid, Legend, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -40,7 +41,7 @@ export default class RadarChartCard extends GenericComponent<IRadarProps, IRadar
   render() {
 
     var { values } = this.state;
-    var { title, subtitle, props } = this.props;
+    var { title, subtitle, props, layout } = this.props;
 
     if (!values) {
       return null;
@@ -59,7 +60,7 @@ export default class RadarChartCard extends GenericComponent<IRadarProps, IRadar
 
     return (
       <Card title={title} subtitle={subtitle}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <RadarChart
             outerRadius={90}
             width={730}

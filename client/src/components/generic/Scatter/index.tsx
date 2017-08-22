@@ -3,14 +3,13 @@ import * as moment from 'moment';
 import * as _ from 'lodash';
 
 import Card from '../../Card';
+import ResponsiveContainer from '../../ResponsiveContainer';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
 import { ScatterChart, Scatter as ScatterLine, XAxis, YAxis, ZAxis, CartesianGrid } from 'recharts';
-import { Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Tooltip, Legend } from 'recharts';
 
 import colors from '../../colors';
 const { ThemeColors } = colors;
-
-import settings from './Settings';
 
 interface IScatterProps extends IGenericProps {
   theme?: string[];
@@ -25,8 +24,6 @@ interface IScatterState extends IGenericState {
 
 export default class Scatter extends GenericComponent<IScatterProps, IScatterState> {
 
-  static editor = settings;
-
   static defaultProps = {
     xDataKey: 'x',
     yDataKey: 'y',
@@ -36,7 +33,7 @@ export default class Scatter extends GenericComponent<IScatterProps, IScatterSta
 
   render() {
     var { groupedValues } = this.state;
-    var { id, title, subtitle, theme, props } = this.props;
+    var { id, title, subtitle, theme, props, layout } = this.props;
     var { scatterProps, groupTitles } = props;
 
     var { xDataKey, yDataKey, zDataKey, zRange } = this.props.props;
@@ -71,7 +68,7 @@ export default class Scatter extends GenericComponent<IScatterProps, IScatterSta
 
     return (
       <Card id={id} title={title} subtitle={subtitle}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }} {...scatterProps}>
             <XAxis dataKey={xDataKey} />
             <YAxis dataKey={yDataKey} />

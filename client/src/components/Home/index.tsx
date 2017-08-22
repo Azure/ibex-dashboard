@@ -23,26 +23,33 @@ const renderHTML = require('react-render-html');
 const MultipleSpacesRegex = /  +/g;
 const styles = {
   card: {
-    minWidth: 400,
-    height: 200,
-    marginTop: 50,
-  },
-  image: {
-    filter: 'opacity(30%) grayscale(70%)'
-  },
-  fabs: {
+    width: 380,
+    height: 280,
+    marginBottom: 20
+  } as React.CSSProperties,
+  media: {
+    width: 380,
+    height: 150,
+    background: '#CCC',
+    margin: 0,
+    padding: 0
+  } as React.CSSProperties,
+  preview: {
+    width: 380,
+    height: 150,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: '50% 50%',
+    backgroundSize: 'contain'
+  } as React.CSSProperties,
+  actions: {
     position: 'absolute',
-    bottom: '50px',
-    right: '10px',
-    zIndex: 1,
-  },
-  primaryFab: {
-    marginLeft: '2px'
-  }
+    bottom: 0
+  } as React.CSSProperties
 };
 
 interface IHomeState extends ISetupConfig {
   loaded?: boolean;
+  errors?: any;
   templates?: IDashboardConfig[];
   selectedTemplateId?: string;
   template?: IDashboardConfig;
@@ -68,6 +75,7 @@ export default class Home extends React.Component<any, IHomeState> {
     clientSecret: '',
     issuer: '',
     loaded: false,
+    errors: null,
 
     templates: [],
     selectedTemplateId: null,
@@ -106,11 +114,17 @@ export default class Home extends React.Component<any, IHomeState> {
     this.downloadTemplate = this.downloadTemplate.bind(this);
   }
 
-  updateConfiguration(state: {templates: IDashboardConfig[], template: IDashboardConfig, creationState: string}) {
+  updateConfiguration(state: {
+    templates: IDashboardConfig[],
+    template: IDashboardConfig,
+    creationState: string,
+    errors: any
+  }) {
     this.setState({
       templates: state.templates || [],
       template: state.template,
-      creationState: state.creationState
+      creationState: state.creationState,
+      errors: state.errors,
     });
     if (this.state.stage === 'requestDownloadTemplate') {
       this.downloadTemplate(this.state.template);
@@ -213,7 +227,7 @@ export default class Home extends React.Component<any, IHomeState> {
   onSubmitImport() {
     var dashboardId = this.state.fileName;
     ConfigurationsActions.submitDashboardFile(this.state.content, dashboardId);
-    
+
     this.setState({ importVisible: false });
   }
 
@@ -235,7 +249,7 @@ export default class Home extends React.Component<any, IHomeState> {
   }
 
   render() {
-    let { loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
+    let { errors, loaded, redirectUrl, templates, selectedTemplateId, template } = this.state;
     let { importVisible } = this.state;
     let { importedFileContent, fileName } = this.state;
     let { infoVisible, infoHtml, infoTitle } = this.state;
@@ -252,62 +266,82 @@ export default class Home extends React.Component<any, IHomeState> {
       return null;
     }
 
+    // Create dashboard form validation
+    let error = false;
+    let errorText = null;
+    if (errors && errors.error && errors.type && errors.type === 'id') {
+      errorText = errors.error;
+      error = true;
+    }
+
     let createCard = (tmpl, index) => (
-      <div key={index} className="md-cell" style={styles.card}>
-        <Card 
-          className="md-block-centered" 
-          key={index} 
-          style={{ backgroundImage: `url(${tmpl.preview})`}} >
-          <Media>
-            <MediaOverlay>
-              <CardTitle title={tmpl.name} subtitle={tmpl.description} />
-            </MediaOverlay>
-          </Media>
-          <CardActions style={styles.fabs}>
-           <Button 
-              floating 
-              secondary 
-              style={{ backgroundColor: '#959ba5', marginRight: '2px' }}
-              onClick={this.onExportTemplate.bind(this, tmpl.id)}
-            >
-              file_download
-            </Button>
-            <Button 
-              floating 
-              secondary 
-              onClick={this.onOpenInfo.bind(this, tmpl.html || '<p>No info available</p>', tmpl.name)}
-            >
-              info
-            </Button>
-            <Button 
-              floating 
-              primary 
-              onClick={this.onNewTemplateSelected.bind(this, tmpl.id)} style={styles.primaryFab}
-            >
-              add_circle_outline
-            </Button>
-          </CardActions>
-        </Card>
-      </div>
+      <Card
+        key={index}
+        className="templates md-cell"
+        style={styles.card}>
+        <Media style={styles.media}>
+          <div className="preview" style={{ ...styles.preview, backgroundImage: `url(${tmpl.preview})` }} />
+        </Media>
+        <CardTitle title={tmpl.name} subtitle={tmpl.description} />
+        <CardActions style={styles.actions}>
+          <Button
+            label="Download"
+            tooltipLabel="Download template"
+            flat
+            onClick={this.onExportTemplate.bind(this, tmpl.id)}
+          >
+            file_download
+          </Button>
+          <Button
+            label="Info"
+            tooltipLabel="Show info"
+            flat
+            onClick={this.onOpenInfo.bind(this, tmpl.html || '<p>No info available</p>', tmpl.name)}
+          >
+            info
+          </Button>
+          <Button
+            label="Create"
+            tooltipLabel="Create dashboard"
+            flat
+            primary
+            onClick={this.onNewTemplateSelected.bind(this, tmpl.id)}
+          >
+            add_circle_outline
+          </Button>
+        </CardActions>
+      </Card>
     );
 
     // Dividing templates into categories
-    let categories = { 'General': [] };
+    // General - All dashboards without any categories
+    // Features - Dashboards appearing at the top of the creation screen
+    let categories = { 'General': [], 'Featured': [] };
     templates.forEach((tmpl, index) => {
       let category = tmpl.category || 'General';
+      
+      if (tmpl.featured) {
+        categories['Featured'].push(createCard(tmpl, index));
+      }
       categories[category] = categories[category] || [];
       categories[category].push(createCard(tmpl, index));
     });
+
+    // Sort templates alphabetically 
+    let sortedCategories = { 'General':  categories.General, 'Featured': categories.Featured };
+    const keys = Object.keys(categories).filter(category => category !== 'Featured').sort(); 
+    keys.forEach(key => sortedCategories[key] = categories[key]);
+    categories = sortedCategories;
 
     let toolbarActions = [];
     toolbarActions.push(
       (
         <Button
-            flat
-            tooltipLabel="Import dashboard"
-            onClick={this.onOpenImport.bind(this)}
-            label="Import dashboard"
-          >file_upload
+          flat
+          tooltipLabel="Import dashboard"
+          onClick={this.onOpenImport.bind(this)}
+          label="Import dashboard"
+        >file_upload
         </Button>
       )
     );
@@ -330,31 +364,31 @@ export default class Home extends React.Component<any, IHomeState> {
         }
 
         <Dialog
-            id="ImportDashboard"
-            visible={importVisible || false}
-            title="Import dashboard"
-            modal
-            actions={[
-              { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
-              { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
-            ]}>
-            <FileUpload
-              id="dashboardDefenitionFile"
-              primary
-              label="Choose File"
-              accept="application/javascript"
-              onLoadStart={this.setFile}
-              onLoad={this.onLoad}
-            />
-            <TextField
-              id="dashboardFileName"
-              label="Dashboard ID"
-              value={fileName || ''}
-              onChange={this.updateFileName}
-              disabled={!importedFileContent}
-              lineDirection="center"
-              placeholder="Choose an ID for the imported dashboard"
-            />
+          id="ImportDashboard"
+          visible={importVisible || false}
+          title="Import dashboard"
+          modal
+          actions={[
+            { onClick: this.onCloseImport, primary: false, label: 'Cancel' },
+            { onClick: this.onSubmitImport, primary: true, label: 'Submit', disabled: !importedFileContent },
+          ]}>
+          <FileUpload
+            id="dashboardDefenitionFile"
+            primary
+            label="Choose File"
+            accept="application/javascript"
+            onLoadStart={this.setFile}
+            onLoad={this.onLoad}
+          />
+          <TextField
+            id="dashboardFileName"
+            label="Dashboard ID"
+            value={fileName || ''}
+            onChange={this.updateFileName}
+            disabled={!importedFileContent}
+            lineDirection="center"
+            placeholder="Choose an ID for the imported dashboard"
+          />
         </Dialog>
 
         <Dialog
@@ -391,6 +425,8 @@ export default class Home extends React.Component<any, IHomeState> {
             defaultValue={template && template.id || ''}
             lineDirection="center"
             placeholder="Choose an ID for the dashboard (will be used in the url)"
+            error={error}
+            errorText={errorText}
           />
           <TextField
             id="name"

@@ -3,15 +3,14 @@ import { GenericComponent, IGenericProps, IGenericState } from '../GenericCompon
 import * as moment from 'moment';
 import * as _ from 'lodash';
 import { AreaChart, Area as AreaFill, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Tooltip, ResponsiveContainer, Legend, defs } from 'recharts';
+import { Tooltip, Legend, defs } from 'recharts';
 import Card from '../../Card';
+import ResponsiveContainer from '../../ResponsiveContainer';
 import Switch from 'react-md/lib/SelectionControls/Switch';
 import colors from '../../colors';
 var { ThemeColors } = colors;
 
 import '../generic.css';
-
-import AreaSettings from './Settings';
 
 interface IAreaProps extends IGenericProps {
   theme?: string[];
@@ -28,7 +27,6 @@ interface IAreaState extends IGenericState {
 
 export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
-  static editor = AreaSettings;
   static defaultProps = {
     isStacked: false
   };
@@ -88,7 +86,7 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
   render() {
     const { timeFormat, values, lines, isStacked } = this.state;
-    const { id, title, subtitle, theme, props } = this.props;
+    const { id, title, subtitle, theme, props, layout } = this.props;
     const { showLegend, areaProps } = props;
 
     const format = timeFormat === 'hour' ? this.hourFormat : this.dateFormat;
@@ -116,7 +114,7 @@ export default class Area extends GenericComponent<IAreaProps, IAreaState> {
 
     return (
       <Card id={id} title={title} subtitle={subtitle} widgets={widgets}>
-        <ResponsiveContainer>
+        <ResponsiveContainer layout={layout}>
           <AreaChart
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             data={values}

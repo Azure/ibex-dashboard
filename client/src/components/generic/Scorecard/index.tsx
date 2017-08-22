@@ -8,8 +8,6 @@ import Tooltip from '../../Tooltip';
 import { GenericComponent, IGenericProps } from '../GenericComponent';
 import utils from '../../../utils';
 
-import settings from './Settings';
-
 const styles = {
   chevron: {
     float: 'none',
@@ -39,7 +37,6 @@ interface IScorecardProps extends IGenericProps {
 
 export default class Scorecard extends GenericComponent<IScorecardProps, any> {
 
-  static editor = settings;
   static fromSource(source: any) {
     if (!source || typeof source !== 'object') { return {}; }
 

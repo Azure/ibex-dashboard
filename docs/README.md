@@ -11,41 +11,49 @@ The server side appraoch was addopted [through this link](https://www.fullstackr
 ## DataSourceConnector
 [DataSourceConnector](../client/src/data-sources/DataSourceConnector.ts) is a class that created and initializes the various data sources.
 
-ElementsConnector
+[ElementConnector](../client/src/components/ElementConnector.tsx) is a class the creates and initializes Visual component for the dashboard and consecutive dialogs.
 
 ## Plugins
 Many of the aspects in this project are extendible. The following are possibilities to donate your own plugins.
 
-# Connection Plugins
+## Connection Plugins
+
+Connection plugins are connected to Data Source plugins. A Data Source can have a connection plugin which will provide all the instances of the Data Source with a single connection to receive credentials information from.
 
 ## Data Source Plugins
+
+[How to create a Data Source Plugin](add-new-data-source.md)
 
 * Constant
 * Sample
 * Application Insights
-* [CosmosDB](./cosmos-db.md)
-* [Bot Framework](./bot-framework.md)
+* [CosmosDB](data-sources/cosmos-db.md)
+* [Bot Framework](data-sources/bot-framework.md)
 * GraphQL
 * Azure 
 
 ## Elements Plugins
 
-* [Area Chart](area.md)
-* [Bar Chart](bar.md)
-* [Detail View](detail.md)
-* [Pie Chart](pie.md)
-* [Request Button](requestbutton.md)
-* [Scatter Chart](scatter.md)
-* [Scorecard](scorecard.md)
-* [Split View Panel](splitpanel.md)
-* [Table](table.md)
-* [Timeline Chart](timeline.md)
+[How to create a Visual Plugin](add-new-element.md)
+
+* [Area Chart](components/area.md)
+* [Bar Chart](components/bar.md)
+* [Detail View](components/detail.md)
+* [Pie Chart](components/pie.md)
+* [Request Button](components/requestbutton.md)
+* [Scatter Chart](components/scatter.md)
+* [Scorecard](components/scorecard.md)
+* [Split View Panel](components/splitpanel.md)
+* [Table](components/table.md)
+* [Timeline Chart](components/timeline.md)
 
 ## data-formats plugins
+
+[A short excerpt on data-formats](data-formats)
 
 # Additional Features
 
 * [Two Modes Elements](two-modes-element.md)
 * [Filter Plugins](filter.md)
 * [Dialogs](dialog.md)
-* Settings [TODO]
+* [Actions](actions.md)
