@@ -11,8 +11,8 @@ interface IQueryResult {
 /**
  * Application Insights data source definition
  */
-interface BotFrameworkDataSource extends IDataSource {
-  type: 'BotFramework/DirectLine',
+interface CosmosDBDataSource extends IDataSource {
+  type: 'CosmosDB/Query',
   dependencies: {
     /**
      * Required - to use in all queries to app insights as a basic timespan parameter
@@ -27,13 +27,13 @@ interface BotFrameworkDataSource extends IDataSource {
      */
     granularity?: string
   },
-  params: BotFrameworkQueryParams;
+  params: CosmosDBQueryParams;
 }
 
  /**
   * A simple query on application insights data source
   */
-interface BotFrameworkQueryParams {
+interface CosmosDBQueryParams {
 }
 
-type BotFrameworkQuery = string | (() => string) | ((dependencies: any) => string);
+type CosmosDBQuery = string | (() => string) | ((dependencies: any) => string);

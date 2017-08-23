@@ -40,6 +40,7 @@ export class DataSourceConnector {
 
     // Dynamically load the plugin from the plugins directory
     var path = datasourcePluginsMappings[config.type];
+
     var PluginClass = require('./plugins/' + path);
     var plugin: any = new PluginClass.default(config, connections);
 

@@ -8,7 +8,6 @@ dashboard.dataSources.push({
   type: 'BotFramework/DirectLine',
   dependencies: { timespan: 'timespan', queryTimespan: 'timespan:queryTimespan' },
   params: {
-    query: `customEvents`,
   }
 });
 
