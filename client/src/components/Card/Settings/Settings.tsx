@@ -12,8 +12,8 @@ import 'brace/mode/text';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import SettingsActions from './SettingsActions';
-import SettingsStore, { IExportData } from './SettingsStore';
+import SettingsActions from './CardSettingsActions';
+import SettingsStore, { IExportData } from './CardSettingsStore';
 import { Toast, ToastActions, IToast } from '../../Toast';
 
 const editorProps: EditorProps = {

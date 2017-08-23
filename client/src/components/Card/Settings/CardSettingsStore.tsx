@@ -3,7 +3,7 @@ import alt, { AbstractStoreModel } from '../../../alt';
 
 import { DataSourceConnector, IDataSourceDictionary, IDataSource } from '../../../data-sources/DataSourceConnector';
 
-import settingsActions from './SettingsActions';
+import cardSettingsActions from './CardSettingsActions';
 
 import { downloadBlob } from '../../Dashboard/DownloadFile'; 
 
@@ -16,7 +16,7 @@ export interface IExportData {
   isGroupedJSON: boolean;
 }
 
-interface ISettingsStoreState {
+interface ICardSettingsStoreState {
   visible: boolean;
   title: string;
   elementId: string;
@@ -26,7 +26,7 @@ interface ISettingsStoreState {
   result?: string;
 }
 
-class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements ISettingsStoreState {
+class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> implements ICardSettingsStoreState {
 
   visible: boolean;
   title: string;
@@ -43,11 +43,11 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
     this.selectedIndex = 0;
 
     this.bindListeners({
-      openDialog: settingsActions.openDialog,
-      closeDialog: settingsActions.closeDialog,
-      selectIndex: settingsActions.selectIndex,
-      getExportData: settingsActions.getExportData,
-      downloadData: settingsActions.downloadData,
+      openDialog: cardSettingsActions.openDialog,
+      closeDialog: cardSettingsActions.closeDialog,
+      selectIndex: cardSettingsActions.selectIndex,
+      getExportData: cardSettingsActions.getExportData,
+      downloadData: cardSettingsActions.downloadData,
     });
   }
 
@@ -307,6 +307,6 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
 
 }
 
-const settingsStore = alt.createStore<ISettingsStoreState>(SettingsStore, 'SettingsStore');
+const cardSettingsStore = alt.createStore<ICardSettingsStoreState>(CardSettingsStore, 'CardSettingsStore');
 
-export default settingsStore;
+export default cardSettingsStore;
