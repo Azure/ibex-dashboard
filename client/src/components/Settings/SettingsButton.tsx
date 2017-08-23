@@ -6,7 +6,6 @@ import Toolbar from 'react-md/lib/Toolbars';
 import Dialog from 'react-md/lib/Dialogs';
 import Paper from 'react-md/lib/Papers';
 import SelectField from 'react-md/lib/SelectFields';
-import { TabsContainer, Tabs, Tab } from 'react-md/lib/Tabs';
 import FontIcon from 'react-md/lib/FontIcons';
 
 import { ToastActions } from '../Toast';
@@ -141,7 +140,8 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
           id="settingsForm"
           title="Edit Dashboard Settings"
           visible={showSettingsDialog}
-          dialogStyle={{ width: '90%', height: '90%', overflowY: 'auto' }}
+          dialogStyle={{ width: '50%', height: '50%', overflowY: 'hidden' }}
+          contentStyle={{ height: 'calc(100% - 124px)', overflowY: 'auto' }}
           className="dialog-toolbar-no-padding"
           modal
           actions={[
@@ -149,26 +149,10 @@ export default class SettingsButton extends React.Component<ISettingsButtonProps
             { onClick: this.onCancel, primary: false, label: 'Cancel' }
           ]}
         >
-          <TabsContainer colored panelClassName="md-grid">
-            <Tabs tabId="settings-tabs">
-              <Tab label={VIEWS.Connections}>
-                <div className="md-cell md-cell--6">
-                  <ConnectionsSettings connections={dashboard.config.connections} />          
-                </div>
-              </Tab>
-              {/* For now, we are deprecating the settings view
-              <Tab label={VIEWS.Elements}>
-                <ElementsSettings settings={dashboard} />
-              </Tab>
-              <Tab label={VIEWS.DataSources}>
-                <h1><DatasourceSettings settings={dashboard} /></h1>
-              </Tab>
-              <Tab label={VIEWS.Filters}>
-                <h1>{VIEWS.Filters} - is not implemented yet</h1>
-              </Tab>*/}
-            </Tabs>
-          </TabsContainer>
-        </Dialog>  
+          <div className="connections">
+            <ConnectionsSettings connections={dashboard.config.connections} />
+          </div>
+        </Dialog>
       </span>
     );
   }

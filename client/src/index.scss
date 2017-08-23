@@ -291,6 +291,10 @@ ul.aligned {
   list-style-position: 'outside';
 }
 
+header .md-btn, section .md-btn {
+  z-index: 1;
+}
+
 /*================*/
 /* Minimal Design */
 /*================*/

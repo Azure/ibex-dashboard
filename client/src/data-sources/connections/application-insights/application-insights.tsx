@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { IConnection, ConnectionEditor, IConnectionProps } from '../Connection';
-import InfoDrawer from '../../../components/common/InfoDrawer';
 import TextField from 'react-md/lib/TextFields';
 import Card from 'react-md/lib/Cards/Card';
 import CardTitle from 'react-md/lib/Cards/CardTitle';
 import Avatar from 'react-md/lib/Avatars';
 import FontIcon from 'react-md/lib/FontIcons';
+import InfoDrawer from '../../../components/common/InfoDrawer';
+import { IConnection, ConnectionEditor, IConnectionProps } from '../Connection';
 import QueryTester from './QueryTester';
 
 export default class ApplicationInsightsConnection implements IConnection {
@@ -24,7 +24,7 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
     let accessApiUri = 'https://dev.int.applicationinsights.io/documentation/Authorization/API-key-and-App-ID';
 
     return (
-      <Card className="hide-borders">
+      <Card className="md-grid hide-borders">
         <CardTitle 
           title="Application Insights" 
           avatar={<Avatar icon={<FontIcon>receipt</FontIcon>} />} 
@@ -36,12 +36,12 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
           buttonStyle={{ float: 'right', margin: 10 }} 
         />
         <InfoDrawer 
-          width={300} 
+          width={300}
           title="Authentication"
           buttonIcon="help"
           buttonTooltip="Click here to learn more about authentications"
         >
-          <div>
+          <div className="md-toolbar-relative">
             Follow the instructions
             in <a href={accessApiUri} target="_blank">this link</a> to
             get <b>Application ID</b> and <b>Api Key</b>
@@ -56,7 +56,7 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
           defaultValue={connection['appId'] || ''}
           lineDirection="center"
           placeholder="Fill in Application ID"
-          className="md-cell md-cell--bottom"
+          className="md-cell--stretch"
           onChange={this.onParamChange}
         />
         <TextField
@@ -65,7 +65,7 @@ class AIConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
           defaultValue={connection['apiKey'] || ''}
           lineDirection="center"
           placeholder="Fill in API Key"
-          className="md-cell md-cell--bottom"
+          className="md-cell--stretch"
           onChange={this.onParamChange}
         />
       </Card>
