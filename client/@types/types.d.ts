@@ -6,7 +6,7 @@ type IDict<T> = { [id: string]: T };
 type IDictionary = IDict<any>;
 type IStringDictionary = IDict<string>;
 
-type IConnection = IStringDictionary; 
+type IConnection = IStringDictionary;
 type IConnections = IDict<IConnection>;
 
 /**
@@ -27,7 +27,7 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
    */
   icon?: string,
   /**
-   * An image logo to be diaplyed next to the title of the dashboard in the navigation header.
+   * An image logo to be displayed next to the title of the dashboard in the navigation header.
    * Optional [Default: None]
    */
   logo?: string,
@@ -51,13 +51,16 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
    * The category to put this template in the dashboard creation screen
    */
   category?: string,
-
+  /** 
+    * A flag indicates whether the template is featured at the top of the dashboard creation screen
+   */
+  featured?: boolean,
   /**
    * Configuration relevant for the current dashboard
    */
   config: {
     /**
-     * A dictionary of connection paramters.
+     * A dictionary of connection parameters.
      * connections: {
      *  "application-insights": { appId: "123456", apiKey: "123456" },
      *  "cosmos-db": { ... }
@@ -80,7 +83,7 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
   },
   filters: IFilter[]
   dialogs: IDialog[],
-  layouts?: ILayouts
+  layouts?: ILayouts,
 }
 
 /**
@@ -90,10 +93,10 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
  */
 
 type DataSource = ConstantDataSource | AIDataSource | SampleDataSource;
- 
- /**
-  * Data Source properties in a dashboard definition
-  */
+
+/**
+ * Data Source properties in a dashboard definition
+ */
 interface IDataSource {
   /**
    * The name/type of the data source - should be in the data source `type` property
@@ -168,7 +171,7 @@ interface Sizes<T> {
   xxs?: T
 }
 
-interface ILayout { 
+interface ILayout {
   "i": string,
   "x": number,
   "y": number,
@@ -271,7 +274,7 @@ interface IElement {
 interface IFilter {
   type: string,
   source?: string,
-  dependencies?: IStringDictionary,  
+  dependencies?: IStringDictionary,
   actions?: IStringDictionary,
   title?: string,
   subtitle?: string,
@@ -280,7 +283,7 @@ interface IFilter {
 }
 
 interface IElementsContainer {
-  elements: IElement[]  
+  elements: IElement[]
 }
 
 interface IDialog extends IDataSourceContainer, IElementsContainer {

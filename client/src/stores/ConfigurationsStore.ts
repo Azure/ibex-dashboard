@@ -2,7 +2,7 @@ import alt, { AbstractStoreModel } from '../alt';
 import * as _ from 'lodash';
 
 import connections from '../data-sources/connections';
-import { DataSourceConnector, IDataSourceDictionary } from '../data-sources';
+import { DataSourceConnector } from '../data-sources';
 import configurationActions from '../actions/ConfigurationsActions';
 
 export interface IConfigurationsStoreState {

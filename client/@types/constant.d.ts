@@ -7,7 +7,7 @@ interface ConstantDataSource extends IDataSource {
     /**
      * List of values to choose from
      */
-    values: string[],
+    values: any[],
     /**
      * Current selected value (usually used in constant filters)
      */
