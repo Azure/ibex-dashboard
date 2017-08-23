@@ -1,6 +1,6 @@
 import alt, { AbstractActions } from '../../../alt';
 
-interface ISettingsActions {
+interface ICardSettingsActions {
   openDialog(title: string, elementId: string): IDict<string>;
   closeDialog(): any;
   selectIndex(index: number): number;
@@ -8,7 +8,7 @@ interface ISettingsActions {
   downloadData(): void;
 }
 
-class SettingsActions extends AbstractActions implements ISettingsActions {
+class CardSettingsActions extends AbstractActions implements ICardSettingsActions {
   constructor(alt: AltJS.Alt) {
     super(alt);
   }
@@ -35,6 +35,6 @@ class SettingsActions extends AbstractActions implements ISettingsActions {
 
 }
 
-const settingsActions = alt.createActions<ISettingsActions>(SettingsActions);
+const cardSettingsActions = alt.createActions<ICardSettingsActions>(CardSettingsActions);
 
-export default settingsActions;
+export default cardSettingsActions;

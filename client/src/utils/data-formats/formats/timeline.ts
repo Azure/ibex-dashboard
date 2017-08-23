@@ -69,7 +69,7 @@ export function timeline(
 
   timeline.forEach(row => {
     let timestamp = row[timeField];
-    let lineFieldValue = row[lineField];
+    let lineFieldValue = lineField === undefined ? valueField : row[lineField];
     let valueFieldValue = row[valueField];
 
     let timeValue = (new Date(timestamp)).getTime();

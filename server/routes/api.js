@@ -23,13 +23,18 @@ const fields = {
   url: /\s*url:\s*("|')(.*)("|')/,
   preview: /\s*preview:\s*("|')(.*)("|')/,
   category: /\s*category:\s*("|')(.*)("|')/,
-  html: /\s*html:\s*(`)([\s\S]*?)(`)/gm
+  html: /\s*html:\s*(`)([\s\S]*?)(`)/gm,
+  featured: /\s*featured:\s*(true|false)/,
 }
 
 const getField = (regExp, text) => {
   regExp.lastIndex = 0;
   const matches = regExp.exec(text);
-  return matches && matches.length >= 3 && matches[2];
+  let match = matches && matches.length >= 3 && matches[2];
+  if (!match) {
+    match = matches && matches.length > 0 && matches[0];
+  }
+  return match;
 }
 
 const getMetadata = (text) => {
@@ -60,7 +65,7 @@ const getFileContents = (filePath) => {
 
 const ensureCustomTemplatesFolderExists = () => {
   const { privateTemplate } = paths();
-  
+
   if (!fs.existsSync(privateTemplate)) {
     fs.mkdirSync(privateTemplate);
   }
@@ -69,13 +74,13 @@ const ensureCustomTemplatesFolderExists = () => {
 router.get('/dashboards', (req, res) => {
 
   const { privateDashboard, preconfDashboard, privateTemplate } = paths();
-  
+
   let script = '';
   let files = fs.readdirSync(privateDashboard);
   files = (files || []).filter(fileName => isValidFile(path.join(privateDashboard, fileName)));
 
   // In case no dashboard is present, create a new sample file
-  if (!files || !files.length) { 
+  if (!files || !files.length) {
     const sampleFileName = 'basic_sample.private.js';
     const sampleTemplatePath = path.join(preconfDashboard, 'sample.ts');
     const samplePath = path.join(privateDashboard, sampleFileName);
@@ -85,7 +90,7 @@ router.get('/dashboards', (req, res) => {
     files = [ sampleFileName ];
   }
 
-  if (files && files.length) { 
+  if (files && files.length) {
     files.forEach((fileName) => {
       const filePath = path.join(privateDashboard, fileName);
       const fileContents = getFileContents(filePath);
@@ -114,7 +119,7 @@ router.get('/dashboards', (req, res) => {
         const fileContents = getFileContents(filePath);
         const jsonDefinition = getMetadata(fileContents);
         let content = 'return ' + JSON.stringify(jsonDefinition);
-        
+
         // Ensuing this dashboard is loaded into the dashboards array on the page
         script += `
           (function (window) {
@@ -138,7 +143,7 @@ router.get('/dashboards', (req, res) => {
         const fileContents = getFileContents(filePath);
         const jsonDefinition = getMetadata(fileContents);
         let content = 'return ' + JSON.stringify(jsonDefinition);
-        
+
         // Ensuing this dashboard is loaded into the dashboards array on the page
         script += `
           (function (window) {
@@ -152,8 +157,8 @@ router.get('/dashboards', (req, res) => {
       }
     });
   }
-  
-  res.send(script);  
+
+  res.send(script);
 });
 
 router.get('/dashboards/:id*', (req, res) => {
@@ -184,13 +189,13 @@ router.get('/dashboards/:id*', (req, res) => {
     }
   }
 
-  res.send(script);  
+  res.send(script);
 });
 
 router.post('/dashboards/:id', (req, res) => {
   let { id } = req.params;
   let { script } = req.body || '';
-  
+
   const { privateDashboard } = paths();
   let dashboardFile = getFileById(privateDashboard, id);
   let filePath = path.join(privateDashboard, dashboardFile);
@@ -211,9 +216,9 @@ router.get('/templates/:id', (req, res) => {
   let templatePath = path.join(__dirname, '..', 'dashboards', 'preconfigured');
 
   let script = '';
-  
+
   let templateFile = getFileById(templatePath, templateId);
-  
+
   if (!templateFile) {
     //fallback to custom template
     templatePath = path.join(__dirname, '..', 'dashboards', 'customTemplates');
@@ -236,7 +241,7 @@ router.get('/templates/:id', (req, res) => {
     }
   }
 
-  res.send(script);  
+  res.send(script);
 });
 
 router.put('/templates/:id', (req, res) => {
@@ -324,14 +329,14 @@ router.delete('/dashboards/:id', (req, res) => {
 
 function getFileById(dir, id, overwrite) {
   let files = fs.readdirSync(dir) || [];
-  
+
   // Make sure the array only contains files
   files = files.filter(fileName => fs.statSync(path.join(dir, fileName)).isFile());
-  if (!files || files.length === 0) { 
+  if (!files || files.length === 0) {
     return null;
   }
 
-  
+
   let dashboardFile = null;
   files.every(fileName => {
     const filePath = path.join(dir, fileName);
@@ -363,7 +368,7 @@ function getFileById(dir, id, overwrite) {
 
 function isAuthorizedToSetup(req) {
   if (!fs.existsSync(privateSetupPath)) { return true; }
-  
+
   let configString = fs.readFileSync(privateSetupPath, 'utf8');
   let config = JSON.parse(configString);
 
@@ -378,7 +383,7 @@ function isAuthorizedToSetup(req) {
 
 router.get('/setup', (req, res) => {
 
-  if (!isAuthorizedToSetup(req)) { 
+  if (!isAuthorizedToSetup(req)) {
     return res.send({ error: new Error('User is not authorized to setup') });
   }
 
@@ -393,7 +398,7 @@ router.get('/setup', (req, res) => {
 
 router.post('/setup', (req, res) => {
 
-  if (!isAuthorizedToSetup(req)) { 
+  if (!isAuthorizedToSetup(req)) {
     return res.send({ error: new Error('User is not authorized to setup') });
   }
 
