@@ -73,7 +73,7 @@ export default class CosmosDBQuery extends DataSourcePlugin<IQueryParams> {
         method: 'POST',
         json: true,
         body: body,
-      },      (error, json) => {
+      },      (error, json, b) => {
         if (error) {
           throw new Error(error);
         }
