@@ -15,10 +15,6 @@ describe('Card settings store', () => {
   let dataSources: IDataSourceDictionary = {};
 
   it('Update interval to "None"', () => {
-    SettingsActions.getExportData(dashboardMock);
+    (SettingsActions.getExportData as any).defer(dashboardMock);
   });
-
-  afterAll(() => {
-    //ReactDOM.unmountComponentAtNode(refresher);
-  })
 });

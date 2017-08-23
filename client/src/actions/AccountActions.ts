@@ -1,5 +1,7 @@
 import alt, { AbstractActions } from '../alt';
 import * as request from 'xhr-request';
+import { ToastActions } from '../components/Toast';
+import utils from '../utils';
 
 interface IAccountActions {
   failure(error: any): any;
@@ -7,6 +9,7 @@ interface IAccountActions {
 }
 
 class AccountActions extends AbstractActions implements IAccountActions {
+  
   constructor(alt: AltJS.Alt) {
     super(alt);
   }
@@ -16,8 +19,8 @@ class AccountActions extends AbstractActions implements IAccountActions {
     return (dispatcher: (account: IDictionary) => void) => {
 
       request('/auth/account', { json: true }, (error: any, result: any) => {
-          if (error) {
-            return this.failure(error);
+          if (error || result && result.error) {
+            return this.failure(error || result && result.error);
           }
           return dispatcher({ account: result.account });
         }
@@ -27,6 +30,7 @@ class AccountActions extends AbstractActions implements IAccountActions {
   }
 
   failure(error: any) {
+    ToastActions.addToast({ text: utils.errorToMessage(error) });
     return { error };
   }
 }

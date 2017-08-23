@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 import { IDataSource } from '../DataSourceConnector';
 import { ToastActions } from '../../components/Toast';
 import { DataFormatTypes, IDataFormat } from '../../utils/data-formats';
+import utils from '../../utils';
 
 export interface IDataSourceOptions {
   dependencies: (string | Object)[];
@@ -168,23 +169,7 @@ export abstract class DataSourcePlugin<T> implements IDataSourcePlugin {
   }
 
   failure(error: any): void { 
-    ToastActions.addToast({ text: this.errorToMessage(error) });
+    ToastActions.addToast({ text: utils.errorToMessage(error) });
     return error;
-  }
-
-  private errorToMessage(error: any): string {
-    if (!(error instanceof Error)) {
-
-      if (typeof error === 'object') { return JSON.stringify(error); }
-
-      return error;
-    }
-
-    const message = (error as Error).message;
-    if (message === '[object ProgressEvent]') {
-      return 'There is a problem connecting to the internet.';
-    }
-
-    return `Error: ${message}`;
   }
 }
