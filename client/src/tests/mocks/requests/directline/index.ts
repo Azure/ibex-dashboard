@@ -1,6 +1,5 @@
 import * as nock from 'nock';
 import dashboardMock from '../../dashboards/bot-framework-directline';
-//import query24HResponseMock from './query.24h.mock';
 import { DIRECT_LINE_URL } from '../../../../data-sources/plugins/BotFramework/DirectLine';
 
 const { directLine } = dashboardMock.config.connections['bot-framework'];
@@ -17,9 +16,8 @@ function mockRequests() {
   })
     .post('/v3/directline/conversations')
     .delay(100)
-    .reply(200, { values: 'a' })
-    //, query24HResponseMock)
-
+    // DirectLine doesn't support timespan based query, so the result is a stub JSON
+    .reply(200, { values: 'fakedata' })
 }
 export {
   mockRequests
