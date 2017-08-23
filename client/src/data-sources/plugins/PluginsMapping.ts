@@ -6,6 +6,6 @@ export default {
   'Azure': 'Azure',
   'Constant': 'Constant/index',
   'Sample': 'Sample',
-  'BotFrameworkDirectLine': 'BotFramework/DirectLine',
+  'BotFramework/DirectLine': 'BotFramework/DirectLine',
   'GraphQL': 'GraphQL',
 };
