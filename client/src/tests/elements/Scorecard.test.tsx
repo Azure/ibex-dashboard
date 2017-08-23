@@ -5,7 +5,6 @@ import * as TestUtils from 'react-addons-test-utils';
 import { Card } from 'react-md/lib/Cards';
 import { Scorecard, Sector, Cell, Legend, Layer } from 'recharts';
 
-import { Spinner, SpinnerActions } from '../../components/Spinner';
 import ScorecardComponent from '../../components/generic/Scorecard';
 import Tooltip from '../../components/Tooltip';
 import { DataSourceConnector, IDataSourceDictionary } from '../../data-sources';
