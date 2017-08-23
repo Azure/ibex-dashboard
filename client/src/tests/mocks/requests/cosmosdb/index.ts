@@ -9,9 +9,6 @@ const { host, key } = dashboardMock.config.connections['cosmos-db'];
  */
 function mockRequests() {
   nock('http://localhost', {
-    /*reqheaders: {
-      "Authorization": 'temp'
-    }*/
   })
     .post('/cosmosdb/query')
     .delay(100)
