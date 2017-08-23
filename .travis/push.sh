@@ -45,7 +45,7 @@ setup_git() {
 
 commit_build_files() {
   git checkout -b "${AUTOCOMMIT_BRANCH}"
-  git add --all build
+  git add --all -f build
   echo -e "Travis build: ${TRAVIS_BUILD_NUMBER}\n\nhttps://travis-ci.org/${GITHUB_ORG}/${GITHUB_REPO}/builds/${TRAVIS_BUILD_ID}" | git commit --file -
 }
 

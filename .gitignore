@@ -5,6 +5,13 @@ node_modules/
 
 # testing
 /coverage
+/client/coverage
+
+# build files
+/build
+
+# client build files
+/client/build
 
 # misc
 .DS_Store
