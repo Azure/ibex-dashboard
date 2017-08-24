@@ -11,8 +11,8 @@ const styles = {
 };
 
 interface IIconPickerProps {
-  defaultIcon?: string;
   defaultLabel?: string;
+  defaultIcon?: string;
 }
 
 interface IIconPickerState {
