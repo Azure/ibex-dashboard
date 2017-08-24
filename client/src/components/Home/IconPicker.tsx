@@ -18,7 +18,6 @@ interface IIconPickerProps {
 interface IIconPickerState {
   label: string;
   icon: string;
-  filterType: any;
 }
 
 export default class IconPicker extends React.Component<IIconPickerProps, IIconPickerState> {
@@ -38,7 +37,6 @@ export default class IconPicker extends React.Component<IIconPickerProps, IIconP
     this.state = {
       label: defaultLabel,
       icon: defaultIcon,
-      filterType: Autocomplete.caseInsensitiveFilter,
     };
 
     this.onChange = this.onChange.bind(this);
@@ -60,7 +58,7 @@ export default class IconPicker extends React.Component<IIconPickerProps, IIconP
   }
 
   render() {
-    const { label, filterType, icon } = this.state;
+    const { label, icon } = this.state;
     return (
       <Autocomplete
         id="icon"
