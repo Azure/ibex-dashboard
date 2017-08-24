@@ -145,9 +145,9 @@ export default class Editor extends React.PureComponent<IEditorProps, IEditorSta
           tabIndex={-1}
         />
       ),
-      <Button icon tooltipLabel="Undo" onClick={this.undo} tabIndex={-1}>undo</Button>,
-      <Button icon tooltipLabel="Redo" onClick={this.redo} tabIndex={-1}>redo</Button>,
-      <Button icon tooltipLabel="Copy document" onClick={this.copy} tabIndex={-1}>content_copy</Button>,
+      <Button icon key={0} tooltipLabel="Undo" onClick={this.undo} tabIndex={-1}>undo</Button>,
+      <Button icon key={1} tooltipLabel="Redo" onClick={this.redo} tabIndex={-1}>redo</Button>,
+      <Button icon key={2} tooltipLabel="Copy document" onClick={this.copy} tabIndex={-1}>content_copy</Button>,
       (
         <Button
           flat

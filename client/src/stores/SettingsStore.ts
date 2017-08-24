@@ -27,6 +27,6 @@ class SettingsStore extends AbstractStoreModel<ISettingsStoreState> implements I
   }
 }
 
-const settingsStore = alt.createStore<ISettingsStoreState>(SettingsStore, 'SettingsStore');
+const settingsStore = alt.createStore<ISettingsStoreState>((SettingsStore as AltJS.StoreModel<any>), 'SettingsStore');
 
 export default settingsStore;

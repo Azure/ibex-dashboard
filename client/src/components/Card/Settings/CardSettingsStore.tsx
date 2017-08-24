@@ -308,6 +308,7 @@ class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> impl
 
 }
 
-const cardSettingsStore = alt.createStore<ICardSettingsStoreState>(CardSettingsStore, 'CardSettingsStore');
+const cardSettingsStore = 
+  alt.createStore<ICardSettingsStoreState>(CardSettingsStore as AltJS.StoreModel<any>, 'CardSettingsStore');
 
 export default cardSettingsStore;

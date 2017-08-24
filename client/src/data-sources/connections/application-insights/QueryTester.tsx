@@ -29,7 +29,7 @@ const styles = {
     height: 'calc(100% - 200px)',
     width: 'calc(100% - 48px)',
     position: 'absolute'
-  }
+  } as React.CSSProperties
 };
 
 export default class QueryTester extends React.Component<IQueryTesterProps, IQueryTesterState> {
