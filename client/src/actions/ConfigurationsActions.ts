@@ -1,5 +1,7 @@
 import alt, { AbstractActions } from '../alt';
 import * as request from 'xhr-request';
+
+import { ToastActions } from '../components/Toast';
 import utils from '../utils'; 
 
 interface IConfigurationsActions {
@@ -71,6 +73,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     
     return (dispatcher: (result: { dashboard: IDashboardConfig }) => void) => {
       
+      (window as any)['dashboard'] = undefined;
       this.getScript('/api/dashboards/' + id, () => {
         let dashboard: IDashboardConfig = (window as any)['dashboard'];
 
@@ -108,6 +111,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     
     return (dispatcher: (result: { template: IDashboardConfig }) => void) => {
       
+      (window as any)['template'] = undefined;
       this.getScript('/api/templates/' + id, () => {
         let template: IDashboardConfig = (window as any)['template'];
 
@@ -173,6 +177,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
   }
 
   failure(error: any) {
+    ToastActions.showText(JSON.stringify(error || 'There was an error'));
     return error;
   }
 

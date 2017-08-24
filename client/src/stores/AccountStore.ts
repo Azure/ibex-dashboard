@@ -25,6 +25,6 @@ class AccountStore extends AbstractStoreModel<IAccountStoreState> implements IAc
   }
 }
 
-const accountStore = alt.createStore<IAccountStoreState>(AccountStore, 'AccountStore');
+const accountStore = alt.createStore<IAccountStoreState>((AccountStore as AltJS.StoreModel<any>), 'AccountStore');
 
 export default accountStore;

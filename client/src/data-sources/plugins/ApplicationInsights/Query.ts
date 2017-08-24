@@ -118,7 +118,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
           if (json.error) {
             return json.error.code === 'PathNotFoundError' ? 
               this.failure(new Error(
-                `There was a problem getting results from Application Insights. Make sure the connection string is food.
+                `There was a problem getting results from Application Insights. Make sure the connection string is good.
                 ${JSON.stringify(json)}`)) : 
               this.failure(json.error);
           }

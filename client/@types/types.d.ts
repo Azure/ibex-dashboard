@@ -92,11 +92,11 @@ interface IDashboardConfig extends IDataSourceContainer, IElementsContainer {
  * =============================
  */
 
-type DataSource = ConstantDataSource | AIDataSource | SampleDataSource;
-
-/**
- * Data Source properties in a dashboard definition
- */
+type DataSource = ConstantDataSource | AIDataSource | SampleDataSource | BotFrameworkDataSource | CosmosDBDataSource;
+ 
+ /**
+  * Data Source properties in a dashboard definition
+  */
 interface IDataSource {
   /**
    * The name/type of the data source - should be in the data source `type` property

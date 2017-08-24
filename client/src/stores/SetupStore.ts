@@ -62,6 +62,6 @@ class SetupStore extends AbstractStoreModel<ISetupStoreState> implements ISetupS
   }
 }
 
-const setupStore = alt.createStore<ISetupStoreState>(SetupStore, 'SetupStore');
+const setupStore = alt.createStore<ISetupStoreState>((SetupStore as AltJS.StoreModel<any>), 'SetupStore');
 
 export default setupStore;

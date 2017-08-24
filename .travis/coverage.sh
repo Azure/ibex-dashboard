@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-min_coverage="${MIN_COVERAGE:-54}"
+min_coverage="${MIN_COVERAGE:-61}"
 line_coverage="$((cd client; CI=true yarn coverage) | grep '^All files  *|' | cut -d'|' -f5 | tr -d ' ' | cut -d'.' -f1)"
 
 if [ ${line_coverage} -lt ${min_coverage} ]; then

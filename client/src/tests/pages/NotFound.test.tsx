@@ -2,16 +2,14 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import * as TestUtils from 'react-addons-test-utils';
 
-import Home from '../../pages/Home'
+import NotFound from '../../pages/NotFound'
 
-describe('Home', () => {
+describe('NotFound', () => {
   let setup;
   let setupComponent;
 
-  it('Home is loading', (done) => {
-    setup = TestUtils.renderIntoDocument(<Home />);
+  it('not found is loading', () => {
+    setup = TestUtils.renderIntoDocument(<NotFound />);
     TestUtils.isElementOfType(setup, 'div');
-
-    setTimeout(() => done(), 500);
   });
 });
