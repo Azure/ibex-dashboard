@@ -8,8 +8,10 @@ describe('Home', () => {
   let setup;
   let setupComponent;
 
-  it('Home is loading', () => {
+  it('Home is loading', (done) => {
     setup = TestUtils.renderIntoDocument(<Home />);
     TestUtils.isElementOfType(setup, 'div');
+
+    setTimeout(() => done(), 500);
   });
 });

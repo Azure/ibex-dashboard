@@ -40,8 +40,9 @@ describe('HomePage', () => {
     }, 100);
   })
 
-  it('Check Home page is loading', () => {
+  it('Check Home page is loading', (done) => {
     // This test is just to make sure the component is able to render
+    setTimeout(() => done(), 500);
   });
 
   afterAll(() => {
