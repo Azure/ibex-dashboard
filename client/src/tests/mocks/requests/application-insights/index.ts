@@ -17,11 +17,14 @@ function mockRequests() {
     }
   })
     .post(`/${appId}/query?timespan=PT24H`)
-    .delay(100)
+    .delay(10)
     .reply(200, query24HResponseMock)
     .post(`/${appId}/query?timespan=P30D`)
-    .delay(100)
-    .reply(200, query30DResponseMock);
+    .delay(10)
+    .reply(200, query30DResponseMock)
+    .post(`/id_fail/query?timespan=P30D`)
+    .delay(10)
+    .reply(404, 'Some error');
 
 }
 export {

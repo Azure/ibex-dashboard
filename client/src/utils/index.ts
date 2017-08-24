@@ -113,4 +113,20 @@ export default class Utils {
 
     return result;
   }
+
+  static errorToMessage(error: any): string {
+    if (!(error instanceof Error)) {
+
+      if (typeof error === 'object') { return JSON.stringify(error); }
+
+      return error;
+    }
+
+    const message = (error as Error).message;
+    if (message === '[object ProgressEvent]') {
+      return 'There is a problem connecting to the internet.';
+    }
+
+    return `Error: ${message}`;
+  }
 };
