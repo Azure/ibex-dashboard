@@ -58,6 +58,6 @@ class EditorStore extends AbstractStoreModel<IEditorStoreState> implements IEdit
   }
 }
 
-const editorStore = alt.createStore<IEditorStoreState>(EditorStore, 'EditorStore');
+const editorStore = alt.createStore<IEditorStoreState>(EditorStore as AltJS.StoreModel<any>, 'EditorStore');
 
 export default editorStore;

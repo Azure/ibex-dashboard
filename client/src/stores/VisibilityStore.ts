@@ -25,6 +25,6 @@ class VisibilityStore extends AbstractStoreModel<any> {
   }
 }
 
-const visibilityStore = alt.createStore<any>(VisibilityStore, 'VisibilityStore');
+const visibilityStore = alt.createStore<any>((VisibilityStore as AltJS.StoreModel<any>) , 'VisibilityStore');
 
 export default visibilityStore;

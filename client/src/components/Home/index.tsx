@@ -112,6 +112,7 @@ export default class Home extends React.Component<any, IHomeState> {
     this.updateFileName = this.updateFileName.bind(this);
     this.onExportTemplate = this.onExportTemplate.bind(this);
     this.downloadTemplate = this.downloadTemplate.bind(this);
+    this.onOpenImport = this.onOpenImport.bind(this);
   }
 
   updateConfiguration(state: {
@@ -339,7 +340,7 @@ export default class Home extends React.Component<any, IHomeState> {
         <Button
           flat
           tooltipLabel="Import dashboard"
-          onClick={this.onOpenImport.bind(this)}
+          onClick={this.onOpenImport}
           label="Import dashboard"
         >file_upload
         </Button>

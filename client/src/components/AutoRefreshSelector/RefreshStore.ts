@@ -24,6 +24,6 @@ class RefreshStore extends AbstractStoreModel<IRefreshStoreState> implements IRe
   }
 }
 
-const refreshStore = alt.createStore<IRefreshStoreState>(RefreshStore, 'RefreshStore');
+const refreshStore = alt.createStore<IRefreshStoreState>(RefreshStore as AltJS.StoreModel<any>, 'RefreshStore');
 
 export default refreshStore;

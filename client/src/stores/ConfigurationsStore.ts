@@ -159,6 +159,7 @@ class ConfigurationsStore extends AbstractStoreModel<IConfigurationsStoreState> 
   }
 }
 
-const configurationsStore = alt.createStore<IConfigurationsStoreState>(ConfigurationsStore, 'ConfigurationsStore');
+const configurationsStore = 
+  alt.createStore<IConfigurationsStoreState>(ConfigurationsStore as AltJS.StoreModel<any>, 'ConfigurationsStore');
 
 export default configurationsStore;
