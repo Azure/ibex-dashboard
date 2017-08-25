@@ -423,7 +423,8 @@ export default class Home extends React.Component<any, IHomeState> {
           <IconPicker 
             ref={field => this._fieldIcon = field}
             defaultLabel="Dashboard Icon" 
-            defaultIcon={template && template.icon || 'dashboard'} />
+            defaultIcon={template && template.icon || 'dashboard'}
+            listStyle={{height: '136px'}} />
           <TextField
             id="id"
             ref={field => this._fieldId = field}
