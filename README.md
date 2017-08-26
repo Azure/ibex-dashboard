@@ -99,6 +99,10 @@ The following steps explain how to connect **Application Insights** bot with you
 6. Open the URL of your web app
 7. Under **AppId**/**ApiKey** set the values you created.
 
+### Adding Application Insights instrumentation to your bot
+- [Instrumentation for Node.js bots](https://github.com/CatalystCode/botbuilder-instrumentation)
+- [Instrumentation for C# bots](https://github.com/CatalystCode/botbuilder-instrumentation-cs)
+
 # Testing
 The test watcher is integrated into the create-react-app mechanism and runs tests related to files changes since the last commit.
 
