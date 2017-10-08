@@ -46,9 +46,9 @@ const getMetadata = (text) => {
 }
 
 const paths = () => ({
-  privateDashboard: path.join(__dirname, '..', 'dashboards'),
+  privateDashboard: path.join(__dirname, '..', 'dashboards','persistence','private'),
   preconfDashboard: path.join(__dirname, '..', 'dashboards', 'preconfigured'),
-  privateTemplate: path.join(__dirname, '..', 'dashboards', 'customTemplates')
+  privateTemplate: path.join(__dirname, '..', 'dashboards','persistence', 'customTemplates')
 });
 
 const isValidFile = (filePath) => {
@@ -213,7 +213,7 @@ router.post('/dashboards/:id', (req, res) => {
 router.get('/templates/:id', (req, res) => {
 
   let templateId = req.params.id;
-  let templatePath = path.join(__dirname, '..', 'dashboards', 'preconfigured');
+  let templatePath = paths().preconfDashboard;
 
   let script = '';
 
@@ -221,7 +221,7 @@ router.get('/templates/:id', (req, res) => {
 
   if (!templateFile) {
     //fallback to custom template
-    templatePath = path.join(__dirname, '..', 'dashboards', 'customTemplates');
+    templatePath = paths().privateTemplate;
     templateFile = getFileById(templatePath, templateId);
   }
   if (templateFile) {
