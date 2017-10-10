@@ -46,9 +46,9 @@ const getMetadata = (text) => {
 }
 
 const paths = () => ({
-  privateDashboard: path.join(__dirname, '..', 'dashboards','persistence','private'),
+  privateDashboard: path.join(__dirname, '..', 'dashboards','persistent','private'),
   preconfDashboard: path.join(__dirname, '..', 'dashboards', 'preconfigured'),
-  privateTemplate: path.join(__dirname, '..', 'dashboards','persistence', 'customTemplates')
+  privateTemplate: path.join(__dirname, '..', 'dashboards','persistent', 'customTemplates')
 });
 
 const isValidFile = (filePath) => {
