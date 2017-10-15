@@ -1,7 +1,7 @@
 # Ibex Dashboard [![Build Status](https://travis-ci.org/CatalystCode/ibex-dashboard.png?branch=master)](https://travis-ci.org/CatalystCode/ibex-dashboard)
 
 > Notice: This repo is in the process of moving into a new home. We will update once this happens in this page.
-> Notice: Version 1.2 breaks the persitency paths of data. If you are upgrading to this version, simply copy your files from `/dashboards` into `/dashboards/persistent/` while keeping the same internal directory structure.
+> Notice: Version 1.2 breaks the persitency paths of data. If you are upgrading to this version, simply copy your generate files from `/dashboards` into `/dashboards/persistent/` as follows: `private files: *.private.js` should be placed in the `/dashboards/persistent/private` folder, and `private templates: *.private.ts` should be placed in the `/dashboards/persistent/customTemplates` folder.
 
 [Ibex](http://aka.ms/ibex) is a dashboarding application that enables building dashboard and templates.
 It mainly supports **Application Insights** but data sources and visual components are easily extendable.
