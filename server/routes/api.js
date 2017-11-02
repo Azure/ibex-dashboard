@@ -67,7 +67,17 @@ const ensureCustomFoldersExists = () => {
   const { privateTemplate, privateDashboard } = paths();
 
   if (!fs.existsSync(privateDashboard)) {
-    fs.mkdirSync(privateDashboard);
+
+    // Path separators could change depending on the platform
+    privateDashboard
+     .split(path.sep)
+     .reduce((currentPath, folder) => {
+       currentPath += folder + path.sep;
+       if (!fs.existsSync(currentPath)){
+         fs.mkdirSync(currentPath);
+       }
+       return currentPath;
+     }, '');
   }
 
   if (!fs.existsSync(privateTemplate)) {
