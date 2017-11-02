@@ -81,7 +81,15 @@ const ensureCustomFoldersExists = () => {
   }
 
   if (!fs.existsSync(privateTemplate)) {
-    fs.mkdirSync(privateTemplate);
+    privateTemplate
+     .split(path.sep)
+     .reduce((currentPath, folder) => {
+       currentPath += folder + path.sep;
+       if (!fs.existsSync(currentPath)){
+         fs.mkdirSync(currentPath);
+       }
+       return currentPath;
+     }, '');
   }
 }
 
