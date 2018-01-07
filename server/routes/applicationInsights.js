@@ -3,7 +3,7 @@ const request = require('xhr-request');
 const path = require('path');
 
 const paths = require('../common/paths');
-const filesHelpers = require('../helpers/filesHelpers');
+const resourceFileProvider = require('../helpers/resourceFileProvider');
 const resourceFieldProvider = require('../helpers/resourceFieldProvider');
 
 const router = new express.Router();
@@ -44,8 +44,8 @@ router.post('/query', (req, res) => {
 
 function getDashboardById(dashboardId) {
   let privateDashboardsPath = paths.resourcesPaths().privateDashboard;
-  let dashboardFile = filesHelpers.getResourceFileNameById(privateDashboardsPath, dashboardId);
-  let dashboardFileContent = filesHelpers.getFileContents(path.join(privateDashboardsPath, dashboardFile));
+  let dashboardFile = resourceFileProvider.getResourceFileNameById(privateDashboardsPath, dashboardId);
+  let dashboardFileContent = resourceFileProvider.getFileContents(path.join(privateDashboardsPath, dashboardFile));
 
   return dashboardFileContent;
 }
