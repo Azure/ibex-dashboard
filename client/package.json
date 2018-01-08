@@ -35,7 +35,7 @@
     "react-router": "3.0.0",
     "react-scripts-ts": "^2.6.0",
     "recharts": "^0.21.2",
-    "tslint": "^4.0.0"
+    "tslint": "^5.8.0"
   },
   "dependencies": {
     "body-parser": "^1.17.1",
