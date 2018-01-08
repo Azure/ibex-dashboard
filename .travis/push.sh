@@ -5,7 +5,7 @@ set -euo pipefail
 readonly GITHUB_ORG="${GITHUB_ORG:-Azure}"
 readonly GITHUB_REPO="${GITHUB_REPO:-ibex-dashboard}"
 readonly TARGET_BRANCH="${TARGET_BRANCH:-master}"
-readonly SOURCE_BRANCH="${SOURCE_BRANCH:-ibex-version-1.0}"
+# readonly SOURCE_BRANCH="${SOURCE_BRANCH:-ibex-version-1.0}"
 
 readonly AUTOCOMMIT_NAME="Travis CI"
 readonly AUTOCOMMIT_EMAIL="travis@travis-ci.org"
