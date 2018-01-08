@@ -20,6 +20,26 @@ const fields = {
   connections: /\s*connections:( )([\S\s]*)(,)\s*layout:/
 }
 
+const MASKING_REQUIREMENTS = {
+  type: 'root',
+  mask: {
+    "connections": {
+      type: 'object',
+      mask: {
+        "application-insights" : {
+          type: 'object',
+          mask: {
+            "apiKey": { 
+              type: 'string',
+              mask: '***********'
+            }
+          }
+        }
+      }
+    }
+  }
+};
+
 const getField = (fieldName, text) => {
   regExp = fields[fieldName];
   regExp.lastIndex = 0;
@@ -42,5 +62,6 @@ const getMetadata = (text) => {
 
 module.exports = {
   getField,
-  getMetadata
+  getMetadata,
+  MASKING_REQUIREMENTS
 }

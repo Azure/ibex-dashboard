@@ -171,6 +171,8 @@ router.post('/dashboards/:id', (req, res) => {
   let dashboardFile = resourceFileProvider.getResourceFileNameById(privateDashboard, id);
   let filePath = path.join(privateDashboard, dashboardFile);
 
+  script = resourceFileProvider.unmaskFileContent(script, filePath);
+
   fs.writeFile(filePath, script, err => {
     if (err) {
       console.error(err);

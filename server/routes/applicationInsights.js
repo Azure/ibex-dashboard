@@ -45,7 +45,7 @@ router.post('/query', (req, res) => {
 function getDashboardById(dashboardId) {
   let privateDashboardsPath = paths.resourcesPaths().privateDashboard;
   let dashboardFile = resourceFileProvider.getResourceFileNameById(privateDashboardsPath, dashboardId);
-  let dashboardFileContent = resourceFileProvider.getFileContents(path.join(privateDashboardsPath, dashboardFile));
+  let dashboardFileContent = resourceFileProvider.getFileContents(path.join(privateDashboardsPath, dashboardFile), false);
 
   return dashboardFileContent;
 }
