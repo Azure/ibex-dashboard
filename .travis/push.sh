@@ -26,7 +26,9 @@ ensure_preconditions_met() {
   log "TRAVIS_BUILD_NUMBER: ${TRAVIS_BUILD_NUMBER}"
   
   # get last commit comment
-  ORIGINAL_COMMIT_MESSAGE="$(echo ${TRAVIS_COMMIT_RANGE} | cut -d '.' -f4)"
+  ORIGINAL_COMMIT_ID="$(echo ${TRAVIS_COMMIT_RANGE} | cut -d '.' -f4)"
+  log "ORIGINAL_COMMIT_ID: ${ORIGINAL_COMMIT_ID}"
+  ORIGINAL_COMMIT_ID=$(git log --format=%B -n 1 $ORIGINAL_COMMIT_ID)
   log "ORIGINAL_COMMIT_MESSAGE: ${ORIGINAL_COMMIT_MESSAGE}"
 
   if [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ]; then
