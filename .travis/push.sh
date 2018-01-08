@@ -25,6 +25,7 @@ ensure_preconditions_met() {
   log "TRAVIS_COMMIT_RANGE: ${TRAVIS_COMMIT_RANGE}"
   log "TRAVIS_BUILD_NUMBER: ${TRAVIS_BUILD_NUMBER}"
   
+  # get last commit comment
   ORIGINAL_COMMIT_MESSAGE="$(echo ${TRAVIS_COMMIT_RANGE} | cut -d '.' -f4)"
   log "ORIGINAL_COMMIT_MESSAGE: ${ORIGINAL_COMMIT_MESSAGE}"
 
