@@ -16,6 +16,14 @@ log() {
 }
 
 ensure_preconditions_met() {
+
+  log "TRAVIS_BRANCH: ${TRAVIS_BRANCH}"
+  log "TRAVIS_PULL_REQUEST: ${TRAVIS_PULL_REQUEST}"
+  log "TRAVIS_PULL_REQUEST_BRANCH: ${TRAVIS_PULL_REQUEST_BRANCH}"
+  log "TRAVIS_COMMIT: ${TRAVIS_COMMIT}"
+  log "TRAVIS_COMMIT_MESSAGE: ${TRAVIS_COMMIT_MESSAGE}"
+  log "TRAVIS_COMMIT_RANGE: ${TRAVIS_COMMIT_RANGE}"
+
   if [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ]; then
     log "Job is CI for a push, skipping creation of production build"
     exit 0
