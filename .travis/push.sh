@@ -28,12 +28,15 @@ ensure_preconditions_met() {
     log "Job is CI for a push, skipping creation of production build"
     exit 0
   fi
-  # if [ "${TRAVIS_BRANCH}_${TRAVIS_PULL_REQUEST_BRANCH}" != "${TARGET_BRANCH}_${SOURCE_BRANCH}" ]; then
+
+  # Only if push is to master branch, include a build
+  # if [ "${TRAVIS_BRANCH}" != "${TARGET_BRANCH}" ]; then
   #   log "Skipping creation of production build"
-  #   log "We only create production builds for pull requests from '${SOURCE_BRANCH}' to '${TARGET_BRANCH}'"
-  #   log "but this pull request is from '${TRAVIS_PULL_REQUEST BRANCH}' to '${TRAVIS_BRANCH}'"
+  #   log "We only create production builds for pull requests to '${TARGET_BRANCH}'"
+  #   log "but this pull request is to '${TRAVIS_BRANCH}'"
   #   exit 0
   # fi
+
   if [ -z "${GITHUB_TOKEN}" ]; then
     log "GITHUB_TOKEN not set: won't be able to push production build"
     log "Please configure the token in .travis.yml or the Travis UI"
@@ -58,7 +61,7 @@ commit_build_files() {
 }
 
 push_to_github() {
-  git push origin-travis "${AUTOCOMMIT_BRANCH}:${SOURCE_BRANCH}"
+  git push origin-travis "${AUTOCOMMIT_BRANCH}:${TRAVIS_PULL_REQUEST_BRANCH}"
 }
 
 ensure_preconditions_met
