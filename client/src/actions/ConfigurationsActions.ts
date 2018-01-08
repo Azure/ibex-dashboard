@@ -19,9 +19,6 @@ interface IConfigurationsActions {
 }
 
 class ConfigurationsActions extends AbstractActions implements IConfigurationsActions {
-  constructor(alt: AltJS.Alt) {
-    super(alt);
-  }
 
   submitDashboardFile(content: string, dashboardId: string) {
     return (dispatcher: (json: any) => void) => {

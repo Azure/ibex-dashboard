@@ -41,7 +41,7 @@ interface IMapDataProps extends IGenericProps {
   props: {
     searchLocations: boolean;
   };
-};
+}
 
 interface IMapDataState extends IGenericState {
   markers: any[];

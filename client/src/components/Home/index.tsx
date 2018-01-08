@@ -219,7 +219,7 @@ export default class Home extends React.Component<any, IHomeState> {
 
   updateFileName(value: string) {
     this.setState({ fileName: value });
-  };
+  }
 
   onLoad(importedFileContent: any, uploadResult: string) {
     const { name, size, type, lastModifiedDate } = importedFileContent;
