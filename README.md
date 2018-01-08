@@ -6,6 +6,16 @@ It mainly supports **Application Insights** but data sources and visual componen
 
 ## Changes
 
+### Version 1.3 (January 10, 2018)
+
+Version 2 contains the following changes:
+
+* Moving application insights queries from client to server
+* Updated tests to answer some security risks presented by GitHub
+* Updated tests to accommodate the new approach
+* Added masking/unmasking of connection parameters (so that client side can only update API KEY but not see what it is)
+* Fixed small bugs with Firefox rendering
+
 ### Version 1.2 (October 16, 2017)
 Version 1.2 breaks the persitency paths of dashboard files and custom templates. If you are upgrading to this version, copy your private dashboards from `/dashboards` into `/dashboards/persistent/` as follows: 
 
