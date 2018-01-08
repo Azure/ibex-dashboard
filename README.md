@@ -8,7 +8,7 @@ It mainly supports **Application Insights** but data sources and visual componen
 
 ### Version 1.3 (January 10, 2018)
 
-Version 2 contains the following changes:
+Version 1.3 contains the following changes:
 
 * Moving application insights queries from client to server
 * Updated tests to answer some security risks presented by GitHub
