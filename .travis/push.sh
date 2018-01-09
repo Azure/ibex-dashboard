@@ -32,7 +32,7 @@ ensure_preconditions_met() {
   log "ORIGINAL_COMMIT_MESSAGE: ${ORIGINAL_COMMIT_MESSAGE}"
 
   # If last commit was by travis build, ignore and don't push
-  if [ $ORIGINAL_COMMIT_MESSAGE == "Travis build: "* ]; then
+  if [ "${ORIGINAL_COMMIT_MESSAGE}" == "Travis build: "* ]; then
     log "Last commit by Travis CI - Ignoring and existing"
     exit 0
   fi
