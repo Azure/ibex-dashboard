@@ -31,6 +31,12 @@ ensure_preconditions_met() {
   ORIGINAL_COMMIT_MESSAGE=$(git log --format=%B -n 1 $ORIGINAL_COMMIT_ID)
   log "ORIGINAL_COMMIT_MESSAGE: ${ORIGINAL_COMMIT_MESSAGE}"
 
+  # If last commit was by travis build, ignore and don't push
+  if [ $ORIGINAL_COMMIT_MESSAGE == "Travis build: "* ]; then
+    log "Last commit by Travis CI - Ignoring and existing"
+    exit 0
+  fi
+
   if [ -z "${TRAVIS_PULL_REQUEST_BRANCH}" ]; then
     log "Job is CI for a push, skipping creation of production build"
     exit 0
