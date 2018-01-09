@@ -19,9 +19,6 @@ interface IConfigurationsActions {
 }
 
 class ConfigurationsActions extends AbstractActions implements IConfigurationsActions {
-  constructor(alt: AltJS.Alt) {
-    super(alt);
-  }
 
   submitDashboardFile(content: string, dashboardId: string) {
     return (dispatcher: (json: any) => void) => {
@@ -72,16 +69,19 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
 
   loadDashboard(id: string) {
     
-    (window as any)['dashboard'] = undefined;
-    this.getScript('/api/dashboards/' + id, () => {
-      let dashboard: IDashboardConfig = (window as any)['dashboard'];
+    return (dispatcher: () => void) => {
+      (window as any)['dashboard'] = undefined;
+      this.getScript('/api/dashboards/' + id, () => {
+        let dashboard: IDashboardConfig = (window as any)['dashboard'];
 
-      if (!dashboard) {
-        return this.failure(new Error('Could not load configuration for dashboard ' + id));
-      }
+        if (!dashboard) {
+          return this.failure(new Error('Could not load configuration for dashboard ' + id));
+        }
 
-      return this.loadDashboardComplete(dashboard);
-    });
+        this.loadDashboardComplete(dashboard);
+        return dispatcher();
+      });
+    };
   }
 
   loadDashboardComplete(dashboard: IDashboardConfig): any {
