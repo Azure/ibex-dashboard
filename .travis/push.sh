@@ -43,12 +43,12 @@ ensure_preconditions_met() {
   fi
 
   # Only if push is to master branch, include a build
-  # if [ "${TRAVIS_BRANCH}" != "${TARGET_BRANCH}" ]; then
-  #   log "Skipping creation of production build"
-  #   log "We only create production builds for pull requests to '${TARGET_BRANCH}'"
-  #   log "but this pull request is to '${TRAVIS_BRANCH}'"
-  #   exit 0
-  # fi
+  if [ "${TRAVIS_BRANCH}" != "${TARGET_BRANCH}" ]; then
+    log "Skipping creation of production build"
+    log "We only create production builds for pull requests to '${TARGET_BRANCH}'"
+    log "but this pull request is to '${TRAVIS_BRANCH}'"
+    exit 0
+  fi
 
   if [ -z "${GITHUB_TOKEN}" ]; then
     log "GITHUB_TOKEN not set: won't be able to push production build"
