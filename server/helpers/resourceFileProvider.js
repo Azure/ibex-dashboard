@@ -111,8 +111,9 @@ function maskFileContent(contents) {
 }
 
 function unmaskFileContent(contents, filePath) {
-  var unmaskContent = getFileContents(filePath, false);
-  return maskString(contents, unmaskContent);
+  let unmaskContent = getFileContents(filePath, false);
+  let unmadkedContents = maskString(contents, unmaskContent);
+  return unmadkedContents ? unmadkedContents : contents;
 }
 
 function getFileContents(filePath, mask) {
