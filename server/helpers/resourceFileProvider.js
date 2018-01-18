@@ -2,8 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const resourceFieldProvider = require('./resourceFieldProvider');
 
-const { MultiRegExp2 } = require('./multiRegExp2');
-
 function getResourceFileNameById(dir, id, overwrite, mask) {
   let files = fs.readdirSync(dir) || [];
 
@@ -43,67 +41,86 @@ function isValidFile(filePath) {
   return stats.isFile() && (filePath.endsWith('.js') || filePath.endsWith('.ts'));
 }
 
-function maskString(contents, unmask, maskRequirements, keyName, maskStart, maskEnd) {
-
-  let maskingStart = maskStart || '';
-  let maskingEnd = maskEnd || '';
-  let currentObject = maskRequirements || resourceFieldProvider.MASKING_REQUIREMENTS;
-  let prefix = keyName || '';
-  let result = null;
-
-  if (prefix) {
-    maskingStart += '"?' + prefix + '"?[^]*?:[^]*?';
+function extractExpression(contents, expression, shouldReplace, mask) {
+  let findExpression = expression.exec(contents);
+  if (!findExpression || findExpression.length === 0) {
+    return null;
   }
+
+  if (shouldReplace) {
+    return contents.replace(findExpression[0], findExpression[0].replace(findExpression[1], mask));
+  }
+
+  return findExpression[0];
+}
+
+function extractUnmaskExpression(contents, expression, shouldGetValue) {
+  let findExpression = expression.exec(contents);
+  if (!findExpression || findExpression.length === 0 || (shouldGetValue && findExpression.length <= 1)) {
+    return null;
+  }
+
+  return shouldGetValue ? findExpression[1] : findExpression[0];
+}
+
+function maskString(contents, unmask, maskRequirements, keyName) {
+
+  let maskRegexValue = null;
+  let currentObject = maskRequirements || resourceFieldProvider.MASKING_REQUIREMENTS;
+  let replacableObject = false;
 
   switch (currentObject.type) {
     case 'object':
-      maskingStart += '{[^]*?';
-      maskingEnd = '[^]*?}' + maskingEnd;
+      maskRegexValue = '\\s*"?' + keyName + '"?:\\s*{(.*)}';
       break;
     case 'array':
-      maskingStart += '\[[^]*?';
-      maskingEnd = '[^]*?\]' + maskingEnd;
+      maskRegexValue = '\\s*"?' + keyName + '"?:\\s*[(.*)]';
       break;
     case 'string':
-      maskingStart += '"';
-      maskingEnd = '"' + maskingEnd;
-
-      if (!unmask) {
-        let baseRegex = new RegExp(maskingStart + '(.*?)' + maskingEnd, 'gi');
-        let advcRegex = new MultiRegExp2(baseRegex);
-        let matching = advcRegex.execForAllGroups(contents);
-
-        if (!matching) { return null; }
-
-        contents = contents.substr(0, matching[1].start) + currentObject.mask + contents.substr(matching[1].end)
-        return contents;
-      } else {
-        let baseRegex = new RegExp(maskingStart + '(.*?)' + maskingEnd, 'gi');
-        let advcRegex = new MultiRegExp2(baseRegex);
-        let matching = advcRegex.execForAllGroups(contents);
-
-        if (!matching || matching[1].match !== currentObject.mask) { return null; }
-
-        let unmaskRegex = new RegExp(maskingStart + '(.*?)' + maskingEnd, 'gi');
-        let unadvcRegex = new MultiRegExp2(baseRegex);
-        let unmaskMatching = unadvcRegex.execForAllGroups(unmask);
-
-        contents = contents.substr(0, matching[1].start) + unmaskMatching[1].match + contents.substr(matching[1].end)
-        return contents;
-      }
+      maskRegexValue = '\\s*"?' + keyName + '"?:\\s*"(.*)"';
+      replacableObject = true;
+      break;
   }
 
-  let maskedContent = contents;
-  let replaced = false;
+  // Focus searches only on relevant part from regex
+  let toReplace = null;
+  let toUnmask = null;
+  if (maskRegexValue && unmask) {
+    let maskRegex = new RegExp(maskRegexValue, 'gim');
+    toUnmask = extractUnmaskExpression(unmask, maskRegex, replacableObject);
+    if (!toUnmask) { return null; }
+  }
+
+  if (maskRegexValue) {
+    let maskRegex = new RegExp(maskRegexValue, 'gim');
+    let mask = unmask && toUnmask || currentObject.mask;
+    toReplace = extractExpression(contents, maskRegex, replacableObject, mask);
+    if (replacableObject) { return toReplace; }
+    if (!toReplace) { return null; }
+  }
+  
+  // Mask child objects
+  let maskedContent = toReplace || contents;
+  let unmakedContent = toUnmask || unmask;
+  let shouldReplace = false;
   for (let key in currentObject.mask) {
-    result = maskString(maskedContent, unmask, currentObject.mask[key], key, maskingStart, maskingEnd);
+    let result = maskString(maskedContent, unmakedContent, currentObject.mask[key], key);
     if (result) {
       maskedContent = result;
-      replaced = true;
+      shouldReplace = true;
     }
   }
+  
+  // Replace maskedContent in parent string...
+  if (shouldReplace) {
+    if (currentObject.type === 'root') {
+      return maskedContent;
+    }
+    return contents.replace(toReplace, maskedContent);
+  }
 
-  return replaced ? maskedContent : null;
+  // No replace has taken place
+  return null;
 }
 
 function maskFileContent(contents) {
