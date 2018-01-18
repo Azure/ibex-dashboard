@@ -99,7 +99,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
       });
     }
 
-    var dashboardId = ConfigurationsStore.getState().dashboard.id;
+    let dashboardId = ConfigurationsStore.getState().dashboard.id;
 
     return (dispatch) => {
       request(
@@ -132,7 +132,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
           }
 
           // Map tables to appropriate results
-          var resultTables = tables.filter((aTable, idx) => {
+          let resultTables = tables.filter((aTable, idx) => {
             return idx < resultStatus.length && 
                     (resultStatus[idx].Kind === 'QueryResult' || resultStatus[idx].Kind === 'PrimaryResults');
           });
@@ -216,7 +216,7 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     mappings = mappings || {};
 
     return table.Rows.map((rowValues, rowIdx) => {
-      var row = {};
+      let row = {};
 
       table.Columns.forEach((col, idx) => {
         row[col.ColumnName] = rowValues[idx];

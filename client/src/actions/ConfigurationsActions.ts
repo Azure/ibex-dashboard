@@ -7,7 +7,7 @@ import utils from '../utils';
 interface IConfigurationsActions {
   loadConfiguration(): any;
   loadDashboard(id: string): any;
-  loadDashboardComplete(dashboard: IDashboardConfig): any;
+  loadDashboardComplete(dashboard: IDashboardConfig): { dashboard: IDashboardConfig };
   createDashboard(dashboard: IDashboardConfig): any;
   loadTemplate(id: string): any;
   saveConfiguration(dashboard: IDashboardConfig): any;
@@ -84,7 +84,7 @@ class ConfigurationsActions extends AbstractActions implements IConfigurationsAc
     };
   }
 
-  loadDashboardComplete(dashboard: IDashboardConfig): any {
+  loadDashboardComplete(dashboard: IDashboardConfig): { dashboard: IDashboardConfig } {
     return { dashboard };
   }
 
