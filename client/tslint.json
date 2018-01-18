@@ -26,14 +26,10 @@
     "label-position": true,
     "max-line-length": [ true, 120 ],
     "member-ordering": [
-      true, 
-      {
-        "order": [
-          "static-before-instance",
-          "variables-before-functions",
-          "public-before-private"
-        ]
-      }
+      true,
+      "public-before-private",
+      "static-before-instance",
+      "variables-before-functions"
     ],
     "no-any": false,
     "no-arg": true,
