@@ -63,64 +63,128 @@ function extractUnmaskExpression(contents, expression, shouldGetValue) {
   return shouldGetValue ? findExpression[1] : findExpression[0];
 }
 
+function extractValueFromJSONString(contents, mask, start, end) {
+
+  if (!mask) { return contents; }
+
+  // search for property name
+  start = start || 0;
+  end  = end || contents.length;
+  let propertyName = mask.substr(0, mask.indexOf('|') >= 0 ? mask.indexOf('|') : mask.length); 
+  let objectIndex = contents.indexOf(propertyName, start);
+  if (objectIndex < 0 || objectIndex > end) { return null; }
+
+  // find first ':'
+  let objectStartInedx = objectIndex + propertyName.length;
+
+  // Checking case of "property-name"
+  if (objectIndex > 0 && contents.length > objectStartInedx &&
+      contents[objectIndex - 1] === '"' && contents[objectStartInedx] === '"') { objectStartInedx++; }
+
+  while (contents.length > objectStartInedx && /\s|:/.test(contents[objectStartInedx])) { objectStartInedx++; }
+
+  // find first '{'
+  while (contents.length > objectStartInedx && /\s/.test(contents[objectStartInedx])) { objectStartInedx++; }
+
+  // Check that the start of the object is a '{' character
+  if (contents.length <= objectStartInedx) { return null; }
+
+  let findStart = '{';
+  let findEnd = '}';
+  let findType = '{';
+  switch (contents[objectStartInedx]) {
+    case '{':
+      findStart = '{';
+      findEnd = '}';
+      findType = 'brackets';
+      break;
+    case '[':
+      findStart = '[';
+      findEnd = ']';
+      findType = 'brackets';
+      break;
+    case '"':
+      findStart = '"';
+      findEnd = '"';
+      findType = 'string';
+      break;
+  }
+
+  // count '{' + '}' until I get to 0
+  let objectEndIndex = objectStartInedx;
+  if (findType === 'brackets') {
+    let brackets = 1;
+    let toggleString = false;
+    let toggleStringA = false;
+    let toggleStringB = false;
+    while (brackets > 0 && contents.length > objectEndIndex) {
+      switch (contents[++objectEndIndex]) {
+        case findStart:
+          if (!toggleString) { brackets++; }
+          break;
+        case findEnd:
+        if (!toggleString) { brackets--; }
+          break;
+        case '"':
+          if (!toggleStringB) { 
+            toggleStringA = !toggleStringA; 
+            toggleString = toggleStringA || toggleStringB;
+          }
+          break;
+        case '\'':
+          if (!toggleStringA) { 
+            toggleStringB = !toggleStringB; 
+            toggleString = toggleStringA || toggleStringB;
+          }
+          break;
+      }
+    }
+  } else {
+    while (contents.length > objectEndIndex && 
+          (contents[++objectEndIndex] !== '"' || contents[objectEndIndex] === '\\'));
+  }
+
+  // Check that the end of the object is a '}' character
+  if (contents.length <= objectEndIndex || contents[objectEndIndex] !== findEnd) { return null; }
+  
+  objectStartInedx++;
+  if (mask.indexOf('|') >= 0) {
+    return extractValueFromJSONString(contents, mask.substr(mask.indexOf('|') + 1), objectStartInedx, objectEndIndex);
+  }
+
+  // take string part and return it
+  return {
+    value: contents.substring(objectStartInedx, objectEndIndex),
+    start: objectStartInedx,
+    end: objectEndIndex
+  };
+}
+
 function maskString(contents, unmask, maskRequirements, keyName) {
 
-  let maskRegexValue = null;
-  let currentObject = maskRequirements || resourceFieldProvider.MASKING_REQUIREMENTS;
-  let replacableObject = false;
 
-  switch (currentObject.type) {
-    case 'object':
-      maskRegexValue = '\\s*"?' + keyName + '"?:\\s*{(.*)}';
-      break;
-    case 'array':
-      maskRegexValue = '\\s*"?' + keyName + '"?:\\s*[(.*)]';
-      break;
-    case 'string':
-      maskRegexValue = '\\s*"?' + keyName + '"?:\\s*"(.*)"';
-      replacableObject = true;
-      break;
-  }
+  let maskedContent = contents;
+  resourceFieldProvider.MASKING_REQUIREMENTS.forEach(masker => {
+    
+    let valueData = extractValueFromJSONString(maskedContent, masker);
+    if (!valueData) { return; }
+    
+    let maskString = resourceFieldProvider.MASK_STRING;
+    if (unmask) {
 
-  // Focus searches only on relevant part from regex
-  let toReplace = null;
-  let toUnmask = null;
-  if (maskRegexValue && unmask) {
-    let maskRegex = new RegExp(maskRegexValue, 'gim');
-    toUnmask = extractUnmaskExpression(unmask, maskRegex, replacableObject);
-    if (!toUnmask) { return null; }
-  }
+      // The user updated the value, no need to unmask
+      if (valueData.value !== resourceFieldProvider.MASK_STRING) { return; }
 
-  if (maskRegexValue) {
-    let maskRegex = new RegExp(maskRegexValue, 'gim');
-    let mask = unmask && toUnmask || currentObject.mask;
-    toReplace = extractExpression(contents, maskRegex, replacableObject, mask);
-    if (replacableObject) { return toReplace; }
-    if (!toReplace) { return null; }
-  }
-  
-  // Mask child objects
-  let maskedContent = toReplace || contents;
-  let unmakedContent = toUnmask || unmask;
-  let shouldReplace = false;
-  for (let key in currentObject.mask) {
-    let result = maskString(maskedContent, unmakedContent, currentObject.mask[key], key);
-    if (result) {
-      maskedContent = result;
-      shouldReplace = true;
+      let unmaskValueData = extractValueFromJSONString(unmask, masker);
+      if (!unmaskValueData) { return; }
+      maskString = unmaskValueData.value;
     }
-  }
-  
-  // Replace maskedContent in parent string...
-  if (shouldReplace) {
-    if (currentObject.type === 'root') {
-      return maskedContent;
-    }
-    return contents.replace(toReplace, maskedContent);
-  }
 
-  // No replace has taken place
-  return null;
+    // Replace old value with masked value
+    maskedContent = maskedContent.substr(0, valueData.start) + maskString + maskedContent.substr(valueData.end);
+  });
+
+  return maskedContent;
 }
 
 function maskFileContent(contents) {
@@ -129,8 +193,8 @@ function maskFileContent(contents) {
 
 function unmaskFileContent(contents, filePath) {
   let unmaskContent = getFileContents(filePath, false);
-  let unmadkedContents = maskString(contents, unmaskContent);
-  return unmadkedContents ? unmadkedContents : contents;
+  let unmaskedContents = maskString(contents, unmaskContent);
+  return unmaskedContents ? unmaskedContents : contents;
 }
 
 function getFileContents(filePath, mask) {
