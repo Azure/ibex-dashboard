@@ -1,11 +1,20 @@
-# Ibex Dashboard [![Build Status](https://travis-ci.org/CatalystCode/ibex-dashboard.png?branch=master)](https://travis-ci.org/CatalystCode/ibex-dashboard)
+# Ibex Dashboard [![Build Status](https://travis-ci.org/Azure/ibex-dashboard.png?branch=master)](https://travis-ci.org/Azure/ibex-dashboard)
 
-> Notice: This repo is in the process of moving into a new home. We will update once this happens in this page.
 
 [Ibex](http://aka.ms/ibex) is a dashboarding application that enables building dashboard and templates.
 It mainly supports **Application Insights** but data sources and visual components are easily extendable.
 
 ## Changes
+
+### Version 1.3 (January 10, 2018)
+
+Version 1.3 contains the following changes:
+
+* Moving application insights queries from client to server
+* Updated tests to answer some security risks presented by GitHub
+* Updated tests to accommodate the new approach
+* Added masking/unmasking of connection parameters (so that client side can only update API KEY but not see what it is)
+* Fixed small bugs with Firefox rendering
 
 ### Version 1.2 (October 16, 2017)
 Version 1.2 breaks the persitency paths of dashboard files and custom templates. If you are upgrading to this version, copy your private dashboards from `/dashboards` into `/dashboards/persistent/` as follows: 
@@ -25,7 +34,7 @@ Version 1.2 breaks the persitency paths of dashboard files and custom templates.
 ```bash
 npm install yarn -g
 
-git clone https://github.com/CatalystCode/ibex-dashboard
+git clone https://github.com/Azure/ibex-dashboard
 cd ibex-dashboard
 yarn
 yarn start
@@ -74,7 +83,7 @@ There are 3 ways to deploy to Azure:
 
 ### 2. Web App On Linux - Automated with Docker Hub
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FCatalystCode%2Fibex-dashboard%2Fmaster%2Fscripts%2Fdeployment%2Fwebapponlinux%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure%2Fibex-dashboard%2Fmaster%2Fscripts%2Fdeployment%2Fwebapponlinux%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
@@ -88,7 +97,7 @@ There are 3 ways to deploy to Azure:
 
 1. `docker build -t **image name** .`
 2. `docker run -d -e PORT=80 **image name** `
-3. Docker image is also available at Docker Hub - `docker pull catalystcode/ibex-dashboard`
+3. Docker image is also available at Docker Hub - `docker pull morshemesh/ibex-dashboard`
 
 # Application Insights Integration
 
@@ -111,8 +120,8 @@ The following steps explain how to connect **Application Insights** bot with you
 7. Under **AppId**/**ApiKey** set the values you created.
 
 ### Adding Application Insights instrumentation to your bot
-- [Instrumentation for Node.js bots](https://github.com/CatalystCode/botbuilder-instrumentation)
-- [Instrumentation for C# bots](https://github.com/CatalystCode/botbuilder-instrumentation-cs)
+- [Instrumentation for Node.js bots](https://github.com/Azure/botbuilder-instrumentation)
+- [Instrumentation for C# bots](https://github.com/Azure/botbuilder-instrumentation-cs)
 
 # Testing
 The test watcher is integrated into the create-react-app mechanism and runs tests related to files changes since the last commit.
