@@ -6,7 +6,7 @@ It mainly supports **Application Insights** but data sources and visual componen
 
 ## Changes
 
-### Version 1.3 (January 10, 2018)
+### Version 1.3 (January 22, 2018)
 
 Version 1.3 contains the following changes:
 
