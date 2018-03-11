@@ -5088,9 +5088,11 @@ react-leaflet-div-icon@^1.1.0:
   dependencies:
     prop-types "^15.5.10"
 
-react-leaflet-markercluster@^1.1.7:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/react-leaflet-markercluster/-/react-leaflet-markercluster-1.1.7.tgz#d35dbdc076ec87f69a1ff8b83b682c0d5ab34136"
+react-leaflet-markercluster@^1.1.8:
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/react-leaflet-markercluster/-/react-leaflet-markercluster-1.1.8.tgz#ba72acb2ae07a47a45b5f7287b73a9c2b26cc316"
+  dependencies:
+    deep-equal "^1.0.1"
 
 react-leaflet@^1.7.8:
   version "1.7.8"
