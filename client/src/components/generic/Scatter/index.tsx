@@ -1,0 +1,85 @@
+import * as React from 'react';
+import * as moment from 'moment';
+import * as _ from 'lodash';
+
+import Card from '../../Card';
+import ResponsiveContainer from '../../ResponsiveContainer';
+import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
+import { ScatterChart, Scatter as ScatterLine, XAxis, YAxis, ZAxis, CartesianGrid } from 'recharts';
+import { Tooltip, Legend } from 'recharts';
+
+import colors from '../../colors';
+const { ThemeColors } = colors;
+
+interface IScatterProps extends IGenericProps {
+  theme?: string[];
+  xDataKey?: string;
+  yDataKey?: string;
+  zDataKey?: string;
+  zRange?: number[];
+}
+
+interface IScatterState extends IGenericState {
+}
+
+export default class Scatter extends GenericComponent<IScatterProps, IScatterState> {
+
+  static defaultProps = {
+    xDataKey: 'x',
+    yDataKey: 'y',
+    zDataKey: 'z',
+    zRange: [10, 1000]
+  };
+
+  render() {
+    var { groupedValues } = this.state;
+    var { id, title, subtitle, theme, props, layout } = this.props;
+    var { scatterProps, groupTitles } = props;
+
+    var { xDataKey, yDataKey, zDataKey, zRange } = this.props.props;
+    if (xDataKey === undefined) { xDataKey = Scatter.defaultProps.xDataKey; }
+    if (yDataKey === undefined) { yDataKey = Scatter.defaultProps.yDataKey; }
+    if (zDataKey === undefined) { zDataKey = Scatter.defaultProps.zDataKey; }
+    if (zRange === undefined) { zRange = Scatter.defaultProps.zRange; }
+
+    var themeColors = theme || ThemeColors;
+
+    let scatterLines = [];
+    let idx = 0;
+    if (groupedValues) {
+      Object.keys(groupedValues).forEach((key) => {
+        if (!key) {
+          return;
+        }
+        let values = groupedValues[key];
+        let line = (
+          <ScatterLine
+            key={idx}
+            name={key}
+            data={values}
+            fill={themeColors[idx % themeColors.length]}
+            stroke={themeColors[idx % themeColors.length]}
+          />
+        );
+        scatterLines.push(line);
+        idx += 1;
+      });
+    }
+
+    return (
+      <Card id={id} title={title} subtitle={subtitle}>
+        <ResponsiveContainer layout={layout}>
+          <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }} {...scatterProps}>
+            <XAxis dataKey={xDataKey} />
+            <YAxis dataKey={yDataKey} />
+            <ZAxis dataKey={zDataKey} range={zRange} />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+            <Legend />
+            {scatterLines}
+          </ScatterChart>
+        </ResponsiveContainer>
+      </Card>
+    );
+  }
+}

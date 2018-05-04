@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SetupActionsLoad 1`] = `
+Store {
+  "admins": Array [],
+  "allowHttp": false,
+  "clientID": "",
+  "clientSecret": "",
+  "enableAuthentication": false,
+  "issuer": "",
+  "loaded": true,
+  "redirectUrl": "",
+  "saveSuccess": true,
+  "stage": "",
+}
+`;
