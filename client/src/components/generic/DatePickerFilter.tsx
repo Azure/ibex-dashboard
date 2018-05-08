@@ -146,12 +146,8 @@ export default class DatePickerFilter extends GenericComponent<any, any> {
         const { title, subtitle, icon } = this.props;
         const { visible, selectedValue} = this.state;
 
-        const paperStyle = visible ?
-          classNames.menu.join(' ') + 'md-paper md-paper--1'
-          : classNames.menu.join(' ');
-        const labelStyle = visible ?
-          classNames.label.join(' ') + 'md-floating-label--active'
-          : classNames.label.join(' ');
+        const paperStyle = classNames.menu.join(' ') + (visible ? 'md-paper md-paper--1' : '');
+        const labelStyle = classNames.label.join(' ') + (visible ? 'md-floating-label--active' : '');
 
         const selectDateRange = selectedValue ? this.toPrettyDateRange(selectedValue) : (subtitle || 'Select range');
 
