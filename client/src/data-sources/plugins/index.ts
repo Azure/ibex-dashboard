@@ -5,6 +5,7 @@ import Azure from './Azure';
 import Constant from './Constant';
 import Sample from './Sample';
 import GraphQL from './GraphQL';
+import KustoQuery from './Kusto/Query';
 
 export default {
   'ApplicationInsights/Query': ApplicationInsightsQuery,
@@ -13,5 +14,6 @@ export default {
   'Constant': Constant,
   'BotFramework/DirectLine': BotFrameworkDirectLine,
   'Sample': Sample,
-  'GraphQL': GraphQL
+  'GraphQL': GraphQL,
+  'Kusto/Query': KustoQuery
 };

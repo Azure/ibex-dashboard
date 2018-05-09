@@ -8,6 +8,7 @@ import RadarChartCard from './RadarChartCard';
 import RadialBarChartCard from './RadialBarChartCard';
 import SimpleRadialBarChartCard from './SimpleRadialBarChartCard';
 import MapData from './MapData';
+import HeatMap from './HeatMap';
 // filters
 import TextFilter from './TextFilter';
 import CheckboxFilter from './CheckboxFilter';
@@ -32,6 +33,7 @@ export default {
   Detail,
   SplitPanel,
   MapData,
+  HeatMap,
   RadarChartCard,
   RadialBarChartCard,
   SimpleRadialBarChartCard,

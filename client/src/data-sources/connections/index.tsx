@@ -5,6 +5,7 @@ import GraphQLConnection from './graphql';
 import BotFrameworkConnection from './bot-framework';
 import CosmosDBConnection from './cosmos-db';
 import AzureConnection from './azure';
+import Kusto from './kusto';
 import { IConnection } from './Connection';
 
 var connectionTypes = [ 
@@ -12,7 +13,8 @@ var connectionTypes = [
   GraphQLConnection,
   AzureConnection, 
   CosmosDBConnection, 
-  BotFrameworkConnection ];
+  BotFrameworkConnection,
+  Kusto ];
 
 var connections: IDict<IConnection> = {};
 connectionTypes.forEach(connectionType => {

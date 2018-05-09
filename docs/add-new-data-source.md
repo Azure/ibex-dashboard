@@ -49,7 +49,7 @@ class NewConnectionEditor extends ConnectionEditor<IConnectionProps, any> {
 }
 ```
 
-Then, do to `/client/src/data-sources/connections/index.ts` and add your new connection type:
+Then, go to `/client/src/data-sources/connections/index.ts` and add your new connection type:
 
 ```ts
 import NewConnection from './new-connection';
@@ -171,6 +171,21 @@ import NewDataSource from './NewDataSource';
 export default {
   ...,
   'NewDataSource': NewDataSource
+};
+
+```
+
+```
+Last, to add this data source to the available data sources, edit the following file:
+
+`/client/src/data-sources/plugins/PlugingsMapping.ts`
+
+```ts
+import Constant from './Constant/index';
+
+export default {
+  ...,
+  'NewDataSource': 'NewDataSource'
 };
 
 ```

@@ -8,3 +8,4 @@ export * from './formats/scorecard';
 export * from './formats/timeline';
 export * from './formats/timespan';
 export * from './formats/filtered-samples';
+export * from './formats/heatMap';

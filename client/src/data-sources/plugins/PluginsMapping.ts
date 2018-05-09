@@ -8,4 +8,5 @@ export default {
   'Sample': 'Sample',
   'BotFramework/DirectLine': 'BotFramework/DirectLine',
   'GraphQL': 'GraphQL',
+  'Kusto/Query': 'Kusto/Query'
 };

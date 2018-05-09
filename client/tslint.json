@@ -17,7 +17,7 @@
     "eofline": false,
     "forin": true,
     "indent": [ true, "spaces" ],
-    "interface-name": [true],
+    "interface-name": [false],
     "jsdoc-format": true,
     "jsx-alignment": false,
     "jsx-no-lambda": false,
