@@ -24,5 +24,6 @@ export function heatMap(
 
     let result = {};
     result[prefix + 'values'] = values;
+    
     return result;
 }

@@ -14,7 +14,8 @@ export default class XLabels extends React.Component<XLabelsProps> {
       <div style={{display: 'flex'}}>
         <FixedBox width={width} />
         {labels.map(x => (
-          <div key={x} style={{flex: 1, textAlign: 'center'}}>
+          <div key={x} style={{flex: 1, textAlign: 'center', transform: 'rotate(-45deg)', marginTop: '16px', 
+                               marginLeft: '-34px'}}>
             {x}
           </div>
         ))}

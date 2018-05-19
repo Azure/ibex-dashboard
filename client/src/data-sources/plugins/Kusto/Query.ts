@@ -51,7 +51,7 @@ export default class KustoQuery extends DataSourcePlugin<IQueryParams> {
 
     const params = this._props.params;
     const query: string = this.compileQuery(params.query, dependencies);
-    const calculated = this._props.calculated;
+    const calculated = params.calculated;
 
     let returnedResults = {
       values: null
@@ -78,9 +78,8 @@ export default class KustoQuery extends DataSourcePlugin<IQueryParams> {
             returnedResults.values = parsedKustoResponse[0];
 
             // Extracting calculated values
-            let calc: any = calculated;
-            if (typeof calc === 'function') {
-              let additionalValues = calc(parsedKustoResponse[0]) || {};
+            if (typeof params.calculated === 'function') {
+              let additionalValues = params.calculated(parsedKustoResponse[0]) || {};
               Object.assign(returnedResults, additionalValues);
             }
             

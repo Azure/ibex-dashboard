@@ -1,4 +1,5 @@
 import * as React from 'react';
+import CircularProgress from 'react-md/lib/Progress/CircularProgress';
 
 import Card from '../../Card';
 import { GenericComponent, IGenericProps, IGenericState } from '../GenericComponent';
@@ -6,8 +7,6 @@ import HeatMapImp, { HeatMapCellData } from './HeatMapImp';
 
 interface HeatMapProps extends IGenericProps {
   props: {
-    xLabels: (string | number)[];
-    yLabels: (string | number)[];
     background?: string;
     height?: number;
     xLabelWidth?: number;
@@ -18,40 +17,43 @@ interface HeatMapProps extends IGenericProps {
 
 interface HeatMapState extends IGenericState {
   values: HeatMapCellData[][];
+  xLabels: (string | number)[];
+  yLabels: (string | number)[];
 }
 
-export default class HeatMap extends React.Component<HeatMapProps, HeatMapState> {
+export default class HeatMap extends GenericComponent<HeatMapProps, HeatMapState> {
   static fromSource(source: string) {
     return {
       values: GenericComponent.sourceFormat(source, 'values'),
+      xLabels: GenericComponent.sourceFormat(source, 'xLabels'),
+      yLabels: GenericComponent.sourceFormat(source, 'yLabels'),
     };
   }
 
   constructor(props: any) {
     super(props);
 
-    const xLabels = new Array(24).fill(0).map((_, i) => `${i}`);
-    const yLabels = ['Sun', 'Mon', 'Tue'];
-    const data = new Array(yLabels.length)
-      .fill(0)
-      .map(() => new Array(xLabels.length).fill({}).map(() => { return {
-        value: Math.floor(Math.random() * 100),
-        label: 'C',
-        color: 'red'
-      } as HeatMapCellData;
-      }));
+    this.handleClick = this.handleClick.bind(this);
 
     this.state = {
-      values: data
+      values: undefined,
+      xLabels: [],
+      yLabels: []
     };
   }
 
+  handleClick(heatmapCell: HeatMapCellData) {
+    this.trigger('onHeatMapCellClick', heatmapCell);
+  }
+
   render() {
-    let { values } = this.state;
+    let { values, xLabels, yLabels } = this.state;
     let { id, title, subtitle, props } = this.props;
     let { background, height, xLabelWidth, onClick, tooltip } = props;
-    const xLabels = new Array(24).fill(0).map((_, i) => `${i}`);
-    const yLabels = ['Sun', 'Mon', 'Tue'];
+
+    if (!values || !values.length) {
+        return <CircularProgress key="loading" id="spinner" />;
+    }
 
     return (
 
@@ -60,6 +62,7 @@ export default class HeatMap extends React.Component<HeatMapProps, HeatMapState>
           data={values}
           xLabels={xLabels}
           yLabels={yLabels}
+          onClick={this.handleClick}
         />
       </Card>
     );

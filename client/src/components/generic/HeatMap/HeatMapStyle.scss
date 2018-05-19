@@ -1,0 +1,32 @@
+.dataGrid {
+  .lineTitle {
+    text-align: right;
+    padding-right: 5px;
+    font-size: 11px;
+    width: 95px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lineContainer {
+    display: flex;
+    width: 100%;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .cell {
+    margin: '0px 0px 0 0';
+    flex: 1;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0 6px black, 0 0 3px black;
+    fill: white;
+    text-rendering: geometricPrecision;
+    font-weight: bold;
+    font-size: 11px;
+  }
+
+  .cell:hover {
+    background-color: rgb(175, 232, 255) !important;
+  }
+}

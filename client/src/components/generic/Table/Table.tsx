@@ -183,7 +183,6 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
     return (
       <Card id={id} 
             title={title}
-            hideTitle={true} 
             className={hideBorders ? 'hide-borders' : ''} 
             contentStyle={styles.autoscroll}>
         <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination" responsive={false}>
