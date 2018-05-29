@@ -70,16 +70,16 @@ export default class Navbar extends React.Component<any, any> {
     let navigationItems = [];
     let toolbarTitle = null;
     
-    // Add the query explorer item
+    // Add the query (query explorer) item
     navigationItems.push(
       <ListItem
         key={1001}
         component={Link}
-        href={'/queryExplorer'}
-        active={'/queryExplorer' === pathname}
+        href={'/query'}
+        active={'/query' === pathname}
         leftIcon={<FontIcon>{'search'}</FontIcon>}
         tileClassName="md-list-tile--mini"
-        primaryText={name || 'Dashboard'}
+        primaryText={name || 'Visualization'}
       />
     );
 

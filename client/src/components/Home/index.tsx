@@ -221,7 +221,7 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ fileName: value });
   }
 
-  onLoad(importedFileContent: any, uploadResult: string) {
+  onLoad(importedFileContent: File, uploadResult: string, event: Event) {
     const { name, size, type, lastModifiedDate } = importedFileContent;
     this.setState({ fileName: name.substr(0, name.indexOf('.')), content: uploadResult });
   }
@@ -233,7 +233,7 @@ export default class Home extends React.Component<any, IHomeState> {
     this.setState({ importVisible: false });
   }
 
-  setFile(importedFileContent: string) {
+  setFile(importedFileContent: File, event: Event) {
     this.setState({ importedFileContent });
   }
 

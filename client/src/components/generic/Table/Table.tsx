@@ -31,7 +31,7 @@ export interface ITableColumnProps {
   click?: string;
   color?: string;
   tooltip?: string;
-  tooltipPosition?: string;
+  tooltipPosition?: 'top' | 'right' | 'bottom' | 'left';
 }
 
 export interface ITableProps extends IGenericProps {
@@ -185,7 +185,7 @@ export default class Table extends GenericComponent<ITableProps, ITableState> {
             title={title}
             className={hideBorders ? 'hide-borders' : ''} 
             contentStyle={styles.autoscroll}>
-        <DataTable plain={!checkboxes} data={checkboxes} className={className} baseId="pagination" responsive={false}>
+        <DataTable plain={!checkboxes} className={className} baseId="pagination" responsive={false}>
           <TableHeader>
             <TableRow autoAdjust={false}>
               {cols.map((col, i) => (

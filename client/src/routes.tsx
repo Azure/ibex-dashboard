@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Setup from './pages/Setup';
+import QueryExplorer from './scenes/QueryExplorer';
 
 export default (
   <Route component={App}>
@@ -14,6 +15,7 @@ export default (
     <Route path="/dashboard" component={Dashboard} />
     <Route path="/dashboard/:id" component={Dashboard}/>
     <Route path="/setup" component={Setup} />
+    <Route path="/query" component={QueryExplorer} />
     <Route path="*" component={NotFound} />
   </Route>
 );

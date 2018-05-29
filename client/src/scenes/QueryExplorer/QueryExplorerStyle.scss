@@ -1,0 +1,7 @@
+.query-explorer-container {
+  height: 100vh;
+  
+  & > .connection-container {
+    display: flex;
+  }
+}

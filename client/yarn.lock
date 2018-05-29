@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@babel/runtime@^7.0.0-beta.42":
+  version "7.0.0-beta.47"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.0.0-beta.47.tgz#273f5e71629e80f6cbcd7507503848615e59f7e0"
+  dependencies:
+    core-js "^2.5.3"
+    regenerator-runtime "^0.11.1"
+
 "@types/alt@^0.16.32":
   version "0.16.34"
   resolved "https://registry.yarnpkg.com/@types/alt/-/alt-0.16.34.tgz#8097539b86912f24bf1841d5414a7408c98fc7b1"
@@ -535,7 +542,7 @@ babel-runtime@6.23.0:
     core-js "^2.4.0"
     regenerator-runtime "^0.10.0"
 
-babel-runtime@^6.20.0, babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0, babel-runtime@^6.6.1:
+babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.26.0, babel-runtime@^6.6.1:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   dependencies:
@@ -1193,6 +1200,10 @@ core-js@^1.0.0:
 core-js@^2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.0.tgz#569c050918be6486b3837552028ae0466b717086"
+
+core-js@^2.5.3:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.6.tgz#0fe6d45bf3cac3ac364a9d72de7576f4eb221b9d"
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -2031,6 +2042,18 @@ fbjs@0.1.0-alpha.7:
     core-js "^1.0.0"
     promise "^7.0.3"
     whatwg-fetch "^0.9.0"
+
+fbjs@^0.8.16:
+  version "0.8.16"
+  resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.16.tgz#5e67432f550dc41b572bf55847b8aca64e5337db"
+  dependencies:
+    core-js "^1.0.0"
+    isomorphic-fetch "^2.1.1"
+    loose-envify "^1.0.0"
+    object-assign "^4.1.0"
+    promise "^7.1.1"
+    setimmediate "^1.0.5"
+    ua-parser-js "^0.7.9"
 
 fbjs@^0.8.4, fbjs@^0.8.9:
   version "0.8.14"
@@ -3806,6 +3829,10 @@ moment@^2.10.6, moment@^2.14.1, moment@^2.18.0:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 
+monaco-editor@^0.13.1:
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.13.1.tgz#6b9ce20e4d1c945042d256825eb133cb23315a52"
+
 monaco-kusto@^0.0.10:
   version "0.0.10"
   resolved "https://1essharedassets.pkgs.visualstudio.com/_packaging/Kusto/npm/registry/monaco-kusto/-/monaco-kusto-0.0.10.tgz#afa6d1c5525dd60a1b6b45873fb3f23ef531268b"
@@ -4837,12 +4864,28 @@ promise@7.1.1, promise@^7.0.3, promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
+prop-types@15.6.0:
+  version "15.6.0"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.3.1"
+    object-assign "^4.1.1"
+
 prop-types@^15.5.10, prop-types@^15.5.4, prop-types@^15.5.6, prop-types@^15.5.8:
   version "15.5.10"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.5.10.tgz#2797dfc3126182e3a95e3dfbb2e893ddd7456154"
   dependencies:
     fbjs "^0.8.9"
     loose-envify "^1.3.1"
+
+prop-types@^15.6.0, prop-types@^15.6.1:
+  version "15.6.1"
+  resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.1.tgz#36644453564255ddda391191fb3a125cbdf654ca"
+  dependencies:
+    fbjs "^0.8.16"
+    loose-envify "^1.3.1"
+    object-assign "^4.1.1"
 
 propagate@0.4.0:
   version "0.4.0"
@@ -5069,13 +5112,13 @@ react-error-overlay@^1.0.8:
     settle-promise "1.0.0"
     source-map "0.5.6"
 
-react-event-listener@^0.4.5:
-  version "0.4.5"
-  resolved "https://registry.yarnpkg.com/react-event-listener/-/react-event-listener-0.4.5.tgz#e3e895a0970cf14ee8f890113af68197abf3d0b1"
+react-event-listener@^0.5.1:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/react-event-listener/-/react-event-listener-0.5.6.tgz#f9349fda4b7735fc6886ca403bdcfd6057e89ceb"
   dependencies:
-    babel-runtime "^6.20.0"
-    fbjs "^0.8.4"
-    prop-types "^15.5.4"
+    "@babel/runtime" "^7.0.0-beta.42"
+    fbjs "^0.8.16"
+    prop-types "^15.6.0"
     warning "^3.0.0"
 
 react-grid-layout@^0.14.7:
@@ -5116,18 +5159,25 @@ react-leaflet@^1.7.8:
     lodash-es "^4.0.0"
     warning "^3.0.0"
 
-react-md@^1.0.18:
-  version "1.0.19"
-  resolved "https://registry.yarnpkg.com/react-md/-/react-md-1.0.19.tgz#45d46b240435a008218121b5db8b0af71cf63ae8"
+react-md@^1.3.1:
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/react-md/-/react-md-1.3.1.tgz#4423610cc191b5ce3a6e322ace75c3aba610ebe9"
   dependencies:
     classnames "^2.2.5"
-    invariant "^2.2.1"
-    prop-types "^15.5.8"
+    prop-types "15.6.0"
     react-motion "^0.5.0"
     react-prop-types "^0.4.0"
-    react-swipeable-views "^0.12.1"
-    react-transition-group "^1.1.3"
+    react-swipeable-views "^0.12.8"
+    react-transition-group "^1.2.1"
     resize-observer-polyfill "^1.4.2"
+
+react-monaco-editor@^0.17.0:
+  version "0.17.0"
+  resolved "https://registry.yarnpkg.com/react-monaco-editor/-/react-monaco-editor-0.17.0.tgz#d8e79f797c5b7684079424693daec8ca1258bb51"
+  dependencies:
+    "@types/react" "*"
+    monaco-editor "^0.13.1"
+    prop-types "^15.6.1"
 
 react-motion@^0.5.0:
   version "0.5.0"
@@ -5220,38 +5270,48 @@ react-smooth@0.1.20:
     raf "^3.2.0"
     react-addons-transition-group "^0.14.0 || ^15.0.0"
 
-react-swipeable-views-core@^0.12.5:
-  version "0.12.5"
-  resolved "https://registry.yarnpkg.com/react-swipeable-views-core/-/react-swipeable-views-core-0.12.5.tgz#7113f3a5c84f85042447a7c49e3f2a206eab7931"
+react-swipeable-views-core@^0.12.11:
+  version "0.12.11"
+  resolved "https://registry.yarnpkg.com/react-swipeable-views-core/-/react-swipeable-views-core-0.12.11.tgz#3cf2b4daffbb36f9d69bd19bf5b2d5370b6b2c1b"
   dependencies:
     babel-runtime "^6.23.0"
     warning "^3.0.0"
 
-react-swipeable-views-utils@^0.12.5:
-  version "0.12.5"
-  resolved "https://registry.yarnpkg.com/react-swipeable-views-utils/-/react-swipeable-views-utils-0.12.5.tgz#878de2108c8fb5160cc3122de10c3ff741a28801"
+react-swipeable-views-utils@^0.12.13:
+  version "0.12.13"
+  resolved "https://registry.yarnpkg.com/react-swipeable-views-utils/-/react-swipeable-views-utils-0.12.13.tgz#fe102524180bf568f746e844c8d74b9cd3e7e0b8"
   dependencies:
     babel-runtime "^6.23.0"
     fbjs "^0.8.4"
     keycode "^2.1.7"
-    prop-types "^15.5.4"
-    react-event-listener "^0.4.5"
-    react-swipeable-views-core "^0.12.5"
+    prop-types "^15.6.0"
+    react-event-listener "^0.5.1"
+    react-swipeable-views-core "^0.12.11"
 
-react-swipeable-views@^0.12.1:
-  version "0.12.5"
-  resolved "https://registry.yarnpkg.com/react-swipeable-views/-/react-swipeable-views-0.12.5.tgz#ff43b35e05c56614bb63ab032769ec8fe9259b0e"
+react-swipeable-views@^0.12.8:
+  version "0.12.13"
+  resolved "https://registry.yarnpkg.com/react-swipeable-views/-/react-swipeable-views-0.12.13.tgz#247442dbe14922efe5ad6fe0297599c817600bf9"
   dependencies:
     babel-runtime "^6.23.0"
     dom-helpers "^3.2.1"
     prop-types "^15.5.4"
-    react-swipeable-views-core "^0.12.5"
-    react-swipeable-views-utils "^0.12.5"
+    react-swipeable-views-core "^0.12.11"
+    react-swipeable-views-utils "^0.12.13"
     warning "^3.0.0"
 
-react-transition-group@^1.1.3, react-transition-group@^1.2.0:
+react-transition-group@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-1.2.0.tgz#b51fc921b0c3835a7ef7c571c79fc82c73e9204f"
+  dependencies:
+    chain-function "^1.0.0"
+    dom-helpers "^3.2.0"
+    loose-envify "^1.3.1"
+    prop-types "^15.5.6"
+    warning "^3.0.0"
+
+react-transition-group@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/react-transition-group/-/react-transition-group-1.2.1.tgz#e11f72b257f921b213229a774df46612346c7ca6"
   dependencies:
     chain-function "^1.0.0"
     dom-helpers "^3.2.0"
@@ -5392,6 +5452,10 @@ regenerator-runtime@^0.10.0:
 regenerator-runtime@^0.11.0:
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.11.0.tgz#7e54fe5b5ccd5d6624ea6255c3473be090b802e1"
+
+regenerator-runtime@^0.11.1:
+  version "0.11.1"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
 
 regex-cache@^0.4.2:
   version "0.4.3"

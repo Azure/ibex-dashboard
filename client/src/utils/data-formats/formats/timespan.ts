@@ -52,7 +52,7 @@ export function timespan(
     'P90D';
 
   let granularity =
-    state.selectedValue === '24 hours' ? '5m' :
+    state.selectedValue === '24 hours' ? '1h' :
     state.selectedValue === '1 week' ? '1d' : '1d';
 
   let result = { 

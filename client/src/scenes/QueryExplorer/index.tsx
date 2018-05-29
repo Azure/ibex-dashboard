@@ -1,11 +1,3 @@
-import * as React from 'react';
+import QueryExplorer from './QueryExplorer';
 
-export default class QueryExplorer extends React.Component {
-  public render() {
-    return (
-      <div>
-        yalla
-      </div>
-    );
-  }
-}
+export default QueryExplorer;

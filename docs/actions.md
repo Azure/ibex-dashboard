@@ -38,7 +38,7 @@ Or
 
 # Examples
 
-## Updading selected values in filter
+## Updating selected values in filter
 
 ```ts
 {

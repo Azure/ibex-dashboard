@@ -9,5 +9,5 @@ interface KustoTable {
     DataType: string,
     ColumnType: string
   }[],
-  Rows: any[][]
+  Rows: {}[][]
 }

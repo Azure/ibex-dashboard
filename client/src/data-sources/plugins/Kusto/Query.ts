@@ -1,6 +1,8 @@
 import { DataSourcePlugin, IOptions } from '../DataSourcePlugin';
 import { getToken } from '../../../utils/authorization';
 import KustoConnection from '../../connections/kusto';
+import KustoClient from '../../../api/external/KustoClientApi';
+import * as KustoUtils from '../../../utils/kusto/kustoUtils';
 
 let connectionType = new KustoConnection();
 
@@ -16,6 +18,8 @@ export default class KustoQuery extends DataSourcePlugin<IQueryParams> {
   type = 'Kusto-Query';
   defaultProperty = 'values';
   connectionType = connectionType.type;
+
+  private kustoClient: KustoClient = new KustoClient();
 
   /**
    * @param options - Options object
@@ -58,39 +62,13 @@ export default class KustoQuery extends DataSourcePlugin<IQueryParams> {
     };
 
     return (dispatch) => {
-      getToken().then((token: string) => {
-        fetch(`https://${clusterName}.kusto.windows.net/v1/rest/query`, {
-          method: 'POST',
-          body: JSON.stringify({
-            'db': databaseName,
-            'csl': query,
-          }),
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Authorization': `Bearer ${token}`,
-          }
-        })
-        .then((response) => {
-          response.json().then((resultTables: KustoQueryResults) => {
-            let parsedKustoResponse = this.mapAllTables(resultTables);
-
-            // Assign the result table
-            returnedResults.values = parsedKustoResponse[0];
-
-            // Extracting calculated values
-            if (typeof params.calculated === 'function') {
-              let additionalValues = params.calculated(parsedKustoResponse[0]) || {};
-              Object.assign(returnedResults, additionalValues);
-            }
-            
-            return dispatch(returnedResults);
-          });
-        })
-        .catch((reason) => {
-          // tslint:disable-next-line:no-console
-          console.log(reason);
-        });
-      }); 
+      this.kustoClient.executeQuery(clusterName, databaseName, query)
+      .then((resultTables: KustoQueryResults) => {
+        return dispatch(KustoUtils.convertKustoResultsToJsonObjects(resultTables));
+      })
+      .catch((reason) => 
+        // tslint:disable-next-line:no-console
+        console.log(reason));
     };
   }
 
@@ -107,29 +85,5 @@ export default class KustoQuery extends DataSourcePlugin<IQueryParams> {
   }
 
   private validateParams(params: IQueryParams): void {
-  }
-
-  private mapAllTables(results: KustoQueryResults): {}[][] {
-    if (!results || !results.Tables || !results.Tables.length) {
-      return [];
-    }
-
-    return results.Tables.map((table, idx) => this.mapTable(table));
-  }
-
-  /**
-   * Map the Kusto results array into JSON objects
-   * @param table Results table to be mapped into JSON object
-   */
-  private mapTable(table: KustoTable): Array<{}> {
-    return table.Rows.map((rowValues, rowIdx) => {
-      let row = {};
-
-      table.Columns.forEach((col, idx) => {
-        row[col.ColumnName] = rowValues[idx];
-      });
-
-      return row;
-    });
   }
 }

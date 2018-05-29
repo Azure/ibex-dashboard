@@ -5,7 +5,9 @@ import injectTooltip from 'react-md/lib/Tooltips';
 // Material icons shouldn't have any other children other than the child string and
 // it gets converted into a span if the tooltip is added, so we add a container
 // around the two.
-const TooltipFontIcon = injectTooltip(({
+const TooltipFontIcon = injectTooltip<{ forceIconFontSize?: boolean, iconClassName?: string, className?: string,
+                                        forceIconSize?: number, style?: any, iconStyle?: React.CSSProperties,
+                                        children?: React.ReactNode, tooltip?: React.ReactNode }>(({
   children, iconClassName, className, tooltip, forceIconFontSize, forceIconSize, style, iconStyle, ...props }) => (
 
   <div {...props} style={style} className={(className || '') + ' inline-rel-container'}>
