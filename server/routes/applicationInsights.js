@@ -23,7 +23,7 @@ router.post('/query', (req, res) => {
   // 1. Get the apiKey from the dashboard
   let apiKey = getApiKeyFromConnection(dashboard, appId);
   
-  var url = `${appInsightsUri}/${appId}/query?timespan=${queryTimespan}`;
+  var url = `${appInsightsUri}/${appId}/query?timespan=${encodeURIComponent(queryTimespan)}`;
   const requestOptions = {
     method: 'POST',
     json: true,
