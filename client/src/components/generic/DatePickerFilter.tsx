@@ -7,6 +7,15 @@ import { DateRange } from 'react-date-range';
 import * as moment from 'moment';
 
 const defaultRanges = {
+  'Today': {
+    startDate: function startDate(now: moment.Moment) {
+      return now;
+    },
+    endDate: function endDate(now: moment.Moment) {
+      return now;
+    }
+  },
+
   'Yesterday': {
     startDate: function startDate(now: moment.Moment) {
       return now.add(-1, 'days');
@@ -21,7 +30,7 @@ const defaultRanges = {
       return now.add(-7, 'days');
     },
     endDate: function endDate(now: moment.Moment) {
-      return now.add(-1, 'days');
+      return now;
     }
   },
 
@@ -30,7 +39,16 @@ const defaultRanges = {
       return now.add(-30, 'days');
     },
     endDate: function endDate(now: moment.Moment) {
-      return now.add(-1, 'days');
+      return now;
+    }
+  },
+
+  'Last 90 Days': {
+    startDate: function startDate(now: moment.Moment) {
+      return now.add(-90, 'days');
+    },
+    endDate: function endDate(now: moment.Moment) {
+      return now;
     }
   }
 };
@@ -70,22 +88,23 @@ const classNames = {
 export default class DatePickerFilter extends GenericComponent<any, any> {
 
     static defaultProps = {
-        title: 'Timespan',
-        subtitle: 'Select range',
-        icon: 'more_vert'
+      title: 'Timespan',
+      subtitle: 'Select range',
+      icon: 'more_vert'
     };
 
     constructor(props: any) {
-        super(props);
+      super(props);
 
-        this.handleSelect = this.handleSelect.bind(this);
-        this.showOverlay = this.showOverlay.bind(this);
-        this.hideOverlay = this.hideOverlay.bind(this);
+      this.handleSelect = this.handleSelect.bind(this);
+      this.showOverlay = this.showOverlay.bind(this);
+      this.hideOverlay = this.hideOverlay.bind(this);
+      this.hideOverlayCancel = this.hideOverlayCancel.bind(this);
 
-        this.state = {
-            visible: false,
-            selectedValue: ''
-        };
+      this.state = {
+        visible: false,
+        selectedValue: ''
+      };
     }
 
     /**
@@ -93,26 +112,28 @@ export default class DatePickerFilter extends GenericComponent<any, any> {
      * @param {Object} newDateRange
      */
     handleSelect(newDateRange: any) {
-        let selectedValue = this.toISODateRange(newDateRange);
+      let selectedValue = this.toISODateRange(newDateRange);
 
-        if (this.state.selectedValue !== selectedValue) {
-            this.setState({
-                selectedValue
-            });
-        }
+      if (this.state.selectedValue !== selectedValue) {
+        this.setState({
+            selectedValue
+        });
+      }
     }
 
     showOverlay() {
-        this.setState({
-            visible: true
-        });
+      this.setState({
+          visible: true
+      });
     }
 
     hideOverlay() {
-        this.setState({
-            visible: false
-        });
-        this.trigger('onChange', this.state.selectedValue);
+      this.setState({ visible: false });
+      this.trigger('onChange', this.state.selectedValue);
+    }
+
+    hideOverlayCancel() {
+      this.setState({ visible: false });
     }
 
     /**
@@ -124,10 +145,10 @@ export default class DatePickerFilter extends GenericComponent<any, any> {
      * @returns {string} ISO8601 Date interval string
      */
     toISODateRange(dateRange: any) {
-        let {startDate, endDate} = dateRange;
-        let startDateISOString = `${startDate.format('YYYY-MM-DD')}T00:00:00.000Z`;
-        let endDateISOString = `${endDate.format('YYYY-MM-DD')}T23:59:59.999Z`;
-        return startDateISOString + '/' + endDateISOString;
+      let {startDate, endDate} = dateRange;
+      let startDateISOString = `${startDate.format('YYYY-MM-DD')}T00:00:00.000Z`;
+      let endDateISOString = `${endDate.format('YYYY-MM-DD')}T23:59:59.999Z`;
+      return startDateISOString + '/' + endDateISOString;
     }
 
     /**
@@ -137,115 +158,120 @@ export default class DatePickerFilter extends GenericComponent<any, any> {
      * @returns {string}
      */
     toPrettyDateRange(selectedValue: string) {
-        let dates = selectedValue.split('/');
-        return dates[0].split('T')[0] + ' to ' + dates[1].split('T')[0];
+      let dates = selectedValue.split('/');
+      return dates[0].split('T')[0] + ' to ' + dates[1].split('T')[0];
     }
 
     render() {
 
-        const { title, subtitle, icon } = this.props;
-        const { visible, selectedValue} = this.state;
+      const { title, subtitle, icon } = this.props;
+      const { visible, selectedValue} = this.state;
 
-        const paperStyle = classNames.menu.join(' ') + (visible ? 'md-paper md-paper--1' : '');
-        const labelStyle = classNames.label.join(' ') + (visible ? 'md-floating-label--active' : '');
+      const paperStyle = classNames.menu.join(' ') + (visible ? 'md-paper md-paper--1' : '');
+      const labelStyle = classNames.label.join(' ') + (visible ? 'md-floating-label--active' : '');
 
-        const selectDateRange = selectedValue ? this.toPrettyDateRange(selectedValue) : (subtitle || 'Select range');
+      const selectDateRange = selectedValue ? this.toPrettyDateRange(selectedValue) : (subtitle || 'Select range');
 
-        let startDate = selectedValue ? moment.utc(selectedValue.split('/')[0]) : '';
-        let endDate = selectedValue ? moment.utc(selectedValue.split('/')[1]) : '';
+      let startDate = selectedValue ? moment.utc(selectedValue.split('/')[0]) : '';
+      let endDate = selectedValue ? moment.utc(selectedValue.split('/')[1]) : '';
 
-        // Application insights only store the information for the last 90 days
-        let minDate = moment().subtract(90, 'days');
-        let maxDate = moment().add(1, 'days');
+      // Application insights only store the information for the last 90 days
+      let minDate = moment().subtract(90, 'days');
+      let maxDate = moment().add(1, 'days');
 
-        let theme = {
-            Calendar: {
-                width       : 300,
-            },
-            PredefinedRanges: {
-                marginLeft  : 20,
-                marginRight : 20,
-                marginTop   : 10
-            },
-            PredefinedRangesItem: {
-                fontSize    : 14,
-                textAlign   : 'center',
-            },
-            PredefinedRangesItemActive: {
-                color       : '#03a9f4',
-            },
-            MonthAndYear    : {
-                background  : '#03a9f4',
-                color       : '#fff',
-                fontSize    : 14,
-                fontWeight  : 'bold'
-            },
-            MonthButton     : {
-                background  : '#03a9f4'
-            },
-            Day             : {
-                transition  : 'transform .1s ease, box-shadow .1s ease, background .1s ease',
-                fontSize    : 14,
-            },
-            DaySelected    : {
-                background   : '#03a9f4'
-            },
-            DayActive    : {
-                background   : '#03a9f4',
-                boxShadow    : 'none'
-            },
-            DayInRange     : {
-                background   : '#b3e5fc',
-                color        : '#000'
-            },
-            DayHover       : {
-                background   : '#ffffff',
-                transform    : 'scale(1.1) translateY(-10%)',
-                boxShadow    : '0 2px 4px rgba(0, 0, 0, 0.4)'
-            },
+      let theme = {
+        Calendar: {
+          width       : 300,
+        },
+        PredefinedRanges: {
+          marginLeft  : 20,
+          marginRight : 20,
+          marginTop   : 10
+        },
+        PredefinedRangesItem: {
+          fontSize    : 14,
+          textAlign   : 'center',
+        },
+        PredefinedRangesItemActive: {
+          color       : '#03a9f4',
+        },
+        MonthAndYear    : {
+          background  : '#03a9f4',
+          color       : '#fff',
+          fontSize    : 14,
+          fontWeight  : 'bold'
+        },
+        MonthButton     : {
+          background  : '#03a9f4'
+        },
+        Day             : {
+          transition  : 'transform .1s ease, box-shadow .1s ease, background .1s ease',
+          fontSize    : 14,
+        },
+        DaySelected    : {
+          background   : '#03a9f4'
+        },
+        DayActive    : {
+          background   : '#03a9f4',
+          boxShadow    : 'none'
+        },
+        DayInRange     : {
+          background   : '#b3e5fc',
+          color        : '#000'
+        },
+        DayHover       : {
+          background   : '#ffffff',
+          transform    : 'scale(1.1) translateY(-10%)',
+          boxShadow    : '0 2px 4px rgba(0, 0, 0, 0.4)'
+        }
+      };
 
-        };
+      const actions = [
+        { primary: true, children: 'done', onClick: this.hideOverlay },
+        { secondary: true, children: 'clear', onClick: this.hideOverlayCancel }
+      ];
 
-        return (
-            <div className="filters">
+      return (
+        <div className="filters">
 
-                <AccessibleFakeInkedButton
-                    className={paperStyle}
-                    onClick={this.showOverlay}
-                    aria-haspopup="true"
-                    aria-expanded={visible}
-                    style={styles.button}
-                >
-                    <label className={labelStyle}>{title}</label>
-                    <div className="md-icon-separator md-text-field md-select-field--btn md-text-field--floating-margin">
-                        <span className="md-value md-icon-text">{selectDateRange}</span>
-                        <FontIcon>arrow_drop_down</FontIcon>
-                    </div>
-                </AccessibleFakeInkedButton>
-
-                <DialogContainer
-                    id="dateRangePicker"
-                    onHide={this.hideOverlay}
-                    visible={visible}
-                    aria-label="Daterange Picker"
-                >
-                    <DateRange
-                        linkedCalendars={true}
-                        calendars={1}
-                        startDate={startDate}
-                        endDate={endDate}
-                        minDate={minDate}
-                        maxDate={maxDate}
-                        // monday as first day of week
-                        firstDayOfWeek={1}
-                        ranges={defaultRanges}
-                        onInit={this.handleSelect}
-                        onChange={this.handleSelect}
-                        theme={theme}
-                    />
-
-                </DialogContainer>
+          <AccessibleFakeInkedButton
+              className={paperStyle}
+              onClick={this.showOverlay}
+              aria-haspopup="true"
+              aria-expanded={visible}
+              style={styles.button}
+          >
+            <label className={labelStyle}>{title}</label>
+            <div className="md-icon-separator md-text-field md-select-field--btn md-text-field--floating-margin">
+              <span className="md-value md-icon-text">{selectDateRange}</span>
+              <FontIcon>arrow_drop_down</FontIcon>
             </div>
-        );
+          </AccessibleFakeInkedButton>
+
+          <DialogContainer
+              id="dateRangePicker"
+              onHide={this.hideOverlay}
+              visible={visible}
+              actions={actions}
+              aria-label="Daterange Picker"
+          >
+            <DateRange
+                linkedCalendars={true}
+                calendars={1}
+                startDate={startDate}
+                endDate={endDate}
+                minDate={minDate}
+                maxDate={maxDate}
+                // monday as first day of week
+                firstDayOfWeek={1}
+                ranges={defaultRanges}
+                onInit={this.handleSelect}
+                onChange={this.handleSelect}
+                theme={theme}
+            />
+
+          </DialogContainer>
+        </div>
+      );
     }
 }
