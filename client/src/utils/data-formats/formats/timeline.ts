@@ -97,7 +97,7 @@ export function timeline(
 
   let result = {};
   result[prefix + 'graphData'] = timelineValues;
-  result[prefix + 'timeFormat'] = (timespan.indexOf("hour") > 0 ? 'hour' : 'date');
+  result[prefix + 'timeFormat'] = ((timespan || "").indexOf("hour") > 0 ? 'hour' : 'date');
   result[prefix + 'lines'] = lines;
   result[prefix + 'pieData'] = usage;
 

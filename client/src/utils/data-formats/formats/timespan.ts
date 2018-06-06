@@ -15,7 +15,7 @@ interface IQueryTimespan {
   granularity: string;
 }
 
-const timespanRegex = /^(\d+) (hour|day|week|month)s?$/g;
+const timespanRegex = /^(\d+) (hour|day|week|month)s?$/;
 function parseTimespan(timespanText: string) : IQueryTimespan {
   var match = timespanRegex.exec(timespanText);
   if (!match) {
