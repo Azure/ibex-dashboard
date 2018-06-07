@@ -25,6 +25,7 @@ interface ICardSettingsStoreState {
   selectedIndex: number;
   exportData?: IExportData[];
   result?: string;
+  query?: string;
 }
 
 class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> implements ICardSettingsStoreState {
@@ -36,6 +37,7 @@ class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> impl
   selectedIndex: number;
   exportData?: IExportData[];
   result?: string;
+  query?: string;
 
   constructor() {
     super();
@@ -49,6 +51,7 @@ class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> impl
       selectIndex: cardSettingsActions.selectIndex,
       getExportData: cardSettingsActions.getExportData,
       downloadData: cardSettingsActions.downloadData,
+      setQueryText: cardSettingsActions.setQueryText
     });
   }
 
@@ -114,6 +117,10 @@ class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> impl
           return true;
         }
       });
+  }
+
+  setQueryText(query: string) {
+    this.query = query;
   }
 
   private getElement(elements: IElement[], index: number) {
@@ -247,7 +254,7 @@ class CardSettingsStore extends AbstractStoreModel<ICardSettingsStoreState> impl
             const resolvedValues = !property ? JSON.parse(JSON.stringify(datasources[datasourceId].store.state)) 
               : datasources[datasourceId].store.state[property];
             let append = {};
-            append[dependenciesKey] = resolvedValues;
+            append[dependenciesKey] = `$${dependenciesKey}$`;
             Object.assign(queryDependencies, append);
           }
         });

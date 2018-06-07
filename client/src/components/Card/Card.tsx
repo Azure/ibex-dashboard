@@ -1,10 +1,17 @@
 import * as React from 'react';
 import { Media } from 'react-md/lib/Media';
 import { Card as MDCard, CardTitle } from 'react-md/lib/Cards';
-import TooltipFontIcon from '../Tooltip/TooltipFontIcon';
+import { DropdownMenu } from 'react-md/lib/Menus';
+import { ListItem } from 'react-md/lib/Lists';
 import Button from 'react-md/lib/Buttons';
+import Dialog from 'react-md/lib/Dialogs';
+
+import TooltipFontIcon from '../Tooltip/TooltipFontIcon';
 import { Settings, SettingsActions } from './Settings';
 import { SpinnerActions } from '../Spinner';
+import ConfigurationsStore from '../../stores/ConfigurationsStore';
+import configurationsStore from '../../stores/ConfigurationsStore';
+import configurationsActions from '../../actions/ConfigurationsActions';
 
 const styles = {
   noTitle: {
@@ -32,6 +39,7 @@ interface ICardProps {
 
 interface ICardState {
   hover: boolean;
+  askDeleteElement: boolean;
 }
 
 export default class Card extends React.PureComponent<ICardProps, ICardState> { 
@@ -42,15 +50,19 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
 
   state = {
     hover: false,
+    askDeleteElement: false
   };
 
   constructor(props: ICardProps) {
     super(props);
+
+    this.showAskToDeleteCard = this.showAskToDeleteCard.bind(this);
+    this.hideAskToDeleteCard = this.hideAskToDeleteCard.bind(this);
   }
 
   render() {
     const { id, title, subtitle, children, className, style, titleStyle, contentStyle, hideTitle } = this.props;
-    const { hover } = this.state;
+    const { hover, askDeleteElement } = this.state;
 
     let elements: React.ReactNode[] = [];
     if (title && !hideTitle) {
@@ -83,6 +95,24 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
       Object.assign(cardTitleStyle, styles.noTitle);
       Object.assign(cardContentStyle, styles.noTitleContent);
     }
+
+    const askDeleteElementDialog = (
+      <Dialog
+          id="deleteElement"
+          visible={askDeleteElement}
+          title="Are you sure?"
+          aria-labelledby="deleteElement"
+          modal
+          actions={[
+            { onClick: () => this.onCardDeletePressed(id), primary: false, label: 'Permanently Delete', },
+            { onClick: this.hideAskToDeleteCard, primary: true, label: 'Cancel' }
+          ]}
+        >
+          <p id="deleteDashboardDescription" className="md-color--secondary-text">
+            Do you want to delete this element?
+          </p>
+        </Dialog>
+    );
     
     return (
       <MDCard 
@@ -93,6 +123,7 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
         <CardTitle title="" subtitle={elements} style={cardTitleStyle} /> 
         <Media style={cardContentStyle}>
           {children}
+          {askDeleteElementDialog}
         </Media>
       </MDCard>
     );
@@ -112,9 +143,36 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
       </Button>
     );
 
+    const settingsButtonWithMenu = (
+      <div style={{ zIndex: 2147483647 }}>
+        <DropdownMenu
+          menuItems={[(<ListItem primaryText="Edit Query"
+                                onClick={() => SettingsActions.openDialog(title, id)} />),
+                      (<ListItem primaryText="Delete" onClick={this.showAskToDeleteCard} />)]}
+          anchor={{
+            x: DropdownMenu.HorizontalAnchors.LEFT,
+            y: DropdownMenu.VerticalAnchors.CENTER,
+          }}
+          position={DropdownMenu.Positions.TOP_RIGHT}
+          sameWidth
+          cascadingZDepth={100}
+        >
+          <Button
+            icon
+            key="settings"
+            className="card-settings-btn"
+          >
+            expand_more
+          </Button>
+        </DropdownMenu>
+      </div>
+    );
+
     return !widgets ? (
-      <div className="card-settings" key="widgets">
-        {settingsButton}
+      <div style={{ zIndex: 2147483647 }}>
+        <div className="card-settings" key="widgets">
+          {settingsButtonWithMenu}
+        </div>
       </div> 
     ) : (
       <div className="card-settings" key="widgets">
@@ -123,5 +181,27 @@ export default class Card extends React.PureComponent<ICardProps, ICardState> {
       </div>
     );
   }
+  
+  private showAskToDeleteCard() {
+    this.setState({ askDeleteElement: true });
+  }
 
+  private hideAskToDeleteCard() {
+    this.setState({ askDeleteElement: false });
+  }
+
+  private onCardDeletePressed(id: string) {
+    // Given 'id' is in template 'elementId@elementIndex'
+    // We need to extract the element id
+    let elementId = id.substr(0, id.search('@'));
+
+    let state = ConfigurationsStore.getState();
+    let currentDashboard = state.dashboard;
+
+    // Find this card's element
+    let filteredElement = currentDashboard.elements.filter(element => element.id !== elementId);
+    currentDashboard.elements = filteredElement;
+
+    configurationsActions.saveConfiguration(currentDashboard);
+  }
 }

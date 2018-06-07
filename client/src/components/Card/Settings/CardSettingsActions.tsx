@@ -6,6 +6,7 @@ interface ICardSettingsActions {
   selectIndex(index: number): number;
   getExportData(dashboard: IDashboardConfig): IDashboardConfig;
   downloadData(): void;
+  setQueryText(query: string): any;
 }
 
 class CardSettingsActions extends AbstractActions implements ICardSettingsActions {
@@ -30,6 +31,9 @@ class CardSettingsActions extends AbstractActions implements ICardSettingsAction
     return {};
   }
 
+  setQueryText(query: string) {
+    return query;
+  }
 }
 
 const cardSettingsActions = alt.createActions<ICardSettingsActions>(CardSettingsActions);

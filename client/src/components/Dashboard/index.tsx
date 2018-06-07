@@ -1,17 +1,22 @@
 import * as React from 'react';
 import * as _ from 'lodash';
+import * as ReactGridLayout from 'react-grid-layout';
 
 import Toolbar from 'react-md/lib/Toolbars';
 import Button from 'react-md/lib/Buttons';
 import Dialog from 'react-md/lib/Dialogs';
+import { DropdownMenu } from 'react-md/lib/Menus';
+import List from 'react-md/lib/Lists/List';
+import ListItem from 'react-md/lib/Lists/ListItem';
+import FontIcon from 'react-md/lib/FontIcons';
+import Avatar from 'react-md/lib/Avatars';
+import Subheader from 'react-md/lib/Subheaders';
+import Divider from 'react-md/lib/Dividers';
+import TextField from 'react-md/lib/TextFields';
+import MenuButton from 'react-md/lib/Menus/MenuButton';
 
 import { Spinner } from '../Spinner';
 import { AutoRefreshSelector } from '../AutoRefreshSelector';
-
-import * as ReactGridLayout from 'react-grid-layout';
-var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
-var WidthProvider = ReactGridLayout.WidthProvider;
-ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 import ElementConnector from '../ElementConnector';
 import { loadDialogsFromDashboard } from '../generic/Dialogs';
@@ -24,17 +29,14 @@ import VisibilityStore from '../../stores/VisibilityStore';
 
 import { Editor, EditorActions } from './Editor';
 import { Settings } from '../Card/Settings';
+import FilterElementCreator from '../../scenes/Dashboard/components/ElementCreator/FilterElementCreator';
+import ChartElementCreator from '../../scenes/Dashboard/components/ElementCreator/ChartElementCreator';
 
 const renderHTML = require('react-render-html');
 
-import List from 'react-md/lib/Lists/List';
-import ListItem from 'react-md/lib/Lists/ListItem';
-import FontIcon from 'react-md/lib/FontIcons';
-import Avatar from 'react-md/lib/Avatars';
-import Subheader from 'react-md/lib/Subheaders';
-import Divider from 'react-md/lib/Dividers';
-import TextField from 'react-md/lib/TextFields';
-import MenuButton from 'react-md/lib/Menus/MenuButton';
+var ResponsiveReactGridLayout = ReactGridLayout.Responsive;
+var WidthProvider = ReactGridLayout.WidthProvider;
+ResponsiveReactGridLayout = WidthProvider(ResponsiveReactGridLayout);
 
 interface IDashboardProps {
   dashboard?: IDashboardConfig;
@@ -54,6 +56,8 @@ interface IDashboardState {
   infoHtml?: string;
   newTemplateName?: string;
   newTemplateDescription?: string;
+  showAddFilterDialog?: boolean;
+  showAddElementDialog?: boolean;
 }
 
 export default class Dashboard extends React.Component<IDashboardProps, IDashboardState> {
@@ -74,6 +78,8 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     infoHtml: '',
     newTemplateName: '',
     newTemplateDescription: '',
+    showAddFilterDialog: false,
+    showAddElementDialog: false
   };
 
   constructor(props: IDashboardProps) {
@@ -97,7 +103,11 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     this.onSaveAsTemplateCancel = this.onSaveAsTemplateCancel.bind(this);
     this.newTemplateDescriptionChange = this.newTemplateDescriptionChange.bind(this);
     this.onVisibilityStoreChange = this.onVisibilityStoreChange.bind(this);
-
+    this.onAddFilterPressed = this.onAddFilterPressed.bind(this);
+    this.onHideFilterElementCreator = this.onHideFilterElementCreator.bind(this);
+    this.onAddElementPressed = this.onAddElementPressed.bind(this);
+    this.onHideElementCreator = this.onHideElementCreator.bind(this);
+    
     VisibilityStore.listen(this.onVisibilityStoreChange);
 
     this.state.newTemplateName = this.props.dashboard.name;
@@ -263,6 +273,22 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
     downloadBlob('return ' + stringDashboard, 'application/json', dashboardName + '.private.js');
   }
 
+  onAddFilterPressed() {
+    this.setState({ showAddFilterDialog: true });
+  }
+
+  onHideFilterElementCreator() {
+    this.setState({ showAddFilterDialog: false });
+  }
+
+  onAddElementPressed() {
+    this.setState({ showAddElementDialog: true });
+  }
+
+  onHideElementCreator() {
+    this.setState({ showAddElementDialog: false });
+  }
+
   render() {
     const { dashboard } = this.props;
 
@@ -276,7 +302,7 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       newTemplateName,
       newTemplateDescription
     } = this.state;
-    const { infoVisible, infoHtml } = this.state;
+    const { infoVisible, infoHtml, showAddFilterDialog, showAddElementDialog } = this.state;
     const layout = this.state.layouts[currentBreakpoint];
 
     if (!grid) {
@@ -362,7 +388,29 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
       <div style={{width: '100%'}}>
         <Toolbar width={100} actions={toolbarActions}>
           {filters}
-          <Spinner />
+          {
+            !editMode ? 
+            (
+              <span style={{ marginTop: '16px'}}>
+                <MenuButton
+                  menuItems={[(<ListItem primaryText="Add filter" onClick={this.onAddFilterPressed} />),
+                              (<ListItem primaryText="Add element" onClick={this.onAddElementPressed} />)]}
+                  anchor={{
+                    x: DropdownMenu.HorizontalAnchors.CENTER,
+                    y: DropdownMenu.VerticalAnchors.OVERLAP,
+                  }}
+                  position={DropdownMenu.Positions.TOP_LEFT}
+                  sameWidth
+                  cascadingZDepth={100}
+                  icon
+                >
+                  add
+                </MenuButton>
+              </span>
+            ) :
+            undefined
+          }
+        <Spinner />
         </Toolbar>
         <ResponsiveReactGridLayout
           {...grid}
@@ -402,6 +450,22 @@ export default class Dashboard extends React.Component<IDashboardProps, IDashboa
 
         <Settings dashboard={dashboard} />
 
+        {
+          showAddFilterDialog &&
+          <FilterElementCreator 
+            visibility={showAddFilterDialog} 
+            onHide={this.onHideFilterElementCreator} 
+          />
+        }
+
+        {
+          showAddElementDialog &&
+          <ChartElementCreator
+            visibility={showAddElementDialog}
+            onHide={this.onHideElementCreator}
+          />
+        }
+                
         <Dialog
           id="deleteDashboard"
           visible={askDelete}

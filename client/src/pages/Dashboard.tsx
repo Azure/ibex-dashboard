@@ -31,7 +31,6 @@ export default class Dashboard extends React.Component<any, IDashboardState> {
   }
 
   componentDidMount() {
-
     this.setState(ConfigurationsStore.getState());
     ConfigurationsStore.listen(this.updateConfiguration);
   }

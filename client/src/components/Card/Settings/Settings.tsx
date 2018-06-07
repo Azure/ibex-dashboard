@@ -15,6 +15,9 @@ import 'brace/theme/github';
 import SettingsActions from './CardSettingsActions';
 import SettingsStore, { IExportData } from './CardSettingsStore';
 import { Toast, ToastActions, IToast } from '../../Toast';
+import cardSettingsActions from './CardSettingsActions';
+import ConfigurationStore from '../../../stores/ConfigurationsStore';
+import ConfigurationActions from '../../../actions/ConfigurationsActions';
 
 const editorProps: EditorProps = {
   $blockScrolling: 1
@@ -33,6 +36,7 @@ interface ISettingsState {
   selectedIndex: number;
   exportData?: IExportData[];
   result?: string;
+  query?: string;
 }
 
 export default class Edit extends React.PureComponent<ISettingsProps, ISettingsState> {
@@ -54,13 +58,19 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
   componentDidMount() {
     SettingsStore.listen(this.onChange);
   }
+
   componentWillUnmount() {
     SettingsStore.unlisten(this.onChange);
   }
 
   onChange(state: ISettingsState) {
     const { visible, elementId, title, selectedIndex, exportData } = state;
-    this.setState({ visible, elementId, title, selectedIndex, exportData });
+    
+    // Get the query from the exported data in case the internal state query wasn't set
+    // The internal state query is being set once the user edits it
+    let query = state.query ? state.query : exportData ? exportData[selectedIndex].query : '';
+
+    this.setState({ visible, elementId, title, selectedIndex, exportData, query });
   }
 
   openDialog = (title: string, elementId: string) => {
@@ -72,7 +82,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
   }
 
   copyData() {
-    const { exportData, selectedIndex} = this.state;
+    const { exportData, selectedIndex } = this.state;
     if (!exportData) {
       return;
     }
@@ -82,7 +92,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
   }
 
   copyQuery() {
-    const { exportData, selectedIndex} = this.state;
+    const { exportData, selectedIndex } = this.state;
     if (!exportData) {
       return;
     }
@@ -100,7 +110,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
   }
 
   render() {
-    const { visible, title, elementId, selectedIndex, exportData } = this.state;
+    const { visible, title, elementId, selectedIndex, exportData, query } = this.state;
     const { offsetHeight, dashboard } = this.props;
 
     const aceHeight = 'calc(100vh - ' + (offsetHeight * 4) + 'px)';
@@ -108,12 +118,13 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
 
     let actions = null;
     let json = '';
-    let query = '';
+    // let query = '';
 
     let mode = 'text';
 
     let dataActions = null;
     let queryActions = null;
+    let queryToPresent = undefined;
 
     if (exportData && exportData.length > 0) {
       const options = exportData.map(item => item.id);
@@ -157,9 +168,9 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
       }
 
       // query
-      if (selected.query) {
-        query = selected.query;
-      }
+      // if (selected.query) {
+      //   query = selected.query;
+      // }
 
       // actions
       dataActions = [
@@ -189,6 +200,11 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
       id = elementId.split('@')[0] || 'Element index error';
     }
 
+    // Remove extra new lines from the query
+    if (query) {
+      queryToPresent = query.replace(/\n\s*\n/g, '\n');
+    }
+
     const content = !query ? (
       <div className="md-toolbar-relative md-grid">
         <div className="md-cell--12">
@@ -200,31 +216,14 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
       </div>
     ) : (
       <div className="md-toolbar-relative md-grid md-grid--no-spacing">
-        <div className="md-cell--6">
-          <Toolbar title="Data" actions={dataActions} themed style={{ width: '100%' }} />
-          <AceEditor className="md-cell--12"
-            name="ace"
-            mode={mode}
-            theme="github"
-            value={json}
-            readOnly={true}
-            showGutter={true}
-            showPrintMargin={false}
-            highlightActiveLine={true}
-            tabSize={2}
-            width="100%"
-            height={aceHeight}
-            editorProps={editorProps}
-          />
-        </div>
-        <div className="md-cell--6">
+        <div className="md-cell--12">
           <Toolbar title="Query" actions={queryActions} themed style={{ width: '100%' }} />
           <AceEditor className="md-cell--12"
             name="ace"
             mode="text"
             theme="github"
-            value={query}
-            readOnly={true}
+            value={queryToPresent}
+            readOnly={false}
             showGutter={true}
             showPrintMargin={false}
             highlightActiveLine={true}
@@ -232,6 +231,7 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
             width="100%"
             height={aceHeight}
             editorProps={editorProps}
+            onChange={this.updateQuery}
           />
         </div>
       </div>
@@ -257,8 +257,19 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
           style={{ width: '100%' }}
         />
         {content}
+        <Button 
+          primary 
+          raised
+          label="Save" 
+          style={{ width: 100 }} 
+          onClick={() => this.saveElementQuery(elementId)} 
+        />
       </Dialog>
     );
+  }
+
+  private updateQuery(query: string) {
+    cardSettingsActions.setQueryText(query);
   }
 
   private toast(text: string) {
@@ -280,4 +291,53 @@ export default class Edit extends React.PureComponent<ISettingsProps, ISettingsS
     document.body.removeChild(input);
   }
 
+  private saveElementQuery(elementId: string) {
+    // 1. Get current active dashboard from state and current active element
+    let configurationState = ConfigurationStore.getState();
+    let currentDashboard = configurationState.dashboard;
+
+    // 2. Get the dependenceis from the query (dependencies are wrapper by $...$)
+    let settingsState = SettingsStore.getState();
+    let query = settingsState.query;
+
+    // In case query wasn't changed / we don't have the new query - abort
+    if (!query) {
+      return;
+    }
+
+    let dependenciesRegex = new RegExp('\\$(.+?)\\$', 'g');
+    let dependencies: string[] = [];
+
+    // Extract all the dependencies matches
+    var dependencyMatch: RegExpExecArray;
+    while ((dependencyMatch = dependenciesRegex.exec(query)) !== null) {
+      dependencies.push(dependencyMatch[1]);
+    }
+
+    // 3. Convert depenedencies to javascript syntax ($...$ should be switched to ${...})
+    let queryDependenciesInJavascriptPattern = dependencies.join(', ');
+    let queryWithUpdatedDependencies: string = query;
+    dependencies.forEach(dependency => queryWithUpdatedDependencies = queryWithUpdatedDependencies
+                                              .replace(`$${dependency}$`, '${' + dependency + '}'));
+
+    // 4. Create the new query and update it in the dashboard element
+    // Find the element id
+    elementId = elementId.split('@')[0];
+    let dashboardElement = currentDashboard.elements.find(element => element.id === elementId);
+
+    // Take the data source from the element
+    let elementDataSourceId = dashboardElement.source as string;
+    let dataSourceId = elementDataSourceId.split(':')[0];
+    let internalQuery = elementDataSourceId.split(':')[1];
+
+    let elementDataSource = currentDashboard.dataSources.find(dataSource => dataSource.id === dataSourceId);
+    let datasourceParams = elementDataSource.params as AIQueryParams;
+    datasourceParams.query = 
+        // tslint:disable-next-line:no-eval
+        eval(`({${queryDependenciesInJavascriptPattern}}) => \`${queryWithUpdatedDependencies}\``);
+
+    ConfigurationActions.saveConfiguration(currentDashboard);
+
+    this.closeDialog();
+  }
 }

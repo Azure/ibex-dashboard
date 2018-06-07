@@ -13,7 +13,7 @@ export default class MonacoQueryEditor extends React.Component<MonacoQueryEditor
 
   public render() {
     return (
-      <div style={{ height: '30%' }}>
+      <div style={{ height: '300px' }}>
         <MonacoEditor
           width="100%"
           language="kusto"

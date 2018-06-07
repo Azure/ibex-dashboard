@@ -64,7 +64,15 @@ export default class KustoQuery extends DataSourcePlugin<IQueryParams> {
     return (dispatch) => {
       this.kustoClient.executeQuery(clusterName, databaseName, query)
       .then((resultTables: KustoQueryResults) => {
-        return dispatch(KustoUtils.convertKustoResultsToJsonObjects(resultTables));
+        returnedResults.values = KustoUtils.convertKustoResultsToJsonObjects(resultTables)[0];
+
+        // Extracting calculated values
+        if (typeof params.calculated === 'function') {
+          let additionalValues = params.calculated(returnedResults.values) || {};
+          Object.assign(returnedResults, additionalValues);
+        }
+
+        return dispatch(returnedResults);
       })
       .catch((reason) => 
         // tslint:disable-next-line:no-console

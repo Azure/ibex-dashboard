@@ -37,7 +37,14 @@ export default class QueryResultPreview extends React.Component<QueryResultPrevi
 
   public render() {
     return (
-      <div style={{ height: '40%' }}>
+      <div style={{ height: '300px' }}>
+        {
+          (!this.state.queryResponseInformation ||
+           !this.state.queryResponseInformation.response) &&
+           <div>
+             Press 'Run' in order to execute the query
+          </div>
+        }
         {
           (this.state.queryResponseInformation &&
            this.state.queryResponseInformation.isLoading &&

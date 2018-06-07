@@ -1,7 +1,12 @@
 .query-explorer-container {
-  height: 100vh;
-  
   & > .connection-container {
     display: flex;
+  }
+
+  & > .monaco-and-result-container {
+    height: 50%;
+    border-style: groove;
+    border-width: 1px;
+    margin-top: 4px;
   }
 }

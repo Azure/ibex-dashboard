@@ -305,10 +305,10 @@ export default class ApplicationInsightsQuery extends DataSourcePlugin<IQueryPar
     const matches = str.match(/^(\s*\||\s*\w+\s*\|)/ig); 
     const start = (!matches || matches.length !== 1) ? '| ' : '';
     if (table) {
-      str = table + ' \n' + timespanQuery + filter + start + str;
+      str = table + ' \n' + filter + start + str;
     } else {
       // Insert timespan and filter after table name
-      str = str.replace(/^\s*(\w+)\s*/gi, '$1 \n' + timespanQuery + filter + start); 
+      str = str.replace(/^\s*(\w+)\s*/gi, '$1 \n' + filter + start); 
     }
     return str;
   }
