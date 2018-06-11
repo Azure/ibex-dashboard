@@ -68,37 +68,7 @@ export default class QueryExplorer extends React.Component<QueryExplorerProps, Q
           />
         </div>
 
-        <Button 
-          primary 
-          raised
-          label="Go" 
-          style={{ width: 100 }} 
-          onClick={this.onExecuteQuery} 
-        />
-
-        <Button 
-            primary 
-            raised
-            label="Pin to dashboard" 
-            style={{ width: 180, marginLeft: '5px' }} 
-            onClick={() => this.setState({ showElementMetadata: true })} 
-          />
-
-        <div className="monaco-and-result-container">
-          <MonacoQueryEditor onChange={this.onQueryTextChanged}/>
-
-          <div style={{ height: '21px', backgroundColor: 'gray' }} />
-          
-          <QueryResultPreview renderAs="timeline" />        
-        </div>
-
-        <Dialog
-          id="elementMetadataInputDialog"
-          visible={showElementMetadata}
-          onHide={() => this.setState({ showElementMetadata: false })}
-          dialogStyle={{ width: '30%', height: '40%' }}
-          title="Create new filter element"
-        >
+        <div>
           <TextField
             id="ElementTitle"
             label="Title"
@@ -114,15 +84,31 @@ export default class QueryExplorer extends React.Component<QueryExplorerProps, Q
             className="md-cell md-cell--bottom"
             onChange={this.onElementSubtitleChanged}
           />
+        </div>
 
-          <Button 
+        <Button 
+          primary 
+          raised
+          label="Go" 
+          style={{ width: 100 }} 
+          onClick={this.onExecuteQuery} 
+        />
+
+        <Button 
             primary 
             raised
-            label="Save" 
-            style={{ width: 100 }} 
+            label="Pin to dashboard" 
+            style={{ width: 180, marginLeft: '5px' }} 
             onClick={this.onPinToDashboard} 
           />
-        </Dialog>
+
+        <div className="monaco-and-result-container">
+          <MonacoQueryEditor onChange={this.onQueryTextChanged}/>
+
+          <div style={{ height: '21px', backgroundColor: 'gray' }} />
+          
+          <QueryResultPreview renderAs="timeline" />        
+        </div>
       </div>
     );
   }

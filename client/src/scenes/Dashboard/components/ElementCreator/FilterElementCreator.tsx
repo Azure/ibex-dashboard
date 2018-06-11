@@ -208,8 +208,8 @@ export default class FilterElementCreator extends React.Component<FilterElementC
 
     ConfigurationActions.saveConfiguration(currentDashboard);
 
-    if (this.props.onHide) {
-      this.props.onHide();
-    } 
+    // if (this.props.onHide) {
+    //   this.props.onHide();
+    // } 
   }
 }
