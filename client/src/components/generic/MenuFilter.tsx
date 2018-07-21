@@ -55,7 +55,7 @@ export default class MenuFilter extends GenericComponent<any, any> {
 
   static fromSource(source: string) {
     return {
-      selectedValue: GenericComponent.sourceFormat(source, 'values-selected'), 
+      selectedValue: GenericComponent.sourceFormat(source, 'values-selected'),
       values: GenericComponent.sourceFormat(source, 'values-all')
     };
   }
@@ -181,19 +181,11 @@ export default class MenuFilter extends GenericComponent<any, any> {
     return (
       <div className="filters">
 
-        <AccessibleFakeInkedButton
-          className={paperStyle}
-          onClick={this.toggleOverlay}
-          aria-haspopup="true"
-          aria-expanded={overlay}
-          style={styles.button}
-        >
-          <label className={labelStyle}>{title}</label>
-          <div className="md-icon-separator md-text-field md-select-field--btn md-text-field--floating-margin">
-            <span className="md-value md-icon-text">{selectText}</span>
-            <FontIcon>arrow_drop_down</FontIcon>
-          </div>
-        </AccessibleFakeInkedButton>
+        <label className={labelStyle}>{title}</label>
+        <div className="md-icon-separator md-text-field md-select-field--btn md-text-field--floating-margin">
+          <span className="md-value md-icon-text">{selectText}</span>
+          <FontIcon>arrow_drop_down</FontIcon>
+        </div>
 
         <div className="md-multiselect-menu" style={containerStyle}>
           <List className="md-paper md-paper--1" style={styles.list}>

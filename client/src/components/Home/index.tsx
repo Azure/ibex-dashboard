@@ -381,6 +381,7 @@ export default class Home extends React.Component<any, IHomeState> {
             accept="application/javascript"
             onLoadStart={this.setFile}
             onLoad={this.onLoad}
+            onChange={(file) => {}}
           />
           <TextField
             id="dashboardFileName"
